@@ -509,7 +509,7 @@ export interface TimingDashboardRow extends DbRunRegistration {
   finish: {
     finished_at: string;
     elapsed_milliseconds: number;
-    recorded_by: string;
+    recorded_by: string | null;
   } | null;
 }
 

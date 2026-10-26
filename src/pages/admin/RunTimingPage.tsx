@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserQRCodeReader, type IScannerControls } from '@zxing/browser';
-import { AlertTriangle, Camera, Clock3, Flag, Play, RefreshCw, RotateCcw, ScanLine, X } from 'lucide-react';
+import { AlertTriangle, CalendarDays, Camera, Clock3, Flag, Medal, PersonStanding, Play, RefreshCw, RotateCcw, ScanLine, Timer, Users, X } from 'lucide-react';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import {
   formatElapsed,
@@ -15,6 +15,8 @@ import {
 } from '../../features/run/runQueries';
 import { LoadingState, EmptyState } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
+import { useAuth } from '../../features/auth/useAuth';
+import { supabase } from '../../lib/supabase';
 
 type AgeGroup = 'all' | 'under18' | '18-29' | '30-39' | '40-49' | '50plus';
 
@@ -39,6 +41,7 @@ function matchesAgeGroup(age: number | null, group: AgeGroup): boolean {
 
 export function RunTimingPage() {
   const { toast } = useToast();
+  const { user, isAdmin } = useAuth();
   const videoRef = useRef<HTMLVideoElement>(null);
   const scannerControls = useRef<IScannerControls | null>(null);
   const scanBusy = useRef(false);
@@ -50,6 +53,9 @@ export function RunTimingPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetPassword, setResetPassword] = useState('');
+  const [resetError, setResetError] = useState('');
   const [now, setNow] = useState(0);
   const [scannerActive, setScannerActive] = useState(false);
   const [manualQr, setManualQr] = useState('');
@@ -144,18 +150,58 @@ export function RunTimingPage() {
     }
   };
 
+  const openResetConfirm = () => {
+    setResetEmail(user?.email ?? '');
+    setResetPassword('');
+    setResetError('');
+    setShowResetConfirm(true);
+  };
+
+  const closeResetConfirm = () => {
+    if (resetting) return;
+    setShowResetConfirm(false);
+    setResetPassword('');
+    setResetError('');
+  };
+
   const handleReset = async () => {
-    if (!runEvent) return;
+    if (!runEvent || !supabase || !user?.email || !isAdmin) {
+      setResetError('An active administrator account is required to reset official timing.');
+      return;
+    }
+
+    if (resetEmail.trim().toLowerCase() !== user.email.toLowerCase()) {
+      setResetError('Enter the email address of the administrator currently signed in.');
+      return;
+    }
+
+    if (!resetPassword) {
+      setResetError('Enter your administrator password.');
+      return;
+    }
+
     try {
       setResetting(true);
+      setResetError('');
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: resetEmail.trim(),
+        password: resetPassword,
+      });
+      if (error || data.user?.id !== user.id) {
+        throw new Error('Administrator credentials could not be verified.');
+      }
+
       stopScanner();
       const deletedFinishCount = await resetOfficialRun(runEvent.id);
       setShowResetConfirm(false);
+      setResetPassword('');
       await refresh();
       setNow(Date.now());
       toast(`Race time reset. ${deletedFinishCount} finish record${deletedFinishCount === 1 ? '' : 's'} cleared.`, 'success');
     } catch (error: unknown) {
-      toast(error instanceof Error ? error.message : 'Unable to reset race timing.', 'error');
+      const message = error instanceof Error ? error.message : 'Unable to reset race timing.';
+      setResetError(message);
+      toast(message, 'error');
     } finally {
       setResetting(false);
     }
@@ -191,7 +237,7 @@ export function RunTimingPage() {
   return <div className="admin-page">
     <div className="admin-heading">
       <div><p className="eyebrow">Race-day operations</p><h1>Official Timing & Finish Line</h1><p>Start the official clock, scan each approved QR once, and review category rankings.</p></div>
-      <button type="button" className="button button--secondary" disabled={refreshing} onClick={() => void handleRefresh()}><RefreshCw size={16} className={refreshing ? 'spin' : undefined} /> {refreshing ? 'Refreshing…' : 'Refresh'}</button>
+      <button type="button" className="button button--secondary" disabled={refreshing} onClick={() => void handleRefresh()} title="Reload the latest start time and finish records from the database"><RefreshCw size={16} className={refreshing ? 'spin' : undefined} /> {refreshing ? 'Reloading…' : 'Reload timing data'}</button>
     </div>
 
     <section className="timing-control-panel">
@@ -199,7 +245,7 @@ export function RunTimingPage() {
       <div className="timing-live-clock" aria-live="polite"><small>Live elapsed time</small><strong>{liveElapsed}</strong></div>
       <div className="timing-control-panel__actions">
         <button type="button" className="button button--primary" disabled={starting || Boolean(runEvent?.official_started_at)} onClick={() => void handleOfficialStart()}><Play size={17} /> {starting ? 'Starting…' : runEvent?.official_started_at ? 'Official clock running' : 'Start official race time'}</button>
-        {runEvent?.official_started_at && <button type="button" className="button button--secondary" onClick={() => setShowResetConfirm(true)}><RotateCcw size={17} /> Reset race time</button>}
+        {runEvent?.official_started_at && isAdmin && <button type="button" className="button button--danger timing-reset-button" onClick={openResetConfirm}><RotateCcw size={17} /> Reset official start</button>}
       </div>
     </section>
 
@@ -229,22 +275,76 @@ export function RunTimingPage() {
       </div>
       {filteredRows.length === 0 ? <EmptyState title="No approved runners" message="Approved runner entries and official results will appear here." /> : <div className="timing-results-table">
         <div className="timing-results-row timing-results-head"><span>Place</span><span>Bib / Runner</span><span>Category</span><span>Division</span><span>Age</span><span>Official Time</span></div>
-        {filteredRows.map((row) => <div className="timing-results-row" key={row.id}><strong>{row.rank ? `#${row.rank}` : '—'}</strong><span><b>#{row.bib_number}</b> {row.participant_name}</span><span>{categories.find((category) => category.id === row.category_id)?.name || 'Run'}</span><span>{row.division === 'female' ? 'Female' : row.division === 'male' ? 'Male' : '—'}</span><span>{ageOnRaceDay(row.birth_date) ?? '—'}</span><span>{row.finish ? <><Clock3 size={14} /> {formatElapsed(row.finish.elapsed_milliseconds)}</> : 'Not finished'}</span></div>)}
+        {filteredRows.map((row) => (
+          <div className="timing-results-row timing-runner-card" key={row.id}>
+            <strong className="timing-runner-card__place">
+              <small>Place</small>
+              <span className="timing-runner-card__place-value">
+                <Medal className="timing-card-icon" size={24} aria-hidden="true" />
+                <span>{row.rank ? row.rank : '—'}</span>
+              </span>
+            </strong>
+            <span className="timing-runner-card__runner">
+              <small>Runner</small>
+              <b>#{row.bib_number}</b>
+              <span>{row.participant_name}</span>
+            </span>
+            <span className="timing-runner-card__category">
+              <span className="timing-card-stat__icon timing-card-stat__icon--category"><PersonStanding size={20} aria-hidden="true" /></span>
+              <span className="timing-card-stat__content">
+                <small>Category</small>
+                <strong>{categories.find((category) => category.id === row.category_id)?.name || 'Run'}</strong>
+              </span>
+            </span>
+            <span className="timing-runner-card__division">
+              <span className="timing-card-stat__icon timing-card-stat__icon--division"><Users size={20} aria-hidden="true" /></span>
+              <span className="timing-card-stat__content">
+                <small>Division</small>
+                <strong>{row.division === 'female' ? 'Female' : row.division === 'male' ? 'Male' : '—'}</strong>
+              </span>
+            </span>
+            <span className="timing-runner-card__age">
+              <span className="timing-card-stat__icon timing-card-stat__icon--age"><CalendarDays size={20} aria-hidden="true" /></span>
+              <span className="timing-card-stat__content">
+                <small>Age</small>
+                <strong>{ageOnRaceDay(row.birth_date) ?? '—'}</strong>
+              </span>
+            </span>
+            <span className={`timing-runner-card__time${row.finish ? ' is-finished' : ''}`}>
+              <span className="timing-card-stat__icon timing-card-stat__icon--time"><Timer size={20} aria-hidden="true" /></span>
+              <span className="timing-card-stat__content">
+                <small>Official time</small>
+                <strong>{row.finish ? <><Clock3 size={14} /> {formatElapsed(row.finish.elapsed_milliseconds)}</> : 'Not finished'}</strong>
+              </span>
+            </span>
+          </div>
+        ))}
       </div>}
     </section>
 
     {showResetConfirm && (
-      <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="reset-race-title">
-        <div className="modal-card timing-reset-modal">
-          <button type="button" className="button button--ghost timing-reset-modal__close" onClick={() => setShowResetConfirm(false)} aria-label="Close reset confirmation"><X size={18} /></button>
+      <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="reset-race-title" aria-describedby="reset-race-description">
+        <form className="modal-card timing-reset-modal" onSubmit={(event) => { event.preventDefault(); void handleReset(); }}>
+          <button type="button" className="button button--ghost timing-reset-modal__close" disabled={resetting} onClick={closeResetConfirm} aria-label="Close reset confirmation"><X size={18} /></button>
           <AlertTriangle size={38} className="timing-reset-modal__warning" aria-hidden="true" />
-          <h2 id="reset-race-title">Reset all race timing?</h2>
-          <p>This will remove the official start time and every recorded finish. Runner registrations, bib numbers, and QR codes will remain. This action cannot be undone.</p>
-          <div className="button-row timing-reset-modal__actions">
-            <button type="button" className="button button--ghost" disabled={resetting} onClick={() => setShowResetConfirm(false)}>Cancel</button>
-            <button type="button" className="button button--danger" disabled={resetting} onClick={() => void handleReset()}><RotateCcw size={17} /> {resetting ? 'Resetting…' : 'Yes, reset all timing'}</button>
+          <h2 id="reset-race-title">Reset the official start?</h2>
+          <p id="reset-race-description">This removes the official start time and every recorded finish. Runner registrations, bib numbers, and QR codes remain unchanged. Verify your administrator credentials to continue.</p>
+          <div className="timing-reset-credentials">
+            <label>
+              Administrator email
+              <input type="email" required value={resetEmail} onChange={(event) => setResetEmail(event.target.value)} autoComplete="username" disabled={resetting} />
+            </label>
+            <label>
+              Administrator password
+              <input type="password" required value={resetPassword} onChange={(event) => setResetPassword(event.target.value)} autoComplete="current-password" disabled={resetting} autoFocus />
+            </label>
           </div>
-        </div>
+          {resetError && <p className="form-message timing-reset-error" role="alert">{resetError}</p>}
+          <div className="button-row timing-reset-modal__actions">
+            <button type="button" className="button button--ghost" disabled={resetting} onClick={closeResetConfirm}>Cancel</button>
+            <button type="submit" className="button button--danger" disabled={resetting}><RotateCcw size={17} /> {resetting ? 'Verifying and resetting…' : 'Verify and reset timing'}</button>
+          </div>
+        </form>
       </div>
     )}
   </div>;

@@ -3,7 +3,6 @@ import { ArrowRight, ChevronRight, MapPin, Play, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { SectionHeading } from '../../components/SectionHeading';
-import { LogoMark } from '../../components/LogoMark';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import { getPublishedActivities, formatActivityDateTime } from '../../features/activities/activityQueries';
 import { getPublishedPosts } from '../../features/content/postQueries';
@@ -97,9 +96,17 @@ export function HomePage() {
             </div>
           </div>
           <div className="hero-emblem">
-            <div className="hero-official-mark">
-              <LogoMark type="committee" />
-            </div>
+            <picture className="hero-artwork">
+              <source srcSet="/images/hero_section_art.webp" type="image/webp" />
+              <img
+                src="/images/hero_section_art.png"
+                alt="Sto. Niño Parish seal surrounded by a ceremonial festival pattern"
+                width="1200"
+                height="1200"
+                fetchPriority="high"
+                decoding="async"
+              />
+            </picture>
             <p>SINOOG 2027</p>
             <small>Viva Pit Señor!</small>
           </div>

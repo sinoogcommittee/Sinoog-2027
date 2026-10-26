@@ -56,28 +56,24 @@ export function AdminDashboardPage() {
           <Users />
           <span>Run Registrations</span>
           <strong>{registrationsCount}</strong>
-          <small>{registrationOpen ? 'Registration active' : 'Registration closed'}</small>
         </article>
 
         <article>
           <CircleDollarSign />
           <span>Payments to review</span>
           <strong>{registrationsCount > 0 ? registrationsCount : 0}</strong>
-          <small>Manual verification</small>
         </article>
 
         <article>
           <Calendar />
           <span>Scheduled activities</span>
           <strong>{activitiesCount}</strong>
-          <small>Masses & programs</small>
         </article>
 
         <article>
           <Newspaper />
           <span>News announcements</span>
           <strong>{postsCount}</strong>
-          <small>Articles published</small>
         </article>
       </div>
 

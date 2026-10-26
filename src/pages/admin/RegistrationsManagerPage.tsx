@@ -249,7 +249,7 @@ export function RegistrationsManagerPage() {
           <h1>Runner Registrations</h1>
           <p>Review participant entries, payments, shirt sizes, and allocate official bib numbers.</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="registration-heading-actions">
           <button type="button" className="button button--primary" onClick={openWalkInRegistration}>
             <UserPlus size={16} /> Register walk-in runner
           </button>
@@ -263,14 +263,14 @@ export function RegistrationsManagerPage() {
       </div>
 
       {/* Shirt Sizing Summary Strip */}
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem', background: '#fff', border: '1px solid var(--line)', padding: '1rem 1.25rem', borderRadius: '8px' }}>
-        <strong style={{ fontSize: '0.88rem', alignSelf: 'center', color: 'var(--wine)' }}>Shirt Kit Counts:</strong>
+      <div className="registration-size-summary">
+        <strong className="registration-size-summary__title">Shirt Kit Counts</strong>
         {Object.entries(shirtCounts).map(([size, count]) => (
-          <div key={size} style={{ fontSize: '0.88rem', background: '#faf8f4', padding: '0.25rem 0.6rem', borderRadius: '4px', border: '1px solid var(--line)' }}>
+          <div className="registration-size-summary__size" key={size}>
             <strong>{size}:</strong> {count}
           </div>
         ))}
-        <div style={{ marginLeft: 'auto', fontSize: '0.88rem', color: 'var(--muted)', alignSelf: 'center' }}>
+        <div className="registration-size-summary__total">
           Total registered: <strong>{registrations.length}</strong>
         </div>
       </div>
@@ -330,8 +330,8 @@ export function RegistrationsManagerPage() {
             }
           />
         ) : (
-          <div className="admin-table">
-            <div className="admin-table__head" style={{ gridTemplateColumns: '1.2fr 1.8fr 1fr 100px 100px 100px' }}>
+          <div className="admin-table registrations-table">
+            <div className="admin-table__head registrations-table__grid">
               <span>Reference</span>
               <span>Participant & Address</span>
               <span>Category / Shirt</span>
@@ -350,17 +350,9 @@ export function RegistrationsManagerPage() {
               return (
                 <div
                   key={r.id}
-                  className="admin-table__row registrations-table__row"
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1.2fr 1.8fr 1fr 100px 100px 100px',
-                    padding: '1rem',
-                    borderBottom: '1px solid #ede4dc',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                  }}
+                  className="admin-table__row registrations-table__grid registrations-table__row"
                 >
-                  <div>
+                  <div className="registration-cell registration-cell--reference">
                     {r.bib_number && <span style={{ display: 'block', fontWeight: 800, fontSize: '1.15rem' }}>#{r.bib_number}</span>}
                     <strong style={{ fontFamily: 'monospace', color: 'var(--wine)' }}>{r.reference}</strong>
                     <small style={{ display: 'block', color: 'var(--muted)', fontSize: '0.78rem' }}>
@@ -371,25 +363,28 @@ export function RegistrationsManagerPage() {
                     </small>
                   </div>
 
-                  <div>
+                  <div className="registration-cell registration-cell--participant">
+                    <span className="registration-card-label">Runner</span>
                     <strong style={{ display: 'block', fontSize: '1rem' }}>{r.participant_name}</strong>
                     <small style={{ color: 'var(--muted)', fontSize: '0.82rem' }}>
                       {r.locality || 'Address not provided'} · {r.mobile}
                     </small>
                   </div>
 
-                  <div>
+                  <div className="registration-cell registration-cell--category">
+                    <span className="registration-card-label">Category and shirt</span>
                     <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>{cat?.name || 'Run'}</span>
                     <small style={{ display: 'block', color: 'var(--muted)' }}>
                       Shirt: <strong>{r.shirt_size || 'N/A'}</strong>
                     </small>
                   </div>
 
-                  <div>
+                  <div className="registration-cell registration-cell--fee">
+                    <span className="registration-card-label">Fee</span>
                     <span style={{ fontWeight: 600, color: 'var(--wine)', fontSize: '0.9rem' }}>{feeFormatted}</span>
                   </div>
 
-                  <div>
+                  <div className="registration-cell registration-cell--status">
                     <StatusBadge tone={r.status === 'approved' ? 'success' : r.status === 'rejected' ? 'danger' : 'warning'}>
                       {r.status}
                     </StatusBadge>

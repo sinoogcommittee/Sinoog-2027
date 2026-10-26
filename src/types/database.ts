@@ -951,7 +951,7 @@ export interface Database {
           division: string;
           finished_at: string;
           elapsed_milliseconds: number;
-          recorded_by: string;
+          recorded_by: string | null;
           created_at: string;
         };
         Insert: {
@@ -961,7 +961,7 @@ export interface Database {
           division: string;
           finished_at: string;
           elapsed_milliseconds: number;
-          recorded_by: string;
+          recorded_by?: string | null;
           created_at?: string;
         };
         Update: {
@@ -971,7 +971,7 @@ export interface Database {
           division?: string;
           finished_at?: string;
           elapsed_milliseconds?: number;
-          recorded_by?: string;
+          recorded_by?: string | null;
           created_at?: string;
         };
         Relationships: [];
@@ -981,21 +981,21 @@ export interface Database {
           registration_id: string;
           bib_number: string | null;
           claimed_at: string;
-          claimed_by: string;
+          claimed_by: string | null;
           notes: string | null;
         };
         Insert: {
           registration_id: string;
           bib_number?: string | null;
           claimed_at?: string;
-          claimed_by: string;
+          claimed_by?: string | null;
           notes?: string | null;
         };
         Update: {
           registration_id?: string;
           bib_number?: string | null;
           claimed_at?: string;
-          claimed_by?: string;
+          claimed_by?: string | null;
           notes?: string | null;
         };
         Relationships: [];

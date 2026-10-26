@@ -67,6 +67,11 @@
 .runner-account-registration{margin-top:28px;padding:28px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow)}.runner-account-registration__heading{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:18px;border-bottom:1px solid var(--line)}.runner-account-registration__heading h2,.runner-account-registration__heading p{margin:0}.runner-account-details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:20px 0;background:var(--line);border:1px solid var(--line)}.runner-account-details>div{min-width:0;padding:14px;background:#fff}.runner-account-details__wide{grid-column:span 3}.runner-account-details dt{margin-bottom:5px;color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}.runner-account-details dd{margin:0;overflow-wrap:anywhere;font-weight:600}.runner-account-waiver{padding:20px;background:#faf8f3;border-left:4px solid var(--gold)}.runner-account-waiver h3{margin-top:0}.runner-account-waiver ul{margin-bottom:0;padding-left:20px}
 
 .timing-control-panel__start{min-width:220px}.timing-live-clock{padding:8px 22px;border-right:1px solid rgba(255,255,255,.2);border-left:1px solid rgba(255,255,255,.2);text-align:center}.timing-live-clock strong{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace!important;font-size:2rem!important;letter-spacing:.06em;font-variant-numeric:tabular-nums}.timing-control-panel__actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}.timing-reset-modal{position:relative;width:min(520px,100%);padding:30px}.timing-reset-modal__close{position:absolute;top:12px;right:12px}.timing-reset-modal__warning{color:#b91c1c}.timing-reset-modal h2{margin:12px 0 8px}.timing-reset-modal__actions{justify-content:flex-end;margin-top:24px}.spin{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.timing-reset-button{box-shadow:0 7px 18px rgba(80,0,8,.25)}
+.timing-reset-credentials{display:grid;gap:14px;margin-top:20px;padding:16px;background:#faf8f3;border:1px solid var(--line);border-radius:7px}
+.timing-reset-credentials label{display:grid;gap:6px;color:var(--ink);font-size:.82rem;font-weight:700}
+.timing-reset-credentials input{width:100%;padding:11px 12px;background:#fff;border:1px solid #d4c5b9;border-radius:6px;color:var(--ink)}
+.timing-reset-error{margin:12px 0 0!important;color:#b91c1c!important}
 
 @media(max-width:900px){.runner-account-details{grid-template-columns:1fr 1fr}.runner-account-details__wide{grid-column:span 2}.timing-live-clock{width:100%;padding:16px 0;border-right:0;border-left:0;border-top:1px solid rgba(255,255,255,.2);border-bottom:1px solid rgba(255,255,255,.2);text-align:left}.timing-control-panel__actions{justify-content:flex-start}.registration-retry-panel{grid-template-columns:auto 1fr}.registration-retry-panel .button{grid-column:1/-1}}
 @media(max-width:600px){.runner-account-registration{padding:20px}.runner-account-registration__heading{flex-direction:column}.runner-account-details{grid-template-columns:1fr}.runner-account-details__wide{grid-column:auto}}
@@ -141,3 +146,300 @@
 .auth-card .google-sign-in svg{flex:0 0 auto}
 .auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0 4px;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
 .auth-divider:before,.auth-divider:after{content:'';height:1px;background:var(--line);flex:1}
+.runner-auth-prompt{margin-top:.9rem;padding-top:1rem;border-top:1px solid var(--line)}
+.runner-auth-prompt>span{display:block;color:var(--muted);font-size:.78rem;margin-bottom:.55rem}
+.runner-auth-prompt__links{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
+.runner-auth-prompt__links a{display:inline-flex;align-items:center;justify-content:center;padding:.5rem .72rem;border-radius:6px;font-size:.78rem;font-weight:800;line-height:1.2;transition:transform .2s ease,box-shadow .2s ease}
+.runner-auth-prompt__links a:first-child{background:var(--wine);color:#fff}
+.runner-auth-prompt__links a:last-child{background:var(--gold);color:#35200b}
+.runner-auth-prompt__links a:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(74,39,20,.14)}
+@media(max-width:420px){.runner-auth-prompt__links{display:grid;grid-template-columns:1fr}.runner-auth-prompt__links a{width:100%}}
+
+/* Overview metric cards */
+.stat-grid article{min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+.stat-grid article>span{line-height:1.25}
+.stat-grid article>strong{margin-top:2px;line-height:1}
+
+/* Committee workspace navigation */
+.portal-nav-scroll{display:flex;flex:1;min-height:0;flex-direction:column}
+.portal-sidebar-actions{display:grid;gap:5px;margin-top:auto}
+.portal-public-site{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:7px;color:#d9c2bf;font-size:.87rem}
+.portal-public-site:hover,.portal-exit:hover{background:rgba(255,255,255,.08);color:#fff}
+.portal-exit span,.portal-public-site span,.portal-nav-item span{min-width:0}
+
+@media(max-width:640px){
+  .portal{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
+  .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .stat-grid article{min-height:132px;padding:16px 14px}
+  .stat-grid article svg{width:21px;height:21px}
+  .stat-grid article>span{min-height:2.5em;margin-top:12px;font-size:.7rem}
+  .stat-grid article>strong{font-size:2rem}
+  .portal-sidebar{position:fixed;z-index:100;right:0;bottom:0;left:0;top:auto;width:100%;height:calc(68px + env(safe-area-inset-bottom));padding:0 0 env(safe-area-inset-bottom);display:block;background:#3e151c;border-top:1px solid rgba(255,255,255,.16);box-shadow:0 -8px 24px rgba(62,21,28,.18);overflow:hidden}
+  .portal-sidebar .brand{display:none}
+  .portal-nav-scroll{width:100%;height:68px;display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .portal-nav-scroll::-webkit-scrollbar{display:none}
+  .portal-sidebar nav,.portal-sidebar-actions{display:flex;flex:0 0 auto;gap:0;margin:0}
+  .portal-sidebar nav .portal-nav-item,.portal-sidebar .portal-public-site,.portal-sidebar button.portal-exit{display:flex;flex:0 0 20vw;width:20vw;min-width:20vw;height:68px;margin:0;padding:7px 3px 6px;border:0;border-radius:0;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:transparent;color:#d9c2bf;font-size:.64rem;line-height:1.05;text-align:center;scroll-snap-align:start}
+  .portal-sidebar nav .portal-nav-item span,.portal-sidebar .portal-public-site span,.portal-sidebar button.portal-exit span{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.64rem;line-height:1.05}
+  .portal-sidebar nav .portal-nav-item svg,.portal-sidebar .portal-public-site svg,.portal-sidebar button.portal-exit svg{flex:none;width:20px;height:20px}
+  .portal-sidebar nav .portal-nav-item.active{background:#6c2530;color:#fff;box-shadow:inset 0 3px 0 var(--gold)}
+  .portal-sidebar nav .portal-nav-item:hover,.portal-sidebar .portal-public-site:hover,.portal-sidebar button.portal-exit:hover{background:#57202a;color:#fff}
+  .portal-sidebar nav .portal-nav-item:focus-visible,.portal-sidebar .portal-public-site:focus-visible,.portal-sidebar button.portal-exit:focus-visible{outline:2px solid var(--gold);outline-offset:-3px}
+}
+
+/* Mobile activity schedule cards */
+@media(max-width:640px){
+  .activity-admin-table{padding:10px;background:#f8f4ec}
+  .activity-admin-table .activity-table__row{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:'activity status' 'type type' 'schedule schedule' 'venue venue' 'actions actions'!important;gap:10px 12px!important;margin-bottom:10px;padding:16px!important;background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:8px;box-shadow:0 5px 16px rgba(74,39,20,.06)}
+  .activity-admin-table .activity-table__row:last-child{margin-bottom:0}
+  .activity-admin-table .activity-table__activity{grid-area:activity;align-self:start}
+  .activity-admin-table .activity-table__activity strong{line-height:1.25}
+  .activity-admin-table .activity-table__activity small{-webkit-line-clamp:2!important;line-height:1.35;margin-top:3px}
+  .activity-admin-table .activity-table__type{grid-area:type}
+  .activity-admin-table .activity-table__type>span{font-size:.75rem!important}
+  .activity-admin-table .activity-table__status{grid-area:status;align-self:start;justify-self:end;text-align:right!important}
+  .activity-admin-table .activity-table__schedule,.activity-admin-table .activity-table__venue{display:grid;gap:5px;padding:10px 12px;background:#faf8f3;border:1px solid #eee5d8;border-radius:6px}
+  .activity-admin-table .activity-table__schedule{grid-area:schedule}
+  .activity-admin-table .activity-table__venue{grid-area:venue}
+  .activity-admin-table .activity-table__schedule>div,.activity-admin-table .activity-table__venue>div{align-items:flex-start!important;gap:7px!important;line-height:1.35}
+  .activity-admin-table .activity-table__schedule svg,.activity-admin-table .activity-table__venue svg{flex:0 0 auto;margin-top:2px}
+  .activity-admin-table .activity-table__venue span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere}
+  .activity-admin-table .activity-table__actions{grid-area:actions;display:flex;justify-content:flex-end!important;gap:6px!important;margin-top:2px;padding-top:10px!important;border-top:1px solid var(--line)}
+  .activity-admin-table .activity-table__actions .button{width:40px;min-width:40px;min-height:40px;padding:0!important}
+}
+
+/* Runner registrations workspace */
+.registration-heading-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.registration-heading-actions .button{white-space:nowrap}
+.registration-size-summary{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:24px;padding:16px 20px;background:#fff;border:1px solid var(--line);border-radius:8px}
+.registration-size-summary__title{margin-right:4px;color:var(--wine);font-size:.88rem}
+.registration-size-summary__size{padding:4px 9px;background:#faf8f4;border:1px solid var(--line);border-radius:4px;font-size:.82rem}
+.registration-size-summary__total{margin-left:auto;color:var(--muted);font-size:.84rem}
+.registrations-table__grid{display:grid;grid-template-columns:minmax(140px,.95fr) minmax(210px,1.55fr) minmax(170px,1.2fr) minmax(90px,.6fr) minmax(100px,.7fr) minmax(150px,1fr);gap:16px;align-items:center;padding-inline:18px}
+.registrations-table__row{padding-block:16px;border-bottom:1px solid #ede4dc}
+.registration-cell{min-width:0}
+.registration-cell small{overflow-wrap:anywhere}
+.registration-card-label{display:none}
+.registrations-table .registration-row-actions{justify-content:flex-end;gap:6px;white-space:nowrap}
+.registrations-table .registration-row-actions .button{flex:none}
+
+@media(max-width:1100px) and (min-width:901px){
+  .registrations-table__grid{grid-template-columns:minmax(120px,.9fr) minmax(175px,1.3fr) minmax(145px,1fr) 82px 92px 140px;gap:8px;padding-inline:12px}
+}
+
+@media(max-width:900px){
+  .registration-heading-actions{justify-content:flex-start}
+  .registrations-table{padding:12px;background:#f8f4ec;overflow:visible}
+  .registrations-table>.admin-table__head{display:none!important}
+  .admin-table .registrations-table__row{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:'reference status' 'participant participant' 'category fee' 'actions actions'!important;gap:12px!important;margin-bottom:12px;padding:16px!important;background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:8px;box-shadow:0 5px 16px rgba(74,39,20,.06);align-items:start!important}
+  .registrations-table__row:last-child{margin-bottom:0}
+  .registration-cell--reference{grid-area:reference}
+  .registration-cell--participant{grid-area:participant;padding-top:12px;border-top:1px solid var(--line)}
+  .registration-cell--participant>strong{line-height:1.3}
+  .registration-cell--participant>small{display:block;margin-top:3px;line-height:1.4}
+  .registration-cell--category{grid-area:category;padding:10px 12px;background:#faf8f3;border:1px solid #eee5d8;border-radius:6px 0 0 6px}
+  .registration-cell--category>span:not(.registration-card-label){display:block;line-height:1.35}
+  .registration-cell--fee{grid-area:fee;min-width:90px;height:100%;padding:10px 12px;background:#faf8f3;border:1px solid #eee5d8;border-left:0;border-radius:0 6px 6px 0;text-align:right!important}
+  .registration-cell--status{grid-area:status;justify-self:end;text-align:right!important}
+  .registration-card-label{display:block;margin-bottom:3px;color:var(--muted);font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .registrations-table .registration-row-actions{grid-area:actions;display:flex;align-items:center;justify-content:flex-end!important;gap:8px!important;padding-top:10px!important;border-top:1px solid var(--line)}
+  .registrations-table .registration-row-actions .button{min-height:40px}
+  .registrations-table .registration-row-actions .button:first-child{padding-inline:12px}
+  .registrations-table .registration-row-actions .button:last-child{width:40px;min-width:40px;padding:0}
+}
+
+@media(max-width:640px){
+  .registration-heading-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;gap:8px}
+  .registration-heading-actions .button{width:100%;min-width:0;padding:10px 8px;font-size:.76rem;line-height:1.25;white-space:normal}
+  .registration-heading-actions .button:first-child{grid-column:1/-1}
+  .registration-size-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:14px;margin-bottom:18px}
+  .registration-size-summary__title,.registration-size-summary__total{grid-column:1/-1;margin:0}
+  .registration-size-summary__size{text-align:center;padding:5px 4px}
+  .registration-size-summary__total{padding-top:8px;border-top:1px solid var(--line);text-align:right}
+  .registrations-table{padding:10px}
+  .admin-table .registrations-table__row{padding:14px!important}
+}
+
+/* Mobile official timing runner cards */
+.timing-runner-card>span>small,.timing-runner-card__place>small{display:none}
+.timing-runner-card__time>span{display:flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums}
+
+@media(max-width:900px){
+  .timing-results-table{padding:12px;background:#f8f4ec;overflow:visible}
+  .timing-results-table .timing-results-head{display:none}
+  .timing-results-table .timing-runner-card{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:'runner place' 'category category' 'division age' 'time time'!important;gap:12px!important;margin-bottom:12px;padding:16px!important;background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:8px;box-shadow:0 5px 16px rgba(74,39,20,.06);align-items:start}
+  .timing-results-table .timing-runner-card:last-child{margin-bottom:0}
+  .timing-runner-card>span,.timing-runner-card>strong{min-width:0}
+  .timing-runner-card>span>small,.timing-runner-card__place>small{display:block;margin-bottom:3px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.64rem;font-weight:700;letter-spacing:.07em;line-height:1.2;text-transform:uppercase}
+  .timing-runner-card__runner{grid-area:runner;display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 6px;align-items:baseline}
+  .timing-runner-card__runner>small{grid-column:1/-1}
+  .timing-runner-card__runner>b{color:var(--wine);font-size:1rem}
+  .timing-runner-card__runner>span{overflow-wrap:anywhere;font-weight:700;line-height:1.3}
+  .timing-runner-card__place{grid-area:place;min-width:54px;text-align:right;color:var(--wine);font-size:1.15rem}
+  .timing-runner-card__category{grid-area:category;padding:10px 12px;background:#faf8f3;border:1px solid #eee5d8;border-radius:6px;line-height:1.35}
+  .timing-runner-card__division,.timing-runner-card__age{padding:9px 12px;background:#fff;border:1px solid var(--line);border-radius:6px;font-weight:700}
+  .timing-runner-card__division{grid-area:division}
+  .timing-runner-card__age{grid-area:age;min-width:86px}
+  .timing-runner-card__time{grid-area:time;display:block!important;padding-top:11px;border-top:1px solid var(--line)}
+  .timing-runner-card__time>span{display:flex;align-items:center;gap:6px;color:var(--muted);font-weight:700}
+  .timing-runner-card__time.is-finished>span{color:var(--green);font-size:1rem}
+}
+
+@media(max-width:640px){
+  .timing-results-table{padding:10px}
+  .timing-results-table .timing-runner-card{padding:14px!important}
+}
+
+/* Selected medal-and-stat-card race results direction */
+.timing-card-icon,.timing-card-stat__icon,.timing-card-stat__content>small{display:none}
+.timing-card-stat__content>strong{font-weight:inherit}
+.timing-runner-card__time>.timing-card-stat__content{display:inline}
+.timing-runner-card__time .timing-card-stat__content>strong{display:inline-flex;align-items:center;gap:5px}
+
+@media(max-width:900px){
+  .timing-results-table .timing-runner-card{grid-template-columns:88px repeat(3,minmax(0,1fr))!important;grid-template-areas:'place runner runner runner' 'category division age time'!important;gap:14px!important;padding:20px!important;border-left-width:7px;border-radius:12px;box-shadow:0 10px 24px rgba(74,39,20,.09)}
+  .timing-runner-card__place{grid-area:place!important;min-width:0;text-align:center!important}
+  .timing-runner-card__place>small,.timing-runner-card__runner>small{display:block;margin-bottom:6px;color:#687084;font-size:.68rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+  .timing-runner-card__place-value{position:relative;display:grid;width:46px;height:46px;margin:auto;place-items:center;color:var(--gold)}
+  .timing-runner-card__place-value .timing-card-icon{display:block;position:absolute;inset:0;width:46px;height:46px;stroke-width:1.8}
+  .timing-runner-card__place-value>span{position:relative;z-index:1;padding-bottom:7px;color:var(--wine);font:800 .82rem 'DM Sans',sans-serif}
+  .timing-runner-card__runner{grid-area:runner!important;display:block;padding-top:1px}
+  .timing-runner-card__runner>b{display:inline;color:var(--wine);font-size:clamp(1.55rem,5vw,2.15rem);line-height:1;letter-spacing:.015em}
+  .timing-runner-card__runner>span{display:inline;margin-left:10px;color:#111827;font-size:clamp(1rem,3vw,1.35rem);font-weight:800;line-height:1.25}
+  .timing-runner-card__category,.timing-runner-card__division,.timing-runner-card__age,.timing-runner-card__time{display:flex!important;min-width:0;min-height:0;height:auto;padding:12px!important;gap:10px;align-items:flex-start!important;align-self:start;background:#fffdfa;border:1px solid #eee5d8;border-radius:8px;line-height:1.25}
+  .timing-runner-card__category{grid-area:category!important}
+  .timing-runner-card__division{grid-area:division!important}
+  .timing-runner-card__age{grid-area:age!important}
+  .timing-runner-card__time{grid-area:time!important;border-top:1px solid #eee5d8}
+  .timing-card-stat__icon{display:grid;flex:0 0 38px;width:38px;height:38px;border-radius:50%;place-items:center}
+  .timing-card-stat__icon--category{background:#fff1c9;color:#c88700}
+  .timing-card-stat__icon--division{background:#dff5e6;color:#19934b}
+  .timing-card-stat__icon--age{background:#dceeff;color:#0969b7}
+  .timing-card-stat__icon--time{background:#fbe0e2;color:var(--wine)}
+  .timing-card-stat__content{display:block!important;min-width:0}
+  .timing-card-stat__content>small{display:block;margin:0 0 4px;color:#687084;font-size:.64rem;font-weight:800;letter-spacing:.04em;line-height:1.15;text-align:left;text-transform:uppercase}
+  .timing-card-stat__content>strong{display:flex!important;align-items:center;gap:5px;color:#111827;font-size:.84rem;font-weight:800;line-height:1.3;overflow-wrap:anywhere}
+  .timing-runner-card__time.is-finished .timing-card-stat__content>strong{color:var(--green)}
+}
+
+@media(max-width:600px){
+  .timing-results-table .timing-runner-card{grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-areas:'place runner runner runner' 'category category time time' 'division division age age'!important;gap:8px!important;padding:14px 12px!important}
+  .timing-runner-card__place>small,.timing-runner-card__runner>small{font-size:.62rem;letter-spacing:.09em}
+  .timing-runner-card__runner>b{display:block;font-size:1.45rem}
+  .timing-runner-card__runner>span{display:block;margin:5px 0 0;font-size:.96rem}
+  .timing-runner-card__category,.timing-runner-card__division,.timing-runner-card__age,.timing-runner-card__time{min-height:0;padding:10px 9px!important;gap:8px;align-self:start}
+  .timing-card-stat__icon{flex-basis:32px;width:32px;height:32px}
+  .timing-card-stat__icon svg{width:18px;height:18px}
+  .timing-card-stat__content>strong{font-size:.78rem}
+}
+
+/* Users and staff workspace */
+.users-access-note{margin-bottom:20px;padding:16px 20px;background:#faf8f4;border:1px solid var(--line);border-radius:8px;font-size:.92rem;line-height:1.55}
+.users-toolbar{flex-wrap:wrap;gap:12px}
+.users-toolbar__search{flex:1 1 240px}
+.users-table__grid{display:grid;grid-template-columns:minmax(190px,1.6fr) minmax(170px,1.2fr) minmax(180px,1.4fr) 100px 92px;gap:12px;align-items:center;padding-inline:18px}
+.users-table__row{padding-block:16px;border-bottom:1px solid #ede4dc}
+.users-table__identity,.users-table__contact,.users-table__roles,.users-table__status,.users-table__actions{min-width:0}
+.users-table__identity>strong{display:block}
+.users-table__contact{font-size:.88rem}
+.users-table__contact>div{min-width:0}
+.users-table__contact svg{display:none}
+.users-table__contact small{color:var(--muted);overflow-wrap:anywhere}
+.users-table__roles{display:flex;flex-wrap:wrap;gap:6px}
+.users-table__actions{display:flex;justify-content:flex-end;gap:6px;text-align:right}
+.users-table__icon-button{display:inline-grid!important;place-items:center;flex:0 0 38px;width:38px!important;min-width:38px!important;height:38px;min-height:38px!important;padding:0!important}
+.users-table__delete{color:#b91c1c!important}
+.users-edit-modal{width:min(780px,100%);max-height:calc(100dvh - 32px);overflow-y:auto;padding:28px}
+.users-edit-modal__heading{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px}
+.users-edit-modal__heading h2,.users-edit-modal__heading p{margin:0}
+.users-edit-modal__heading h2{font:600 1.75rem Fraunces,serif}
+.users-edit-modal__heading>div>p:last-child{margin-top:5px;color:var(--muted)}
+.users-edit-modal__identity{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 14px;margin-bottom:16px;padding:12px 14px;background:#faf8f3;border:1px solid var(--line);border-radius:7px;font-size:.78rem}
+.users-edit-modal__identity span{color:var(--muted);font-weight:700}
+.users-edit-modal__identity strong{min-width:0;overflow-wrap:anywhere}
+.users-edit-modal fieldset{margin:0 0 16px;padding:16px;border:1px solid var(--line);border-radius:8px}
+.users-edit-modal legend{padding:0 6px;color:var(--wine);font-weight:800}
+.users-edit-modal__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.users-edit-modal__wide{grid-column:1/-1}
+.users-edit-modal label{display:grid;gap:6px;color:var(--ink);font-size:.82rem;font-weight:700}
+.users-edit-modal label>span{display:flex;align-items:center;gap:6px}
+.users-edit-modal input,.users-edit-modal textarea{width:100%;padding:10px 11px;background:#fff;border:1px solid #d4c5b9;border-radius:6px;color:var(--ink);font:inherit}
+.users-edit-modal textarea{resize:vertical}
+.users-edit-modal__roles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.users-edit-modal__roles label{display:flex;align-items:center;padding:10px;background:#faf8f3;border:1px solid var(--line);border-radius:6px;cursor:pointer}
+.users-edit-modal__roles input,.users-edit-modal__suspended input{width:auto;flex:none}
+.users-edit-modal__suspended{display:flex!important;align-items:flex-start;gap:9px!important;padding:12px;background:#fff7f7;border:1px solid #fecaca;border-radius:6px}
+.users-edit-modal__suspended input{margin-top:3px}
+.users-edit-modal__suspended span{display:block!important}
+.users-edit-modal__suspended strong,.users-edit-modal__suspended small{display:block}
+.users-edit-modal__suspended small{margin-top:2px;color:#7f1d1d;font-weight:400;line-height:1.35}
+.users-edit-modal__password>span{color:var(--wine)}
+.users-edit-modal__note{margin:9px 0 0!important;color:var(--muted)!important;font-size:.78rem!important;line-height:1.4}
+.users-edit-modal__actions{display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:-28px;margin:8px -28px -28px;padding:14px 28px;background:#fff;border-top:1px solid var(--line)}
+.users-create-success h3{margin:14px 0 4px;font:600 1.35rem Fraunces,serif}
+.users-create-success>p{margin-bottom:16px;color:var(--muted)}
+
+@media(max-width:1050px) and (min-width:761px){
+  .users-table__grid{grid-template-columns:minmax(155px,1.4fr) minmax(140px,1fr) minmax(145px,1.1fr) 86px 126px;gap:8px;padding-inline:12px}
+}
+
+@media(max-width:760px){
+  .users-create-button{width:100%}
+  .users-access-note{display:none}
+  .users-admin-panel{margin-top:0;background:transparent;border:0}
+  .users-toolbar{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:0 0 14px;background:transparent;border:0}
+  .users-toolbar__search{width:100%;min-height:50px;height:auto!important;margin:0;padding:12px 14px!important;background:#fff;border:1px solid var(--line);border-radius:8px}
+  .users-toolbar select{width:100%;min-height:48px;padding:10px 14px!important;background:#fff;border-color:var(--line)!important;border-radius:8px!important}
+  .users-table{padding:10px;background:#f8f4ec;overflow:visible}
+  .users-table>.admin-table__head{display:none!important}
+  .admin-table .users-table__row{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:'identity roles' 'contact status' 'actions actions'!important;gap:10px 14px!important;margin-bottom:10px;padding:16px!important;background:#fff;border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:9px;box-shadow:0 5px 16px rgba(74,39,20,.06);align-items:start!important}
+  .users-table__row:last-child{margin-bottom:0}
+  .users-table__identity{grid-area:identity!important}
+  .users-table__identity>strong{color:#111827;font-size:1.08rem;line-height:1.25}
+  .users-table__identity>small{margin-top:3px;color:var(--muted)!important;font-size:.76rem!important}
+  .users-table__contact{grid-area:contact!important;display:grid;gap:7px;padding-top:4px;color:#172033;font-size:.84rem}
+  .users-table__contact>div{display:grid;grid-template-columns:18px minmax(0,1fr);gap:7px;align-items:start}
+  .users-table__contact svg{display:block;margin-top:2px;color:#172033}
+  .users-table__contact small{font-size:.78rem;line-height:1.35}
+  .users-table__roles{grid-area:roles!important;max-width:145px;justify-content:flex-end;align-content:start}
+  .users-table__status{grid-area:status!important;justify-self:end;text-align:right!important}
+  .users-table__roles .status,.users-table__status .status{min-height:27px;height:auto;padding:4px 10px;white-space:nowrap}
+  .admin-table .users-table__row>.users-table__actions{grid-area:actions!important;display:flex;justify-content:flex-end!important;align-items:center!important;gap:8px!important;margin-top:4px;padding-top:10px!important;border-top:1px solid var(--line);text-align:right!important}
+  .users-table__actions .button{min-height:40px;min-width:40px}
+  .users-table__actions .users-table__icon-button{width:40px!important;min-width:40px!important;padding:0!important}
+}
+
+@media(max-width:380px){
+  .admin-table .users-table__row{grid-template-columns:minmax(0,1fr) auto!important;gap:9px 10px!important;padding:14px 12px!important}
+  .users-table__roles{max-width:118px}
+  .users-table__roles .status,.users-table__status .status{padding-inline:8px;font-size:.6rem}
+}
+
+@media(max-width:640px){
+  .users-edit-modal{width:100%;max-height:calc(100dvh - 16px);padding:20px 16px}
+  .users-edit-modal__heading{gap:10px}
+  .users-edit-modal__heading h2{font-size:1.5rem}
+  .users-edit-modal__grid,.users-edit-modal__roles{grid-template-columns:minmax(0,1fr)}
+  .users-edit-modal__wide{grid-column:auto}
+  .users-edit-modal__identity{grid-template-columns:minmax(0,1fr);gap:2px}
+  .users-edit-modal__identity strong+span{margin-top:7px}
+  .users-edit-modal__actions{bottom:-20px;margin:8px -16px -20px;padding:12px 16px}
+  .users-edit-modal__actions .button{flex:1;min-width:0;padding-inline:10px}
+}
+
+/* Landing hero artwork */
+.home-hero__inner{grid-template-columns:minmax(0,1.12fr) minmax(340px,.88fr);gap:42px}
+.hero-emblem{display:grid;text-align:center;justify-items:center;justify-self:center;width:min(100%,470px)}
+.hero-artwork{display:block;width:100%;filter:drop-shadow(0 24px 34px rgba(35,4,9,.38))}
+.hero-artwork img{width:100%;height:auto;aspect-ratio:1;object-fit:contain;-webkit-mask-image:radial-gradient(circle at center,#000 0 64%,rgba(0,0,0,.96) 68%,transparent 73%);mask-image:radial-gradient(circle at center,#000 0 64%,rgba(0,0,0,.96) 68%,transparent 73%)}
+.hero-emblem>p{margin:2px 0 0}
+
+@media(max-width:960px){
+  .home-hero__inner{grid-template-columns:minmax(0,1fr);gap:24px;padding-bottom:72px}
+  .hero-emblem{display:grid;width:min(390px,78vw);margin-top:8px}
+}
+
+@media(max-width:640px){
+  .hero-emblem{width:min(300px,88vw);margin-top:0}
+  .hero-emblem>p{font-size:1.55rem;margin-top:-2px}
+}

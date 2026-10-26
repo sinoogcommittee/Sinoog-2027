@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Search, Shield, UserX, UserCheck, Save, X } from 'lucide-react';
+import { ClipboardCopy, KeyRound, Mail, MapPin, Pencil, Phone, Search, Shield, Trash2, Save, UserPlus, X } from 'lucide-react';
 import {
+  createManagedStaffAccount,
+  deleteManagedUserAsAdmin,
+  getManagedUserDeletionPreview,
+  getManagedUserDetails,
   listUsersForAdmin,
-  setUserStaffRoles,
-  setUserSuspended,
-  updateUserProfileAsAdmin,
+  updateManagedUserAsAdmin,
   type ManagedUser,
   type StaffRole,
 } from '../../features/users/userQueries';
@@ -28,11 +30,25 @@ export function UsersManagerPage() {
   const [roleFilter, setRoleFilter] = useState<'all' | StaffRole | 'runner'>('all');
 
   const [selected, setSelected] = useState<ManagedUser | null>(null);
+  const [editEmail, setEditEmail] = useState('');
   const [editName, setEditName] = useState('');
   const [editMobile, setEditMobile] = useState('');
   const [editLocality, setEditLocality] = useState('');
   const [editRoles, setEditRoles] = useState<StaffRole[]>([]);
+  const [editSuspended, setEditSuspended] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [loadingDetails, setLoadingDetails] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createEmail, setCreateEmail] = useState('');
+  const [createPassword, setCreatePassword] = useState('');
+  const [createName, setCreateName] = useState('');
+  const [createMobile, setCreateMobile] = useState('');
+  const [createLocality, setCreateLocality] = useState('');
+  const [createRoles, setCreateRoles] = useState<StaffRole[]>([]);
+  const [createdCredentials, setCreatedCredentials] = useState<{ name: string; email: string; password: string } | null>(null);
 
   const canManage = isAdmin || isDemoAdmin;
 
@@ -58,6 +74,13 @@ export function UsersManagerPage() {
   }, [load]);
 
   const filtered = useMemo(() => {
+    const rolePriority = (u: ManagedUser) => {
+      if (u.roles.includes('admin')) return 0;
+      if (u.roles.includes('news_in_charge')) return 1;
+      if (u.roles.includes('delegation_head')) return 2;
+      return 3;
+    };
+
     return users.filter((u) => {
       const q = searchQuery.trim().toLowerCase();
       const matchSearch =
@@ -73,33 +96,119 @@ export function UsersManagerPage() {
       else if (roleFilter !== 'all') matchRole = u.roles.includes(roleFilter);
 
       return matchSearch && matchRole;
+    }).sort((a, b) => {
+      const priorityDifference = rolePriority(a) - rolePriority(b);
+      if (priorityDifference !== 0) return priorityDifference;
+      return (a.full_name || 'Unnamed account').localeCompare(b.full_name || 'Unnamed account', 'en', {
+        sensitivity: 'base',
+      });
     });
   }, [users, searchQuery, roleFilter]);
 
-  function openEditor(u: ManagedUser) {
+  async function openEditor(u: ManagedUser) {
     setSelected(u);
+    setEditEmail(u.email || '');
     setEditName(u.full_name || '');
     setEditMobile(u.mobile || '');
     setEditLocality(u.locality || '');
     setEditRoles(u.roles.filter((r): r is StaffRole => r === 'admin' || r === 'news_in_charge' || r === 'delegation_head'));
+    setEditSuspended(Boolean(u.suspended_at));
+    setNewPassword('');
+    setLoadingDetails(true);
+    try {
+      const details = await getManagedUserDetails(u.id);
+      setSelected(details);
+      setEditEmail(details.email || '');
+      setEditName(details.full_name || '');
+      setEditMobile(details.mobile || '');
+      setEditLocality(details.locality || '');
+      setEditRoles(details.roles.filter((r): r is StaffRole => r === 'admin' || r === 'news_in_charge' || r === 'delegation_head'));
+      setEditSuspended(Boolean(details.suspended_at));
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : 'Unable to load the complete user record.', 'error');
+      setSelected(null);
+    } finally {
+      setLoadingDetails(false);
+    }
   }
 
   function toggleRole(role: StaffRole) {
     setEditRoles((prev) => (prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]));
   }
 
+  function openCreateStaff() {
+    setCreateEmail('');
+    setCreatePassword('');
+    setCreateName('');
+    setCreateMobile('');
+    setCreateLocality('');
+    setCreateRoles([]);
+    setCreatedCredentials(null);
+    setCreateOpen(true);
+  }
+
+  function closeCreateStaff() {
+    if (creating) return;
+    setCreateOpen(false);
+    setCreatedCredentials(null);
+    setCreatePassword('');
+  }
+
+  function toggleCreateRole(role: StaffRole) {
+    setCreateRoles((prev) => (prev.includes(role) ? prev.filter((item) => item !== role) : [...prev, role]));
+  }
+
+  async function handleCreateStaff() {
+    if (!canManage || createRoles.length === 0) return;
+    setCreating(true);
+    try {
+      await createManagedStaffAccount({
+        email: createEmail.trim(),
+        password: createPassword,
+        full_name: createName.trim(),
+        mobile: createMobile.trim(),
+        locality: createLocality.trim(),
+        roles: createRoles,
+      });
+      setCreatedCredentials({ name: createName.trim(), email: createEmail.trim(), password: createPassword });
+      toast('Staff account created and recorded in the audit log.', 'success');
+      await load();
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : 'Unable to create the staff account.', 'error');
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function copyCreatedCredentials() {
+    if (!createdCredentials) return;
+    try {
+      await navigator.clipboard.writeText(
+        `Sinoog 2027 staff account\nName: ${createdCredentials.name}\nEmail: ${createdCredentials.email}\nTemporary password: ${createdCredentials.password}`
+      );
+      toast('Staff sign-in details copied.', 'success');
+    } catch {
+      toast('Unable to copy automatically. Copy the details manually.', 'error');
+    }
+  }
+
   async function handleSave() {
     if (!selected || !canManage) return;
     setSaving(true);
     try {
-      await updateUserProfileAsAdmin(selected.id, {
-        full_name: editName.trim() || null,
-        mobile: editMobile.trim() || null,
-        locality: editLocality.trim() || null,
+      await updateManagedUserAsAdmin({
+        user_id: selected.id,
+        email: editEmail.trim(),
+        full_name: editName.trim(),
+        mobile: editMobile.trim(),
+        locality: editLocality.trim(),
+        roles: editRoles,
+        suspended: editSuspended,
+        new_password: newPassword || undefined,
       });
-      await setUserStaffRoles(selected.id, editRoles, user?.id ?? null);
-      toast('User updated and roles saved.', 'success');
+      toast(newPassword ? 'User details, access, and password updated.' : 'User details and access updated.', 'success');
       setSelected(null);
+      setNewPassword('');
       await load();
     } catch (err: unknown) {
       toast(err instanceof Error ? err.message : 'Unable to save user.', 'error');
@@ -108,19 +217,39 @@ export function UsersManagerPage() {
     }
   }
 
-  async function handleSuspendToggle(u: ManagedUser) {
-    if (!canManage) return;
+  async function handleDelete(u: ManagedUser) {
+    if (!canManage || deletingId) return;
     if (u.id === user?.id) {
-      toast('You cannot suspend your own account.', 'error');
+      toast('You cannot delete the administrator account currently signed in.', 'error');
       return;
     }
     try {
-      const next = !u.suspended_at;
-      await setUserSuspended(u.id, next);
-      toast(next ? 'User suspended.' : 'User reactivated.', 'success');
+      setDeletingId(u.id);
+      const preview = await getManagedUserDeletionPreview(u.id);
+      if (!preview.eligible) {
+        throw new Error('This account still has an active or approved registration. Reject the registration or suspend the account before deleting it.');
+      }
+      const reason = preview.eligibility === 'suspended'
+        ? 'The account is suspended.'
+        : preview.eligibility === 'rejected_or_cancelled'
+          ? 'All run registrations are rejected or cancelled.'
+          : 'The account has no run registration.';
+      const confirmed = window.confirm(
+        `Permanently delete ${u.full_name || 'this user'}?\n\n${reason}\n\nThis will permanently remove:\n` +
+        `• The login account and profile\n` +
+        `• ${preview.registration_count} run registration(s), including payments, waivers, bib, QR, and finish record\n` +
+        `• ${preview.payment_evidence_count} private payment screenshot(s)\n\n` +
+        `${preview.preserved_content_count} official content/audit record(s) will be preserved, but their link to this account will be cleared.\n\n` +
+        `The signed-in administrator will be recorded in the audit log. This cannot be undone.`
+      );
+      if (!confirmed) return;
+      await deleteManagedUserAsAdmin(u.id);
+      toast('User account and related personal records deleted. The administrator action was recorded.', 'success');
       await load();
     } catch (err: unknown) {
-      toast(err instanceof Error ? err.message : 'Unable to update suspension.', 'error');
+      toast(err instanceof Error ? err.message : 'Unable to delete the user account.', 'error');
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -142,31 +271,23 @@ export function UsersManagerPage() {
           <p className="eyebrow">Committee administration</p>
           <h1>Users & staff</h1>
           <p>
-            Assign administrator and staff roles to existing accounts. New staff must create an account first; an admin
-            then approves access by adding roles.
+            Create staff sign-in accounts, update profile details, and assign committee access roles.
           </p>
         </div>
+        <button type="button" className="button button--primary users-create-button" onClick={openCreateStaff}>
+          <UserPlus size={17} aria-hidden="true" /> Create staff account
+        </button>
       </div>
 
-      <div
-        style={{
-          background: '#faf8f4',
-          border: '1px solid var(--line)',
-          borderRadius: '8px',
-          padding: '1rem 1.25rem',
-          marginBottom: '1.25rem',
-          fontSize: '0.92rem',
-          lineHeight: 1.55,
-        }}
-      >
-        <strong>How staff access works:</strong> There is no public staff sign-up. The person signs up as a normal
-        account (runner sign-up is fine). An administrator finds them here and adds roles such as Administrator, News
-        in charge, or Delegation head. They then use <em>Staff login</em>.
+      <div className="users-access-note">
+        <strong>How staff access works:</strong> There is no public staff sign-up. An administrator creates the account
+        here, assigns Administrator, News in charge, or Delegation head access, and securely gives the temporary
+        credentials to the staff member. They then use <em>Staff login</em>.
       </div>
 
-      <section className="admin-panel">
-        <div className="table-tools" style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
-          <label style={{ flex: '1 1 240px' }}>
+      <section className="admin-panel users-admin-panel">
+        <div className="table-tools users-toolbar">
+          <label className="users-toolbar__search">
             <Search size={16} />
             <input
               type="text"
@@ -203,10 +324,9 @@ export function UsersManagerPage() {
             }
           />
         ) : (
-          <div className="admin-table">
+          <div className="admin-table users-table">
             <div
-              className="admin-table__head"
-              style={{ gridTemplateColumns: '1.6fr 1.2fr 1.4fr 100px 120px' }}
+              className="admin-table__head users-table__grid"
             >
               <span>Name</span>
               <span>Contact</span>
@@ -220,27 +340,19 @@ export function UsersManagerPage() {
               return (
                 <div
                   key={u.id}
-                  className="admin-table__row users-table__row"
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1.6fr 1.2fr 1.4fr 100px 120px',
-                    padding: '1rem',
-                    borderBottom: '1px solid #ede4dc',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                  }}
+                  className="admin-table__row users-table__grid users-table__row"
                 >
-                  <div>
+                  <div className="users-table__identity">
                     <strong>{u.full_name || 'Unnamed account'}</strong>
                     <small style={{ display: 'block', color: 'var(--muted)', fontSize: '0.75rem' }}>
                       {u.id.slice(0, 8)}…
                     </small>
                   </div>
-                  <div style={{ fontSize: '0.9rem' }}>
-                    <div>{u.mobile || '—'}</div>
-                    <small style={{ color: 'var(--muted)' }}>{u.locality || '—'}</small>
+                  <div className="users-table__contact">
+                    <div><Phone size={15} aria-hidden="true" /><span>{u.mobile || '—'}</span></div>
+                    <div><MapPin size={15} aria-hidden="true" /><small>{u.locality || '—'}</small></div>
                   </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                  <div className="users-table__roles">
                     {staffRoles.length === 0 ? (
                       <StatusBadge tone="warning">runner</StatusBadge>
                     ) : (
@@ -251,22 +363,30 @@ export function UsersManagerPage() {
                       ))
                     )}
                   </div>
-                  <div>
+                  <div className="users-table__status">
                     <StatusBadge tone={u.suspended_at ? 'danger' : 'success'}>
                       {u.suspended_at ? 'Suspended' : 'Active'}
                     </StatusBadge>
                   </div>
-                  <div style={{ textAlign: 'right', display: 'flex', gap: '0.35rem', justifyContent: 'flex-end' }}>
-                    <button type="button" className="button button--ghost button--sm" onClick={() => openEditor(u)}>
-                      <Shield size={14} /> Roles
+                  <div className="users-table__actions">
+                    <button
+                      type="button"
+                      className="button button--ghost button--sm users-table__icon-button"
+                      onClick={() => void openEditor(u)}
+                      title={`Edit ${u.full_name || 'user'}`}
+                      aria-label={`Edit ${u.full_name || 'user'}`}
+                    >
+                      <Pencil size={16} aria-hidden="true" />
                     </button>
                     <button
                       type="button"
-                      className="button button--ghost button--sm"
-                      onClick={() => void handleSuspendToggle(u)}
-                      title={u.suspended_at ? 'Reactivate' : 'Suspend'}
+                      className="button button--ghost button--sm users-table__icon-button users-table__delete"
+                      onClick={() => void handleDelete(u)}
+                      disabled={deletingId === u.id || u.id === user?.id}
+                      title={u.id === user?.id ? 'You cannot delete your own account' : 'Delete user account'}
+                      aria-label={`Delete ${u.full_name || 'user'}`}
                     >
-                      {u.suspended_at ? <UserCheck size={14} /> : <UserX size={14} />}
+                      <Trash2 size={16} aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -276,75 +396,169 @@ export function UsersManagerPage() {
         )}
       </section>
 
+      {createOpen && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="staff-create-title">
+          <form className="modal-card users-edit-modal" onSubmit={(event) => { event.preventDefault(); void handleCreateStaff(); }}>
+            <div className="users-edit-modal__heading">
+              <div>
+                <p className="eyebrow">Committee access</p>
+                <h2 id="staff-create-title">Create staff account</h2>
+                <p>Create the login, profile, temporary password, and assigned roles together.</p>
+              </div>
+              <button type="button" className="button button--ghost" disabled={creating} onClick={closeCreateStaff} aria-label="Close">
+                <X size={18} aria-hidden="true" />
+              </button>
+            </div>
+
+            {createdCredentials ? (
+              <div className="users-create-success">
+                <StatusBadge tone="success">Account created</StatusBadge>
+                <h3>Give these details to {createdCredentials.name}</h3>
+                <p>The temporary password is shown only here. Send it through a secure channel.</p>
+                <div className="users-edit-modal__identity">
+                  <span>Email address</span>
+                  <strong>{createdCredentials.email}</strong>
+                  <span>Temporary password</span>
+                  <strong>{createdCredentials.password}</strong>
+                </div>
+                <div className="users-edit-modal__actions">
+                  <button type="button" className="button button--secondary" onClick={() => void copyCreatedCredentials()}>
+                    <ClipboardCopy size={16} aria-hidden="true" /> Copy details
+                  </button>
+                  <button type="button" className="button button--primary" onClick={closeCreateStaff}>Done</button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <fieldset>
+                  <legend>Staff account details</legend>
+                  <div className="users-edit-modal__grid">
+                    <label className="users-edit-modal__wide">
+                      <span><Mail size={15} aria-hidden="true" /> Email address</span>
+                      <input type="email" required value={createEmail} onChange={(event) => setCreateEmail(event.target.value)} autoComplete="off" />
+                    </label>
+                    <label>
+                      Full name
+                      <input type="text" required value={createName} onChange={(event) => setCreateName(event.target.value)} autoComplete="off" />
+                    </label>
+                    <label>
+                      Mobile number
+                      <input type="tel" value={createMobile} onChange={(event) => setCreateMobile(event.target.value)} autoComplete="off" />
+                    </label>
+                    <label className="users-edit-modal__wide">
+                      Full address
+                      <textarea rows={2} value={createLocality} onChange={(event) => setCreateLocality(event.target.value)} />
+                    </label>
+                    <label className="users-edit-modal__wide users-edit-modal__password">
+                      <span><KeyRound size={16} aria-hidden="true" /> Temporary password</span>
+                      <input type="password" required minLength={8} value={createPassword} onChange={(event) => setCreatePassword(event.target.value)} autoComplete="new-password" placeholder="At least 8 characters" />
+                    </label>
+                  </div>
+                </fieldset>
+
+                <fieldset>
+                  <legend>Staff roles</legend>
+                  <div className="users-edit-modal__roles">
+                    {(Object.keys(ROLE_LABELS) as StaffRole[]).map((role) => (
+                      <label key={role}>
+                        <input type="checkbox" checked={createRoles.includes(role)} onChange={() => toggleCreateRole(role)} />
+                        <span><Shield size={16} aria-hidden="true" /> {ROLE_LABELS[role]}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="users-edit-modal__note">Assign at least one role. Staff accounts cannot be created as runner-only accounts here.</p>
+                </fieldset>
+
+                <div className="users-edit-modal__actions">
+                  <button type="button" className="button button--ghost" disabled={creating} onClick={closeCreateStaff}>Cancel</button>
+                  <button type="submit" className="button button--primary" disabled={creating || !createEmail.trim() || !createName.trim() || createPassword.length < 8 || createRoles.length === 0}>
+                    <UserPlus size={16} aria-hidden="true" /> {creating ? 'Creating…' : 'Create staff account'}
+                  </button>
+                </div>
+              </>
+            )}
+          </form>
+        </div>
+      )}
+
       {selected && (
         <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="user-edit-title">
-          <div className="modal-card" style={{ maxWidth: '560px', width: '95%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h2 id="user-edit-title" style={{ margin: 0, fontSize: '1.35rem' }}>
-                Edit user & roles
-              </h2>
-              <button type="button" className="button button--ghost" onClick={() => setSelected(null)} aria-label="Close">
+          <form className="modal-card users-edit-modal" onSubmit={(event) => { event.preventDefault(); void handleSave(); }}>
+            <div className="users-edit-modal__heading">
+              <div>
+                <p className="eyebrow">Account administration</p>
+                <h2 id="user-edit-title">Edit user</h2>
+                <p>Update profile information, access, roles, and login credentials.</p>
+              </div>
+              <button type="button" className="button button--ghost" disabled={saving} onClick={() => setSelected(null)} aria-label="Close">
                 <X size={18} />
               </button>
             </div>
 
-            <div style={{ display: 'grid', gap: '0.85rem', marginBottom: '1.25rem' }}>
-              <label>
-                Full name
-                <input
-                  type="text"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  style={{ width: '100%', padding: '0.55rem 0.7rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-              </label>
-              <label>
-                Mobile
-                <input
-                  type="tel"
-                  value={editMobile}
-                  onChange={(e) => setEditMobile(e.target.value)}
-                  style={{ width: '100%', padding: '0.55rem 0.7rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-              </label>
-              <label>
-                Address
-                <input
-                  type="text"
-                  value={editLocality}
-                  onChange={(e) => setEditLocality(e.target.value)}
-                  style={{ width: '100%', padding: '0.55rem 0.7rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-              </label>
-            </div>
+            {loadingDetails ? <LoadingState message="Loading complete user details…" /> : <>
+              <div className="users-edit-modal__identity">
+                <span>Account ID</span>
+                <strong>{selected.id}</strong>
+                <span>Created</span>
+                <strong>{new Date(selected.created_at).toLocaleString('en-PH')}</strong>
+              </div>
 
-            <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Staff roles (admin approval)</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
-              {(Object.keys(ROLE_LABELS) as StaffRole[]).map((role) => (
-                <label key={role} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={editRoles.includes(role)}
-                    onChange={() => toggleRole(role)}
-                  />
-                  <span>{ROLE_LABELS[role]}</span>
+              <fieldset>
+                <legend>Account details</legend>
+                <div className="users-edit-modal__grid">
+                  <label className="users-edit-modal__wide">
+                    <span><Mail size={15} /> Email address</span>
+                    <input type="email" required value={editEmail} onChange={(event) => setEditEmail(event.target.value)} autoComplete="off" />
+                  </label>
+                  <label>
+                    Full name
+                    <input type="text" required value={editName} onChange={(event) => setEditName(event.target.value)} />
+                  </label>
+                  <label>
+                    Mobile number
+                    <input type="tel" value={editMobile} onChange={(event) => setEditMobile(event.target.value)} />
+                  </label>
+                  <label className="users-edit-modal__wide">
+                    Full address
+                    <textarea rows={2} value={editLocality} onChange={(event) => setEditLocality(event.target.value)} />
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>Access and staff roles</legend>
+                <div className="users-edit-modal__roles">
+                  {(Object.keys(ROLE_LABELS) as StaffRole[]).map((role) => (
+                    <label key={role}>
+                      <input type="checkbox" checked={editRoles.includes(role)} onChange={() => toggleRole(role)} />
+                      <span><Shield size={16} /> {ROLE_LABELS[role]}</span>
+                    </label>
+                  ))}
+                </div>
+                <label className="users-edit-modal__suspended">
+                  <input type="checkbox" checked={editSuspended} disabled={selected.id === user?.id} onChange={(event) => setEditSuspended(event.target.checked)} />
+                  <span><strong>Suspend this account</strong><small>Prevents the user from using protected website features. Your current account cannot suspend itself.</small></span>
                 </label>
-              ))}
-            </div>
-            <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '1rem' }}>
-              Runner access uses the built-in <code>public_user</code> role and is always kept. Clearing all staff
-              roles leaves the account as a runner-only account.
-            </p>
+                <p className="users-edit-modal__note">Runner access is always retained. Clearing all staff roles leaves this as a runner-only account.</p>
+              </fieldset>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-              <button type="button" className="button button--ghost" onClick={() => setSelected(null)}>
-                Cancel
-              </button>
-              <button type="button" className="button button--primary" disabled={saving} onClick={() => void handleSave()}>
-                <Save size={16} /> {saving ? 'Saving…' : 'Save user'}
-              </button>
-            </div>
-          </div>
+              <fieldset>
+                <legend>Password reset</legend>
+                <label className="users-edit-modal__password">
+                  <span><KeyRound size={16} /> New password</span>
+                  <input type="password" minLength={8} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} autoComplete="new-password" placeholder="Leave blank to keep the current password" />
+                </label>
+                <p className="users-edit-modal__note">If entered, the new password takes effect immediately. Give it to the user through a secure channel.</p>
+              </fieldset>
+
+              <div className="users-edit-modal__actions">
+                <button type="button" className="button button--ghost" disabled={saving} onClick={() => setSelected(null)}>Cancel</button>
+                <button type="submit" className="button button--primary" disabled={saving || !editEmail.trim() || !editName.trim()}>
+                  <Save size={16} /> {saving ? 'Saving…' : 'Save changes'}
+                </button>
+              </div>
+            </>}
+          </form>
         </div>
       )}
     </div>

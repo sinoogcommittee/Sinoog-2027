@@ -3,7 +3,6 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 import { useAuth } from '../../features/auth/useAuth';
-import { GoogleSignInButton } from '../../features/auth/GoogleSignInButton';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -68,9 +67,6 @@ export function LoginPage() {
           administrator — there is no public staff registration.
         </p>
 
-        <GoogleSignInButton nextPath="/admin" onError={setMessage} />
-        <div className="auth-divider"><span>or sign in with email</span></div>
-
         <form onSubmit={(e) => void submit(e)}>
           <label>
             Email address
@@ -114,11 +110,13 @@ export function LoginPage() {
         <small>
           <Link to="/forgot-password">Forgot password</Link>
         </small>
-        <small style={{ display: 'block', marginTop: '0.75rem' }}>
-          Registering for the Sinoog Run? <Link to="/signin">Runner sign in</Link>
-          {' · '}
-          <Link to="/signin?mode=signup">Create runner account</Link>
-        </small>
+        <div className="runner-auth-prompt">
+          <span>Registering for the Sinoog Run?</span>
+          <div className="runner-auth-prompt__links">
+            <Link to="/signin">Runner sign in</Link>
+            <Link to="/signin?mode=signup">Create runner account</Link>
+          </div>
+        </div>
       </div>
     </section>
   );

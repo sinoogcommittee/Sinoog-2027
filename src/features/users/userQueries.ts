@@ -5,6 +5,7 @@ export type StaffRole = 'admin' | 'news_in_charge' | 'delegation_head';
 
 export interface ManagedUser {
   id: string;
+  email?: string | null;
   full_name: string | null;
   mobile: string | null;
   locality: string | null;
@@ -12,6 +13,34 @@ export interface ManagedUser {
   created_at: string;
   updated_at: string;
   roles: AppRole[];
+}
+
+export interface ManagedUserUpdate {
+  user_id: string;
+  email: string;
+  full_name: string;
+  mobile: string;
+  locality: string;
+  roles: StaffRole[];
+  suspended: boolean;
+  new_password?: string;
+}
+
+export interface ManagedStaffCreate {
+  email: string;
+  password: string;
+  full_name: string;
+  mobile: string;
+  locality: string;
+  roles: StaffRole[];
+}
+
+export interface ManagedUserDeletionPreview {
+  eligible: boolean;
+  eligibility: 'suspended' | 'rejected_or_cancelled' | 'no_registration' | 'active_registration';
+  registration_count: number;
+  payment_evidence_count: number;
+  preserved_content_count: number;
 }
 
 const STAFF_ROLES: StaffRole[] = ['admin', 'news_in_charge', 'delegation_head'];
@@ -144,4 +173,39 @@ export async function setUserStaffRoles(
       throw new Error(error.message);
     }
   }
+}
+
+async function invokeAdminUser<T>(body: Record<string, unknown>): Promise<T> {
+  if (!supabase) throw new Error('Supabase is not configured.');
+  const { data, error } = await supabase.functions.invoke('admin-manage-user', { body });
+  if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(String(data.error));
+  return data as T;
+}
+
+export async function getManagedUserDetails(userId: string): Promise<ManagedUser> {
+  const data = await invokeAdminUser<{ user: ManagedUser }>({ action: 'get', user_id: userId });
+  return data.user;
+}
+
+export async function createManagedStaffAccount(input: ManagedStaffCreate): Promise<ManagedUser> {
+  const data = await invokeAdminUser<{ user: ManagedUser }>({ action: 'create', ...input });
+  return data.user;
+}
+
+export async function updateManagedUserAsAdmin(update: ManagedUserUpdate): Promise<ManagedUser> {
+  const data = await invokeAdminUser<{ user: ManagedUser }>({ action: 'update', ...update });
+  return data.user;
+}
+
+export async function deleteManagedUserAsAdmin(userId: string): Promise<void> {
+  await invokeAdminUser<{ deleted: true }>({ action: 'delete', user_id: userId });
+}
+
+export async function getManagedUserDeletionPreview(userId: string): Promise<ManagedUserDeletionPreview> {
+  const data = await invokeAdminUser<{ preview: ManagedUserDeletionPreview }>({
+    action: 'delete-preview',
+    user_id: userId,
+  });
+  return data.preview;
 }

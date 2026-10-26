@@ -1,5 +1,16 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Calendar, Flag, Home, LogOut, Newspaper, Settings, ShieldCheck, Users } from 'lucide-react';
+import {
+  Calendar,
+  ClipboardCheck,
+  ExternalLink,
+  Flag,
+  Home,
+  LogOut,
+  Newspaper,
+  Settings,
+  ShieldCheck,
+  UserCog,
+} from 'lucide-react';
 import { LogoMark } from '../components/LogoMark';
 import { useAuth } from '../features/auth/useAuth';
 
@@ -7,10 +18,10 @@ const items = [
   ['Overview', '/admin', Home],
   ['Activities & Schedule', '/admin/activities', Calendar],
   ['News posts', '/admin/posts', Newspaper],
-  ['Registrations', '/admin/registrations', Users],
+  ['Registrations', '/admin/registrations', ClipboardCheck],
   ['Race timing', '/admin/run-timing', Flag],
   ['Delegations', '/admin/delegations', ShieldCheck],
-  ['Users & Staff', '/admin/users', Users],
+  ['Users & Staff', '/admin/users', UserCog],
   ['Website settings', '/admin/settings', Settings],
 ] as const;
 
@@ -36,17 +47,32 @@ export function PortalLayout() {
             <small>Committee workspace</small>
           </span>
         </Link>
-        <nav aria-label="Committee workspace navigation">
-          {items.map(([label, path, Icon]) => (
-            <NavLink key={path} to={path} end={path === '/admin'} title={label}>
-              <Icon size={18} />
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-        <button type="button" className="portal-exit" onClick={() => void handleSignOut()}>
-          <LogOut size={18} /> Sign out
-        </button>
+        <div className="portal-nav-scroll">
+          <nav aria-label="Committee workspace navigation">
+            {items.map(([label, path, Icon]) => (
+              <NavLink
+                className="portal-nav-item"
+                key={path}
+                to={path}
+                end={path === '/admin'}
+                title={label}
+              >
+                <Icon size={19} aria-hidden="true" />
+                <span>{label}</span>
+              </NavLink>
+            ))}
+          </nav>
+          <div className="portal-sidebar-actions">
+            <Link className="portal-public-site" to="/" title="View public website">
+              <ExternalLink size={19} aria-hidden="true" />
+              <span>Public site</span>
+            </Link>
+            <button type="button" className="portal-exit" onClick={() => void handleSignOut()} title="Sign out">
+              <LogOut size={19} aria-hidden="true" />
+              <span>Sign out</span>
+            </button>
+          </div>
+        </div>
       </aside>
       <div className="portal-content">
         <header className="portal-topbar">
