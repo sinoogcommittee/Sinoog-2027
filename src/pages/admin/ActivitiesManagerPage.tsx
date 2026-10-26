@@ -6,6 +6,8 @@ import {
   updateActivity,
   deleteActivity,
   formatActivityDateTime,
+  getActivityDateKey,
+  sortActivitiesByDateAndOrder,
   type ActivityInput,
 } from '../../features/activities/activityQueries';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
@@ -44,6 +46,25 @@ export function ActivitiesManagerPage() {
 
   // Delete Confirm State
   const [deleteTarget, setDeleteTarget] = useState<DbActivity | null>(null);
+
+  const activitiesOnSelectedDate = useMemo(() => {
+    const dateKey = getActivityDateKey(startsAt);
+    if (!dateKey) return [];
+    return sortActivitiesByDateAndOrder(
+      activities.filter((activity) =>
+        activity.id !== editingActivity?.id && getActivityDateKey(activity.starts_at) === dateKey
+      )
+    );
+  }, [activities, startsAt, editingActivity]);
+
+  const nextOrderForDate = useCallback((dateValue: string, excludedId?: string) => {
+    const dateKey = getActivityDateKey(dateValue);
+    if (!dateKey) return 1;
+    const orders = activities
+      .filter((activity) => activity.id !== excludedId && getActivityDateKey(activity.starts_at) === dateKey)
+      .map((activity) => activity.sort_order || 0);
+    return Math.max(0, ...orders) + 1;
+  }, [activities]);
 
   const fetchActivities = useCallback(async () => {
     try {
@@ -89,16 +110,17 @@ export function ActivitiesManagerPage() {
   }, [toast]);
 
   const openCreateModal = () => {
+    const defaultStart = '2027-01-06T17:00';
     setEditingActivity(null);
     setTitle('');
     setType('mass');
-    setStartsAt('2027-01-06T17:00');
+    setStartsAt(defaultStart);
     setEndsAt('');
     setVenue('Sto. Niño Parish Church, Guinacot');
     setCelebrant('');
     setDescription('');
     setStatus('published');
-    setSortOrder((activities.length || 0) + 1);
+    setSortOrder(nextOrderForDate(defaultStart));
     setFormError(null);
     setIsModalOpen(true);
   };
@@ -147,11 +169,45 @@ export function ActivitiesManagerPage() {
         sort_order: Number(sortOrder) || 1,
       };
 
+      const previousDateKey = getActivityDateKey(editingActivity?.starts_at);
+      const savedActivity = editingActivity
+        ? await updateActivity(editingActivity.id, payload)
+        : await createActivity(payload);
+
+      const targetDateKey = getActivityDateKey(savedActivity.starts_at);
+      if (targetDateKey) {
+        const targetGroup = sortActivitiesByDateAndOrder([
+          ...activities.filter((activity) =>
+            activity.id !== savedActivity.id && getActivityDateKey(activity.starts_at) === targetDateKey
+          ),
+          savedActivity,
+        ]);
+        const withoutSaved = targetGroup.filter((activity) => activity.id !== savedActivity.id);
+        const requestedIndex = Math.max(0, Math.min(Number(sortOrder || 1) - 1, withoutSaved.length));
+        withoutSaved.splice(requestedIndex, 0, savedActivity);
+        await Promise.all(withoutSaved.map((activity, index) =>
+          activity.sort_order === index + 1
+            ? Promise.resolve(activity)
+            : updateActivity(activity.id, { sort_order: index + 1 })
+        ));
+      }
+
+      if (previousDateKey && previousDateKey !== targetDateKey) {
+        const previousGroup = sortActivitiesByDateAndOrder(
+          activities.filter((activity) =>
+            activity.id !== savedActivity.id && getActivityDateKey(activity.starts_at) === previousDateKey
+          )
+        );
+        await Promise.all(previousGroup.map((activity, index) =>
+          activity.sort_order === index + 1
+            ? Promise.resolve(activity)
+            : updateActivity(activity.id, { sort_order: index + 1 })
+        ));
+      }
+
       if (editingActivity) {
-        await updateActivity(editingActivity.id, payload);
         toast(`Updated "${payload.title}" successfully.`, 'success');
       } else {
-        await createActivity(payload);
         toast(`Created "${payload.title}" successfully.`, 'success');
       }
 
@@ -191,7 +247,7 @@ export function ActivitiesManagerPage() {
   };
 
   const filteredActivities = useMemo(() => {
-    return activities.filter((act) => {
+    return sortActivitiesByDateAndOrder(activities.filter((act) => {
       const matchType = typeFilter === 'all' || act.type === typeFilter;
       const matchStatus = statusFilter === 'all' || act.status === statusFilter;
       const matchQuery =
@@ -200,7 +256,7 @@ export function ActivitiesManagerPage() {
         (act.venue && act.venue.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (act.celebrant && act.celebrant.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchType && matchStatus && matchQuery;
-    });
+    }));
   }, [activities, typeFilter, statusFilter, searchQuery]);
 
   return (
@@ -399,7 +455,7 @@ export function ActivitiesManagerPage() {
       {/* Activity Edit / Add Modal */}
       {isModalOpen && (
         <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="activity-modal-title">
-          <div className="modal-card" style={{ maxWidth: '640px', width: '95%' }}>
+          <div className="modal-card activity-modal" style={{ maxWidth: '640px', width: '95%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
               <h2 id="activity-modal-title" style={{ fontSize: '1.35rem', margin: 0 }}>
                 {editingActivity ? 'Edit Activity' : 'Create New Activity'}
@@ -491,7 +547,15 @@ export function ActivitiesManagerPage() {
                   <input
                     type="datetime-local"
                     value={startsAt}
-                    onChange={(e) => setStartsAt(e.target.value)}
+                    onChange={(e) => {
+                      const nextStart = e.target.value;
+                      const oldDate = getActivityDateKey(startsAt);
+                      const nextDate = getActivityDateKey(nextStart);
+                      setStartsAt(nextStart);
+                      if (oldDate !== nextDate) {
+                        setSortOrder(nextOrderForDate(nextStart, editingActivity?.id));
+                      }
+                    }}
                     style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
                   />
                 </div>
@@ -552,16 +616,19 @@ export function ActivitiesManagerPage() {
 
               <div>
                 <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                  Sort Order Number
+                  Order for {startsAt ? new Date(`${startsAt.slice(0, 10)}T00:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'this date'}
                 </label>
                 <input
                   type="number"
+                  min={1}
+                  max={activitiesOnSelectedDate.length + 1}
                   value={sortOrder}
-                  onChange={(e) => setSortOrder(Number(e.target.value))}
+                  onChange={(e) => setSortOrder(Math.max(1, Number(e.target.value)))}
+                  disabled={!startsAt}
                   style={{ width: '100px', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
                 />
                 <small style={{ display: 'block', color: '#6d6158', marginTop: '0.25rem' }}>
-                  Lower numbers appear earlier in the schedule list.
+                  New activities receive the next number automatically. Changing this number only reorders the {activitiesOnSelectedDate.length + 1} {activitiesOnSelectedDate.length === 0 ? 'activity' : 'activities'} on this date; activities on other dates are unchanged.
                 </small>
               </div>
 

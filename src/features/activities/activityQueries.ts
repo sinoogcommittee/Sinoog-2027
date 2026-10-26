@@ -72,6 +72,30 @@ export const FALLBACK_ACTIVITIES: DbActivity[] = [
   },
 ];
 
+export function getActivityDateKey(value: string | null | undefined): string {
+  if (!value) return '';
+  if (/^\d{4}-\d{2}-\d{2}/.test(value) && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(value)) {
+    return value.slice(0, 10);
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value.slice(0, 10);
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((item) => item.type === type)?.value ?? '';
+  return `${part('year')}-${part('month')}-${part('day')}`;
+}
+
+export function sortActivitiesByDateAndOrder(list: DbActivity[]): DbActivity[] {
+  return [...list].sort((a, b) => {
+    const dateCompare = getActivityDateKey(a.starts_at).localeCompare(getActivityDateKey(b.starts_at));
+    if (dateCompare !== 0) return dateCompare;
+    const orderCompare = (a.sort_order ?? 0) - (b.sort_order ?? 0);
+    if (orderCompare !== 0) return orderCompare;
+    return (a.starts_at ?? '').localeCompare(b.starts_at ?? '');
+  });
+}
+
 export async function getPublishedActivities(typeFilter?: ActivityType | 'all'): Promise<DbActivity[]> {
   if (!supabase) {
     if (!typeFilter || typeFilter === 'all') return FALLBACK_ACTIVITIES;
@@ -95,7 +119,7 @@ export async function getPublishedActivities(typeFilter?: ActivityType | 'all'):
       if (!typeFilter || typeFilter === 'all') return FALLBACK_ACTIVITIES;
       return FALLBACK_ACTIVITIES.filter((a) => a.type === typeFilter);
     }
-    return (data as DbActivity[]) ?? FALLBACK_ACTIVITIES;
+    return sortActivitiesByDateAndOrder((data as DbActivity[]) ?? FALLBACK_ACTIVITIES);
   } catch (err) {
     console.warn('Failed to load published activities:', err);
     if (!typeFilter || typeFilter === 'all') return FALLBACK_ACTIVITIES;
@@ -119,7 +143,7 @@ export async function getAllActivitiesForAdmin(): Promise<DbActivity[]> {
     throw new Error(error.message);
   }
 
-  return (data as DbActivity[]) ?? [];
+  return sortActivitiesByDateAndOrder((data as DbActivity[]) ?? []);
 }
 
 export interface ActivityInput {

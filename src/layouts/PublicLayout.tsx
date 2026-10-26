@@ -69,7 +69,7 @@ export function PublicLayout() {
               </>
             ) : (
               <Link to="/login" className="nav-login" onClick={() => setOpen(false)}>
-                Staff sign in
+                Sign in
               </Link>
             )}
           </nav>

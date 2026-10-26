@@ -1,8 +1,7 @@
 # Sinoog 2027 Website — Master Build Roadmap
 
-Last updated: October 26, 2026 (progress review against commit `f5f2eec`)  
+Last updated: October 26, 2026 — source, routes, Git, build, lint, and admin-activity audit
 Project folder: `E:\Programs\Sinoog 2027`  
-Repository: `https://github.com/sinoogcommittee/Sinoog-2027`  
 Purpose: This is the primary implementation checklist and handoff document for taking the website from its current foundation to production, event-day operation, and post-event archiving.
 
 ## 1. Confirmed project information
@@ -33,67 +32,76 @@ The novena begins January 6, 2027. The individual Mass times, celebrants, venues
 
 ## 3. Current implementation snapshot
 
-Status below reflects the working tree at commit `f5f2eec` (“update main website sections”, 2026-10-26).
+Audit basis: source tree, route configuration, feature queries, admin screens, Git state, `npm run build`, and `npm run lint` inspected on October 26, 2026. Database contents and Render production behavior were not independently verified during this audit.
 
 ### Completed foundation
 
-- [x] React and TypeScript project created with Vite.
-- [x] Responsive public navigation, footer, and page layout.
+- [x] React 19 and TypeScript project created with Vite.
+- [x] Responsive public navigation, footer, page layouts, parish/committee logos, and official church map.
 - [x] Public routes for home, festival, participants, guidelines, run, routes, registration, activities, Masses, nightly activities, news, gallery, sponsors, about, privacy, terms, login, and 404.
-- [x] Committee workspace routes for overview, registrations, delegations, posts, activities, users, and settings.
-- [x] Supabase client configuration using `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`.
-- [x] Email/password login screen.
-- [x] Protected `/admin` route that checks the Supabase `admin` role (via shared auth context and `RequireRole`).
-- [x] Admin sign-out behavior.
-- [x] Parish and committee logos integrated into the public and admin interfaces.
-- [x] Optimized 512×512 WebP version of the parish logo while preserving its original PNG.
-- [x] Official Google Maps embed added to the About page.
-- [x] Responsive visual system using parish wine, celebration gold, paper cream, Fraunces, and DM Sans.
-- [x] Render static-site configuration with SPA routing fallback.
-- [x] Initial SQL schema, access policies, Storage buckets, placeholder data, and first-admin script (migration files `001`–`005` in repo).
-- [x] Production build and lint checks passing at the time of the latest commit.
-- [x] GitHub repository created and source committed (`sinoogcommittee/Sinoog-2027`).
-- [x] Shared `AuthProvider` with profile and role loading (`admin`, `news_in_charge`, `delegation_head`, `public_user`), suspension awareness, and demo-admin fallback.
-- [x] Access-denied page for unauthorized staff routes.
-- [x] Toast notification system and reusable loading / empty / error feedback components.
-- [x] Feature modules and typed query layers: `auth`, `activities`, `content` (posts), `editions`, `media`, `run`, `ui`.
-- [x] Generated Supabase-oriented types under `src/types/database.ts` and `src/types/index.ts`.
-- [x] Dedicated `SettingsPage` for edition identity, key dates, feature switches, announcement banner, and contact info.
-- [x] Dedicated `ActivitiesManagerPage` with create / edit / publish workflow backed by `activityQueries`.
-- [x] Dedicated `PostsManagerPage` with draft / publish workflow backed by `postQueries`.
-- [x] Public home, activities, and news pages load published data from Supabase (not only local demo arrays).
-- [x] Multi-step public Sinoog Run registration wizard with category selection, participant and emergency fields, waiver, reference generation, and payment-proof upload UI (`RunRegistrationPage` + `runQueries`).
-- [x] Edition-controlled registration open/closed switch used by the public registration page and admin dashboard.
-- [x] Admin dashboard overview with live activity, post, and registration counts from query modules.
-- [x] `RegistrationsManagerPage` source file present for admin review workflows.
+- [x] Protected committee workspace with overview, registrations, delegations, posts, activities, users, and settings routes.
+- [x] Supabase browser client configured through safe `VITE_` variables.
+- [x] Shared `AuthProvider` loads session, profile, roles, suspension state, and role-derived access flags.
+- [x] Shared `RequireRole`, access-denied page, session loading state, and sign-out flow.
+- [x] Shared toast, loading, empty, error, and confirmation-dialog components.
+- [x] Typed database model file exists at `src/types/database.ts`.
+- [x] Feature query modules exist for editions/settings, activities, posts, run data, and public media.
+- [x] Public Home, Activities, News, News Article, Run, and Run Registration pages request live Supabase data with local fallback behavior.
+- [x] Activities administration supports list, create, edit, publish/unpublish, and delete operations.
+- [x] The Create/Edit Activity dialog is viewport-scrollable, and activity ordering is automatically grouped by Manila activity date. Administrators can reorder same-date activities without changing other dates.
+- [x] News administration supports list, search/filter, create, edit, preview, publish/unpublish, pin/unpin, image upload, and delete operations.
+- [x] Settings administration edits edition identity, dates, registration switch, contact information, feature switches, and announcement-banner values.
+- [x] A runner registration form, own-registration status view, payment-evidence upload flow, and a registration-review screen have been implemented in source.
+- [x] Initial schema, RLS/Storage policies, optional seed, first-admin, and corrected-novena-date migrations exist through `005`.
+- [x] Git repository exists on `main` and tracks `origin/main`; initial commit `d3b4890` is on GitHub.
+- [x] `.gitignore` protects environment files, dependencies, build output, Supabase local state, logs, and key files.
+- [x] Runner sign-in/sign-up, email confirmation handling, password recovery/reset, and profile editing screens exist and are routed.
+- [x] Administrator user management lists accounts and supports profile edits, staff-role assignment/removal, suspension/reactivation, self-suspension prevention, and a last-admin check in source.
+- [x] Current production build and lint checks pass (October 26, 2026).
 
-### Present but still placeholders or incomplete
+### Implemented but not yet production-ready
 
-- [~] `src/data/siteData.ts` still contains demonstration arrays; primary public pages prefer live queries, but residual demo content should be removed or strictly demoted.
-- [~] Festival participants and guidelines pages still show pending-content states.
-- [~] Public run information pages (route map, kit details, FAQs) still need committee-approved content and fuller data binding.
-- [~] Gallery uses visual placeholders rather than a full Supabase-backed album system.
-- [~] Sponsors page has no database-backed sponsor list (feature switch exists in Settings).
-- [~] `/admin/registrations` is still routed to the generic `AdminListPage` shell; `RegistrationsManagerPage` is not yet wired in `App.tsx`.
-- [~] `/admin/delegations` and `/admin/users` remain generic list shells without full CRUD.
-- [~] News CMS covers basic create/publish and cover image helpers; rich-text depth, scheduled publish, related posts, and full audit trail are incomplete.
-- [~] Privacy notice and participant terms remain drafts pending committee review.
-- [~] Payment recipient details shown in the registration UI still include placeholder account values that must be replaced with committee-approved instructions before launch.
-- [~] Dashboard “launch readiness” badges describe UI capability; they do not yet prove production RLS, capacity rules, or official content approval.
+- [~] Many public queries fall back to demonstration records when Supabase is empty or fails. This can make unapproved information appear official.
+- [x] The fallback edition and Opening Novena Mass use the corrected January 6, 2027 date (commit `4e63545`).
+- [~] Public article HTML and admin article preview use `dangerouslySetInnerHTML` without DOMPurify sanitization even though DOMPurify is installed.
+- [~] Activities, News, and Settings CRUD exist but require live Supabase role, RLS, error, and publication testing.
+- [~] `/admin/registrations` now routes to `RegistrationsManagerPage.tsx` with filtering, review actions, and CSV export, but review transitions and payment prerequisites are not yet enforced by a trusted server/database function.
+- [~] Runner registration inserts records from the browser and accepts browser-provided fee/category data; capacity, eligibility, fee, registration window, and reference generation are not yet server-authoritative.
+- [~] Payment evidence upload exists but requires file validation, reconciliation rules, cleanup after partial failure, and reviewer/payment-status administration.
+- [~] The waiver and privacy wording in the registration form is hard-coded draft text and has not been committee-approved or versioned from live configuration.
+- [~] Public media upload validates browser MIME type and size but does not yet perform trusted content inspection, metadata stripping, derivatives, or cleanup.
+- [~] Feature switches and announcement-banner values can be saved, but public layouts do not yet consistently consume them.
+- [~] Gallery, sponsors, festival participants, guidelines, and delegations remain placeholder or generic screens.
+- [~] User administration is implemented in source but still needs live RLS/role testing, atomic last-admin protection, trusted invitations, and audit logging.
+- [~] The latest committed checkpoint is `8701391`; the activity query/page/style changes, this roadmap update, and a separate existing `PublicLayout.tsx` edit are currently uncommitted.
+- [~] Build output is approximately 663.67 kB JavaScript before compression and produces a chunk-size warning; route-level code splitting is still required.
+- [~] Lint exits successfully but reports two React state-in-effect warnings in `AccountPage.tsx` and `UsersManagerPage.tsx`.
+- [~] Privacy notice and participant terms remain drafts pending committee approval.
 
 ### Not yet implemented
 
-- [ ] Public runner account creation, email verification, password recovery, and account dashboard.
-- [ ] Staff invitation flow, real users admin CRUD, last-admin protection, and role assignment UI.
-- [ ] Full registration review → payment verify → approve/reject → bib → QR → kit claim operations (admin side incomplete; public submit path exists).
-- [ ] Delegation-head workspace, roster submission, music upload, revisions, and approval.
-- [ ] Full media processing pipeline (orientation, derivatives, gallery manager, lightbox).
-- [ ] Sponsors administration module.
-- [ ] Transactional email notifications.
-- [ ] Audit-event creation from application actions.
-- [ ] Automated tests and multi-role permission tests against live Supabase.
-- [ ] Branch protection, CI gates, staging workflow, and production deployment verification.
-- [ ] Confirmed application of migrations `001`–`005` on the live Supabase project (files exist; ops verification still required).
+- [~] Runner sign-up, email confirmation flow, password recovery/reset, and profile editing are implemented; production redirect URLs, verification enforcement before registration, and end-to-end tests remain.
+- [ ] Authoritative server/database function for capacity reservation, eligibility, fee calculation, unique reference creation, registration submission, and status transitions.
+- [ ] Complete payment-review screen, verified-payment requirement, refund handling, and audit trail.
+- [ ] Bib allocation, QR confirmation, authenticated lookup, and kit claiming.
+- [ ] Delegation-head workspace, assignment, roster submission, private music upload, revisions, and approval.
+- [ ] Sponsor and gallery administration connected to Supabase.
+- [~] Role CRUD, last-admin check, suspension, and reactivation UI exist; trusted staff invitations, database-atomic last-admin enforcement, deletion policy, and audit events remain.
+- [ ] Transactional email provider and retryable notifications.
+- [ ] Application audit-event creation for sensitive actions.
+- [ ] Automated unit, integration, end-to-end, and RLS permission tests.
+- [ ] Verified Render production configuration, Supabase redirect URLs, monitoring, backups, and recovery rehearsal.
+
+### Immediate P0 corrections before opening registration or publishing staff-authored HTML
+
+1. Stop returning published demonstration records on live Supabase errors; show an honest empty/error state instead.
+2. Sanitize stored article HTML before preview and public rendering; add an allowlist and tests.
+3. Move run fee, category, capacity, eligibility, registration-window, reference, consent-version, and submission logic into an atomic database function or trusted Edge Function.
+4. Move registration/payment review transitions into controlled server/database functions and require verified payment (or documented free-entry authority) before approval.
+5. Keep `registration_open=false` until the committee approves distances, fees, capacity, waiver, privacy notice, payment instructions, refund rules, and support ownership.
+6. Validate payment-evidence file content/size, clean up failed uploads, and complete reviewer/payment-status administration.
+7. Verify user/role RLS with separate accounts and make last-admin protection atomic in the database.
+8. Commit and push the activity dialog/order changes after review, or isolate unfinished work on a development branch.
 
 ## 4. Definition of finished
 
@@ -133,12 +141,12 @@ The website is ready for production only when all of the following are true:
 
 Priority: **P0**
 
-- [x] Initialize Git in `E:\Programs\Sinoog 2027` if it is not already a repository.
-- [x] Create the GitHub repository (`sinoogcommittee/Sinoog-2027`).
-- [x] Confirm `.gitignore` excludes `.env`, `.env.local`, `node_modules`, `dist`, editor files, logs, and temporary uploads.
-- [x] Commit the application source, SQL migrations, documentation, logos, and `render.yaml`.
-- [ ] Use `main` as the protected production branch.
-- [ ] Require successful build and lint checks before merging changes.
+- [x] Initialize Git in `E:\Programs\Sinoog 2027`.
+- [x] Create and connect the GitHub repository at `sinoogcommittee/Sinoog-2027`.
+- [x] Confirm `.gitignore` excludes `.env`, `.env.local`, `node_modules`, `dist`, editor files, logs, key files, and temporary outputs.
+- [x] Application work through commit `8701391` is committed on `main`; only the latest activity dialog/order and related layout/style edits remain uncommitted at this checkpoint.
+- [~] Use `main` as the production branch. Local `main` tracks `origin/main`; branch-protection status is not yet verified.
+- [~] Build and lint currently pass; enforce them automatically in GitHub before merging.
 - [ ] Create a separate development or staging workflow.
 - [ ] Add issue labels such as `P0`, `P1`, `P2`, `frontend`, `supabase`, `content`, `security`, and `launch`.
 - [ ] Copy this roadmap into GitHub issues or a project board without losing the acceptance criteria.
@@ -150,8 +158,6 @@ Completion gate: A clean checkout can run `npm install`, `npm run build`, and `n
 Priority: **P0**
 
 ### Apply and verify migrations
-
-Migration files `001_schema.sql` through `005_correct_novena_start_date.sql` are present in the repository. Runtime application on the live Supabase project still needs confirmation.
 
 - [ ] Confirm `001_schema.sql` completed successfully.
 - [ ] Confirm `002_security_and_storage.sql` completed successfully.
@@ -167,7 +173,7 @@ Migration files `001_schema.sql` through `005_correct_novena_start_date.sql` are
 - [ ] Confirm Storage buckets exist: `public-media`, `payment-evidence`, and `delegation-files`.
 - [ ] Confirm the profile-creation trigger works for a newly created test user.
 - [ ] Confirm `updated_at` triggers change timestamps during updates.
-- [x] Generate TypeScript database types and save them under `src/types/database.ts`.
+- [~] A typed database model exists at `src/types/database.ts`; verify it matches the current live Supabase schema and document how it was generated.
 - [ ] Add a repeatable command or documented process for regenerating types after migrations.
 
 ### Verify Row Level Security
@@ -188,20 +194,20 @@ Completion gate: The security matrix passes using separate test accounts for eve
 
 Priority: **P0**
 
-- [x] Create feature folders: `features/auth`, `features/content`, `features/activities`, `features/run`, `features/media`, `features/editions`, and `features/ui` (delegations / sponsors / admin folders still thin or absent).
-- [x] Add typed Supabase query functions for auth-adjacent, activities, posts, editions, media, and run features.
-- [x] Add a shared authentication/session provider (`AuthProvider` in `main.tsx`).
-- [x] Add role and profile loading to a shared account context.
-- [x] Handle authentication refresh and session changes via Supabase `onAuthStateChange`.
-- [~] Replace local arrays in `src/data/siteData.ts` with Supabase queries — public home / activities / news prefer live queries; residual demo arrays remain and should be removed.
-- [x] Keep a small explicit fallback only for maintenance or initial loading; do not display demonstration content as official production content (still needs a final pass).
-- [x] Add reusable loading, empty, error, and access-denied components.
-- [ ] Add form validation schemas for user-facing and admin forms (inline validation exists in places; shared schema library not yet adopted).
+- [~] Feature folders exist for auth, content, activities, editions, media, run, users, and shared UI. Delegations, sponsors, and a dedicated payment-review module still need implementation.
+- [~] Typed Supabase queries exist for editions/settings, activities, posts, run records, and public media; complete the remaining modules and verify all return/error types.
+- [x] Add a shared authentication/session provider.
+- [x] Add role, profile, suspension, and derived-permission loading to the shared auth context.
+- [~] Authentication state change and refresh handling exist; add an explicit session-expired message and recovery flow.
+- [~] Home, Activities, News, News Article, Run, and Registration use Supabase query modules, but `siteData.ts` and published fallbacks remain.
+- [ ] Replace published demonstration fallbacks with honest empty/error states in configured production environments.
+- [x] Add reusable loading, empty, error, access-denied, confirmation, toast, and retry-capable feedback components.
+- [ ] Add form validation schemas for user-facing and admin forms.
 - [x] Add a consistent notification/toast system.
 - [ ] Add confirmation dialogs only for consequential actions such as publishing, approving, suspending, refund recording, and kit claims.
 - [ ] Add error reporting without logging passwords, tokens, payment evidence, rosters, or sensitive form payloads.
 
-Completion gate: Public pages load live draft-filtered or published data from Supabase, and failure states are understandable. **Partially met** — home, activities, and news use live published queries; gallery, sponsors, festival detail content, and some run info pages remain placeholder.
+Completion gate: Public pages load live draft-filtered or published data from Supabase, and failure states are understandable.
 
 ## 9. Phase 3 — Authentication and account management
 
@@ -209,26 +215,24 @@ Priority: **P0**
 
 ### Public account flows
 
-- [ ] Create a separate `SignUpPage.tsx` for runners.
-- [ ] Require email verification before final registration submission.
-- [ ] Create `ForgotPasswordPage.tsx`, `ResetPasswordPage.tsx`, and `AuthCallbackPage.tsx`.
+- [x] Provide runner sign-in and sign-up in `RunnerAuthPage.tsx`; `/signup` redirects to its sign-up tab. A separate unused `SignUpPage.tsx` remains and should be removed or intentionally adopted.
+- [~] Supabase email confirmation handling exists; explicitly block final registration until the email is verified and test it.
+- [x] Create and route `ForgotPasswordPage.tsx`, `ResetPasswordPage.tsx`, and `AuthCallbackPage.tsx`.
 - [ ] Configure Supabase redirect URLs for local, staging, and production environments.
-- [ ] Create `AccountPage.tsx` for name, mobile number, and locality.
-- [ ] Show clear errors for invalid credentials, unverified email, suspended account, and insufficient role.
+- [x] Create and route `AccountPage.tsx` for name, mobile number, and locality.
+- [~] Invalid credentials, access denial, and common auth errors have UI states; verify unverified-email, suspended-session, and expired-session behavior end to end.
 - [ ] Add rate limiting or bot protection to exposed forms if abuse appears.
 
 ### Staff and role management
 
-Shared auth context loads roles from `user_roles` and exposes `isAdmin`, `isNewsInCharge`, `isDelegationHead`, and suspension state. Demo-admin fallback exists when Supabase env is missing.
-
-- [ ] Replace the admin user-list shell with real data.
+- [x] Replace the admin user-list shell with live profile and role data.
 - [ ] Invite staff accounts through a trusted server function; never expose the service-role key to the browser.
-- [ ] Assign and remove `delegation_head`, `news_in_charge`, and `admin` roles.
-- [ ] Prevent self-promotion through public sign-up.
-- [ ] Prevent removal or suspension of the last active administrator.
-- [ ] Support suspension, reactivation, and controlled deletion.
+- [~] Assign and remove `delegation_head`, `news_in_charge`, and `admin` roles from the admin UI; verify RLS and move sensitive mutations to trusted functions.
+- [~] Public sign-up grants only runner/public access in the UI; verify the database prevents self-promotion through direct requests.
+- [~] UI/query logic prevents self-suspension and checks removal of the last administrator; enforce both atomically in the database.
+- [~] Support suspension and reactivation. Controlled account deletion remains undefined and unimplemented.
 - [ ] Log staff invitations, role changes, suspensions, and reactivations.
-- [x] Add a visible access-denied page instead of silently redirecting every unauthorized user.
+- [x] Add a visible access-denied page and protected admin route.
 
 Completion gate: Password recovery, session expiry, invitation, role assignment, suspension, and last-admin protection have been tested.
 
@@ -236,54 +240,57 @@ Completion gate: Password recovery, session expiry, invitation, role assignment,
 
 Priority: **P0**
 
-- [x] Build a real `SettingsPage.tsx` rather than using the generic admin list page.
-- [x] Edit parish name, public location, timezone, official contacts, and social links.
-- [x] Edit edition dates and display labels (run, novena start, fiesta).
-- [x] Add feature switches for registration, delegation submission, sponsor display, and gallery display.
-- [ ] Add registration opening and closing timestamps (boolean open switch exists; window timestamps not yet modeled in the settings UI).
-- [x] Add a public announcement banner with severity (expiry still optional/incomplete).
+- [x] Build and route a dedicated `SettingsPage.tsx` instead of the generic admin list page.
+- [~] Settings edit parish name, public location, timezone, contacts, and Facebook link. Committee-name handling still needs a dedicated setting if required.
+- [x] Edit edition name, run date, novena start date, fiesta date, and registration-open state.
+- [~] Save switches for registration, delegation submission, sponsor display, gallery display, and announcement banner. Connect every switch to its public route and validate expiry behavior.
+- [ ] Add registration opening and closing timestamps.
+- [~] Announcement text, enabled state, and severity can be saved; public rendering and expiry enforcement remain.
 - [ ] Add editable SEO title, description, social image, and canonical domain.
 - [ ] Add an edition archive/create workflow for future Sinoog celebrations.
-- [ ] Restrict edition changes to administrators and audit every change (UI is admin-gated; audit events not yet written).
+- [ ] Restrict edition changes to administrators and audit every change.
 
-Completion gate: The committee can change operational details without editing source code. **Mostly met** for the 2027 edition core fields and feature switches.
+Completion gate: The committee can change operational details without editing source code.
 
 ## 11. Phase 5 — Activities, novena, and Mass schedules
 
 Priority: **P0**
 
-- [x] Build a dedicated `ActivitiesManagerPage.tsx`.
-- [x] Create, edit, preview, publish, unpublish, reorder, and archive activities (core CRUD and publication path implemented).
+- [x] Build and route a dedicated `ActivitiesManagerPage.tsx`.
+- [~] Create, edit, publish/unpublish, filter, and delete activities. Same-date ordering is editable and other dates are unaffected; add archival policy and make multi-row reordering atomic for concurrent editors.
+- [x] Make the Create/Edit Activity dialog scroll within short browser viewports.
+- [x] Automatically group activity order by Manila date and calculate the next order number for the selected date.
 - [x] Support types: Mass, Sinoog Run, festival, nightly activity, and other.
-- [x] Support start/end time, venue, description, celebrant, contact, and related notice.
-- [~] Add schedule validation so end time cannot precede start time (partial client-side checks; harden server-side).
-- [ ] Confirm and enter the complete novena and Pontifical Mass schedule (parish approval still required).
+- [~] Support start/end time, venue, description, and celebrant. Contact and related-notice fields are not yet modeled.
+- [ ] Add schedule validation so end time cannot precede start time.
+- [ ] Confirm and enter the complete novena and Pontifical Mass schedule.
+- [~] Draft migration `006_seed_2027_mass_and_fiesta_schedule.sql` has been prepared from the supplied 2026 parish posters: January 6-13 novena Masses, January 14 Vesper Mass, January 15 Fiesta Masses, and January 16 Liwas Mass/Sakay-Sakay. All celebrants are blank and all records remain drafts until the committee confirms the 2027 schedule.
 - [ ] Clearly distinguish unconfirmed, changed, and cancelled events.
-- [x] Add schedule filters and a printer-friendly view on the public activities page.
+- [ ] Add schedule filters and a printer-friendly view.
 - [ ] Add calendar download files when dates are final.
 - [ ] Add a “last updated” time for schedule changes.
 - [ ] Allow urgent schedule changes to trigger an announcement.
 
-Completion gate: A staff member can publish an accurate schedule, correct one event, and have the change appear publicly without a deployment. **Code path met**; official novena content still depends on parish confirmation.
+Completion gate: A staff member can publish an accurate schedule, correct one event, and have the change appear publicly without a deployment.
 
 ## 12. Phase 6 — News and announcements CMS
 
 Priority: **P0**
 
-- [x] Build posts management UI (`PostsManagerPage.tsx`) and supporting `postQueries` (dedicated `PostEditorPage` still optional; editor is integrated in the manager).
-- [x] Support title, slug, excerpt, body, category, featured image path, and publication state.
-- [x] Implement draft, published, and archived-oriented states in the query layer and manager.
-- [~] Add preview before publishing.
-- [x] Sanitize formatted article content before display (`dompurify` dependency present).
-- [ ] Prevent duplicate slugs inside one edition (enforce uniquely in database/policy).
-- [ ] Add image alt text, captions, and credits end-to-end.
-- [~] Add publish and correction timestamps.
-- [ ] Add search and category filtering on the public News page.
+- [~] `PostsManagerPage.tsx` combines the list and editor modal. Split into separate route files later only if maintainability requires it.
+- [~] Supports title, slug, excerpt, raw HTML body, category, featured image, and pinned state. Attached gallery, related event, and visible author attribution remain.
+- [x] Implement draft, published, and archived states.
+- [x] Add article preview before saving/publishing.
+- [ ] Sanitize formatted article content before admin preview and public rendering. This is P0 because raw stored HTML currently reaches `dangerouslySetInnerHTML`.
+- [x] Prevent duplicate slugs inside one edition in the query layer and database constraint.
+- [ ] Add image alt text, captions, and credits.
+- [ ] Add publish and correction timestamps.
+- [x] Add search and category filtering on the public News page.
 - [ ] Add related posts and share links.
 - [ ] Consider scheduled publishing only after ordinary publishing is stable.
 - [ ] Audit who created, edited, published, unpublished, or archived a post.
 
-Completion gate: A `news_in_charge` user can publish and correct an article but cannot access unrelated private modules. **Partially met** — basic CMS works for admins; strict news-only role isolation and full editorial features remain open.
+Completion gate: A `news_in_charge` user can publish and correct an article but cannot access unrelated private modules.
 
 ## 13. Phase 7 — Media processing and gallery
 
@@ -359,30 +366,28 @@ Priority: **P0 before registration opens**
 
 ### Required fields and consent
 
-Public registration wizard already collects most of the fields below. Guardian and promotional consent flows are not complete.
-
-- [x] Participant name
-- [x] Birth date only where eligibility or category logic requires it
-- [x] Mobile number and locality
-- [x] Distance category
-- [x] Shirt size
-- [x] Optional club or team
-- [x] Emergency contact name, relationship, and mobile number
-- [x] Accessibility or assistance request with restricted staff visibility
-- [x] Required acceptance of the current event terms and privacy notice
+- [ ] Participant name
+- [ ] Birth date only where eligibility or category logic requires it
+- [ ] Mobile number and locality
+- [ ] Distance category
+- [ ] Shirt size
+- [ ] Optional club or team
+- [ ] Emergency contact name, relationship, and mobile number
+- [ ] Accessibility or assistance request with restricted staff visibility
+- [ ] Required acceptance of the current event terms and privacy notice
 - [ ] Guardian details and consent when minors are allowed
 - [ ] Separate optional consent for promotional use
 
 ### Registration workflow
 
-- [x] Build a multi-step registration form with progress, back navigation, and validation (`RunRegistrationPage`). Draft preservation across reloads is still limited.
-- [ ] Verify the account email before submission.
+- [~] A multi-step registration form with progress, back navigation, and validation exists; verify refresh-safe draft preservation and all validation rules.
+- [~] Registration requires an authenticated account; explicitly verify confirmed email before submission.
 - [ ] Calculate authoritative category, eligibility, capacity, and fee on the server.
-- [x] Create a unique registration reference on submit (harden non-guessability and server authority).
-- [ ] Store snapshots of participant data, fee, currency, category, and consent versions.
-- [ ] Enforce one registration per user for the run edition.
+- [ ] Create a unique, non-guessable registration reference.
+- [~] Participant, fee, currency, category, and fixed consent-version snapshots are inserted from the browser; move authoritative values and versions to trusted configuration/server logic.
+- [~] The form loads the current user's registration and the schema is intended to enforce uniqueness; verify the live unique constraint and race behavior.
 - [ ] Protect the final slot from simultaneous registration attempts using a transaction or atomic database function.
-- [ ] Add a My Registration page with registration, payment, and kit statuses shown separately.
+- [~] The registration page shows the signed-in runner's registration status; separate and complete registration, payment, and kit status presentation.
 - [ ] Support committee requests for correction without deleting the registration.
 - [ ] Support runner cancellation under the approved policy.
 - [ ] Add confirmation emails for submission, correction request, approval, rejection, cancellation, and payment changes.
@@ -400,12 +405,12 @@ Priority: **P0 before paid registration opens**
 ### Manual-payment first release
 
 - [ ] Add administrator-configured payment methods, instructions, recipient name, and official account identifier.
-- [x] Display the exact fee snapshot and currency (from category `fee_centavos`).
-- [x] Allow runner to submit a payment reference and private proof file (public UI implemented).
-- [ ] Validate evidence type and size.
-- [ ] Store evidence in the private `payment-evidence` bucket under an authorized user path.
-- [ ] Build a payment review queue.
-- [ ] Let authorized reviewers verify or reject a payment with a reason.
+- [~] The form displays a fee/currency and saves a snapshot, but the value is currently browser-provided rather than server-authoritative.
+- [x] Allow runner to submit a payment reference and private proof file.
+- [~] Browser MIME/size checks exist; add trusted file-content validation and failure cleanup.
+- [~] Store evidence in the private `payment-evidence` bucket under a user/registration path; verify Storage policies and signed access with separate accounts.
+- [~] Registration review UI exists, but a complete payment-specific queue and evidence-review workflow remain.
+- [~] Authorized staff can change review state in the current UI; add payment verification/rejection reasons and controlled trusted transitions.
 - [ ] Require actual account reconciliation; a screenshot alone is not proof of settlement.
 - [ ] Keep payment verification separate from registration approval.
 - [ ] Provide a paid-but-rejected resolution and refund-recording workflow.
@@ -431,13 +436,13 @@ Completion gate: Duplicate submissions or webhook retries cannot create duplicat
 
 Priority: **P1**
 
-- [ ] Build the registration list and detail pages.
-- [ ] Filter by category, registration status, payment status, shirt size, date, and search term.
+- [~] Build the registration list and review interface; complete a dedicated detail view and evidence access.
+- [~] Filtering and search exist; verify category, registration status, payment status, shirt size, and date coverage.
 - [ ] Review participant and emergency data only for authorized operational needs.
 - [ ] Approve only when payment is verified or a documented free-entry/waiver authorization exists.
 - [ ] Add correction request and rejection reasons visible to the runner.
 - [ ] Add safe batch approval with an eligibility preview and per-record result.
-- [ ] Export authorized lists by category and shirt size.
+- [~] CSV export exists; restrict fields by operational need, log exports, and test authorization.
 - [ ] Log every export and avoid exporting unnecessary fields.
 - [ ] Allocate bib numbers with uniqueness enforcement.
 - [ ] Generate a QR confirmation containing only an opaque reference.
@@ -571,7 +576,8 @@ Priority: **P0**
 
 ### Automated checks
 
-- [ ] Keep `npm run build` and `npm run lint` passing.
+- [x] `npm run build` and `npm run lint` pass as of October 26, 2026.
+- [~] Resolve the two current React lint warnings in `AccountPage.tsx` and `UsersManagerPage.tsx`.
 - [ ] Add unit tests for fee, eligibility, status transition, date, and capacity logic.
 - [ ] Add integration tests for Supabase query and mutation wrappers.
 - [ ] Add end-to-end tests for sign-up, login, password reset, registration, payment correction, delegation revision, news publishing, and kit claim.
@@ -707,36 +713,38 @@ Priority: **P1**
 
 | Route | Current state | Required finish work |
 |---|---|---|
-| `/` | Responsive UI with local data | Live settings, published activities/news, real media, sponsor data, event-state behavior |
+| `/` | Responsive UI with Supabase queries and local fallbacks | Remove production demo fallbacks; complete live settings, media, sponsors, and event-state behavior |
 | `/festival` | Informational shell | Approved story, program, public participants, official media |
 | `/festival/participants` | Empty state | Approved delegation public profiles and ordering |
 | `/festival/guidelines` | Empty state | Versioned guidelines and downloadable files |
-| `/run` | Informational shell | Live categories, fees, capacity, timing, kit, FAQs |
+| `/run` | Supabase-backed run/category UI with fallbacks | Authoritative fees/capacity, confirmed timing, kit details, and FAQs |
 | `/run/routes` | Empty route state | Approved route maps and operational points |
-| `/run/register` | Closed placeholder | Account, multi-step form, payment, consent, submission |
-| `/activities` | Local placeholder data | Published live activities and filtering |
-| `/activities/masses` | Local placeholder data | Confirmed novena and Pontifical Mass schedule |
+| `/run/register` | Authenticated multi-step form, status view, and payment-proof upload | Server-authoritative submission, verified email, approved consent, atomic capacity, secure payment review |
+| `/activities` | Published Supabase activities with fallback, filters, and print view | Remove production demo fallback and confirm all content |
+| `/activities/masses` | Live filtered schedule with corrected Jan. 6 fallback | Enter and approve the complete novena and Pontifical Mass schedule |
 | `/activities/nightly` | Empty state | Published nightly program |
-| `/news` | Local placeholder data | Live search, categories, pinned posts, pagination |
-| `/news/:slug` | Local article shell | Sanitized live article and media data |
+| `/news` | Live Supabase posts with search/filter and fallback | Remove production fallback, add pagination and final category behavior |
+| `/news/:slug` | Live article route | Sanitize article HTML before rendering and complete media/error behavior |
 | `/gallery` | Visual placeholders | Published albums, optimized media, accessible viewer |
 | `/sponsors` | Empty state | Published sponsors grouped by tier |
 | `/about` | Parish content and live map | Approved parish history and official contacts |
 | `/privacy` | Draft | Approved privacy notice and effective/version date |
 | `/terms` | Draft | Approved run terms, waiver, refund and guardian rules |
-| `/login` | Supabase login | Password recovery, suspended/access-denied handling |
-| `/account` | Missing | Profile and account security |
-| `/account/registration` | Missing | Runner status, corrections, proof, confirmation, QR |
+| `/signin` | Runner sign-in/sign-up tabs | Verify email-confirmation and production redirect behavior |
+| `/login` | Separate committee-staff Supabase login | Verify suspended/session-expired behavior and production redirects |
+| `/forgot-password`, `/auth/reset-password`, `/auth/callback` | Implemented and routed | Configure redirect URLs and complete end-to-end tests |
+| `/account` | Profile editing implemented | Resolve lint warning; add account-security behavior and tests |
+| `/account/registration` | Not a separate route; status is currently on `/run/register` | Decide route structure; add corrections, confirmation, payment/kit status, and QR |
 | `/delegation` | Missing | Delegation-head dashboard and submission workflow |
 | `/admin` | Dashboard shell | Live metrics, queues, alerts, readiness checklist |
-| `/admin/registrations` | Generic empty table | Full list, filters, detail, review, export, batch actions |
+| `/admin/registrations` | Live review list with filters, actions, and CSV export | Trusted status transitions, payment prerequisites, detail/evidence view, audit log, batch safety |
 | `/admin/delegations` | Generic empty table | Assignments, review, revisions, deadlines, files |
-| `/admin/posts` | Generic empty table | News list, editor, preview, publish workflow |
-| `/admin/activities` | Generic empty table | Activity and Mass schedule CRUD |
+| `/admin/posts` | Functional news CRUD, preview, publishing, pinning, and image upload | Sanitize HTML, verify RLS/media security, and test publication workflow |
+| `/admin/activities` | Functional CRUD with scrollable form and date-scoped ordering | Atomic reorder, archive policy, schedule validation, and multi-role tests |
 | `/admin/gallery` | Missing | Album and media management |
 | `/admin/sponsors` | Missing | Sponsor and tier management |
-| `/admin/users` | Generic empty table | Invitations, roles, suspension, last-admin protection |
-| `/admin/settings` | Generic empty table | Edition, contacts, features, payment, SEO, banners |
+| `/admin/users` | Live list, profile edits, roles, suspension/reactivation, last-admin check | Trusted invitations, atomic guards, audit log, deletion policy, RLS tests |
+| `/admin/settings` | Functional edition, contacts, feature switches, and banner editor | Consume switches publicly; add payment, SEO, expiry, audit, and permission tests |
 
 ## 31. Database and server-work checklist
 
@@ -757,41 +765,39 @@ Before feature completion:
 
 ## 32. Recommended implementation order from the current state
 
-Much of the original early sequence is already in the source tree. Continue from the live baseline in this order:
+Do the remaining work in this sequence:
 
-1. Confirm migrations `001`–`005` and first-admin promotion on the live Supabase project; record results.
-2. Protect `main`, add CI (build + lint), and keep secrets out of the repository.
-3. Wire `RegistrationsManagerPage` into `/admin/registrations` and finish payment verify / approve / reject flows.
-4. Complete public runner account lifecycle (sign-up, email verification, password recovery, account page).
-5. Remove residual `siteData.ts` demonstration content from any remaining public surfaces.
-6. Harden run configuration (official categories, capacity, ages, payment recipients, policies) and admin run config UI.
-7. Finish registration ops: exports, bib allocation, opaque QR, kit claim, offline reconciliation plan.
-8. Build real users/roles admin and last-admin protection.
-9. Build delegation assignment and head submission workspace.
+1. Review, commit, and push the current activity dialog/date-order changes; keep `main` deployable.
+2. Verify migrations `001`–`005`, first-admin roles, Storage buckets, and the complete RLS matrix in the live Supabase project.
+3. Remove published demo fallbacks from configured production behavior and sanitize all staff-authored HTML.
+4. Resolve the two lint warnings and add route-level code splitting before the application grows further.
+5. Move registration creation, capacity reservation, fees, eligibility, references, consent versions, and status transitions into trusted atomic database/Edge functions.
+6. Complete payment evidence validation, reconciliation, review, correction, refund, and audit behavior.
+7. Finalize privacy, terms, waiver, refund rules, contacts, event configuration, and committee-owned content.
+8. Complete registration review, notification, safe export, QR, bib, and kit claiming.
+9. Build delegation assignment, submission, private upload, revision, and review.
 10. Build gallery and sponsor administration.
-11. Add transactional email and audit events.
-12. Complete permission, accessibility, performance, and end-to-end testing.
-13. Deploy staging, conduct committee rehearsal, then deploy production.
-14. Follow the controlled launch, event-day, and post-event procedures.
+11. Add unit, integration, end-to-end, accessibility, performance, and permission tests.
+12. Verify Render/Supabase production configuration, rehearse on staging, and follow controlled launch/event-day/archive procedures.
 
 ## 33. Immediate next work package
 
-The previous “immediate next package” (GitHub, auth provider, Settings/Activities, live public queries) is largely complete in source. The next development session should focus on:
+The next development session should complete this exact work package before registration is opened:
 
-- [ ] Confirm `004_promote_first_admin.sql` (and related migrations) succeeded on the live Supabase project.
-- [ ] Protect the `main` branch and keep Supabase keys out of git history.
-- [x] Generate Supabase TypeScript types. *(present under `src/types/`)*
-- [x] Shared authenticated-user and roles provider. *(done)*
-- [x] Loading, access-denied, and toast states. *(done)*
-- [x] Connect editions, settings, published activities, and published posts to Supabase. *(done for primary paths)*
-- [~] Replace remaining `siteData.ts` placeholders completely.
-- [x] Dedicated Settings and Activities administration pages. *(done)*
-- [ ] Route and finish `RegistrationsManagerPage` for payment review and entry approval.
-- [ ] Public sign-up, email verification, password recovery, and account page before collecting real runner PII.
-- [ ] Replace placeholder payment account details with committee-approved instructions.
-- [ ] Verify role and publication policies with multiple real test accounts (admin, news, runner, anonymous).
+- [ ] Review the activity form on desktop and a short/mobile viewport: the whole dialog must scroll and remain closable/savable.
+- [ ] Verify activity ordering with two dates and multiple same-date activities; reordering one date must not change the other date.
+- [ ] Replace the current multi-update activity reorder with one atomic database function if more than one administrator may edit schedules concurrently.
+- [ ] Commit and push the current activity changes; record the new commit here.
+- [ ] Confirm migrations `001`–`005`, `rieldiango24@gmail.com` roles, Storage buckets, and live schema/type alignment.
+- [ ] Test anonymous, runner, news staff, delegation head, administrator, and suspended-user access using separate accounts and direct Supabase requests.
+- [ ] Remove published demo fallback behavior in production and show honest loading/empty/error states.
+- [ ] Sanitize article HTML in both admin preview and public rendering with a strict allowlist and automated unsafe-markup tests.
+- [ ] Design and add an atomic registration-submission function before accepting real registrations.
+- [ ] Keep `registration_open=false` until the terms, privacy notice, waiver, fees, capacity, payment/refund process, and support contact are approved.
 
-Do not begin collecting real runner or delegation personal information until the privacy notice, terms, retention rules, payment process, and permission tests are complete.
+Current handoff checkpoint: `main` is at commit `8701391`. The working tree contains this roadmap update, the latest activity query/page/style changes, and a separate existing `PublicLayout.tsx` edit at the time of this audit. `npm run build` and `npm run lint` pass; lint has two warnings, and the build reports a large-chunk warning.
+
+Do not begin collecting runner or delegation personal information until the privacy notice, terms, retention rules, payment process, and permission tests are complete.
 
 ## 34. How to keep this roadmap current
 
