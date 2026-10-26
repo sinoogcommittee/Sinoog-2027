@@ -1,0 +1,3 @@
+import { HeartHandshake } from 'lucide-react';
+import { PageHero } from '../../components/PageHero';
+export function SponsorsPage() { return <><PageHero eyebrow="With gratitude" title="Celebration sponsors" description="We recognize the partners who help make the parish fiesta and Sinoog Festival possible."/><section className="section"><div className="container"><div className="empty-state"><HeartHandshake/><h3>Sponsor list coming soon</h3><p>Approved sponsor names, logos, and recognition tiers will appear here.</p></div><div className="notice"><strong>Interested in supporting Sinoog 2027?</strong><span>Official sponsorship contact details will be published after committee confirmation.</span></div></div></section></>; }

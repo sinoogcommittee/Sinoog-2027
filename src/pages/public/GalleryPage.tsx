@@ -1,0 +1,4 @@
+import { Camera } from 'lucide-react';
+import { PageHero } from '../../components/PageHero';
+const labels = ['Faith in procession', 'Festival colors', 'Community in motion', 'Devotion at the parish', 'Stories from the stage', 'Together in celebration'];
+export function GalleryPage() { return <><PageHero eyebrow="Celebration archive" title="Sinoog gallery" description="Photos and videos from previous celebrations and the journey to Sinoog 2027."/><section className="section"><div className="container"><div className="filter-pills"><button>All years</button><button>2027</button><button>Previous celebrations</button></div><div className="gallery-grid">{labels.map((label, i) => <figure key={label} className={`gallery-item gallery-item--${(i % 3) + 1}`}><div><Camera/><span>Photo coming soon</span></div><figcaption>{label}<small>Sinoog Festival</small></figcaption></figure>)}</div></div></section></>; }
