@@ -5,7 +5,7 @@ import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 import { useAuth } from '../../features/auth/useAuth';
 
 export function SignUpPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isAdmin } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [mobile, setMobile] = useState('');
@@ -17,6 +17,7 @@ export function SignUpPage() {
   const [loading, setLoading] = useState(false);
 
   if (!authLoading && user) {
+    if (isAdmin) return <Navigate to="/admin" replace />;
     return <Navigate to="/account" replace />;
   }
 
@@ -25,15 +26,13 @@ export function SignUpPage() {
     setMessage('');
 
     if (!supabase) {
-      setMessage('Add your Supabase environment values to enable account creation.');
+      setMessage('Add your Supabase environment values to enable runner account creation.');
       return;
     }
-
     if (password.length < 8) {
       setMessage('Password must be at least 8 characters.');
       return;
     }
-
     if (password !== confirmPassword) {
       setMessage('Passwords do not match.');
       return;
@@ -51,6 +50,7 @@ export function SignUpPage() {
             full_name: fullName.trim(),
             mobile: mobile.trim(),
             locality: locality.trim(),
+            account_purpose: 'runner',
           },
         },
       });
@@ -60,7 +60,6 @@ export function SignUpPage() {
         return;
       }
 
-      // Best-effort profile upsert when session is available (email confirmation may delay it)
       if (data.user) {
         await supabase.from('profiles').upsert({
           id: data.user.id,
@@ -72,7 +71,7 @@ export function SignUpPage() {
 
       setSuccess(true);
     } catch (err: unknown) {
-      setMessage(err instanceof Error ? err.message : 'Unable to create account.');
+      setMessage(err instanceof Error ? err.message : 'Unable to create runner account.');
     } finally {
       setLoading(false);
     }
@@ -81,43 +80,32 @@ export function SignUpPage() {
   return (
     <section className="auth-page">
       <div className="auth-card">
-        <p className="eyebrow">Runner account</p>
-        <h1>Create your account</h1>
+        <p className="eyebrow">Sinoog Run 2027</p>
+        <h1>Create a runner account</h1>
         <p>
-          Register once to submit your Sinoog Run entry, upload payment proof, and track approval status.
+          Sign up to register for the Sinoog Run, upload payment proof, and track your entry status. This is not
+          committee website access.
         </p>
 
         {success ? (
           <div className="form-message" role="status">
             <p>
-              <strong>Check your email.</strong> We sent a confirmation link to <em>{email}</em>. Open it to
-              activate your account, then sign in to continue registration.
+              <strong>Check your email.</strong> We sent a confirmation link to <em>{email}</em>. After confirming,
+              sign in to continue your run registration.
             </p>
             <p style={{ marginTop: '1rem' }}>
-              <Link to="/login">Go to sign in</Link>
+              <Link to="/runner/login">Runner sign in</Link>
             </p>
           </div>
         ) : (
           <form onSubmit={(e) => void submit(e)}>
             <label>
               Full name
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                autoComplete="name"
-              />
+              <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required autoComplete="name" />
             </label>
             <label>
               Email address
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
             </label>
             <label>
               Mobile number
@@ -164,17 +152,20 @@ export function SignUpPage() {
             </label>
             {message && <p className="form-message">{message}</p>}
             <Button type="submit" disabled={loading || !isSupabaseConfigured}>
-              {loading ? 'Creating account…' : 'Create account'}
+              {loading ? 'Creating account…' : 'Create runner account'}
             </Button>
           </form>
         )}
 
         <small>
-          Already have an account? <Link to="/login">Sign in</Link>
+          Already registered as a runner? <Link to="/runner/login">Sign in</Link>
           {' · '}
           <Link to="/privacy">Privacy</Link>
           {' · '}
           <Link to="/terms">Terms</Link>
+        </small>
+        <small style={{ display: 'block', marginTop: '0.75rem' }}>
+          Committee staff use a separate sign-in. <Link to="/login">Staff login</Link>
         </small>
       </div>
     </section>

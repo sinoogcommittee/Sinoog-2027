@@ -61,19 +61,22 @@ export function PublicLayout() {
                 <Link to="/account" className="nav-login" onClick={() => setOpen(false)}>
                   My account
                 </Link>
-                {isAdmin || isDemoAdmin ? (
+                {(isAdmin || isDemoAdmin) && (
                   <Link to="/admin" className="nav-login" onClick={() => setOpen(false)}>
                     Workspace
                   </Link>
-                ) : null}
+                )}
               </>
             ) : (
               <>
                 <Link to="/signup" className="nav-login" onClick={() => setOpen(false)}>
-                  Register
+                  Run sign up
+                </Link>
+                <Link to="/runner/login" className="nav-login" onClick={() => setOpen(false)}>
+                  Runner sign in
                 </Link>
                 <Link to="/login" className="nav-login" onClick={() => setOpen(false)}>
-                  Sign in
+                  Staff
                 </Link>
               </>
             )}
@@ -115,6 +118,7 @@ export function PublicLayout() {
             <Link to="/about">About & contact</Link>
             <Link to="/privacy">Privacy</Link>
             <Link to="/terms">Terms & waiver</Link>
+            <Link to="/login">Staff login</Link>
             <a href="https://www.facebook.com/Sto.NinoParishGuinacot" target="_blank" rel="noreferrer">
               <Facebook size={16} /> Parish Facebook
             </a>

@@ -1,31 +1,34 @@
 import { useState, type FormEvent } from 'react';
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 import { useAuth } from '../../features/auth/useAuth';
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { user, isAdmin, isDemoAdmin, loading: authLoading, refresh } = useAuth();
+  const { user, isAdmin, isDemoAdmin, isNewsInCharge, isDelegationHead, loading: authLoading, refresh } =
+    useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const nextPath = searchParams.get('next') || '';
+  const hasStaffAccess = isAdmin || isNewsInCharge || isDelegationHead || isDemoAdmin;
 
-  if (!authLoading && (user || isDemoAdmin)) {
-    if (nextPath.startsWith('/')) return <Navigate to={nextPath} replace />;
-    return <Navigate to={isAdmin || isDemoAdmin ? '/admin' : '/account'} replace />;
+  if (!authLoading && user) {
+    if (hasStaffAccess) return <Navigate to="/admin" replace />;
+    // Signed-in runner landed on staff login by mistake
+    return <Navigate to="/account" replace />;
+  }
+  if (!authLoading && isDemoAdmin) {
+    return <Navigate to="/admin" replace />;
   }
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     setMessage('');
-
     if (!supabase) {
-      setMessage('Add your Supabase environment values to enable secure login.');
+      setMessage('Add your Supabase environment values to enable staff login.');
       return;
     }
 
@@ -40,9 +43,8 @@ export function LoginPage() {
         return;
       }
       await refresh();
-      // Role-aware redirect happens on next render via Navigate above;
-      // also navigate explicitly for responsiveness.
-      navigate(nextPath.startsWith('/') ? nextPath : '/account');
+      // Role check on next paint; send toward admin — RequireAdmin will block non-staff
+      navigate('/admin');
     } catch (err: unknown) {
       setMessage(err instanceof Error ? err.message : 'Unable to sign in.');
     } finally {
@@ -53,20 +55,17 @@ export function LoginPage() {
   return (
     <section className="auth-page">
       <div className="auth-card">
-        <p className="eyebrow">Sign in</p>
-        <h1>Welcome back</h1>
-        <p>Runners and committee staff use the same sign-in. Your role determines what you can access.</p>
+        <p className="eyebrow">Committee access</p>
+        <h1>Staff sign in</h1>
+        <p>
+          Sign in to manage website content, schedules, site settings, and run operations. Accounts are assigned by an
+          administrator — there is no public staff registration.
+        </p>
 
         <form onSubmit={(e) => void submit(e)}>
           <label>
             Email address
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
           </label>
           <label>
             Password
@@ -80,7 +79,7 @@ export function LoginPage() {
           </label>
           {message && <p className="form-message">{message}</p>}
           <Button type="submit" disabled={loading}>
-            {loading ? 'Signing in…' : 'Sign in'}
+            {loading ? 'Signing in…' : 'Sign in to workspace'}
           </Button>
         </form>
 
@@ -98,9 +97,13 @@ export function LoginPage() {
         )}
 
         <small>
-          <Link to="/signup">Create runner account</Link>
-          {' · '}
           <Link to="/forgot-password">Forgot password</Link>
+        </small>
+        <small style={{ display: 'block', marginTop: '0.75rem' }}>
+          Registering for the Sinoog Run?{' '}
+          <Link to="/signup">Create a runner account</Link>
+          {' or '}
+          <Link to="/runner/login">runner sign in</Link>
         </small>
       </div>
     </section>

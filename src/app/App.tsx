@@ -13,9 +13,11 @@ import { AboutPage } from '../pages/public/AboutPage';
 import { PolicyPage } from '../pages/public/PolicyPage';
 import { RunRegistrationPage } from '../pages/public/RunRegistrationPage';
 import { LoginPage } from '../pages/auth/LoginPage';
+import { RunnerLoginPage } from '../pages/auth/RunnerLoginPage';
 import { SignUpPage } from '../pages/auth/SignUpPage';
 import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from '../pages/auth/ResetPasswordPage';
+import { AuthCallbackPage } from '../pages/auth/AuthCallbackPage';
 import { AccountPage } from '../pages/auth/AccountPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminListPage } from '../pages/admin/AdminListPage';
@@ -25,7 +27,7 @@ import { PostsManagerPage } from '../pages/admin/PostsManagerPage';
 import { RegistrationsManagerPage } from '../pages/admin/RegistrationsManagerPage';
 import { NotFoundPage } from '../pages/public/NotFoundPage';
 import { RequireAdmin } from '../components/RequireAdmin';
-import { AuthCallbackPage } from '../pages/auth/AuthCallbackPage';
+import { UsersManagerPage } from '../pages/admin/UsersManagerPage';
 
 export default function App() {
   return (
@@ -48,16 +50,21 @@ export default function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/privacy" element={<PolicyPage type="privacy" />} />
         <Route path="/terms" element={<PolicyPage type="terms" />} />
-        <Route path="/login" element={<LoginPage />} />
+
+        {/* Runner account flow */}
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/runner/login" element={<RunnerLoginPage />} />
+        <Route path="/account" element={<AccountPage />} />
+
+        {/* Committee / website admin sign-in (no public staff sign-up) */}
+        <Route path="/login" element={<LoginPage />} />
+
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
-        <Route path="/account" element={<AccountPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
 
-      {/* Protected Admin Workspace */}
       <Route element={<RequireAdmin />}>
         <Route path="/admin" element={<PortalLayout />}>
           <Route index element={<AdminDashboardPage />} />
@@ -67,6 +74,7 @@ export default function App() {
           <Route path="registrations" element={<RegistrationsManagerPage />} />
           <Route path="delegations" element={<AdminListPage type="delegations" />} />
           <Route path="users" element={<AdminListPage type="users" />} />
+          <Route path="users" element={<UsersManagerPage />} />
         </Route>
       </Route>
 

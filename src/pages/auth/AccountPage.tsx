@@ -9,7 +9,6 @@ import { supabase } from '../../lib/supabase';
 export function AccountPage() {
   const { user, profile, loading: authLoading, isAdmin, isDemoAdmin, refresh, signOut } = useAuth();
   const { toast } = useToast();
-
   const [fullName, setFullName] = useState('');
   const [mobile, setMobile] = useState('');
   const [locality, setLocality] = useState('');
@@ -24,33 +23,29 @@ export function AccountPage() {
   if (authLoading) {
     return (
       <div style={{ minHeight: '50vh', display: 'grid', placeItems: 'center' }}>
-        <LoadingState message="Loading your account…" />
+        <LoadingState message="Loading your runner account…" />
       </div>
     );
   }
 
   if (!user && !isDemoAdmin) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/runner/login?next=/account" replace />;
   }
 
   async function handleSave(e: FormEvent) {
     e.preventDefault();
     if (!supabase || !user) {
-      toast('Sign in with a real account to update your profile.', 'error');
+      toast('Sign in with a runner account to update your profile.', 'error');
       return;
     }
-
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          id: user.id,
-          full_name: fullName.trim() || null,
-          mobile: mobile.trim() || null,
-          locality: locality.trim() || null,
-        });
-
+      const { error } = await supabase.from('profiles').upsert({
+        id: user.id,
+        full_name: fullName.trim() || null,
+        mobile: mobile.trim() || null,
+        locality: locality.trim() || null,
+      });
       if (error) throw error;
       await refresh();
       toast('Account details saved.', 'success');
@@ -61,17 +56,13 @@ export function AccountPage() {
     }
   }
 
-  async function handleSignOut() {
-    await signOut();
-  }
-
   return (
     <section className="section">
       <div className="container narrow">
-        <p className="eyebrow">Your account</p>
-        <h1 style={{ fontFamily: 'Fraunces, serif', marginBottom: '0.5rem' }}>Profile</h1>
+        <p className="eyebrow">Sinoog Run account</p>
+        <h1 style={{ fontFamily: 'Fraunces, serif', marginBottom: '0.5rem' }}>My runner profile</h1>
         <p style={{ color: 'var(--muted)', marginBottom: '1.5rem' }}>
-          {user?.email || (isDemoAdmin ? 'Demo administrator (local preview)' : '')}
+          {user?.email || (isDemoAdmin ? 'Demo session' : '')}
         </p>
 
         <div className="admin-panel" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
@@ -124,7 +115,7 @@ export function AccountPage() {
 
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <Link to="/run">Sinoog Run details</Link>
-          <button type="button" className="button button--ghost" onClick={() => void handleSignOut()}>
+          <button type="button" className="button button--ghost" onClick={() => void signOut()}>
             Sign out
           </button>
         </div>
