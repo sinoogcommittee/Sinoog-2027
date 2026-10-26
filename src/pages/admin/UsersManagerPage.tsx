@@ -53,7 +53,8 @@ export function UsersManagerPage() {
   }, [isDemoAdmin, user, toast]);
 
   useEffect(() => {
-    void load();
+    const loadTimer = window.setTimeout(() => void load(), 0);
+    return () => window.clearTimeout(loadTimer);
   }, [load]);
 
   const filtered = useMemo(() => {
@@ -169,7 +170,7 @@ export function UsersManagerPage() {
             <Search size={16} />
             <input
               type="text"
-              placeholder="Search by name, mobile, or locality…"
+              placeholder="Search by name, mobile, or address…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -219,6 +220,7 @@ export function UsersManagerPage() {
               return (
                 <div
                   key={u.id}
+                  className="admin-table__row users-table__row"
                   style={{
                     display: 'grid',
                     gridTemplateColumns: '1.6fr 1.2fr 1.4fr 100px 120px',
@@ -306,7 +308,7 @@ export function UsersManagerPage() {
                 />
               </label>
               <label>
-                Locality
+                Address
                 <input
                   type="text"
                   value={editLocality}

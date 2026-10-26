@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 import { useAuth } from '../../features/auth/useAuth';
+import { GoogleSignInButton } from '../../features/auth/GoogleSignInButton';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -66,6 +67,9 @@ export function LoginPage() {
           Sign in to manage website content, schedules, site settings, and run operations. Accounts are assigned by an
           administrator — there is no public staff registration.
         </p>
+
+        <GoogleSignInButton nextPath="/admin" onError={setMessage} />
+        <div className="auth-divider"><span>or sign in with email</span></div>
 
         <form onSubmit={(e) => void submit(e)}>
           <label>

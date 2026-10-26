@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserQRCodeReader, type IScannerControls } from '@zxing/browser';
-import { Camera, Clock3, Flag, Play, RefreshCw, ScanLine } from 'lucide-react';
+import { AlertTriangle, Camera, Clock3, Flag, Play, RefreshCw, RotateCcw, ScanLine, X } from 'lucide-react';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import {
   formatElapsed,
   getRunEventAndCategories,
   getTimingDashboard,
   recordRunnerFinish,
+  resetOfficialRun,
   startOfficialRun,
   type RunCategory,
   type RunEvent,
@@ -46,6 +47,10 @@ export function RunTimingPage() {
   const [rows, setRows] = useState<TimingDashboardRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [now, setNow] = useState(0);
   const [scannerActive, setScannerActive] = useState(false);
   const [manualQr, setManualQr] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -66,6 +71,16 @@ export function RunTimingPage() {
   }, [refresh, toast]);
 
   useEffect(() => () => scannerControls.current?.stop(), []);
+
+  useEffect(() => {
+    if (!runEvent?.official_started_at) return;
+    const initialTick = window.setTimeout(() => setNow(Date.now()), 0);
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => {
+      window.clearTimeout(initialTick);
+      window.clearInterval(timer);
+    };
+  }, [runEvent?.official_started_at]);
 
   const submitFinish = useCallback(async (value: string) => {
     if (scanBusy.current) return;
@@ -103,11 +118,12 @@ export function RunTimingPage() {
   };
 
   const handleOfficialStart = async () => {
-    if (!runEvent || !window.confirm('Start the official race clock now? This timestamp cannot be restarted from this screen.')) return;
+    if (!runEvent || !window.confirm('Start the official race clock now? The timer begins immediately for all runners.')) return;
     setStarting(true);
     try {
       const startedAt = await startOfficialRun(runEvent.id);
       setRunEvent({ ...runEvent, official_started_at: startedAt });
+      setNow(Date.now());
       toast('Official race clock started.', 'success');
     } catch (error: unknown) {
       toast(error instanceof Error ? error.message : 'Unable to start the race clock.', 'error');
@@ -115,6 +131,39 @@ export function RunTimingPage() {
       setStarting(false);
     }
   };
+
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await refresh();
+      toast('Race timing data refreshed.', 'success');
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : 'Unable to refresh race timing.', 'error');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleReset = async () => {
+    if (!runEvent) return;
+    try {
+      setResetting(true);
+      stopScanner();
+      const deletedFinishCount = await resetOfficialRun(runEvent.id);
+      setShowResetConfirm(false);
+      await refresh();
+      setNow(Date.now());
+      toast(`Race time reset. ${deletedFinishCount} finish record${deletedFinishCount === 1 ? '' : 's'} cleared.`, 'success');
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : 'Unable to reset race timing.', 'error');
+    } finally {
+      setResetting(false);
+    }
+  };
+
+  const liveElapsed = runEvent?.official_started_at
+    ? formatElapsed(Math.max(0, (now || new Date(runEvent.official_started_at).getTime()) - new Date(runEvent.official_started_at).getTime()))
+    : '00:00:00';
 
   const rankedRows = useMemo(() => {
     const rankById = new Map<string, number>();
@@ -142,12 +191,16 @@ export function RunTimingPage() {
   return <div className="admin-page">
     <div className="admin-heading">
       <div><p className="eyebrow">Race-day operations</p><h1>Official Timing & Finish Line</h1><p>Start the official clock, scan each approved QR once, and review category rankings.</p></div>
-      <button type="button" className="button button--secondary" onClick={() => void refresh()}><RefreshCw size={16} /> Refresh</button>
+      <button type="button" className="button button--secondary" disabled={refreshing} onClick={() => void handleRefresh()}><RefreshCw size={16} className={refreshing ? 'spin' : undefined} /> {refreshing ? 'Refreshing…' : 'Refresh'}</button>
     </div>
 
     <section className="timing-control-panel">
-      <div><small>Official start</small><strong>{runEvent?.official_started_at ? new Date(runEvent.official_started_at).toLocaleString('en-PH', { dateStyle: 'long', timeStyle: 'medium', timeZone: 'Asia/Manila' }) : 'Not started'}</strong></div>
-      <button type="button" className="button button--primary" disabled={starting || Boolean(runEvent?.official_started_at)} onClick={() => void handleOfficialStart()}><Play size={17} /> {starting ? 'Starting…' : runEvent?.official_started_at ? 'Official clock running' : 'Start official race time'}</button>
+      <div className="timing-control-panel__start"><small>Official start</small><strong>{runEvent?.official_started_at ? new Date(runEvent.official_started_at).toLocaleString('en-PH', { dateStyle: 'long', timeStyle: 'medium', timeZone: 'Asia/Manila' }) : 'Not started'}</strong></div>
+      <div className="timing-live-clock" aria-live="polite"><small>Live elapsed time</small><strong>{liveElapsed}</strong></div>
+      <div className="timing-control-panel__actions">
+        <button type="button" className="button button--primary" disabled={starting || Boolean(runEvent?.official_started_at)} onClick={() => void handleOfficialStart()}><Play size={17} /> {starting ? 'Starting…' : runEvent?.official_started_at ? 'Official clock running' : 'Start official race time'}</button>
+        {runEvent?.official_started_at && <button type="button" className="button button--secondary" onClick={() => setShowResetConfirm(true)}><RotateCcw size={17} /> Reset race time</button>}
+      </div>
     </section>
 
     <section className="admin-panel finish-scanner-panel">
@@ -179,6 +232,21 @@ export function RunTimingPage() {
         {filteredRows.map((row) => <div className="timing-results-row" key={row.id}><strong>{row.rank ? `#${row.rank}` : '—'}</strong><span><b>#{row.bib_number}</b> {row.participant_name}</span><span>{categories.find((category) => category.id === row.category_id)?.name || 'Run'}</span><span>{row.division === 'female' ? 'Female' : row.division === 'male' ? 'Male' : '—'}</span><span>{ageOnRaceDay(row.birth_date) ?? '—'}</span><span>{row.finish ? <><Clock3 size={14} /> {formatElapsed(row.finish.elapsed_milliseconds)}</> : 'Not finished'}</span></div>)}
       </div>}
     </section>
+
+    {showResetConfirm && (
+      <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="reset-race-title">
+        <div className="modal-card timing-reset-modal">
+          <button type="button" className="button button--ghost timing-reset-modal__close" onClick={() => setShowResetConfirm(false)} aria-label="Close reset confirmation"><X size={18} /></button>
+          <AlertTriangle size={38} className="timing-reset-modal__warning" aria-hidden="true" />
+          <h2 id="reset-race-title">Reset all race timing?</h2>
+          <p>This will remove the official start time and every recorded finish. Runner registrations, bib numbers, and QR codes will remain. This action cannot be undone.</p>
+          <div className="button-row timing-reset-modal__actions">
+            <button type="button" className="button button--ghost" disabled={resetting} onClick={() => setShowResetConfirm(false)}>Cancel</button>
+            <button type="button" className="button button--danger" disabled={resetting} onClick={() => void handleReset()}><RotateCcw size={17} /> {resetting ? 'Resetting…' : 'Yes, reset all timing'}</button>
+          </div>
+        </div>
+      </div>
+    )}
   </div>;
 }
 

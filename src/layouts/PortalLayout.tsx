@@ -36,9 +36,9 @@ export function PortalLayout() {
             <small>Committee workspace</small>
           </span>
         </Link>
-        <nav>
+        <nav aria-label="Committee workspace navigation">
           {items.map(([label, path, Icon]) => (
-            <NavLink key={path} to={path} end={path === '/admin'}>
+            <NavLink key={path} to={path} end={path === '/admin'} title={label}>
               <Icon size={18} />
               {label}
             </NavLink>

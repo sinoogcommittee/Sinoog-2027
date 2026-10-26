@@ -3,15 +3,18 @@ import { ArrowLeft, CalendarDays, Share2, AlertCircle } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { getPostBySlug } from '../../features/content/postQueries';
 import { getPublicMediaUrl } from '../../features/media/mediaQueries';
-import { LoadingState } from '../../features/ui/FeedbackStates';
+import { ErrorState, LoadingState } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
 import type { NewsPost } from '../../types';
+import { sanitizeArticleHtml } from '../../features/content/sanitizeArticleHtml';
 
 export function NewsArticlePage() {
   const { slug } = useParams<{ slug: string }>();
   const { toast } = useToast();
   const [post, setPost] = useState<NewsPost | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -19,16 +22,24 @@ export function NewsArticlePage() {
       return;
     }
 
-    void getPostBySlug(slug).then((item) => {
-      if (!active) return;
-      setPost(item);
-      setLoading(false);
-    });
+    const loadTimer = window.setTimeout(() => {
+      setLoading(true);
+      setLoadError(null);
+      void getPostBySlug(slug).then((item) => {
+        if (!active) return;
+        setPost(item);
+      }).catch((error: unknown) => {
+        if (active) setLoadError(error instanceof Error ? error.message : 'Unable to load this article.');
+      }).finally(() => {
+        if (active) setLoading(false);
+      });
+    }, 0);
 
     return () => {
       active = false;
+      window.clearTimeout(loadTimer);
     };
-  }, [slug]);
+  }, [slug, reloadKey]);
 
   const handleShare = () => {
     if (navigator.share) {
@@ -52,6 +63,9 @@ export function NewsArticlePage() {
   }
 
   if (!post) {
+    if (loadError) {
+      return <article className="article-page"><div className="container narrow"><ErrorState message={loadError} onRetry={() => { setLoading(true); setReloadKey((value) => value + 1); }} /></div></article>;
+    }
     return (
       <article className="article-page">
         <div className="container narrow" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
@@ -111,7 +125,7 @@ export function NewsArticlePage() {
           )}
 
           {post.bodyHtml ? (
-            <div dangerouslySetInnerHTML={{ __html: post.bodyHtml }} />
+            <div dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(post.bodyHtml) }} />
           ) : (
             <>
               <p>

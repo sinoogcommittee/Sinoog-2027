@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 import { useAuth } from '../../features/auth/useAuth';
+import { GoogleSignInButton } from '../../features/auth/GoogleSignInButton';
 
 type Mode = 'signin' | 'signup';
 
@@ -166,6 +167,12 @@ export function RunnerAuthPage() {
           </button>
         </div>
 
+        <GoogleSignInButton
+          nextPath={nextPath.startsWith('/') && !nextPath.startsWith('//') ? nextPath : '/account'}
+          onError={setMessage}
+        />
+        <div className="auth-divider"><span>or continue with email</span></div>
+
         {success && mode === 'signup' ? (
           <div className="form-message" role="status">
             <p>
@@ -227,7 +234,8 @@ export function RunnerAuthPage() {
                 value={locality}
                 onChange={(e) => setLocality(e.target.value)}
                 required
-                autoComplete="address-level2"
+                autoComplete="street-address"
+                placeholder="House/Street, Barangay, Municipality, Province"
               />
             </label>
             <label>

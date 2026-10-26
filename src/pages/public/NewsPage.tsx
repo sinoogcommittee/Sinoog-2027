@@ -3,7 +3,7 @@ import { ArrowRight, Search, Newspaper } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHero } from '../../components/PageHero';
 import { getPublishedPosts } from '../../features/content/postQueries';
-import { LoadingState } from '../../features/ui/FeedbackStates';
+import { ErrorState, LoadingState } from '../../features/ui/FeedbackStates';
 import type { NewsPost } from '../../types';
 
 export function NewsPage() {
@@ -11,6 +11,8 @@ export function NewsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   const categories = ['All', 'Announcement', 'Sinoog Run', 'Festival'];
 
@@ -18,10 +20,14 @@ export function NewsPage() {
     let active = true;
 
     const timer = setTimeout(() => {
+      setLoadError(null);
       void getPublishedPosts(selectedCategory, searchTerm).then((list) => {
         if (!active) return;
         setPosts(list);
-        setLoading(false);
+      }).catch((error: unknown) => {
+        if (active) setLoadError(error instanceof Error ? error.message : 'Unable to load published news.');
+      }).finally(() => {
+        if (active) setLoading(false);
       });
     }, 250);
 
@@ -29,7 +35,7 @@ export function NewsPage() {
       active = false;
       clearTimeout(timer);
     };
-  }, [searchTerm, selectedCategory]);
+  }, [searchTerm, selectedCategory, reloadKey]);
 
   return (
     <>
@@ -85,6 +91,8 @@ export function NewsPage() {
             <div style={{ padding: '4rem 0' }}>
               <LoadingState message="Loading articles and notices…" />
             </div>
+          ) : loadError ? (
+            <ErrorState message={loadError} onRetry={() => { setLoading(true); setReloadKey((value) => value + 1); }} />
           ) : posts.length > 0 ? (
             <div className="article-list">
               {posts.map((post) => {

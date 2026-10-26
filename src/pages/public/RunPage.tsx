@@ -5,11 +5,13 @@ import { PageHero } from '../../components/PageHero';
 import { SectionHeading } from '../../components/SectionHeading';
 import {
   getRunEventAndCategories,
+  getUserRegistration,
   type RunCategory,
   type RunEvent,
 } from '../../features/run/runQueries';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import { useAuth } from '../../features/auth/useAuth';
+import type { DbRunRegistration } from '../../types';
 
 export function RunPage({ section }: { section?: 'routes' }) {
   const { user, isDemoAdmin } = useAuth();
@@ -18,6 +20,8 @@ export function RunPage({ section }: { section?: 'routes' }) {
   const [categories, setCategories] = useState<RunCategory[]>([]);
   const [runEvent, setRunEvent] = useState<RunEvent | null>(null);
   const [registrationOpen, setRegistrationOpen] = useState(false);
+  const [registration, setRegistration] = useState<DbRunRegistration | null>(null);
+  const activeUserId = user?.id || (isDemoAdmin ? 'demo-user-123' : null);
 
   useEffect(() => {
     let mounted = true;
@@ -35,6 +39,10 @@ export function RunPage({ section }: { section?: 'routes' }) {
         );
         setRunEvent(event);
         setCategories(cats);
+        if (activeUserId) {
+          const state = await getUserRegistration(event.id, activeUserId);
+          if (mounted) setRegistration(state.registration);
+        }
       } catch (err: unknown) {
         console.warn('Failed to load run data on RunPage:', err);
       }
@@ -43,7 +51,10 @@ export function RunPage({ section }: { section?: 'routes' }) {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [activeUserId]);
+
+  const hasActiveRegistration = Boolean(registration && !['rejected', 'cancelled'].includes(registration.status));
+  const isApproved = registration?.status === 'approved';
 
   return (
     <>
@@ -56,7 +67,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
           {signedIn ? (
             <>
               <Button to="/run/register">
-                {registrationOpen ? 'Register now' : 'Registration status'}
+                {isApproved ? 'Registered' : hasActiveRegistration ? 'Registration status' : registrationOpen ? 'Register now' : 'Registration status'}
               </Button>
               <Button to="/account" variant="secondary">
                 My runner account
@@ -163,6 +174,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
                     style: 'currency',
                     currency: 'PHP',
                   });
+                  const isRegisteredCategory = hasActiveRegistration && registration?.category_id === c.id;
                   return (
                     <div
                       key={c.id}
@@ -202,21 +214,25 @@ export function RunPage({ section }: { section?: 'routes' }) {
                         <small style={{ color: 'var(--muted)' }}>
                           Age: {c.min_age ? `${c.min_age}+ yrs` : 'Open'}
                         </small>
-                        <Button
-                          to={signedIn ? '/run/register' : '/signin?next=/run/register'}
-                          variant="secondary"
-                          style={{ padding: '8px 14px', fontSize: '0.85rem' }}
-                        >
-                          {signedIn ? (
-                            <>
-                              Register <ArrowRight size={14} />
-                            </>
-                          ) : (
-                            <>
-                              Sign in to register <ArrowRight size={14} />
-                            </>
-                          )}
-                        </Button>
+                        {hasActiveRegistration ? (
+                          <button
+                            type="button"
+                            className="button button--secondary button--sm"
+                            disabled
+                            aria-label={isRegisteredCategory ? `${c.name} registered` : `${c.name} unavailable because you already registered`}
+                          >
+                            {isRegisteredCategory ? (isApproved ? 'Registered' : 'Registration submitted') : 'Already registered'}
+                            {isRegisteredCategory && <CheckCircle2 size={14} />}
+                          </button>
+                        ) : (
+                          <Button
+                            to={signedIn ? '/run/register' : '/signin?next=/run/register'}
+                            variant="secondary"
+                            style={{ padding: '8px 14px', fontSize: '0.85rem' }}
+                          >
+                            {signedIn ? <>Register <ArrowRight size={14} /></> : <>Sign in to register <ArrowRight size={14} /></>}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   );

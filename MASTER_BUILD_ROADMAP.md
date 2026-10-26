@@ -1,6 +1,6 @@
 # Sinoog 2027 Website — Master Build Roadmap
 
-Last updated: October 26, 2026 — source, routes, Git, build, lint, and admin-activity audit
+Last updated: October 26, 2026 — responsive audit, production-data safety, article sanitization, tests, build, and lint
 Project folder: `E:\Programs\Sinoog 2027`  
 Purpose: This is the primary implementation checklist and handoff document for taking the website from its current foundation to production, event-day operation, and post-event archiving.
 
@@ -61,12 +61,12 @@ Audit basis: source tree, route configuration, feature queries, admin screens, G
 
 ### Implemented but not yet production-ready
 
-- [~] Many public queries fall back to demonstration records when Supabase is empty or fails. This can make unapproved information appear official.
+- [x] Production queries no longer replace empty/error Supabase responses with demonstration activities or news. Local fallback records are limited to an unconfigured Vite development session.
 - [x] The fallback edition and Opening Novena Mass use the corrected January 6, 2027 date (commit `4e63545`).
-- [~] Public article HTML and admin article preview use `dangerouslySetInnerHTML` without DOMPurify sanitization even though DOMPurify is installed.
+- [x] Public articles, admin preview, and post create/update paths use a strict DOMPurify allowlist; automated tests cover executable markup, unsafe attributes/URLs, and approved formatting.
 - [~] Activities, News, and Settings CRUD exist but require live Supabase role, RLS, error, and publication testing.
-- [~] `/admin/registrations` now routes to `RegistrationsManagerPage.tsx` with filtering, review actions, and CSV export, but review transitions and payment prerequisites are not yet enforced by a trusted server/database function.
-- [~] Runner registration inserts records from the browser and accepts browser-provided fee/category data; capacity, eligibility, fee, registration window, and reference generation are not yet server-authoritative.
+- [~] `/admin/registrations` uses trusted review functions from migrations `007` and `008`; live permission and workflow verification remains, and payment verification still needs to be separated from registration approval.
+- [~] Migration `007` provides server-authoritative capacity, fee, registration window, consent snapshot, and reference generation; apply/permission/concurrency verification remains.
 - [~] Payment evidence upload exists but requires file validation, reconciliation rules, cleanup after partial failure, and reviewer/payment-status administration.
 - [~] The waiver and privacy wording in the registration form is hard-coded draft text and has not been committee-approved or versioned from live configuration.
 - [~] Public media upload validates browser MIME type and size but does not yet perform trusted content inspection, metadata stripping, derivatives, or cleanup.
@@ -74,16 +74,16 @@ Audit basis: source tree, route configuration, feature queries, admin screens, G
 - [~] Gallery, sponsors, festival participants, guidelines, and delegations remain placeholder or generic screens.
 - [~] User administration is implemented in source but still needs live RLS/role testing, atomic last-admin protection, trusted invitations, and audit logging.
 - [~] The latest committed checkpoint is `8701391`; the activity query/page/style changes, this roadmap update, and a separate existing `PublicLayout.tsx` edit are currently uncommitted.
-- [~] Build output is approximately 663.67 kB JavaScript before compression and produces a chunk-size warning; route-level code splitting is still required.
-- [~] Lint exits successfully but reports two React state-in-effect warnings in `AccountPage.tsx` and `UsersManagerPage.tsx`.
+- [x] Vite 8 vendor chunking and the lazy timing route keep generated chunks below the configured warning threshold.
+- [x] Lint exits with zero warnings; the prior state-in-effect warnings were corrected.
 - [~] Privacy notice and participant terms remain drafts pending committee approval.
 
 ### Not yet implemented
 
 - [~] Runner sign-up, email confirmation flow, password recovery/reset, and profile editing are implemented; production redirect URLs, verification enforcement before registration, and end-to-end tests remain.
-- [ ] Authoritative server/database function for capacity reservation, eligibility, fee calculation, unique reference creation, registration submission, and status transitions.
+- [~] Migration `007` contains the authoritative registration and transition functions; live Supabase application and permission/concurrency verification remain.
 - [ ] Complete payment-review screen, verified-payment requirement, refund handling, and audit trail.
-- [ ] Bib allocation, QR confirmation, authenticated lookup, and kit claiming.
+- [~] Unique bib allocation and opaque QR confirmation are implemented; authenticated kit lookup and kit claiming remain.
 - [ ] Delegation-head workspace, assignment, roster submission, private music upload, revisions, and approval.
 - [ ] Sponsor and gallery administration connected to Supabase.
 - [~] Role CRUD, last-admin check, suspension, and reactivation UI exist; trusted staff invitations, database-atomic last-admin enforcement, deletion policy, and audit events remain.
@@ -146,7 +146,7 @@ Priority: **P0**
 - [x] Confirm `.gitignore` excludes `.env`, `.env.local`, `node_modules`, `dist`, editor files, logs, key files, and temporary outputs.
 - [x] Application work through commit `8701391` is committed on `main`; only the latest activity dialog/order and related layout/style edits remain uncommitted at this checkpoint.
 - [~] Use `main` as the production branch. Local `main` tracks `origin/main`; branch-protection status is not yet verified.
-- [~] Build and lint currently pass; enforce them automatically in GitHub before merging.
+- [x] `.github/workflows/ci.yml` runs exact dependency installation, lint, unit tests, and the production build for pushes and pull requests targeting `main` or `develop`.
 - [ ] Create a separate development or staging workflow.
 - [ ] Add issue labels such as `P0`, `P1`, `P2`, `frontend`, `supabase`, `content`, `security`, and `launch`.
 - [ ] Copy this roadmap into GitHub issues or a project board without losing the acceptance criteria.
@@ -164,7 +164,7 @@ Priority: **P0**
 - [ ] Confirm the corrected `003_seed_placeholders.sql` was applied only if placeholder records are wanted.
 - [ ] Run `004_promote_first_admin.sql` and confirm the result shows `rieldiango24@gmail.com` with `admin` and `public_user` roles.
 - [ ] Run `005_correct_novena_start_date.sql` and confirm the result shows run date January 9, novena start January 6, and fiesta date January 15.
-- [ ] Record which migrations were applied and when.
+- [~] `SUPABASE_VERIFICATION.md` now provides the migration record; fill in the applied date, method, verifier, and result from the live Supabase project.
 - [ ] Do not treat the optional activity seed as official content; it remains draft until reviewed.
 
 ### Inspect database objects
@@ -174,7 +174,7 @@ Priority: **P0**
 - [ ] Confirm the profile-creation trigger works for a newly created test user.
 - [ ] Confirm `updated_at` triggers change timestamps during updates.
 - [~] A typed database model exists at `src/types/database.ts`; verify it matches the current live Supabase schema and document how it was generated.
-- [ ] Add a repeatable command or documented process for regenerating types after migrations.
+- [x] Document a repeatable linked-project type-generation process in `SUPABASE_VERIFICATION.md`.
 
 ### Verify Row Level Security
 
@@ -200,7 +200,7 @@ Priority: **P0**
 - [x] Add role, profile, suspension, and derived-permission loading to the shared auth context.
 - [~] Authentication state change and refresh handling exist; add an explicit session-expired message and recovery flow.
 - [~] Home, Activities, News, News Article, Run, and Registration use Supabase query modules, but `siteData.ts` and published fallbacks remain.
-- [ ] Replace published demonstration fallbacks with honest empty/error states in configured production environments.
+- [x] Replace published demonstration fallbacks with honest empty/error/retry states in configured production environments.
 - [x] Add reusable loading, empty, error, access-denied, confirmation, toast, and retry-capable feedback components.
 - [ ] Add form validation schemas for user-facing and admin forms.
 - [x] Add a consistent notification/toast system.
@@ -216,6 +216,7 @@ Priority: **P0**
 ### Public account flows
 
 - [x] Provide runner sign-in and sign-up in `RunnerAuthPage.tsx`; `/signup` redirects to its sign-up tab. A separate unused `SignUpPage.tsx` remains and should be removed or intentionally adopted.
+- [~] Google sign-in is implemented for runner and staff entry screens with a safe `/auth/callback` return path; enable the Google provider and production redirect allowlist in Supabase/Google, then test new and existing accounts.
 - [~] Supabase email confirmation handling exists; explicitly block final registration until the email is verified and test it.
 - [x] Create and route `ForgotPasswordPage.tsx`, `ResetPasswordPage.tsx`, and `AuthCallbackPage.tsx`.
 - [ ] Configure Supabase redirect URLs for local, staging, and production environments.
@@ -257,7 +258,7 @@ Completion gate: The committee can change operational details without editing so
 Priority: **P0**
 
 - [x] Build and route a dedicated `ActivitiesManagerPage.tsx`.
-- [~] Create, edit, publish/unpublish, filter, and delete activities. Same-date ordering is editable and other dates are unaffected; add archival policy and make multi-row reordering atomic for concurrent editors.
+- [~] Create, edit, publish/unpublish, filter, and delete activities. Migration `009_atomic_activity_reordering.sql` replaces browser multi-row updates with one edition-locked trusted reorder function and audit event; apply and concurrency-test it, then define the archival policy.
 - [x] Make the Create/Edit Activity dialog scroll within short browser viewports.
 - [x] Automatically group activity order by Manila date and calculate the next order number for the selected date.
 - [x] Support types: Mass, Sinoog Run, festival, nightly activity, and other.
@@ -281,7 +282,7 @@ Priority: **P0**
 - [~] Supports title, slug, excerpt, raw HTML body, category, featured image, and pinned state. Attached gallery, related event, and visible author attribution remain.
 - [x] Implement draft, published, and archived states.
 - [x] Add article preview before saving/publishing.
-- [ ] Sanitize formatted article content before admin preview and public rendering. This is P0 because raw stored HTML currently reaches `dangerouslySetInnerHTML`.
+- [x] Sanitize formatted article content before persistence, admin preview, and public rendering with a strict DOMPurify allowlist and automated security tests.
 - [x] Prevent duplicate slugs inside one edition in the query layer and database constraint.
 - [ ] Add image alt text, captions, and credits.
 - [ ] Add publish and correction timestamps.
@@ -369,6 +370,7 @@ Priority: **P0 before registration opens**
 - [x] Participant name
 - [ ] Birth date only where eligibility or category logic requires it
 - [x] Mobile number and full address
+- [x] Registration reuses the signed-in runner profile's full name, mobile number, and Address, and saves corrections back to the profile to avoid repeated entry.
 - [x] Distance category
 - [x] Male/Female race division for ranking
 - [x] Shirt size
@@ -523,7 +525,7 @@ Priority: **P0 before collecting personal data**
 - [ ] Define retention periods for runner data, payment evidence, delegation rosters, music, audit logs, and exports.
 - [ ] Implement retention and deletion procedures.
 - [ ] Restrict sensitive accessibility information to the smallest staff group that needs it.
-- [ ] Sanitize rich text and protect against unsafe HTML.
+- [x] Sanitize news rich text on write, preview, and public rendering; retain this requirement for any future rich-text modules.
 - [ ] Validate all uploads by actual content and authorized ownership.
 - [ ] Review all RLS and Storage policies after every schema change.
 - [ ] Add rate limits to privileged or abuse-prone server functions.
@@ -582,7 +584,7 @@ Priority: **P0**
 ### Automated checks
 
 - [x] `npm run build` and `npm run lint` pass as of October 26, 2026.
-- [~] Resolve the two current React lint warnings in `AccountPage.tsx` and `UsersManagerPage.tsx`.
+- [x] Resolve the React state-in-effect lint warnings and keep lint warning-free.
 - [ ] Add unit tests for fee, eligibility, status transition, date, and capacity logic.
 - [ ] Add integration tests for Supabase query and mutation wrappers.
 - [ ] Add end-to-end tests for sign-up, login, password reset, registration, payment correction, delegation revision, news publishing, and kit claim.
@@ -790,14 +792,14 @@ Do the remaining work in this sequence:
 
 The next development session should complete this exact work package before registration is opened:
 
-- [ ] Review the activity form on desktop and a short/mobile viewport: the whole dialog must scroll and remain closable/savable.
+- [x] Review and harden the activity form for desktop and short/mobile viewports: the dialog is viewport-bounded, scrollable, closable, and its two-column fields collapse on phones.
 - [ ] Verify activity ordering with two dates and multiple same-date activities; reordering one date must not change the other date.
-- [ ] Replace the current multi-update activity reorder with one atomic database function if more than one administrator may edit schedules concurrently.
+- [~] Migration `009_atomic_activity_reordering.sql` and the updated activity client replace multi-update reordering with one atomic, audited function; apply it and verify two concurrent administrator edits.
 - [ ] Commit and push the current activity changes; record the new commit here.
 - [ ] Confirm migrations `001`–`005`, `rieldiango24@gmail.com` roles, Storage buckets, and live schema/type alignment.
 - [ ] Test anonymous, runner, news staff, delegation head, administrator, and suspended-user access using separate accounts and direct Supabase requests.
-- [ ] Remove published demo fallback behavior in production and show honest loading/empty/error states.
-- [ ] Sanitize article HTML in both admin preview and public rendering with a strict allowlist and automated unsafe-markup tests.
+- [x] Remove published demo fallback behavior in production and show honest loading/empty/error/retry states.
+- [x] Sanitize article HTML during save, admin preview, and public rendering with a strict allowlist and automated unsafe-markup tests.
 - [~] Apply migration `007` and deploy `admin-create-runner`; then test online GCash and walk-in cash registration end to end with separate accounts.
 - [ ] Keep `registration_open=false` until the terms, privacy notice, waiver, fees, capacity, payment/refund process, and support contact are approved.
 
@@ -813,6 +815,33 @@ Do not begin collecting runner or delegation personal information until the priv
 4. Confirm that `payment-evidence` is a private bucket with a 5 MB limit and only `image/jpeg`, `image/png`, and `image/webp`. The browser re-encodes screenshots to WebP and targets 1.5 MB before upload. Migration `007` applies the bucket settings; migration `002` contains the owner/admin Storage policies.
 5. Confirm the signed-in staff account has an `admin` row in `user_roles`; the Edge Function refuses all other roles.
 6. Test one online GCash runner and one administrator-created cash runner. Confirm account login, unique bib, unique QR, `registration_source`, `registered_by`, payment status, CSV, print layout, official start, finish scan, and runner result.
+
+The read-only `supabase/verification/001_foundation_verification.sql` detail query, consolidated `002_foundation_summary.sql`, and `SUPABASE_VERIFICATION.md` checklist cover the first live verification pass for tables, enums, trusted functions, buckets, RLS, policies, triggers, the first administrator, event dates, run configuration, and operational indexes. CLI migration history is unavailable because the current migrations were applied through the SQL Editor, so the manual record is authoritative.
+
+Foundation verification result on October 26, 2026: 12 operational checks passed, CLI migration history was informational, and the only failed expectation was the launch-state guard because live registration is currently open. The administrator confirmed that registration should remain open temporarily for deployment testing. Close it after testing unless the committee explicitly approves public launch. Detailed role, Storage, concurrency, and end-to-end workflow tests are still required.
+
+### Registration and timing controls — migration 008
+
+- [x] Approved runners see “Registered” on their selected category and all other category registration buttons are disabled.
+- [x] Runner Account shows the complete submitted registration, payment/result status, emergency details, and the recorded waiver/privacy acceptances.
+- [x] Approval accepts submitted or already verified payment records; verified cash registrations do not require uploaded evidence.
+- [x] Rejected entries can be deleted by an administrator or their owning runner, after which the runner can register again. Approved entries are protected from deletion in both the interface and database.
+- [x] Race timing has a working refresh state, a live HH:MM:SS elapsed clock, and a confirmed full timing reset.
+- [x] A timing reset clears the official start and all finish records but preserves runners, bib numbers, and QR codes.
+- [x] Route changes now return the window to the top of the newly opened page.
+- [ ] Run `supabase/migrations/008_run_registration_and_timing_controls.sql` manually in Supabase before testing these controls on Render.
+- [ ] Acceptance-test approve → request changes → approve, rejected → delete → re-register, approved deletion protection, live clock, finish scan, and timing reset using non-production test accounts.
+
+### Responsive layout audit
+
+- [x] Rechecked all current public, authentication, and committee workspace routes for fixed-width and horizontal-overflow risks.
+- [x] Converted posts, users, and run-registration admin rows into stacked cards below 760px instead of horizontally scrolling tables.
+- [x] Made activity, post, payment, registration, and settings form grids collapse to one column on phones.
+- [x] Added consistent viewport-safe scrolling and padding for every modal dialog.
+- [x] Improved the mobile registration stepper and category cards, including keyboard-accessible category selection.
+- [x] Hardened long article content, embedded media, account text, toolbars, action buttons, and top-bar text against overflow.
+- [x] Added accessible labels/tooltips to the compact committee navigation.
+- [x] Verified the responsive changes with clean lint and a successful production build.
 
 ## 34. How to keep this roadmap current
 

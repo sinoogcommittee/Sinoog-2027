@@ -4,4 +4,26 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: 'react-vendor',
+              test: /node_modules\/(?:react|react-dom|react-router|react-router-dom)\//,
+            },
+            {
+              name: 'supabase-vendor',
+              test: /node_modules\/@supabase\//,
+            },
+            {
+              name: 'ui-vendor',
+              test: /node_modules\/(?:lucide-react|qrcode\.react|dompurify)\//,
+            },
+          ],
+        },
+      },
+    },
+  },
 })

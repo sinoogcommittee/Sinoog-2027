@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase';
+import { isLocalDemoMode, supabase } from '../../lib/supabase';
 import type { DbActivity, ActivityType, ContentStatus } from '../../types';
 
 export const FALLBACK_ACTIVITIES: DbActivity[] = [
@@ -98,6 +98,7 @@ export function sortActivitiesByDateAndOrder(list: DbActivity[]): DbActivity[] {
 
 export async function getPublishedActivities(typeFilter?: ActivityType | 'all'): Promise<DbActivity[]> {
   if (!supabase) {
+    if (!isLocalDemoMode) return [];
     if (!typeFilter || typeFilter === 'all') return FALLBACK_ACTIVITIES;
     return FALLBACK_ACTIVITIES.filter((a) => a.type === typeFilter);
   }
@@ -115,21 +116,16 @@ export async function getPublishedActivities(typeFilter?: ActivityType | 'all'):
     }
 
     const { data, error } = await query;
-    if (error || !data || data.length === 0) {
-      if (!typeFilter || typeFilter === 'all') return FALLBACK_ACTIVITIES;
-      return FALLBACK_ACTIVITIES.filter((a) => a.type === typeFilter);
-    }
-    return sortActivitiesByDateAndOrder((data as DbActivity[]) ?? FALLBACK_ACTIVITIES);
+    if (error) throw new Error(error.message);
+    return sortActivitiesByDateAndOrder((data as DbActivity[]) ?? []);
   } catch (err) {
-    console.warn('Failed to load published activities:', err);
-    if (!typeFilter || typeFilter === 'all') return FALLBACK_ACTIVITIES;
-    return FALLBACK_ACTIVITIES.filter((a) => a.type === typeFilter);
+    throw err instanceof Error ? err : new Error('Unable to load the published schedule.');
   }
 }
 
 export async function getAllActivitiesForAdmin(): Promise<DbActivity[]> {
   if (!supabase) {
-    return FALLBACK_ACTIVITIES;
+    return isLocalDemoMode ? FALLBACK_ACTIVITIES : [];
   }
 
   const { data, error } = await supabase
@@ -208,6 +204,20 @@ export async function updateActivity(
   }
 
   return data as DbActivity;
+}
+
+export async function reorderActivityForDate(
+  activityId: string,
+  requestedPosition: number,
+  previousDate: string | null
+): Promise<void> {
+  if (!supabase) throw new Error('Supabase client is not connected');
+  const { error } = await supabase.rpc('reorder_activity_for_date', {
+    p_activity_id: activityId,
+    p_requested_position: Math.max(1, Math.trunc(requestedPosition)),
+    p_previous_date: previousDate,
+  });
+  if (error) throw new Error(error.message);
 }
 
 export async function deleteActivity(id: string): Promise<void> {

@@ -16,6 +16,7 @@ import { PageHero } from '../../components/PageHero';
 import {
   getRunEventAndCategories,
   getUserRegistration,
+  deleteRejectedRegistration,
   submitRegistration,
   submitPaymentEvidence,
   type RunCategory,
@@ -29,16 +30,17 @@ import { useToast } from '../../features/ui/useToast';
 import { StatusBadge } from '../../components/StatusBadge';
 import { QRCodeSVG } from 'qrcode.react';
 import { getRunnerQrValue } from '../../features/run/runQueries';
+import { supabase } from '../../lib/supabase';
 
 export function RunRegistrationPage() {
-  const { user, isDemoAdmin } = useAuth();
+  const { user, profile, isDemoAdmin, refresh } = useAuth();
   const { toast } = useToast();
 
   const [loading, setLoading] = useState(true);
   const [registrationOpen, setRegistrationOpen] = useState(false);
   const [runEvent, setRunEvent] = useState<RunEvent | null>(null);
   const [categories, setCategories] = useState<RunCategory[]>([]);
-  const [userState, setUserState] = useState<UserRegistrationState>({ registration: null, payment: null });
+  const [userState, setUserState] = useState<UserRegistrationState>({ registration: null, payment: null, consents: [] });
 
   // Wizard Step
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
@@ -64,8 +66,13 @@ export function RunRegistrationPage() {
   const [payerReference, setPayerReference] = useState('');
   const [paymentFile, setPaymentFile] = useState<File | null>(null);
   const [uploadingProof, setUploadingProof] = useState(false);
+  const [restartingRegistration, setRestartingRegistration] = useState(false);
 
   const activeUserId = user?.id || (isDemoAdmin ? 'demo-user-123' : null);
+  const profileName = profile?.full_name
+    || (typeof user?.user_metadata?.full_name === 'string' ? user.user_metadata.full_name : '');
+  const profileMobile = profile?.mobile || '';
+  const profileAddress = profile?.locality || '';
 
   useEffect(() => {
     let mounted = true;
@@ -93,6 +100,10 @@ export function RunRegistrationPage() {
           setUserState(regState);
           if (regState.registration) {
             setParticipantName(regState.registration.participant_name);
+          } else {
+            setParticipantName(profileName);
+            setMobile(profileMobile);
+            setLocality(profileAddress);
           }
         }
       } catch (err: unknown) {
@@ -108,9 +119,28 @@ export function RunRegistrationPage() {
     return () => {
       mounted = false;
     };
-  }, [activeUserId]);
+  }, [activeUserId, profileName, profileMobile, profileAddress]);
 
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId) || categories[0];
+
+  const handleRegisterAgain = async () => {
+    const registration = userState.registration;
+    if (!registration || registration.status !== 'rejected') return;
+    if (!window.confirm('Remove this rejected entry and start a new registration? Your previous payment proof will also be removed.')) return;
+
+    try {
+      setRestartingRegistration(true);
+      await deleteRejectedRegistration(registration.id);
+      setUserState({ registration: null, payment: null, consents: [] });
+      setSelectedCategoryId(registration.category_id);
+      setStep(1);
+      toast('Your rejected entry was cleared. You can register again now.', 'success');
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : 'Unable to restart registration.', 'error');
+    } finally {
+      setRestartingRegistration(false);
+    }
+  };
 
   const handleNextToStep2 = () => {
     if (!selectedCategoryId) {
@@ -153,6 +183,17 @@ export function RunRegistrationPage() {
     try {
       setSubmitting(true);
       setFormError(null);
+
+      if (supabase && user) {
+        const { error: profileError } = await supabase.from('profiles').upsert({
+          id: user.id,
+          full_name: participantName.trim() || null,
+          mobile: mobile.trim() || null,
+          locality: locality.trim() || null,
+        });
+        if (profileError) throw new Error(`Unable to update your runner profile: ${profileError.message}`);
+        await refresh();
+      }
 
       const reg = await submitRegistration({
         run_event_id: selectedCategory.run_event_id,
@@ -309,6 +350,19 @@ export function RunRegistrationPage() {
                 </div>
               )}
 
+              {reg.status === 'rejected' && (
+                <div className="registration-retry-panel">
+                  <AlertCircle size={22} aria-hidden="true" />
+                  <div>
+                    <h3>Registration was rejected</h3>
+                    <p>{reg.review_notes || 'Review the required details, then start a new registration when ready.'}</p>
+                  </div>
+                  <button type="button" className="button button--primary" disabled={restartingRegistration} onClick={() => void handleRegisterAgain()}>
+                    {restartingRegistration ? 'Preparing…' : 'Register again'}
+                  </button>
+                </div>
+              )}
+
               {userState.result && (
                 <div className="runner-result-card">
                   <div><small>Official finish time</small><strong>{Math.floor(userState.result.elapsed_milliseconds / 3600000).toString().padStart(2, '0')}:{Math.floor((userState.result.elapsed_milliseconds % 3600000) / 60000).toString().padStart(2, '0')}:{Math.floor((userState.result.elapsed_milliseconds % 60000) / 1000).toString().padStart(2, '0')}</strong></div>
@@ -343,7 +397,7 @@ export function RunRegistrationPage() {
                       </div>
 
                       <form onSubmit={(e) => void handlePaymentProofSubmit(e)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                           <div>
                             <label style={{ display: 'block', fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.25rem' }}>
                               Payment Method
@@ -487,7 +541,7 @@ export function RunRegistrationPage() {
           )}
 
           {/* Stepper Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid var(--line)', paddingBottom: '0.75rem', marginBottom: '2rem' }}>
+          <div className="registration-stepper" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid var(--line)', paddingBottom: '0.75rem', marginBottom: '2rem' }}>
             <span style={{ fontWeight: step === 1 ? 700 : 500, color: step === 1 ? 'var(--wine)' : 'var(--muted)' }}>
               1. Distance
             </span>
@@ -523,10 +577,16 @@ export function RunRegistrationPage() {
                   });
                   const isSelected = selectedCategoryId === c.id;
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={c.id}
+                      className="registration-category-option"
                       onClick={() => setSelectedCategoryId(c.id)}
+                      aria-pressed={isSelected}
                       style={{
+                        width: '100%',
+                        textAlign: 'left',
+                        color: 'inherit',
                         padding: '1.25rem',
                         borderRadius: '8px',
                         border: isSelected ? '2px solid var(--wine)' : '1px solid var(--line)',
@@ -543,7 +603,7 @@ export function RunRegistrationPage() {
                         <h3 style={{ margin: '0.35rem 0', fontFamily: 'Fraunces, serif', fontSize: '1.2rem' }}>{c.name}</h3>
                         <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--muted)' }}>{c.kit_description}</p>
                       </div>
-                      <div style={{ textAlign: 'right', minWidth: '100px' }}>
+                      <div className="registration-category-option__price" style={{ textAlign: 'right', minWidth: '100px' }}>
                         <span style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--wine)' }}>
                           {feeFormatted}
                         </span>
@@ -551,7 +611,7 @@ export function RunRegistrationPage() {
                           {c.capacity ? `${c.capacity} slots cap` : 'Open capacity'}
                         </div>
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -570,6 +630,13 @@ export function RunRegistrationPage() {
               <h2 style={{ fontFamily: 'Fraunces, serif', fontSize: '1.5rem', marginBottom: '1rem' }}>
                 Participant Details
               </h2>
+              <div className="notice" style={{ marginTop: 0, marginBottom: '1.25rem' }}>
+                <CheckCircle2 size={18} />
+                <span>
+                  <strong>Loaded from your runner profile</strong>
+                  Your name, mobile number, and address are reused here. Any correction you make will also update your profile.
+                </span>
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
                 <div>
                   <label style={{ display: 'block', fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.25rem' }}>
@@ -585,7 +652,7 @@ export function RunRegistrationPage() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
                     <label style={{ display: 'block', fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.25rem' }}>
                       Mobile Phone Number <span style={{ color: '#c53030' }}>*</span>
@@ -625,10 +692,10 @@ export function RunRegistrationPage() {
                   <small style={{ color: 'var(--muted)' }}>Used only for official race results and awarding rankings.</small>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
                     <label style={{ display: 'block', fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.25rem' }}>
-                      Full Address <span style={{ color: '#c53030' }}>*</span>
+                      Address <span style={{ color: '#c53030' }}>*</span>
                     </label>
                     <input
                       type="text"
@@ -705,7 +772,7 @@ export function RunRegistrationPage() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
                     <label style={{ display: 'block', fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.25rem' }}>
                       Relationship <span style={{ color: '#c53030' }}>*</span>
@@ -769,13 +836,13 @@ export function RunRegistrationPage() {
 
               <div style={{ background: '#faf8f4', border: '1px solid var(--line)', borderRadius: '6px', padding: '1.25rem', marginBottom: '1.5rem' }}>
                 <h3 style={{ fontSize: '1.1rem', margin: '0 0 0.75rem' }}>Summary</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.92rem' }}>
+                <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.92rem' }}>
                   <div><strong>Runner:</strong> {participantName}</div>
                   <div><strong>Category:</strong> {selectedCategory.name}</div>
                   <div><strong>Division:</strong> {division === 'female' ? 'Female' : 'Male'}</div>
                   <div><strong>Mobile:</strong> {mobile}</div>
                   <div><strong>Shirt Size:</strong> {shirtSize}</div>
-                  <div><strong>Full address:</strong> {locality}</div>
+                  <div><strong>Address:</strong> {locality}</div>
                   <div><strong>Fee:</strong> {(selectedCategory.fee_centavos / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</div>
                 </div>
               </div>

@@ -3,13 +3,15 @@ import { Link } from 'react-router-dom';
 import { CalendarDays, Clock, MapPin, UserRound, Printer } from 'lucide-react';
 import { PageHero } from '../../components/PageHero';
 import { getPublishedActivities, formatActivityDateTime } from '../../features/activities/activityQueries';
-import { LoadingState } from '../../features/ui/FeedbackStates';
+import { ErrorState, LoadingState } from '../../features/ui/FeedbackStates';
 import type { DbActivity, ActivityType } from '../../types';
 
 export function ActivitiesPage({ filter: routeFilter }: { filter?: 'mass' | 'nightly' }) {
   const [manualFilter, setManualFilter] = useState<string | null>(null);
   const [activities, setActivities] = useState<DbActivity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   const activeFilter = manualFilter ?? routeFilter ?? 'all';
 
@@ -17,16 +19,24 @@ export function ActivitiesPage({ filter: routeFilter }: { filter?: 'mass' | 'nig
     let active = true;
 
     const typeArg = activeFilter === 'all' ? undefined : (activeFilter as ActivityType);
-    void getPublishedActivities(typeArg).then((list) => {
-      if (!active) return;
-      setActivities(list);
-      setLoading(false);
-    });
+    const loadTimer = window.setTimeout(() => {
+      setLoading(true);
+      setLoadError(null);
+      void getPublishedActivities(typeArg).then((list) => {
+        if (!active) return;
+        setActivities(list);
+      }).catch((error: unknown) => {
+        if (active) setLoadError(error instanceof Error ? error.message : 'Unable to load the published schedule.');
+      }).finally(() => {
+        if (active) setLoading(false);
+      });
+    }, 0);
 
     return () => {
       active = false;
+      window.clearTimeout(loadTimer);
     };
-  }, [activeFilter]);
+  }, [activeFilter, reloadKey]);
 
   const pageTitle =
     activeFilter === 'mass'
@@ -111,6 +121,8 @@ export function ActivitiesPage({ filter: routeFilter }: { filter?: 'mass' | 'nig
             <div style={{ padding: '4rem 0' }}>
               <LoadingState message="Loading official celebration schedule…" />
             </div>
+          ) : loadError ? (
+            <ErrorState message={loadError} onRetry={() => { setLoading(true); setReloadKey((value) => value + 1); }} />
           ) : activities.length > 0 ? (
             <div className="timeline">
               {activities.map((a) => {

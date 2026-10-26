@@ -1,5 +1,6 @@
-import { supabase } from '../../lib/supabase';
+import { isLocalDemoMode, supabase } from '../../lib/supabase';
 import type { DbPost, ContentStatus, NewsPost } from '../../types';
+import { sanitizeArticleHtml } from './sanitizeArticleHtml';
 
 export const FALLBACK_POSTS: NewsPost[] = [
   {
@@ -45,6 +46,7 @@ export function slugify(text: string): string {
 
 export async function getPublishedPosts(category?: string, searchTerm?: string): Promise<NewsPost[]> {
   if (!supabase) {
+    if (!isLocalDemoMode) return [];
     let list = FALLBACK_POSTS;
     if (category && category !== 'All') {
       list = list.filter((p) => p.category.toLowerCase() === category.toLowerCase());
@@ -73,13 +75,8 @@ export async function getPublishedPosts(category?: string, searchTerm?: string):
     }
 
     const { data, error } = await query;
-    if (error || !data || data.length === 0) {
-      let list = FALLBACK_POSTS;
-      if (category && category !== 'All') {
-        list = list.filter((p) => p.category.toLowerCase() === category.toLowerCase());
-      }
-      return list;
-    }
+    if (error) throw new Error(error.message);
+    if (!data || data.length === 0) return [];
 
     const rows = data as DbPost[];
     return rows.map((d) => ({
@@ -101,19 +98,18 @@ export async function getPublishedPosts(category?: string, searchTerm?: string):
             year: 'numeric',
             timeZone: 'Asia/Manila',
           }),
-      bodyHtml: d.body_html,
+      bodyHtml: sanitizeArticleHtml(d.body_html),
       featuredImagePath: d.featured_image_path,
       pinned: d.pinned,
     }));
   } catch (err) {
-    console.warn('Failed to load published posts:', err);
-    return FALLBACK_POSTS;
+    throw err instanceof Error ? err : new Error('Unable to load published news.');
   }
 }
 
 export async function getPostBySlug(slug: string): Promise<NewsPost | null> {
   if (!supabase) {
-    return FALLBACK_POSTS.find((p) => p.slug === slug) ?? null;
+    return isLocalDemoMode ? FALLBACK_POSTS.find((p) => p.slug === slug) ?? null : null;
   }
 
   try {
@@ -124,9 +120,8 @@ export async function getPostBySlug(slug: string): Promise<NewsPost | null> {
       .eq('status', 'published')
       .maybeSingle();
 
-    if (error || !data) {
-      return FALLBACK_POSTS.find((p) => p.slug === slug) ?? null;
-    }
+    if (error) throw new Error(error.message);
+    if (!data) return null;
 
     const d = data as DbPost;
     return {
@@ -148,18 +143,18 @@ export async function getPostBySlug(slug: string): Promise<NewsPost | null> {
             year: 'numeric',
             timeZone: 'Asia/Manila',
           }),
-      bodyHtml: d.body_html,
+      bodyHtml: sanitizeArticleHtml(d.body_html),
       featuredImagePath: d.featured_image_path,
       pinned: d.pinned,
     };
   } catch (err) {
-    console.warn('Failed to load post by slug:', err);
-    return FALLBACK_POSTS.find((p) => p.slug === slug) ?? null;
+    throw err instanceof Error ? err : new Error('Unable to load this article.');
   }
 }
 
 export async function getAllPostsForAdmin(): Promise<DbPost[]> {
   if (!supabase) {
+    if (!isLocalDemoMode) return [];
     return FALLBACK_POSTS.map((f) => ({
       id: f.id,
       edition_id: 'current-2027',
@@ -233,7 +228,7 @@ export async function createPost(payload: PostInput): Promise<DbPost> {
       slug: payload.slug,
       title: payload.title,
       excerpt: payload.excerpt || null,
-      body_html: payload.body_html,
+      body_html: sanitizeArticleHtml(payload.body_html),
       category: payload.category,
       featured_image_path: payload.featured_image_path || null,
       status: payload.status,
@@ -256,7 +251,10 @@ export async function updatePost(id: string, payload: Partial<PostInput>): Promi
   }
 
   // If changing status to published and published_at is not set, set it now
-  const updates: Partial<PostInput> = { ...payload };
+  const updates: Partial<PostInput> = {
+    ...payload,
+    ...(payload.body_html !== undefined ? { body_html: sanitizeArticleHtml(payload.body_html) } : {}),
+  };
   if (updates.status === 'published' && !updates.published_at) {
     updates.published_at = new Date().toISOString();
   }

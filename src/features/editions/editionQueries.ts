@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase';
+import { isLocalDemoMode, supabase } from '../../lib/supabase';
 import type { Edition, Json } from '../../types/database';
 
 export const DEFAULT_EDITION: Edition = {
@@ -39,7 +39,10 @@ export interface SiteSettingsMap {
 }
 
 export async function getCurrentEdition(): Promise<Edition> {
-  if (!supabase) return DEFAULT_EDITION;
+  if (!supabase) {
+    if (isLocalDemoMode) return DEFAULT_EDITION;
+    throw new Error('The website database is not configured.');
+  }
 
   try {
     const { data, error } = await supabase
@@ -48,14 +51,11 @@ export async function getCurrentEdition(): Promise<Edition> {
       .eq('is_current', true)
       .maybeSingle();
 
-    if (error || !data) {
-      console.warn('Could not fetch current edition from Supabase, using fallback.', error);
-      return DEFAULT_EDITION;
-    }
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error('No current Sinoog edition has been configured.');
     return data as Edition;
   } catch (err) {
-    console.warn('Supabase edition fetch error:', err);
-    return DEFAULT_EDITION;
+    throw err instanceof Error ? err : new Error('Unable to load the current Sinoog edition.');
   }
 }
 
@@ -68,9 +68,8 @@ export async function getSiteSettings(editionId: string): Promise<SiteSettingsMa
       .select('key, value')
       .eq('edition_id', editionId);
 
-    if (error || !data) {
-      return {};
-    }
+    if (error) throw new Error(error.message);
+    if (!data) return {};
 
     const settings: SiteSettingsMap = {};
     for (const item of data as Array<{ key: string; value: Json }>) {
@@ -84,8 +83,7 @@ export async function getSiteSettings(editionId: string): Promise<SiteSettingsMa
     }
     return settings;
   } catch (err) {
-    console.warn('Supabase site settings fetch error:', err);
-    return {};
+    throw err instanceof Error ? err : new Error('Unable to load website settings.');
   }
 }
 

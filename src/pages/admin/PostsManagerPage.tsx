@@ -14,6 +14,7 @@ import { StatusBadge } from '../../components/StatusBadge';
 import { LoadingState, EmptyState, ConfirmDialog } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
 import type { DbPost, ContentStatus } from '../../types';
+import { sanitizeArticleHtml } from '../../features/content/sanitizeArticleHtml';
 
 export function PostsManagerPage() {
   const { toast } = useToast();
@@ -329,6 +330,7 @@ export function PostsManagerPage() {
             {filteredPosts.map((post) => (
               <div
                 key={post.id}
+                className="admin-table__row posts-table__row"
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '2.5fr 1fr 1fr 100px 140px',
@@ -503,7 +505,7 @@ export function PostsManagerPage() {
                     />
                   </div>
                 )}
-                <div className="prose" dangerouslySetInnerHTML={{ __html: bodyHtml || '<p>No content written yet.</p>' }} />
+                <div className="prose" dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(bodyHtml || '<p>No content written yet.</p>') }} />
               </div>
             ) : (
               <form onSubmit={(e) => void handleFormSubmit(e)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -521,7 +523,7 @@ export function PostsManagerPage() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
                     <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
                       URL Slug <span style={{ color: '#c53030' }}>*</span>
@@ -625,7 +627,7 @@ export function PostsManagerPage() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'center', background: '#faf8f4', padding: '0.75rem', borderRadius: '6px' }}>
+                <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'center', background: '#faf8f4', padding: '0.75rem', borderRadius: '6px' }}>
                   <div>
                     <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
                       Publication Status

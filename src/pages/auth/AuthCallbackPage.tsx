@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../features/auth/useAuth';
 
 export function AuthCallbackPage() {
   const navigate = useNavigate();
-  const { refresh, isAdmin } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { refresh } = useAuth();
   const [message, setMessage] = useState('Confirming your session…');
+  const requestedPath = searchParams.get('next');
 
   useEffect(() => {
     let active = true;
@@ -29,13 +31,22 @@ export function AuthCallbackPage() {
           if (error) throw error;
         }
 
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
         await refresh();
         if (!active) return;
 
-        // Brief delay so auth context settles
-        setTimeout(() => {
-          navigate(isAdmin ? '/admin' : '/account', { replace: true });
-        }, 200);
+        const safeRequestedPath = requestedPath?.startsWith('/') && !requestedPath.startsWith('//')
+          ? requestedPath
+          : null;
+        let destination = safeRequestedPath || '/account';
+
+        if (!safeRequestedPath && sessionData.session?.user.id) {
+          const { data: adminRole } = await supabase.from('user_roles').select('role')
+            .eq('user_id', sessionData.session.user.id).eq('role', 'admin').maybeSingle();
+          if (adminRole) destination = '/admin';
+        }
+        navigate(destination, { replace: true });
       } catch (err: unknown) {
         if (!active) return;
         setMessage(err instanceof Error ? err.message : 'Unable to complete sign-in from this link.');
@@ -46,7 +57,7 @@ export function AuthCallbackPage() {
     return () => {
       active = false;
     };
-  }, [navigate, refresh, isAdmin]);
+  }, [navigate, refresh, requestedPath]);
 
   return (
     <section className="auth-page">

@@ -125,7 +125,8 @@ export function SignUpPage() {
                 value={locality}
                 onChange={(e) => setLocality(e.target.value)}
                 required
-                autoComplete="address-level2"
+                autoComplete="street-address"
+                placeholder="House/Street, Barangay, Municipality, Province"
               />
             </label>
             <label>

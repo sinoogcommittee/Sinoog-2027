@@ -28,11 +28,14 @@ import { RegistrationsManagerPage } from '../pages/admin/RegistrationsManagerPag
 import { UsersManagerPage } from '../pages/admin/UsersManagerPage';
 import { NotFoundPage } from '../pages/public/NotFoundPage';
 import { RequireAdmin } from '../components/RequireAdmin';
+import { ScrollToTop } from '../components/ScrollToTop';
 
 const RunTimingPage = lazy(() => import('../pages/admin/RunTimingPage').then((module) => ({ default: module.RunTimingPage })));
 
 export default function App() {
   return (
+    <>
+    <ScrollToTop />
     <Routes>
       <Route element={<PublicLayout />}>
         <Route path="/" element={<HomePage />} />
@@ -83,5 +86,6 @@ export default function App() {
 
       <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
     </Routes>
+    </>
   );
 }

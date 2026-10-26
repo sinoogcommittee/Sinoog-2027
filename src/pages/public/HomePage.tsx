@@ -9,27 +9,40 @@ import { getPublishedActivities, formatActivityDateTime } from '../../features/a
 import { getPublishedPosts } from '../../features/content/postQueries';
 import { getPublicMediaUrl } from '../../features/media/mediaQueries';
 import type { DbActivity, NewsPost } from '../../types';
+import { EmptyState, ErrorState, LoadingState } from '../../features/ui/FeedbackStates';
 
 export function HomePage() {
   const [activitiesList, setActivitiesList] = useState<DbActivity[]>([]);
   const [newsList, setNewsList] = useState<NewsPost[]>([]);
+  const [contentLoading, setContentLoading] = useState(true);
+  const [contentError, setContentError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let active = true;
-    void Promise.all([
-      getCurrentEdition(),
-      getPublishedActivities(),
-      getPublishedPosts(),
-    ]).then(([, acts, posts]) => {
-      if (!active) return;
-      setActivitiesList(acts.slice(0, 4));
-      setNewsList(posts.slice(0, 3));
-    });
+    const loadTimer = window.setTimeout(() => {
+      setContentLoading(true);
+      setContentError(null);
+      void Promise.all([
+        getCurrentEdition(),
+        getPublishedActivities(),
+        getPublishedPosts(),
+      ]).then(([, acts, posts]) => {
+        if (!active) return;
+        setActivitiesList(acts.slice(0, 4));
+        setNewsList(posts.slice(0, 3));
+      }).catch((error: unknown) => {
+        if (active) setContentError(error instanceof Error ? error.message : 'Unable to load official updates.');
+      }).finally(() => {
+        if (active) setContentLoading(false);
+      });
+    }, 0);
 
     return () => {
       active = false;
+      window.clearTimeout(loadTimer);
     };
-  }, []);
+  }, [reloadKey]);
 
   const celebrationKeyDates = [
     {
@@ -143,7 +156,11 @@ export function HomePage() {
             </Link>
           </div>
           <div className="schedule-list">
-            {activitiesList.map((a) => {
+            {contentLoading ? <LoadingState message="Loading the official schedule…" /> : contentError ? (
+              <ErrorState message={contentError} onRetry={() => { setContentLoading(true); setReloadKey((value) => value + 1); }} />
+            ) : activitiesList.length === 0 ? (
+              <EmptyState title="Schedule confirmation in progress" message="Published activities will appear here after committee approval." />
+            ) : activitiesList.map((a) => {
               const dt = formatActivityDateTime(a.starts_at);
               const dayStr = a.starts_at
                 ? new Date(a.starts_at).getDate().toString().padStart(2, '0')
@@ -177,7 +194,11 @@ export function HomePage() {
             </Link>
           </div>
           <div className="news-grid">
-            {newsList.map((post, i) => (
+            {contentLoading ? <LoadingState message="Loading official announcements…" /> : contentError ? (
+              <ErrorState message={contentError} onRetry={() => { setContentLoading(true); setReloadKey((value) => value + 1); }} />
+            ) : newsList.length === 0 ? (
+              <EmptyState title="No published announcements" message="Committee announcements will appear here once published." />
+            ) : newsList.map((post, i) => (
               <Link
                 to={`/news/${post.slug}`}
                 className={`news-card ${i === 0 ? 'news-card--featured' : ''}`}

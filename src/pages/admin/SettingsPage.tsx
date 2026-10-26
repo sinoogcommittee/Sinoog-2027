@@ -262,7 +262,7 @@ export function SettingsPage() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', padding: '1rem' }}>
+            <div className="settings-responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', padding: '1rem' }}>
               <div>
                 <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
                   Edition Name
@@ -328,7 +328,7 @@ export function SettingsPage() {
                 <p>Editable payment destination, registration deadline, and race start time.</p>
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', padding: '1rem' }}>
+            <div className="settings-responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', padding: '1rem' }}>
               <div>
                 <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>GCash Number</label>
                 <input type="tel" inputMode="numeric" value={gcashNumber} onChange={(e) => setGcashNumber(e.target.value.replace(/[^0-9+]/g, ''))} placeholder="09260265423" style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }} />
@@ -366,7 +366,7 @@ export function SettingsPage() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', padding: '1rem' }}>
+            <div className="settings-responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', padding: '1rem' }}>
               <div>
                 <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
                   Sinoog Run Date
@@ -506,7 +506,7 @@ export function SettingsPage() {
               </label>
 
               {bannerEnabled && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: '1rem' }}>
+                <div className="settings-banner-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: '1rem' }}>
                   <div>
                     <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
                       Banner Text / Advisory
@@ -551,7 +551,7 @@ export function SettingsPage() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', padding: '1rem' }}>
+            <div className="settings-responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', padding: '1rem' }}>
               <div>
                 <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
                   Support Email

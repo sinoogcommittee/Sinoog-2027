@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Search, Download, Check, XCircle, FileText, X, AlertCircle, Printer, ExternalLink, CreditCard, UserPlus, Copy } from 'lucide-react';
+import { Search, Download, Check, XCircle, FileText, X, AlertCircle, Printer, ExternalLink, CreditCard, UserPlus, Copy, Trash2 } from 'lucide-react';
 import {
   getAllRegistrationsForAdmin,
   updateRegistrationReview,
@@ -9,6 +9,7 @@ import {
   getRunnerQrValue,
   type AdminPaymentDetails,
   adminCreateCashRunner,
+  deleteRejectedRegistration,
   type AdminCashRegistrationInput,
 } from '../../features/run/runQueries';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
@@ -163,6 +164,26 @@ export function RegistrationsManagerPage() {
     }
   };
 
+  const handleDeleteRegistration = async (registration: DbRunRegistration) => {
+    if (registration.status === 'approved') {
+      window.alert('Approved runners cannot be deleted. Their bib, QR code, and race records must remain protected.');
+      return;
+    }
+    if (registration.status !== 'rejected') {
+      window.alert('Only rejected registrations can be deleted. Reject the entry first if it should be removed.');
+      return;
+    }
+    if (!window.confirm(`Delete the rejected registration for ${registration.participant_name}? This removes its payment proof and cannot be undone.`)) return;
+
+    try {
+      await deleteRejectedRegistration(registration.id);
+      toast('Rejected registration deleted. The runner can register again.', 'success');
+      await fetchRegistrations();
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : 'Unable to delete registration.', 'error');
+    }
+  };
+
   const filteredRegistrations = registrations.filter((r) => {
     const matchSearch =
       !searchQuery ||
@@ -180,7 +201,7 @@ export function RegistrationsManagerPage() {
       return;
     }
 
-    const headers = ['Runner Number', 'Reference', 'Participant', 'Category', 'Division', 'Shirt Size', 'Mobile', 'Full Address', 'Emergency Name', 'Emergency Mobile', 'Registration Source', 'Registered By User ID', 'Status', 'Submitted At'];
+    const headers = ['Runner Number', 'Reference', 'Participant', 'Category', 'Division', 'Shirt Size', 'Mobile', 'Address', 'Emergency Name', 'Emergency Mobile', 'Registration Source', 'Registered By User ID', 'Status', 'Submitted At'];
     const rows = filteredRegistrations.map((r) => {
       const cat = categories.find((c) => c.id === r.category_id)?.name || 'Run';
       return [
@@ -312,7 +333,7 @@ export function RegistrationsManagerPage() {
           <div className="admin-table">
             <div className="admin-table__head" style={{ gridTemplateColumns: '1.2fr 1.8fr 1fr 100px 100px 100px' }}>
               <span>Reference</span>
-              <span>Participant & Locality</span>
+              <span>Participant & Address</span>
               <span>Category / Shirt</span>
               <span>Fee</span>
               <span>Status</span>
@@ -329,6 +350,7 @@ export function RegistrationsManagerPage() {
               return (
                 <div
                   key={r.id}
+                  className="admin-table__row registrations-table__row"
                   style={{
                     display: 'grid',
                     gridTemplateColumns: '1.2fr 1.8fr 1fr 100px 100px 100px',
@@ -373,13 +395,22 @@ export function RegistrationsManagerPage() {
                     </StatusBadge>
                   </div>
 
-                  <div style={{ textAlign: 'right' }}>
+                  <div className="registration-row-actions">
                     <button
                       type="button"
                       className="button button--ghost button--sm"
                       onClick={() => void openReview(r)}
                     >
                       <FileText size={16} /> Review
+                    </button>
+                    <button
+                      type="button"
+                      className="button button--ghost button--sm"
+                      aria-label={`Delete registration for ${r.participant_name}`}
+                      title={r.status === 'approved' ? 'Approved runners cannot be deleted' : r.status === 'rejected' ? 'Delete rejected registration' : 'Reject this registration before deleting'}
+                      onClick={() => void handleDeleteRegistration(r)}
+                    >
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
@@ -436,7 +467,7 @@ export function RegistrationsManagerPage() {
                     <label>Mobile number<input required value={walkIn.mobile} onChange={(e) => setWalkIn({ ...walkIn, mobile: e.target.value })} /></label>
                     <label>Shirt size<select required value={walkIn.shirt_size} onChange={(e) => setWalkIn({ ...walkIn, shirt_size: e.target.value })}><option value="">Select size</option>{['XS','S','M','L','XL','2XL'].map((size) => <option key={size}>{size}</option>)}</select></label>
                     <label>Club / team (optional)<input value={walkIn.club_name || ''} onChange={(e) => setWalkIn({ ...walkIn, club_name: e.target.value })} /></label>
-                    <label className="walk-in-form__wide">Full address<textarea rows={2} required value={walkIn.locality} onChange={(e) => setWalkIn({ ...walkIn, locality: e.target.value })} /></label>
+                    <label className="walk-in-form__wide">Address<textarea rows={2} required value={walkIn.locality} onChange={(e) => setWalkIn({ ...walkIn, locality: e.target.value })} /></label>
                   </div>
                 </fieldset>
 
@@ -485,12 +516,12 @@ export function RegistrationsManagerPage() {
               </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', background: '#faf8f4', padding: '1rem', borderRadius: '6px', marginBottom: '1rem', fontSize: '0.9rem' }}>
+            <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', background: '#faf8f4', padding: '1rem', borderRadius: '6px', marginBottom: '1rem', fontSize: '0.9rem' }}>
               <div><strong>Name:</strong> {selectedReg.participant_name}</div>
               <div><strong>Category:</strong> {categories.find((c) => c.id === selectedReg.category_id)?.name}</div>
               <div><strong>Division:</strong> {selectedReg.division === 'female' ? 'Female' : selectedReg.division === 'male' ? 'Male' : 'Not set'}</div>
               <div><strong>Mobile:</strong> {selectedReg.mobile}</div>
-              <div style={{ gridColumn: '1 / -1' }}><strong>Full Address:</strong> {selectedReg.locality || 'Not provided'}</div>
+              <div style={{ gridColumn: '1 / -1' }}><strong>Address:</strong> {selectedReg.locality || 'Not provided'}</div>
               <div><strong>Shirt Size:</strong> {selectedReg.shirt_size}</div>
               <div><strong>Birth Date:</strong> {selectedReg.birth_date || 'N/A'}</div>
               <div><strong>Emergency Contact:</strong> {selectedReg.emergency_name} ({selectedReg.emergency_relationship})</div>
@@ -566,7 +597,7 @@ export function RegistrationsManagerPage() {
                 <button
                   type="button"
                   className="button button--primary button--sm"
-                  disabled={reviewing || paymentLoading || paymentDetails?.status !== 'submitted' || paymentDetails.evidence.length === 0}
+                  disabled={reviewing || paymentLoading || !paymentDetails || !['submitted', 'verified'].includes(paymentDetails.status) || (paymentDetails.method.toLowerCase() !== 'cash' && paymentDetails.evidence.length === 0)}
                   onClick={() => void handleUpdateStatus('approved')}
                 >
                   <Check size={14} /> Approve Entry

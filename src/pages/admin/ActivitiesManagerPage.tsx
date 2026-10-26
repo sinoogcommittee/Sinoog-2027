@@ -4,6 +4,7 @@ import {
   getAllActivitiesForAdmin,
   createActivity,
   updateActivity,
+  reorderActivityForDate,
   deleteActivity,
   formatActivityDateTime,
   getActivityDateKey,
@@ -176,33 +177,7 @@ export function ActivitiesManagerPage() {
 
       const targetDateKey = getActivityDateKey(savedActivity.starts_at);
       if (targetDateKey) {
-        const targetGroup = sortActivitiesByDateAndOrder([
-          ...activities.filter((activity) =>
-            activity.id !== savedActivity.id && getActivityDateKey(activity.starts_at) === targetDateKey
-          ),
-          savedActivity,
-        ]);
-        const withoutSaved = targetGroup.filter((activity) => activity.id !== savedActivity.id);
-        const requestedIndex = Math.max(0, Math.min(Number(sortOrder || 1) - 1, withoutSaved.length));
-        withoutSaved.splice(requestedIndex, 0, savedActivity);
-        await Promise.all(withoutSaved.map((activity, index) =>
-          activity.sort_order === index + 1
-            ? Promise.resolve(activity)
-            : updateActivity(activity.id, { sort_order: index + 1 })
-        ));
-      }
-
-      if (previousDateKey && previousDateKey !== targetDateKey) {
-        const previousGroup = sortActivitiesByDateAndOrder(
-          activities.filter((activity) =>
-            activity.id !== savedActivity.id && getActivityDateKey(activity.starts_at) === previousDateKey
-          )
-        );
-        await Promise.all(previousGroup.map((activity, index) =>
-          activity.sort_order === index + 1
-            ? Promise.resolve(activity)
-            : updateActivity(activity.id, { sort_order: index + 1 })
-        ));
+        await reorderActivityForDate(savedActivity.id, Number(sortOrder || 1), previousDateKey || null);
       }
 
       if (editingActivity) {
@@ -498,7 +473,7 @@ export function ActivitiesManagerPage() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
                     Type
@@ -532,7 +507,7 @@ export function ActivitiesManagerPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
                     Start Date & Time (Asia/Manila)
@@ -566,7 +541,7 @@ export function ActivitiesManagerPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
                     Venue / Location

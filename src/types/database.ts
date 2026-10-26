@@ -1077,6 +1077,14 @@ export interface Database {
       [_ in never]: never;
     };
     Functions: {
+      reorder_activity_for_date: {
+        Args: {
+          p_activity_id: string;
+          p_requested_position: number;
+          p_previous_date?: string | null;
+        };
+        Returns: undefined;
+      };
       submit_run_registration: {
         Args: {
           p_run_event_id: string;
@@ -1124,6 +1132,14 @@ export interface Database {
           category_rank: number;
           overall_rank: number;
         }>;
+      };
+      delete_rejected_run_registration: {
+        Args: { p_registration_id: string };
+        Returns: string[];
+      };
+      reset_run_timing: {
+        Args: { p_run_event_id: string };
+        Returns: number;
       };
       admin_register_cash_runner: {
         Args: {

@@ -174,6 +174,13 @@ export interface UserRegistrationState {
     rejection_reason?: string | null;
     evidence?: Array<{ id: string; object_path: string; uploaded_at: string }>;
   } | null;
+  consents: Array<{
+    id: string;
+    consent_type: 'terms' | 'privacy' | 'guardian' | 'marketing';
+    version: string;
+    accepted: boolean;
+    accepted_at: string;
+  }>;
   result?: {
     finished_at: string;
     elapsed_milliseconds: number;
@@ -195,10 +202,10 @@ export async function getUserRegistration(
         const parsed = JSON.parse(stored) as UserRegistrationState;
         return parsed;
       } catch {
-        return { registration: null, payment: null };
+        return { registration: null, payment: null, consents: [] };
       }
     }
-    return { registration: null, payment: null };
+    return { registration: null, payment: null, consents: [] };
   }
 
   try {
@@ -210,7 +217,7 @@ export async function getUserRegistration(
       .maybeSingle();
 
     if (!regData) {
-      return { registration: null, payment: null };
+      return { registration: null, payment: null, consents: [] };
     }
 
     const registration = regData as DbRunRegistration;
@@ -245,11 +252,16 @@ export async function getUserRegistration(
         })),
       };
     }
-    const { data: resultData } = await supabase.rpc('get_my_run_result', { p_registration_id: registration.id });
-    return { registration, payment: paymentObj, result: resultData?.[0] ?? null };
+    const [{ data: resultData }, { data: consentData, error: consentError }] = await Promise.all([
+      supabase.rpc('get_my_run_result', { p_registration_id: registration.id }),
+      supabase.from('registration_consents').select('id,consent_type,version,accepted,accepted_at')
+        .eq('registration_id', registration.id).order('accepted_at', { ascending: true }),
+    ]);
+    if (consentError) throw new Error(consentError.message);
+    return { registration, payment: paymentObj, consents: consentData ?? [], result: resultData?.[0] ?? null };
   } catch (err) {
     console.warn('Error fetching user registration:', err);
-    return { registration: null, payment: null };
+    return { registration: null, payment: null, consents: [] };
   }
 }
 
@@ -299,6 +311,10 @@ export async function submitRegistration(payload: RegistrationInput): Promise<Db
         payer_reference: null,
         status: 'unpaid',
       },
+      consents: [
+        { id: 'demo-terms', consent_type: 'terms', version: '2027-v1', accepted: true, accepted_at: new Date().toISOString() },
+        { id: 'demo-privacy', consent_type: 'privacy', version: '2027-v1', accepted: true, accepted_at: new Date().toISOString() },
+      ],
     };
 
     localStorage.setItem('demo_reg_demo-user-123', JSON.stringify(state));
@@ -430,6 +446,18 @@ export async function updateRegistrationReview(
   }
 }
 
+export async function deleteRejectedRegistration(id: string): Promise<void> {
+  if (!supabase) return;
+  const { data: objectPaths, error } = await supabase.rpc('delete_rejected_run_registration', {
+    p_registration_id: id,
+  });
+  if (error) throw new Error(error.message);
+  if (objectPaths?.length) {
+    const { error: storageError } = await supabase.storage.from('payment-evidence').remove(objectPaths);
+    if (storageError) console.warn('Rejected registration was deleted, but payment-file cleanup failed:', storageError);
+  }
+}
+
 export interface AdminPaymentDetails {
   id: string;
   method: string;
@@ -490,6 +518,13 @@ export async function startOfficialRun(runEventId: string): Promise<string> {
   const { data, error } = await supabase.rpc('start_run_timing', { p_run_event_id: runEventId });
   if (error || !data) throw new Error(error?.message || 'Unable to start official timing.');
   return data;
+}
+
+export async function resetOfficialRun(runEventId: string): Promise<number> {
+  if (!supabase) return 0;
+  const { data, error } = await supabase.rpc('reset_run_timing', { p_run_event_id: runEventId });
+  if (error) throw new Error(error.message);
+  return data ?? 0;
 }
 
 export async function recordRunnerFinish(qrValue: string): Promise<void> {

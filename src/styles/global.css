@@ -61,6 +61,61 @@
 
 .button--danger{background:#dc2626;color:#fff}
 .button--danger:hover{background:#b91c1c}
+
+.registration-retry-panel{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;margin-top:22px;padding:18px;border:1px solid #fecaca;background:#fff7f7;color:#7f1d1d}.registration-retry-panel h3,.registration-retry-panel p{margin:0}.registration-retry-panel p{margin-top:4px;color:#7f1d1d}.registration-row-actions{display:flex;justify-content:flex-end;align-items:center;gap:4px}
+
+.runner-account-registration{margin-top:28px;padding:28px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow)}.runner-account-registration__heading{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:18px;border-bottom:1px solid var(--line)}.runner-account-registration__heading h2,.runner-account-registration__heading p{margin:0}.runner-account-details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:20px 0;background:var(--line);border:1px solid var(--line)}.runner-account-details>div{min-width:0;padding:14px;background:#fff}.runner-account-details__wide{grid-column:span 3}.runner-account-details dt{margin-bottom:5px;color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}.runner-account-details dd{margin:0;overflow-wrap:anywhere;font-weight:600}.runner-account-waiver{padding:20px;background:#faf8f3;border-left:4px solid var(--gold)}.runner-account-waiver h3{margin-top:0}.runner-account-waiver ul{margin-bottom:0;padding-left:20px}
+
+.timing-control-panel__start{min-width:220px}.timing-live-clock{padding:8px 22px;border-right:1px solid rgba(255,255,255,.2);border-left:1px solid rgba(255,255,255,.2);text-align:center}.timing-live-clock strong{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace!important;font-size:2rem!important;letter-spacing:.06em;font-variant-numeric:tabular-nums}.timing-control-panel__actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}.timing-reset-modal{position:relative;width:min(520px,100%);padding:30px}.timing-reset-modal__close{position:absolute;top:12px;right:12px}.timing-reset-modal__warning{color:#b91c1c}.timing-reset-modal h2{margin:12px 0 8px}.timing-reset-modal__actions{justify-content:flex-end;margin-top:24px}.spin{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:900px){.runner-account-details{grid-template-columns:1fr 1fr}.runner-account-details__wide{grid-column:span 2}.timing-live-clock{width:100%;padding:16px 0;border-right:0;border-left:0;border-top:1px solid rgba(255,255,255,.2);border-bottom:1px solid rgba(255,255,255,.2);text-align:left}.timing-control-panel__actions{justify-content:flex-start}.registration-retry-panel{grid-template-columns:auto 1fr}.registration-retry-panel .button{grid-column:1/-1}}
+@media(max-width:600px){.runner-account-registration{padding:20px}.runner-account-registration__heading{flex-direction:column}.runner-account-details{grid-template-columns:1fr}.runner-account-details__wide{grid-column:auto}}
+
+/* Shared responsive hardening for public forms, admin workspaces, and dialogs. */
+.admin-table__row>*{min-width:0;overflow-wrap:anywhere}.table-tools>*{min-width:0}.table-tools input,.table-tools select{max-width:100%;min-width:0}.modal-card{max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain}.prose,.article-page{overflow-wrap:anywhere}.prose img,.prose video,.prose iframe,.article-page img,.article-page video,.article-page iframe{max-width:100%;height:auto}.prose pre,.prose table,.article-page pre,.article-page table{display:block;max-width:100%;overflow-x:auto}
+
+@media(max-width:760px){
+  .admin-table{overflow-x:visible}
+  .admin-table>.admin-table__head{display:none!important;min-width:0!important}
+  .admin-table__row{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:11px!important;padding:18px 14px!important;align-items:start!important;border-bottom:1px solid var(--line);box-shadow:inset 4px 0 0 var(--gold)}
+  .admin-table__row>div{min-width:0;text-align:left!important}
+  .admin-table__row>div:last-child{justify-content:flex-start!important;text-align:left!important;padding-top:2px}
+  .admin-table__row .button{min-height:44px;min-width:44px}
+  .table-tools{align-items:stretch;flex-direction:column}
+  .table-tools label,.table-tools button,.table-tools select{width:100%}
+  .table-tools label{display:flex;align-items:center;gap:8px}
+  .table-tools label input{width:100%}
+}
+
+@media(max-width:640px){
+  body{overflow-x:hidden}
+  .modal-overlay{place-items:start center;padding:8px;overflow-y:auto}
+  .modal-card,.activity-modal{width:100%!important;max-height:calc(100dvh - 16px);padding:20px 16px}
+  .responsive-two-column,.settings-responsive-grid,.settings-banner-grid{grid-template-columns:minmax(0,1fr)!important}
+  .settings-responsive-grid{padding:14px!important}
+  .admin-heading>.button,.admin-heading>button{width:100%}
+  .admin-panel{max-width:100%;overflow:hidden}
+  .panel-heading{padding:18px 16px}
+  .portal-topbar{padding:0 14px;overflow:hidden}
+  .portal-topbar div{min-width:0}
+  .portal-topbar span,.portal-topbar small{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .portal-sidebar{padding:10px 8px;scrollbar-width:thin}
+  .portal-sidebar nav{gap:4px}
+  .menu-button{display:grid;place-items:center;min-width:44px;min-height:44px}
+  .main-nav{max-height:calc(100dvh - 102px);overflow-y:auto}
+  .button{min-height:44px}
+  .auth-page{padding:36px 14px}
+  .auth-card h1{font-size:clamp(2.1rem,12vw,2.8rem)}
+  .page-hero h1{font-size:clamp(2.35rem,13vw,3rem);overflow-wrap:anywhere}
+  .home-hero h1{font-size:clamp(2.8rem,15vw,3.5rem)}
+  .toast-container{right:14px;bottom:14px;max-width:calc(100vw - 28px)}
+  .registration-row-actions{justify-content:flex-start}
+  .registration-stepper{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px;padding-bottom:14px!important}
+  .registration-stepper span{font-size:.78rem}
+  .registration-category-option{align-items:flex-start!important;flex-direction:column;gap:14px}
+  .registration-category-option__price{min-width:0!important;text-align:left!important}
+  .timing-filters select{width:100%}
+}
 .button--sm{padding:7px 12px;font-size:.82rem}
 
 @media print{
@@ -80,3 +135,9 @@
 .walk-in-consent{display:flex!important;grid-template-columns:auto 1fr;align-items:flex-start;font-weight:500!important}.walk-in-consent input{width:auto;margin-top:.2rem}.walk-in-actions{display:flex;justify-content:flex-end;gap:.65rem;flex-wrap:wrap}
 .walk-in-success{text-align:center;padding:1rem}.walk-in-success>svg{color:#117a55}.walk-in-success dl{display:grid;gap:.6rem;margin:1.25rem 0;text-align:left}.walk-in-success dl div{display:grid;grid-template-columns:150px 1fr;border-bottom:1px solid var(--line);padding:.65rem 0}.walk-in-success dt{color:var(--muted)}.walk-in-success dd{margin:0;font-weight:800;overflow-wrap:anywhere}
 @media(max-width:640px){.walk-in-form__grid{grid-template-columns:1fr}.walk-in-form__wide{grid-column:auto}.walk-in-success dl div{grid-template-columns:1fr;gap:.2rem}}
+
+.auth-card .google-sign-in{width:100%;background:#fff;border-color:#cfc7be;color:#2b2320;box-shadow:0 3px 10px rgba(43,35,32,.06)}
+.auth-card .google-sign-in:hover{border-color:#a99d92;background:#fffdf8}
+.auth-card .google-sign-in svg{flex:0 0 auto}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0 4px;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.auth-divider:before,.auth-divider:after{content:'';height:1px;background:var(--line);flex:1}
