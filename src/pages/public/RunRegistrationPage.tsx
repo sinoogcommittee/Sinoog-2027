@@ -27,6 +27,8 @@ import { useAuth } from '../../features/auth/useAuth';
 import { LoadingState } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
 import { StatusBadge } from '../../components/StatusBadge';
+import { QRCodeSVG } from 'qrcode.react';
+import { getRunnerQrValue } from '../../features/run/runQueries';
 
 export function RunRegistrationPage() {
   const { user, isDemoAdmin } = useAuth();
@@ -34,7 +36,7 @@ export function RunRegistrationPage() {
 
   const [loading, setLoading] = useState(true);
   const [registrationOpen, setRegistrationOpen] = useState(false);
-  const [, setRunEvent] = useState<RunEvent | null>(null);
+  const [runEvent, setRunEvent] = useState<RunEvent | null>(null);
   const [categories, setCategories] = useState<RunCategory[]>([]);
   const [userState, setUserState] = useState<UserRegistrationState>({ registration: null, payment: null });
 
@@ -44,6 +46,7 @@ export function RunRegistrationPage() {
   // Form Fields
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [participantName, setParticipantName] = useState('');
+  const [division, setDivision] = useState<'male' | 'female'>('male');
   const [mobile, setMobile] = useState('');
   const [locality, setLocality] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -58,7 +61,6 @@ export function RunRegistrationPage() {
   const [formError, setFormError] = useState<string | null>(null);
 
   // Payment Form Fields
-  const [paymentMethod, setPaymentMethod] = useState('GCash');
   const [payerReference, setPayerReference] = useState('');
   const [paymentFile, setPaymentFile] = useState<File | null>(null);
   const [uploadingProof, setUploadingProof] = useState(false);
@@ -71,10 +73,14 @@ export function RunRegistrationPage() {
       try {
         const ed = await getCurrentEdition();
         if (!mounted) return;
-        setRegistrationOpen(ed.registration_open);
-
         const { event: rEvent, categories: rCats } = await getRunEventAndCategories(ed.id);
         if (!mounted) return;
+        const now = Date.now();
+        setRegistrationOpen(
+          ed.registration_open
+          && (!rEvent.registration_opens_at || now >= new Date(rEvent.registration_opens_at).getTime())
+          && (!rEvent.registration_closes_at || now <= new Date(rEvent.registration_closes_at).getTime())
+        );
         setRunEvent(rEvent);
         setCategories(rCats);
         if (rCats.length > 0) {
@@ -151,8 +157,8 @@ export function RunRegistrationPage() {
       const reg = await submitRegistration({
         run_event_id: selectedCategory.run_event_id,
         category_id: selectedCategory.id,
-        user_id: activeUserId,
         participant_name: participantName.trim(),
+        division,
         birth_date: birthDate,
         mobile: mobile.trim(),
         locality: locality.trim(),
@@ -162,7 +168,6 @@ export function RunRegistrationPage() {
         emergency_relationship: emergencyRelationship.trim(),
         emergency_mobile: emergencyMobile.trim(),
         accessibility_notes: accessibilityNotes.trim() || null,
-        fee_centavos: selectedCategory.fee_centavos,
       });
 
       toast(`Registration submitted! Reference: ${reg.reference}`, 'success');
@@ -197,14 +202,13 @@ export function RunRegistrationPage() {
 
     try {
       setUploadingProof(true);
-      await submitPaymentEvidence(
+      const compression = await submitPaymentEvidence(
         userState.payment.id,
         activeUserId || 'guest',
-        paymentMethod,
         payerReference.trim(),
         paymentFile
       );
-      toast('Payment proof submitted successfully! Review pending.', 'success');
+      toast(`Payment proof compressed to ${Math.max(1, Math.round(compression.compressedBytes / 1024))} KB and submitted.`, 'success');
       if (selectedCategory) {
         const updated = await getUserRegistration(selectedCategory.run_event_id, activeUserId || 'guest');
         setUserState(updated);
@@ -235,6 +239,7 @@ export function RunRegistrationPage() {
       style: 'currency',
       currency: 'PHP',
     });
+    const qrValue = getRunnerQrValue(reg);
 
     return (
       <>
@@ -289,14 +294,27 @@ export function RunRegistrationPage() {
               </div>
 
               {reg.status === 'approved' && (
-                <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '1.25rem', display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '1rem' }}>
-                  <QrCode size={40} color="#16a34a" />
-                  <div>
-                    <h3 style={{ color: '#166534', margin: '0 0 0.25rem', fontSize: '1.1rem' }}>Entry Approved & Confirmed</h3>
-                    <p style={{ margin: 0, fontSize: '0.9rem', color: '#15803d' }}>
-                      Present reference <strong>{reg.reference}</strong> at the Sto. Niño Parish Gym claiming booth on January 8–9, 2027 to receive your official race kit and bib.
-                    </p>
+                <div className="runner-pass">
+                  <div className="runner-pass__details">
+                    <small>Official four-digit runner number</small>
+                    <strong>{reg.bib_number || 'Pending'}</strong>
+                    <h3>Registration approved</h3>
+                    <p>Present this runner number and QR code during race-kit claiming and event recording.</p>
                   </div>
+                  {qrValue ? (
+                    <div className="runner-pass__qr" aria-label={`QR code for runner ${reg.bib_number}`}>
+                      <QRCodeSVG value={qrValue} size={144} level="H" marginSize={2} />
+                    </div>
+                  ) : <QrCode size={48} aria-hidden="true" />}
+                </div>
+              )}
+
+              {userState.result && (
+                <div className="runner-result-card">
+                  <div><small>Official finish time</small><strong>{Math.floor(userState.result.elapsed_milliseconds / 3600000).toString().padStart(2, '0')}:{Math.floor((userState.result.elapsed_milliseconds % 3600000) / 60000).toString().padStart(2, '0')}:{Math.floor((userState.result.elapsed_milliseconds % 60000) / 1000).toString().padStart(2, '0')}</strong></div>
+                  <div><small>{reg.division === 'female' ? 'Female' : 'Male'} division place</small><strong>#{userState.result.division_rank}</strong></div>
+                  <div><small>Category place</small><strong>#{userState.result.category_rank}</strong></div>
+                  <div><small>Overall place</small><strong>#{userState.result.overall_rank}</strong></div>
                 </div>
               )}
 
@@ -316,11 +334,11 @@ export function RunRegistrationPage() {
                   ) : (
                     <>
                       <div style={{ background: '#faf8f4', border: '1px solid var(--line)', borderRadius: '6px', padding: '1.25rem', marginBottom: '1.5rem', fontSize: '0.92rem' }}>
-                        <p style={{ margin: '0 0 0.5rem', fontWeight: 600 }}>Official Payment Options (Sto. Niño Parish Sinoog Committee):</p>
+                        <p style={{ margin: '0 0 0.5rem', fontWeight: 600 }}>Pay the exact registration fee through GCash:</p>
                         <ul style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.6 }}>
-                          <li><strong>GCash:</strong> 0917-123-4567 (Account: Sto. Niño Parish Guinacot)</li>
-                          <li><strong>Landbank / Maya:</strong> Available upon parish office request</li>
-                          <li><strong>On-Site:</strong> Sto. Niño Parish Office, Guinacot (Mon–Sat, 8am–5pm)</li>
+                          <li><strong>GCash number:</strong> {runEvent?.gcash_number || '09260265423'}</li>
+                          {runEvent?.gcash_account_name && <li><strong>Account name:</strong> {runEvent.gcash_account_name}</li>}
+                          <li><strong>Amount:</strong> {feeFormatted}</li>
                         </ul>
                       </div>
 
@@ -331,13 +349,11 @@ export function RunRegistrationPage() {
                               Payment Method
                             </label>
                             <select
-                              value={paymentMethod}
-                              onChange={(e) => setPaymentMethod(e.target.value)}
+                              value="GCash"
+                              disabled
                               style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
                             >
                               <option value="GCash">GCash</option>
-                              <option value="Bank Transfer">Bank Transfer / Maya</option>
-                              <option value="Parish Office Cash">Parish Office / On-site Cash</option>
                             </select>
                           </div>
 
@@ -358,12 +374,12 @@ export function RunRegistrationPage() {
 
                         <div>
                           <label style={{ display: 'block', fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.25rem' }}>
-                            Screenshot / Receipt Proof (Image or PDF) <span style={{ color: '#c53030' }}>*</span>
+                            GCash Screenshot <span style={{ color: '#c53030' }}>*</span>
                           </label>
                           <input
                             type="file"
                             required
-                            accept="image/jpeg,image/png,image/webp,application/pdf"
+                            accept="image/jpeg,image/png,image/webp"
                             onChange={handlePaymentFileChange}
                             style={{ width: '100%', padding: '0.5rem 0', fontSize: '0.88rem' }}
                           />
@@ -598,17 +614,28 @@ export function RunRegistrationPage() {
                   </div>
                 </div>
 
+                <div>
+                  <label style={{ display: 'block', fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.25rem' }}>
+                    Race Division <span style={{ color: '#c53030' }}>*</span>
+                  </label>
+                  <select value={division} onChange={(e) => setDivision(e.target.value as 'male' | 'female')} required style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                  <small style={{ color: 'var(--muted)' }}>Used only for official race results and awarding rankings.</small>
+                </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
                     <label style={{ display: 'block', fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.25rem' }}>
-                      Locality / Barangay / Municipality <span style={{ color: '#c53030' }}>*</span>
+                      Full Address <span style={{ color: '#c53030' }}>*</span>
                     </label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Guinacot, Guindulman"
                       value={locality}
                       onChange={(e) => setLocality(e.target.value)}
+                      placeholder="House/Street, Barangay, Municipality, Province"
                       style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
                     />
                   </div>
@@ -745,9 +772,10 @@ export function RunRegistrationPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.92rem' }}>
                   <div><strong>Runner:</strong> {participantName}</div>
                   <div><strong>Category:</strong> {selectedCategory.name}</div>
+                  <div><strong>Division:</strong> {division === 'female' ? 'Female' : 'Male'}</div>
                   <div><strong>Mobile:</strong> {mobile}</div>
                   <div><strong>Shirt Size:</strong> {shirtSize}</div>
-                  <div><strong>Locality:</strong> {locality}</div>
+                  <div><strong>Full address:</strong> {locality}</div>
                   <div><strong>Fee:</strong> {(selectedCategory.fee_centavos / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</div>
                 </div>
               </div>

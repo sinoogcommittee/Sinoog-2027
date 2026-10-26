@@ -88,12 +88,13 @@ export function AccountPage() {
               />
             </label>
             <label>
-              Locality / barangay
+              Full address
               <input
                 type="text"
                 value={locality}
                 onChange={(e) => setLocality(e.target.value)}
-                autoComplete="address-level2"
+                autoComplete="street-address"
+                placeholder="House/Street, Barangay, Municipality, Province"
                 style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
               />
             </label>

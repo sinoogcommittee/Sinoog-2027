@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Calendar, Home, LogOut, Newspaper, Settings, ShieldCheck, Users } from 'lucide-react';
+import { Calendar, Flag, Home, LogOut, Newspaper, Settings, ShieldCheck, Users } from 'lucide-react';
 import { LogoMark } from '../components/LogoMark';
 import { useAuth } from '../features/auth/useAuth';
 
@@ -8,6 +8,7 @@ const items = [
   ['Activities & Schedule', '/admin/activities', Calendar],
   ['News posts', '/admin/posts', Newspaper],
   ['Registrations', '/admin/registrations', Users],
+  ['Race timing', '/admin/run-timing', Flag],
   ['Delegations', '/admin/delegations', ShieldCheck],
   ['Users & Staff', '/admin/users', Users],
   ['Website settings', '/admin/settings', Settings],

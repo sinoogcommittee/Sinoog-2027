@@ -332,14 +332,14 @@ export function ActivitiesManagerPage() {
             }
           />
         ) : (
-          <div className="admin-table">
-            <div className="admin-table__head" style={{ gridTemplateColumns: '2fr 1fr 1.5fr 1fr 100px 120px' }}>
+          <div className="admin-table activity-admin-table">
+            <div className="admin-table__head activity-table__grid activity-table__head">
               <span>Activity & Details</span>
               <span>Type</span>
               <span>Schedule</span>
               <span>Venue / Celebrant</span>
               <span>Status</span>
-              <span style={{ textAlign: 'right' }}>Actions</span>
+              <span className="activity-table__actions-label">Actions</span>
             </div>
 
             {filteredActivities.map((act) => {
@@ -347,16 +347,9 @@ export function ActivitiesManagerPage() {
               return (
                 <div
                   key={act.id}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '2fr 1fr 1.5fr 1fr 100px 120px',
-                    padding: '1rem',
-                    borderBottom: '1px solid #ede4dc',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                  }}
+                  className="activity-table__grid activity-table__row"
                 >
-                  <div>
+                  <div className="activity-table__cell activity-table__activity">
                     <strong style={{ display: 'block', fontSize: '1.05rem', color: '#3d1214' }}>
                       {act.title}
                     </strong>
@@ -367,7 +360,7 @@ export function ActivitiesManagerPage() {
                     )}
                   </div>
 
-                  <div>
+                  <div className="activity-table__cell activity-table__type">
                     <span
                       style={{
                         display: 'inline-block',
@@ -384,7 +377,7 @@ export function ActivitiesManagerPage() {
                     </span>
                   </div>
 
-                  <div style={{ fontSize: '0.9rem' }}>
+                  <div className="activity-table__cell activity-table__schedule" style={{ fontSize: '0.9rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#2c221e' }}>
                       <Calendar size={14} color="#781d22" />
                       <span>{dt.date}</span>
@@ -395,7 +388,7 @@ export function ActivitiesManagerPage() {
                     </div>
                   </div>
 
-                  <div style={{ fontSize: '0.85rem', color: '#55483f' }}>
+                  <div className="activity-table__cell activity-table__venue" style={{ fontSize: '0.85rem', color: '#55483f' }}>
                     {act.venue && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                         <MapPin size={13} color="#a1403d" />
@@ -410,13 +403,13 @@ export function ActivitiesManagerPage() {
                     )}
                   </div>
 
-                  <div>
+                  <div className="activity-table__cell activity-table__status">
                     <StatusBadge tone={act.status === 'published' ? 'success' : act.status === 'draft' ? 'warning' : 'neutral'}>
                       {act.status}
                     </StatusBadge>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
+                  <div className="activity-table__cell activity-table__actions">
                     <button
                       type="button"
                       className="button button--ghost"

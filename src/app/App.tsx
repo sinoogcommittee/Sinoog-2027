@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import { PublicLayout } from '../layouts/PublicLayout';
 import { PortalLayout } from '../layouts/PortalLayout';
 import { HomePage } from '../pages/public/HomePage';
@@ -27,6 +28,8 @@ import { RegistrationsManagerPage } from '../pages/admin/RegistrationsManagerPag
 import { UsersManagerPage } from '../pages/admin/UsersManagerPage';
 import { NotFoundPage } from '../pages/public/NotFoundPage';
 import { RequireAdmin } from '../components/RequireAdmin';
+
+const RunTimingPage = lazy(() => import('../pages/admin/RunTimingPage').then((module) => ({ default: module.RunTimingPage })));
 
 export default function App() {
   return (
@@ -72,6 +75,7 @@ export default function App() {
           <Route path="posts" element={<PostsManagerPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="registrations" element={<RegistrationsManagerPage />} />
+          <Route path="run-timing" element={<Suspense fallback={<div className="admin-page">Loading race timing…</div>}><RunTimingPage /></Suspense>} />
           <Route path="delegations" element={<AdminListPage type="delegations" />} />
           <Route path="users" element={<UsersManagerPage />} />
         </Route>

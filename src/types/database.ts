@@ -587,6 +587,11 @@ export interface Database {
           title: string;
           registration_opens_at: string | null;
           registration_closes_at: string | null;
+          race_starts_at: string | null;
+          official_started_at: string | null;
+          official_started_by: string | null;
+          gcash_number: string | null;
+          gcash_account_name: string | null;
           terms_version: string | null;
           terms_body: string | null;
           privacy_version: string | null;
@@ -600,6 +605,11 @@ export interface Database {
           title?: string;
           registration_opens_at?: string | null;
           registration_closes_at?: string | null;
+          race_starts_at?: string | null;
+          official_started_at?: string | null;
+          official_started_by?: string | null;
+          gcash_number?: string | null;
+          gcash_account_name?: string | null;
           terms_version?: string | null;
           terms_body?: string | null;
           privacy_version?: string | null;
@@ -613,6 +623,11 @@ export interface Database {
           title?: string;
           registration_opens_at?: string | null;
           registration_closes_at?: string | null;
+          race_starts_at?: string | null;
+          official_started_at?: string | null;
+          official_started_by?: string | null;
+          gcash_number?: string | null;
+          gcash_account_name?: string | null;
           terms_version?: string | null;
           terms_body?: string | null;
           privacy_version?: string | null;
@@ -702,6 +717,7 @@ export interface Database {
           category_id: string;
           user_id: string;
           participant_name: string;
+          division: string | null;
           birth_date: string | null;
           mobile: string;
           locality: string | null;
@@ -718,6 +734,10 @@ export interface Database {
           reviewed_by: string | null;
           reviewed_at: string | null;
           review_notes: string | null;
+          bib_number: string | null;
+          qr_token: string | null;
+          registration_source: 'online' | 'admin_cash';
+          registered_by: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -728,6 +748,7 @@ export interface Database {
           category_id: string;
           user_id: string;
           participant_name: string;
+          division?: string | null;
           birth_date?: string | null;
           mobile: string;
           locality?: string | null;
@@ -744,6 +765,10 @@ export interface Database {
           reviewed_by?: string | null;
           reviewed_at?: string | null;
           review_notes?: string | null;
+          bib_number?: string | null;
+          qr_token?: string | null;
+          registration_source?: 'online' | 'admin_cash';
+          registered_by?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -754,6 +779,7 @@ export interface Database {
           category_id?: string;
           user_id?: string;
           participant_name?: string;
+          division?: string | null;
           birth_date?: string | null;
           mobile?: string;
           locality?: string | null;
@@ -770,6 +796,10 @@ export interface Database {
           reviewed_by?: string | null;
           reviewed_at?: string | null;
           review_notes?: string | null;
+          bib_number?: string | null;
+          qr_token?: string | null;
+          registration_source?: 'online' | 'admin_cash';
+          registered_by?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -913,6 +943,39 @@ export interface Database {
         };
         Relationships: [];
       };
+      run_finish_records: {
+        Row: {
+          registration_id: string;
+          run_event_id: string;
+          category_id: string;
+          division: string;
+          finished_at: string;
+          elapsed_milliseconds: number;
+          recorded_by: string;
+          created_at: string;
+        };
+        Insert: {
+          registration_id: string;
+          run_event_id: string;
+          category_id: string;
+          division: string;
+          finished_at: string;
+          elapsed_milliseconds: number;
+          recorded_by: string;
+          created_at?: string;
+        };
+        Update: {
+          registration_id?: string;
+          run_event_id?: string;
+          category_id?: string;
+          division?: string;
+          finished_at?: string;
+          elapsed_milliseconds?: number;
+          recorded_by?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       kit_claims: {
         Row: {
           registration_id: string;
@@ -1014,7 +1077,75 @@ export interface Database {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      submit_run_registration: {
+        Args: {
+          p_run_event_id: string;
+          p_category_id: string;
+          p_participant_name: string;
+          p_division: string;
+          p_birth_date: string;
+          p_mobile: string;
+          p_locality: string;
+          p_shirt_size: string;
+          p_club_name: string;
+          p_emergency_name: string;
+          p_emergency_relationship: string;
+          p_emergency_mobile: string;
+          p_accessibility_notes: string;
+        };
+        Returns: Database['public']['Tables']['run_registrations']['Row'];
+      };
+      mark_gcash_payment_submitted: {
+        Args: { p_payment_id: string; p_payer_reference: string };
+        Returns: undefined;
+      };
+      review_run_registration: {
+        Args: {
+          p_registration_id: string;
+          p_status: ReviewStatus;
+          p_review_notes?: string;
+        };
+        Returns: Database['public']['Tables']['run_registrations']['Row'];
+      };
+      start_run_timing: {
+        Args: { p_run_event_id: string };
+        Returns: string;
+      };
+      record_run_finish: {
+        Args: { p_qr_token: string };
+        Returns: Database['public']['Tables']['run_finish_records']['Row'];
+      };
+      get_my_run_result: {
+        Args: { p_registration_id: string };
+        Returns: Array<{
+          finished_at: string;
+          elapsed_milliseconds: number;
+          division_rank: number;
+          category_rank: number;
+          overall_rank: number;
+        }>;
+      };
+      admin_register_cash_runner: {
+        Args: {
+          p_admin_id: string;
+          p_user_id: string;
+          p_run_event_id: string;
+          p_category_id: string;
+          p_participant_name: string;
+          p_division: string;
+          p_birth_date: string;
+          p_mobile: string;
+          p_full_address: string;
+          p_shirt_size: string;
+          p_club_name: string;
+          p_emergency_name: string;
+          p_emergency_relationship: string;
+          p_emergency_mobile: string;
+          p_accessibility_notes: string;
+          p_offline_consent_confirmed: boolean;
+        };
+        Returns: Database['public']['Tables']['run_registrations']['Row'];
+      };
     };
     Enums: {
       app_role: AppRole;

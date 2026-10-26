@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, type FormEvent } from 'react';
-import { Save, Calendar, Shield, Bell, Mail } from 'lucide-react';
+import { Save, Calendar, Shield, Bell, Mail, CreditCard } from 'lucide-react';
 import {
   getCurrentEdition,
   getSiteSettings,
@@ -9,6 +9,12 @@ import {
 import { LoadingState } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
 import type { Edition } from '../../types/database';
+import { getRunEventAndCategories, updateRunEventSettings } from '../../features/run/runQueries';
+
+const toManilaInput = (value: string | null) => value
+  ? new Date(value).toLocaleString('sv-SE', { timeZone: 'Asia/Manila' }).replace(' ', 'T').slice(0, 16)
+  : '';
+const fromManilaInput = (value: string) => value ? `${value}:00+08:00` : null;
 
 export function SettingsPage() {
   const { toast } = useToast();
@@ -25,6 +31,12 @@ export function SettingsPage() {
   const [novenaStartDate, setNovenaStartDate] = useState('');
   const [fiestaDate, setFiestaDate] = useState('');
   const [registrationOpen, setRegistrationOpen] = useState(false);
+  const [runEventId, setRunEventId] = useState<string | null>(null);
+  const [registrationOpensAt, setRegistrationOpensAt] = useState('');
+  const [registrationClosesAt, setRegistrationClosesAt] = useState('');
+  const [raceStartsAt, setRaceStartsAt] = useState('');
+  const [gcashNumber, setGcashNumber] = useState('09260265423');
+  const [gcashAccountName, setGcashAccountName] = useState('');
 
   // Site settings - Feature switches
   const [delegationsEnabled, setDelegationsEnabled] = useState(false);
@@ -55,6 +67,14 @@ export function SettingsPage() {
       setNovenaStartDate(ed.novena_start_date || '');
       setFiestaDate(ed.fiesta_date || '');
       setRegistrationOpen(ed.registration_open);
+
+      const { event } = await getRunEventAndCategories(ed.id);
+      setRunEventId(event.id);
+      setRegistrationOpensAt(toManilaInput(event.registration_opens_at));
+      setRegistrationClosesAt(toManilaInput(event.registration_closes_at));
+      setRaceStartsAt(toManilaInput(event.race_starts_at));
+      setGcashNumber(event.gcash_number || '09260265423');
+      setGcashAccountName(event.gcash_account_name || '');
 
       const settings = await getSiteSettings(ed.id);
       if (settings.announcement_banner) {
@@ -97,6 +117,15 @@ export function SettingsPage() {
         setNovenaStartDate(ed.novena_start_date || '');
         setFiestaDate(ed.fiesta_date || '');
         setRegistrationOpen(ed.registration_open);
+
+        const { event } = await getRunEventAndCategories(ed.id);
+        if (!mounted) return;
+        setRunEventId(event.id);
+        setRegistrationOpensAt(toManilaInput(event.registration_opens_at));
+        setRegistrationClosesAt(toManilaInput(event.registration_closes_at));
+        setRaceStartsAt(toManilaInput(event.race_starts_at));
+        setGcashNumber(event.gcash_number || '09260265423');
+        setGcashAccountName(event.gcash_account_name || '');
 
         const settings = await getSiteSettings(ed.id);
         if (!mounted) return;
@@ -177,6 +206,16 @@ export function SettingsPage() {
         office_hours: officeHours,
         social_fb: socialFb,
       });
+
+      if (runEventId) {
+        await updateRunEventSettings(runEventId, {
+          registration_opens_at: fromManilaInput(registrationOpensAt),
+          registration_closes_at: fromManilaInput(registrationClosesAt),
+          race_starts_at: fromManilaInput(raceStartsAt),
+          gcash_number: gcashNumber.trim() || null,
+          gcash_account_name: gcashAccountName.trim() || null,
+        });
+      }
 
       toast('Website settings saved successfully!', 'success');
       await fetchSettings();
@@ -274,6 +313,43 @@ export function SettingsPage() {
                   style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #e0d8d0', background: '#f5efe6' }}
                 />
                 <small style={{ color: '#6d6158' }}>All event schedules are authoritatively stored in Asia/Manila.</small>
+              </div>
+            </div>
+          </section>
+
+          {/* Sinoog Run operational settings */}
+          <section className="admin-panel">
+            <div className="panel-heading">
+              <div>
+                <h2>
+                  <CreditCard size={18} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: '-2px' }} />
+                  Sinoog Run Registration & GCash
+                </h2>
+                <p>Editable payment destination, registration deadline, and race start time.</p>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', padding: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>GCash Number</label>
+                <input type="tel" inputMode="numeric" value={gcashNumber} onChange={(e) => setGcashNumber(e.target.value.replace(/[^0-9+]/g, ''))} placeholder="09260265423" style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>GCash Account Name</label>
+                <input type="text" value={gcashAccountName} onChange={(e) => setGcashAccountName(e.target.value)} placeholder="Add when confirmed" style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>Registration Opens</label>
+                <input type="datetime-local" value={registrationOpensAt} onChange={(e) => setRegistrationOpensAt(e.target.value)} style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>Registration Deadline</label>
+                <input type="datetime-local" value={registrationClosesAt} onChange={(e) => setRegistrationClosesAt(e.target.value)} style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }} />
+                <small style={{ color: '#6d6158' }}>Leave blank while the deadline is still to be announced.</small>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>Race Start Date & Time</label>
+                <input type="datetime-local" value={raceStartsAt} onChange={(e) => setRaceStartsAt(e.target.value)} style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }} />
+                <small style={{ color: '#6d6158' }}>Leave blank until the official start time is confirmed.</small>
               </div>
             </div>
           </section>

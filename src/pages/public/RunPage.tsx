@@ -6,6 +6,7 @@ import { SectionHeading } from '../../components/SectionHeading';
 import {
   getRunEventAndCategories,
   type RunCategory,
+  type RunEvent,
 } from '../../features/run/runQueries';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import { useAuth } from '../../features/auth/useAuth';
@@ -15,6 +16,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
   const signedIn = Boolean(user) || isDemoAdmin;
 
   const [categories, setCategories] = useState<RunCategory[]>([]);
+  const [runEvent, setRunEvent] = useState<RunEvent | null>(null);
   const [registrationOpen, setRegistrationOpen] = useState(false);
 
   useEffect(() => {
@@ -23,9 +25,15 @@ export function RunPage({ section }: { section?: 'routes' }) {
       try {
         const ed = await getCurrentEdition();
         if (!mounted) return;
-        setRegistrationOpen(ed.registration_open);
-        const { categories: cats } = await getRunEventAndCategories(ed.id);
+        const { event, categories: cats } = await getRunEventAndCategories(ed.id);
         if (!mounted) return;
+        const now = Date.now();
+        setRegistrationOpen(
+          ed.registration_open
+          && (!event.registration_opens_at || now >= new Date(event.registration_opens_at).getTime())
+          && (!event.registration_closes_at || now <= new Date(event.registration_closes_at).getTime())
+        );
+        setRunEvent(event);
         setCategories(cats);
       } catch (err: unknown) {
         console.warn('Failed to load run data on RunPage:', err);
@@ -88,47 +96,23 @@ export function RunPage({ section }: { section?: 'routes' }) {
                   marginTop: '2rem',
                 }}
               >
-                <div style={{ background: '#fff', border: '1px solid var(--line)', padding: '1.75rem', borderRadius: '8px' }}>
-                  <span className="activity-type activity-type--run">3 Kilometers</span>
-                  <h3 style={{ fontFamily: 'Fraunces, serif', fontSize: '1.35rem', margin: '0.5rem 0' }}>
-                    3K Family & Youth Loop
-                  </h3>
-                  <p style={{ color: 'var(--muted)', fontSize: '0.92rem', lineHeight: 1.6 }}>
-                    Starts at Sto. Niño Church entrance, proceeds south along the barangay coastal road, turning around at
-                    the 1.5K mark near Guinacot Elementary School.
-                  </p>
-                  <div style={{ borderTop: '1px solid #eee', paddingTop: '1rem', marginTop: '1rem', fontSize: '0.85rem' }}>
-                    <strong>Water Station:</strong> At turnaround point · <strong>Gun Start:</strong> 6:00 AM
+                {categories.map((category) => (
+                  <div key={category.id} style={{ background: '#fff', border: '1px solid var(--line)', padding: '1.75rem', borderRadius: '8px' }}>
+                    <span className="activity-type activity-type--run">{category.distance_meters / 1000} Kilometers</span>
+                    <h3 style={{ fontFamily: 'Fraunces, serif', fontSize: '1.35rem', margin: '0.5rem 0' }}>{category.name}</h3>
+                    <p style={{ color: 'var(--muted)', fontSize: '0.92rem', lineHeight: 1.6 }}>
+                      {category.distance_meters === 10000
+                        ? 'Sto. Niño Guinacot Parish → Stampa Cabantian → Cansiwang Road → Guinacot High School Road → Back to Parish'
+                        : 'The official route and checkpoints will be announced after committee approval.'}
+                    </p>
+                    <div style={{ borderTop: '1px solid #eee', paddingTop: '1rem', marginTop: '1rem', fontSize: '0.85rem' }}>
+                      <strong>Race start:</strong>{' '}
+                      {runEvent?.race_starts_at
+                        ? new Date(runEvent.race_starts_at).toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Manila' })
+                        : 'To be announced'}
+                    </div>
                   </div>
-                </div>
-
-                <div style={{ background: '#fff', border: '1px solid var(--line)', padding: '1.75rem', borderRadius: '8px' }}>
-                  <span className="activity-type activity-type--run">5 Kilometers</span>
-                  <h3 style={{ fontFamily: 'Fraunces, serif', fontSize: '1.35rem', margin: '0.5rem 0' }}>
-                    5K Community Course
-                  </h3>
-                  <p style={{ color: 'var(--muted)', fontSize: '0.92rem', lineHeight: 1.6 }}>
-                    Out-and-back course along the provincial highway scenic route with rolling coastal hills and wide
-                    paved lanes.
-                  </p>
-                  <div style={{ borderTop: '1px solid #eee', paddingTop: '1rem', marginTop: '1rem', fontSize: '0.85rem' }}>
-                    <strong>Water Stations:</strong> 2K and 3.5K marks · <strong>Gun Start:</strong> 5:45 AM
-                  </div>
-                </div>
-
-                <div style={{ background: '#fff', border: '1px solid var(--line)', padding: '1.75rem', borderRadius: '8px' }}>
-                  <span className="activity-type activity-type--run">10 Kilometers</span>
-                  <h3 style={{ fontFamily: 'Fraunces, serif', fontSize: '1.35rem', margin: '0.5rem 0' }}>
-                    10K Coastal Challenge
-                  </h3>
-                  <p style={{ color: 'var(--muted)', fontSize: '0.92rem', lineHeight: 1.6 }}>
-                    Full challenge route toward Guindulman poblacion boundary and back, featuring timed checkpoints and
-                    mobile paramedic escorts.
-                  </p>
-                  <div style={{ borderTop: '1px solid #eee', paddingTop: '1rem', marginTop: '1rem', fontSize: '0.85rem' }}>
-                    <strong>Water Stations:</strong> Every 2.5 KM · <strong>Gun Start:</strong> 5:15 AM
-                  </div>
-                </div>
+                ))}
               </div>
 
               <div className="route-placeholder" style={{ marginTop: '2.5rem' }}>
@@ -243,8 +227,8 @@ export function RunPage({ section }: { section?: 'routes' }) {
                 <article>
                   <Route />
                   <h3>Scenic Route</h3>
-                  <p>Guinacot coastal corridor with clear signage and safety marshals.</p>
-                  <strong>Certified Distance</strong>
+                  <p>Official course details will be published after committee and safety approval.</p>
+                  <strong>Route confirmation pending</strong>
                 </article>
                 <article>
                   <PackageOpen />
@@ -255,7 +239,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
                 <article>
                   <Clock />
                   <h3>Race-Day Guide</h3>
-                  <p>Assembly begins 4:30 AM at Sto. Niño Parish Grounds.</p>
+                  <p>{runEvent?.race_starts_at ? `Race starts at ${new Date(runEvent.race_starts_at).toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Manila' })}.` : 'Race start time will be announced soon.'}</p>
                   <strong>January 9, 2027</strong>
                 </article>
               </div>
@@ -269,6 +253,10 @@ export function RunPage({ section }: { section?: 'routes' }) {
                   </span>
                 </div>
               )}
+              <div className="notice" style={{ marginTop: '1rem' }}>
+                <Clock size={20} />
+                <span><strong>Registration deadline:</strong>{' '}{runEvent?.registration_closes_at ? new Date(runEvent.registration_closes_at).toLocaleString('en-PH', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Manila' }) : 'To be announced soon'}</span>
+              </div>
             </>
           )}
         </div>
