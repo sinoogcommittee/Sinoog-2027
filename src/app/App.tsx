@@ -13,11 +13,10 @@ import { AboutPage } from '../pages/public/AboutPage';
 import { PolicyPage } from '../pages/public/PolicyPage';
 import { RunRegistrationPage } from '../pages/public/RunRegistrationPage';
 import { LoginPage } from '../pages/auth/LoginPage';
-import { RunnerLoginPage } from '../pages/auth/RunnerLoginPage';
-import { SignUpPage } from '../pages/auth/SignUpPage';
-import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage';
+import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage'; 
 import { ResetPasswordPage } from '../pages/auth/ResetPasswordPage';
 import { AuthCallbackPage } from '../pages/auth/AuthCallbackPage';
+import { RunnerAuthPage } from '../pages/auth/RunnerAuthPage';
 import { AccountPage } from '../pages/auth/AccountPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminListPage } from '../pages/admin/AdminListPage';
@@ -25,9 +24,9 @@ import { ActivitiesManagerPage } from '../pages/admin/ActivitiesManagerPage';
 import { SettingsPage } from '../pages/admin/SettingsPage';
 import { PostsManagerPage } from '../pages/admin/PostsManagerPage';
 import { RegistrationsManagerPage } from '../pages/admin/RegistrationsManagerPage';
+import { UsersManagerPage } from '../pages/admin/UsersManagerPage';
 import { NotFoundPage } from '../pages/public/NotFoundPage';
 import { RequireAdmin } from '../components/RequireAdmin';
-import { UsersManagerPage } from '../pages/admin/UsersManagerPage';
 
 export default function App() {
   return (
@@ -51,12 +50,13 @@ export default function App() {
         <Route path="/privacy" element={<PolicyPage type="privacy" />} />
         <Route path="/terms" element={<PolicyPage type="terms" />} />
 
-        {/* Runner account flow */}
-        <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/runner/login" element={<RunnerLoginPage />} />
+        {/* Single runner entry: Sign in + Sign up tabs */}
+        <Route path="/signin" element={<RunnerAuthPage />} />
+        <Route path="/signup" element={<Navigate to="/signin?mode=signup" replace />} />
+        <Route path="/runner/login" element={<Navigate to="/signin" replace />} />
         <Route path="/account" element={<AccountPage />} />
 
-        {/* Committee / website admin sign-in (no public staff sign-up) */}
+        {/* Committee staff only */}
         <Route path="/login" element={<LoginPage />} />
 
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -73,7 +73,6 @@ export default function App() {
           <Route path="settings" element={<SettingsPage />} />
           <Route path="registrations" element={<RegistrationsManagerPage />} />
           <Route path="delegations" element={<AdminListPage type="delegations" />} />
-          <Route path="users" element={<AdminListPage type="users" />} />
           <Route path="users" element={<UsersManagerPage />} />
         </Route>
       </Route>

@@ -68,17 +68,9 @@ export function PublicLayout() {
                 )}
               </>
             ) : (
-              <>
-                <Link to="/signup" className="nav-login" onClick={() => setOpen(false)}>
-                  Run sign up
-                </Link>
-                <Link to="/runner/login" className="nav-login" onClick={() => setOpen(false)}>
-                  Runner sign in
-                </Link>
-                <Link to="/login" className="nav-login" onClick={() => setOpen(false)}>
-                  Staff
-                </Link>
-              </>
+              <Link to="/signin" className="nav-login" onClick={() => setOpen(false)}>
+                Sign in
+              </Link>
             )}
           </nav>
         </div>

@@ -6,8 +6,15 @@ import { useAuth } from '../../features/auth/useAuth';
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { user, isAdmin, isDemoAdmin, isNewsInCharge, isDelegationHead, loading: authLoading, refresh } =
-    useAuth();
+  const {
+    user,
+    isAdmin,
+    isDemoAdmin,
+    isNewsInCharge,
+    isDelegationHead,
+    loading: authLoading,
+    refresh,
+  } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -17,7 +24,6 @@ export function LoginPage() {
 
   if (!authLoading && user) {
     if (hasStaffAccess) return <Navigate to="/admin" replace />;
-    // Signed-in runner landed on staff login by mistake
     return <Navigate to="/account" replace />;
   }
   if (!authLoading && isDemoAdmin) {
@@ -43,7 +49,6 @@ export function LoginPage() {
         return;
       }
       await refresh();
-      // Role check on next paint; send toward admin — RequireAdmin will block non-staff
       navigate('/admin');
     } catch (err: unknown) {
       setMessage(err instanceof Error ? err.message : 'Unable to sign in.');
@@ -65,7 +70,13 @@ export function LoginPage() {
         <form onSubmit={(e) => void submit(e)}>
           <label>
             Email address
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
           </label>
           <label>
             Password
@@ -100,10 +111,9 @@ export function LoginPage() {
           <Link to="/forgot-password">Forgot password</Link>
         </small>
         <small style={{ display: 'block', marginTop: '0.75rem' }}>
-          Registering for the Sinoog Run?{' '}
-          <Link to="/signup">Create a runner account</Link>
-          {' or '}
-          <Link to="/runner/login">runner sign in</Link>
+          Registering for the Sinoog Run? <Link to="/signin">Runner sign in</Link>
+          {' · '}
+          <Link to="/signin?mode=signup">Create runner account</Link>
         </small>
       </div>
     </section>
