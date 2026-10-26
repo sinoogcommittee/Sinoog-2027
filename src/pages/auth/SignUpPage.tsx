@@ -119,7 +119,7 @@ export function SignUpPage() {
               />
             </label>
             <label>
-              Locality / barangay
+              Address
               <input
                 type="text"
                 value={locality}

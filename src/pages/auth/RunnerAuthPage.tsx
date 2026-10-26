@@ -221,7 +221,7 @@ export function RunnerAuthPage() {
               />
             </label>
             <label>
-              Locality / barangay
+              Address
               <input
                 type="text"
                 value={locality}
