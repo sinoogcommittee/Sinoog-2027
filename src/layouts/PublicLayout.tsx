@@ -68,8 +68,8 @@ export function PublicLayout() {
                 )}
               </>
             ) : (
-              <Link to="/signin" className="nav-login" onClick={() => setOpen(false)}>
-                Sign in
+              <Link to="/login" className="nav-login" onClick={() => setOpen(false)}>
+                Staff sign in
               </Link>
             )}
           </nav>
@@ -110,7 +110,7 @@ export function PublicLayout() {
             <Link to="/about">About & contact</Link>
             <Link to="/privacy">Privacy</Link>
             <Link to="/terms">Terms & waiver</Link>
-            <Link to="/login">Staff login</Link>
+            <Link to="/login">Staff sign in</Link>
             <a href="https://www.facebook.com/Sto.NinoParishGuinacot" target="_blank" rel="noreferrer">
               <Facebook size={16} /> Parish Facebook
             </a>
