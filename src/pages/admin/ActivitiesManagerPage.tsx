@@ -92,7 +92,7 @@ export function ActivitiesManagerPage() {
     setEditingActivity(null);
     setTitle('');
     setType('mass');
-    setStartsAt('2027-01-09T08:00');
+    setStartsAt('2027-01-06T17:00');
     setEndsAt('');
     setVenue('Sto. Niño Parish Church, Guinacot');
     setCelebrant('');

@@ -9,7 +9,7 @@ export const DEFAULT_EDITION: Edition = {
   location: 'Guinacot, Guindulman, Bohol',
   timezone: 'Asia/Manila',
   run_date: '2027-01-09',
-  novena_start_date: '2027-01-09',
+  novena_start_date: '2027-01-06',
   fiesta_date: '2027-01-15',
   registration_open: false,
   is_current: true,
@@ -116,14 +116,11 @@ export async function saveSiteSetting(
     return { error: new Error('Supabase client is not configured') };
   }
 
-  const { error } = await supabase
-    .from('site_settings')
-    .upsert({
-      edition_id: editionId,
-      key,
-      value,
-    });
+  const { error } = await supabase.from('site_settings').upsert({
+    edition_id: editionId,
+    key,
+    value,
+  });
 
   return { error: error ? new Error(error.message) : null };
 }
-

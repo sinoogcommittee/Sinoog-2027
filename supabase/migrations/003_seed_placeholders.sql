@@ -1,10 +1,11 @@
 -- Optional development placeholders. Run only after 001 and 002.
+-- Official dates: novena starts 2027-01-06; Sinoog Run 2027-01-09; fiesta 2027-01-15.
 with e as (
   select id from public.editions where year=2027
 ), seed(type,title,starts_at,venue,celebrant,status,sort_order) as (
   values
-    ('run',      'Sinoog Run 2027',     '2027-01-09 05:00:00+08'::timestamptz, 'Guinacot, Guindulman', null::text,        'draft'::public.content_status, 10),
-    ('mass',     'Opening Novena Mass',  '2027-01-09 18:00:00+08'::timestamptz, 'Sto. Niño Parish',      'To be announced', 'draft'::public.content_status, 20),
+    ('mass',     'Opening Novena Mass',  '2027-01-06 18:00:00+08'::timestamptz, 'Sto. Niño Parish',      'To be announced', 'draft'::public.content_status, 10),
+    ('run',      'Sinoog Run 2027',     '2027-01-09 05:00:00+08'::timestamptz, 'Guinacot, Guindulman', null::text,        'draft'::public.content_status, 20),
     ('mass',     'Pontifical Mass',      '2027-01-15 09:00:00+08'::timestamptz, 'Sto. Niño Parish',      'To be announced', 'draft'::public.content_status, 30),
     ('festival', 'Sinoog Festival 2027', '2027-01-15 13:00:00+08'::timestamptz, 'Guinacot, Guindulman', null::text,        'draft'::public.content_status, 40)
 )

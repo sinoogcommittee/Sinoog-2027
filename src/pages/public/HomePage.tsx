@@ -32,9 +32,21 @@ export function HomePage() {
   }, []);
 
   const celebrationKeyDates = [
-    { date: 'January 9, 2027', label: 'Sinoog Run', note: 'Opening event · Registration details coming soon' },
-    { date: 'January 9, 2027', label: 'Novena begins', note: 'Mass schedule awaiting final parish confirmation' },
-    { date: 'January 15, 2027', label: 'Fiesta & Sinoog Festival', note: 'Guinacot, Guindulman, Bohol' },
+    {
+      date: 'January 6, 2027',
+      label: 'Novena begins',
+      note: 'Mass schedule awaiting final parish confirmation',
+    },
+    {
+      date: 'January 9, 2027',
+      label: 'Sinoog Run',
+      note: 'Opening event · Registration details coming soon',
+    },
+    {
+      date: 'January 15, 2027',
+      label: 'Fiesta & Sinoog Festival',
+      note: 'Guinacot, Guindulman, Bohol',
+    },
   ];
 
   return (
@@ -133,7 +145,9 @@ export function HomePage() {
           <div className="schedule-list">
             {activitiesList.map((a) => {
               const dt = formatActivityDateTime(a.starts_at);
-              const dayStr = a.starts_at ? new Date(a.starts_at).getDate().toString().padStart(2, '0') : '09';
+              const dayStr = a.starts_at
+                ? new Date(a.starts_at).getDate().toString().padStart(2, '0')
+                : '--';
               return (
                 <article key={a.id}>
                   <time>

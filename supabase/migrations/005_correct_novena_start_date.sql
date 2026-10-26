@@ -15,7 +15,7 @@ where a.edition_id=e.id
   and a.title='Opening Novena Mass'
   and a.type='mass'
   and a.status='draft'
-  and a.starts_at::date='2027-01-09'::date;
+  and a.starts_at::date='2027-01-06'::date;
 
 select year,run_date,novena_start_date,fiesta_date
 from public.editions

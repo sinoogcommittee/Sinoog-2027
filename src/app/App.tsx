@@ -13,13 +13,19 @@ import { AboutPage } from '../pages/public/AboutPage';
 import { PolicyPage } from '../pages/public/PolicyPage';
 import { RunRegistrationPage } from '../pages/public/RunRegistrationPage';
 import { LoginPage } from '../pages/auth/LoginPage';
+import { SignUpPage } from '../pages/auth/SignUpPage';
+import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from '../pages/auth/ResetPasswordPage';
+import { AccountPage } from '../pages/auth/AccountPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminListPage } from '../pages/admin/AdminListPage';
 import { ActivitiesManagerPage } from '../pages/admin/ActivitiesManagerPage';
 import { SettingsPage } from '../pages/admin/SettingsPage';
 import { PostsManagerPage } from '../pages/admin/PostsManagerPage';
+import { RegistrationsManagerPage } from '../pages/admin/RegistrationsManagerPage';
 import { NotFoundPage } from '../pages/public/NotFoundPage';
 import { RequireAdmin } from '../components/RequireAdmin';
+import { AuthCallbackPage } from '../pages/auth/AuthCallbackPage';
 
 export default function App() {
   return (
@@ -43,6 +49,11 @@ export default function App() {
         <Route path="/privacy" element={<PolicyPage type="privacy" />} />
         <Route path="/terms" element={<PolicyPage type="terms" />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
+        <Route path="/account" element={<AccountPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
 
@@ -53,7 +64,7 @@ export default function App() {
           <Route path="activities" element={<ActivitiesManagerPage />} />
           <Route path="posts" element={<PostsManagerPage />} />
           <Route path="settings" element={<SettingsPage />} />
-          <Route path="registrations" element={<AdminListPage type="registrations" />} />
+          <Route path="registrations" element={<RegistrationsManagerPage />} />
           <Route path="delegations" element={<AdminListPage type="delegations" />} />
           <Route path="users" element={<AdminListPage type="users" />} />
         </Route>
