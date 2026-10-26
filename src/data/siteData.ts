@@ -2,12 +2,12 @@ import type { Activity, NewsPost } from '../types';
 
 export const keyDates = [
   { date: 'January 9, 2027', label: 'Sinoog Run', note: 'Registration details to be announced' },
-  { date: 'January 9, 2027', label: 'Novena begins', note: 'Mass schedule awaiting parish confirmation' },
+  { date: 'January 6, 2027', label: 'Novena begins', note: 'Mass times and celebrants awaiting parish confirmation' },
   { date: 'January 15, 2027', label: 'Fiesta & Sinoog Festival', note: 'Guinacot, Guindulman, Bohol' },
 ];
 export const activities: Activity[] = [
   { id: '1', title: 'Sinoog Run 2027', type: 'run', date: '2027-01-09', time: 'To be announced', venue: 'Guinacot, Guindulman' },
-  { id: '2', title: 'Opening Novena Mass', type: 'mass', date: '2027-01-09', time: 'To be announced', venue: 'Sto. Niño Parish', celebrant: 'To be announced' },
+  { id: '2', title: 'Opening Novena Mass', type: 'mass', date: '2027-01-06', time: 'To be announced', venue: 'Sto. Niño Parish', celebrant: 'To be announced' },
   { id: '3', title: 'Pontifical Mass', type: 'mass', date: '2027-01-15', time: 'To be announced', venue: 'Sto. Niño Parish', celebrant: 'To be announced' },
   { id: '4', title: 'Sinoog Festival 2027', type: 'festival', date: '2027-01-15', time: 'To be announced', venue: 'Guinacot, Guindulman' },
 ];

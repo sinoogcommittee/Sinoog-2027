@@ -10,7 +10,7 @@ Purpose: This is the primary implementation checklist and handoff document for t
 - Parish: **Sto. Niño Parish — Guinacot, Guindulman, Bohol**
 - Organizer: **Sinoog Committee**
 - Sinoog Run: **January 9, 2027**
-- Stated start of novena: **January 9, 2027**
+- Start of novena Masses: **January 6, 2027**
 - Fiesta and Sinoog Festival: **January 15, 2027**
 - Official timezone: **Asia/Manila**
 - Frontend: React, TypeScript, Vite, React Router
@@ -19,7 +19,7 @@ Purpose: This is the primary implementation checklist and handoff document for t
 - Frontend hosting: Render Static Site
 - Initial administrator account: `rieldiango24@gmail.com`
 
-The complete novena schedule still requires parish confirmation. January 9 through January 15 contains seven calendar dates, so the website must not invent nine Mass dates or celebrants.
+The novena begins January 6, 2027. The individual Mass times, celebrants, venues, and confirmation of the complete novena and Pontifical Mass schedule still require parish approval.
 
 ## 2. Status legend and priorities
 
@@ -133,6 +133,7 @@ Priority: **P0**
 - [ ] Confirm `002_security_and_storage.sql` completed successfully.
 - [ ] Confirm the corrected `003_seed_placeholders.sql` was applied only if placeholder records are wanted.
 - [ ] Run `004_promote_first_admin.sql` and confirm the result shows `rieldiango24@gmail.com` with `admin` and `public_user` roles.
+- [ ] Run `005_correct_novena_start_date.sql` and confirm the result shows run date January 9, novena start January 6, and fiesta date January 15.
 - [ ] Record which migrations were applied and when.
 - [ ] Do not treat the optional activity seed as official content; it remains draft until reviewed.
 

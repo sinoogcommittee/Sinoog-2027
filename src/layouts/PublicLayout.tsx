@@ -8,7 +8,7 @@ export function PublicLayout() {
   return <div className="site-shell">
     <a className="skip-link" href="#main">Skip to content</a>
     <header className="site-header">
-      <div className="utility-bar"><div className="container utility-bar__inner"><span><MapPin size={14}/> Guinacot, Guindulman, Bohol</span><span><CalendarDays size={14}/> January 9–15, 2027</span></div></div>
+      <div className="utility-bar"><div className="container utility-bar__inner"><span><MapPin size={14}/> Guinacot, Guindulman, Bohol</span><span><CalendarDays size={14}/> January 6–15, 2027</span></div></div>
       <div className="container nav-wrap">
         <Link className="brand" to="/" onClick={() => setOpen(false)}><LogoMark type="parish"/><span><strong>Sinoog 2027</strong><small>Sto. Niño Parish · Guinacot</small></span></Link>
         <button className="menu-button" aria-label="Toggle navigation" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? <X/> : <Menu/>}</button>

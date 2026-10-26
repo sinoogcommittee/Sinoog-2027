@@ -15,6 +15,7 @@ Run the following files in Supabase SQL Editor in order:
 2. `supabase/migrations/002_security_and_storage.sql`
 3. `supabase/migrations/003_seed_placeholders.sql` (optional)
 4. `supabase/migrations/004_promote_first_admin.sql` (assigns the initial administrator)
+5. `supabase/migrations/005_correct_novena_start_date.sql` (sets the novena start to January 6, 2027)
 
 The fourth script looks up `rieldiango24@gmail.com` in Supabase Authentication and safely assigns the initial `admin` role. It can be rerun without creating duplicate roles.
 

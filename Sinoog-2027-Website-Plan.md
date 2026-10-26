@@ -10,11 +10,11 @@ Planning baseline: October 26, 2026. The year was changed to 2027 at the organiz
 - Parish: **Sto. Niño Parish — Guinacot, Guindulman, Bohol**
 - Organizing body: **Sinoog Committee**
 - Sinoog Run: **January 9, 2027**
-- Start of novena Masses: **January 9, 2027**
+- Start of novena Masses: **January 6, 2027**
 - Fiesta and Sinoog Festival: **January 15, 2027**
 - Time zone: **Asia/Manila**
 
-Confirm the full novena schedule with the parish: January 9–15 spans seven calendar dates. Do not generate nine Mass dates or assume which Mass concludes the novena. Celebrants, times, venues, and nightly activities remain unpublished until supplied.
+The novena begins January 6, 2027. Confirm the individual Mass dates, times, celebrants, venues, and the Pontifical Mass schedule with the parish before publication. Nightly activities remain unpublished until supplied.
 
 Build a public information website plus three connected workspaces: a runner account area, a delegation submission area, and a committee administration area. General visitors should browse without signing in. Accounts are required for private submissions and registration tracking.
 
