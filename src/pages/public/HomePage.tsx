@@ -7,12 +7,18 @@ import { getCurrentEdition } from '../../features/editions/editionQueries';
 import { getPublishedActivities, formatActivityDateTime } from '../../features/activities/activityQueries';
 import { getPublishedPosts } from '../../features/content/postQueries';
 import { getPublicMediaUrl } from '../../features/media/mediaQueries';
+import {
+  getSponsorLogoUrl,
+  listPublishedEditionSponsors,
+  type EditionSponsorRow,
+} from '../../features/sponsors/sponsorQueries';
 import type { DbActivity, NewsPost } from '../../types';
 import { EmptyState, ErrorState, LoadingState } from '../../features/ui/FeedbackStates';
 
 export function HomePage() {
   const [activitiesList, setActivitiesList] = useState<DbActivity[]>([]);
   const [newsList, setNewsList] = useState<NewsPost[]>([]);
+  const [sponsors, setSponsors] = useState<EditionSponsorRow[]>([]);
   const [contentLoading, setContentLoading] = useState(true);
   const [contentError, setContentError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
@@ -26,10 +32,12 @@ export function HomePage() {
         getCurrentEdition(),
         getPublishedActivities(),
         getPublishedPosts(),
-      ]).then(([, acts, posts]) => {
+        listPublishedEditionSponsors(),
+      ]).then(([, acts, posts, sponsorRows]) => {
         if (!active) return;
         setActivitiesList(acts.slice(0, 4));
         setNewsList(posts.slice(0, 3));
+        setSponsors(sponsorRows.slice(0, 8));
       }).catch((error: unknown) => {
         if (active) setContentError(error instanceof Error ? error.message : 'Unable to load official updates.');
       }).finally(() => {
@@ -260,15 +268,55 @@ export function HomePage() {
           <SectionHeading
             eyebrow="With gratitude"
             title="Our celebration partners"
-            description="Sponsor names and recognition tiers will appear here after committee approval."
+            description={
+              sponsors.length > 0
+                ? 'Partners supporting the parish fiesta and Sinoog Festival.'
+                : 'Sponsor names and recognition tiers will appear here after committee approval.'
+            }
             align="center"
           />
-          <div className="sponsor-strip">
-            <span>MAJOR PARTNER</span>
-            <span>COMMUNITY PARTNER</span>
-            <span>MEDIA PARTNER</span>
-            <span>SUPPORTER</span>
-          </div>
+          {sponsors.length > 0 ? (
+            <div className="sponsor-strip sponsor-strip--live">
+              {sponsors.map((row) => {
+                const logo = getSponsorLogoUrl(row.sponsor.logo_path);
+                const inner = (
+                  <>
+                    <div className="sponsor-strip__logo">
+                      {logo ? (
+                        <img src={logo} alt="" />
+                      ) : (
+                        <span className="sponsor-strip__initial">{row.sponsor.name.slice(0, 1)}</span>
+                      )}
+                    </div>
+                    <strong>{row.sponsor.name}</strong>
+                    <small>{row.tier}</small>
+                  </>
+                );
+                return row.sponsor.website_url ? (
+                  <a
+                    key={row.sponsor_id}
+                    className="sponsor-strip__card"
+                    href={row.sponsor.website_url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {inner}
+                  </a>
+                ) : (
+                  <div key={row.sponsor_id} className="sponsor-strip__card">
+                    {inner}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="sponsor-strip">
+              <span>MAJOR PARTNER</span>
+              <span>COMMUNITY PARTNER</span>
+              <span>MEDIA PARTNER</span>
+              <span>SUPPORTER</span>
+            </div>
+          )}
           <div className="center-action">
             <Button to="/sponsors" variant="ghost">
               View all sponsors
