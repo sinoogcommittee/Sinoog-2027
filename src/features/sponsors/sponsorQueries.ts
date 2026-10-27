@@ -4,14 +4,10 @@ import { getPublicMediaUrl, uploadPublicImage } from '../media/mediaQueries';
 import type { DbSponsor } from '../../types';
 
 export const SPONSOR_TIERS = [
-  'Presenting',
-  'Platinum',
-  'Gold',
-  'Silver',
-  'Bronze',
-  'Partner',
-  'Media',
-  'Supporter',
+  'Diamond Sponsor',
+  'Gold Sponsor',
+  'Silver Sponsor',
+  'Bronze Sponsor',
 ] as const;
 
 export type SponsorTier = (typeof SPONSOR_TIERS)[number] | string;
@@ -132,7 +128,7 @@ export async function createEditionSponsor(input: SponsorInput, editionId?: stri
     .insert({
       edition_id: edId,
       sponsor_id: sponsor.id,
-      tier: input.tier.trim() || 'Supporter',
+      tier: input.tier.trim() || 'Bronze Sponsor',
       sort_order: input.sort_order,
       published: input.published,
     })
@@ -181,7 +177,7 @@ export async function updateEditionSponsor(
   const { error: linkError } = await supabase
     .from('edition_sponsors')
     .update({
-      tier: input.tier.trim() || 'Supporter',
+      tier: input.tier.trim() || 'Bronze Sponsor',
       sort_order: input.sort_order,
       published: input.published,
     })
@@ -244,11 +240,17 @@ export async function uploadSponsorLogo(file: File, editionId: string): Promise<
 
 /** Group published sponsors by tier for the public page. */
 export function groupSponsorsByTier(rows: EditionSponsorRow[]): { tier: string; items: EditionSponsorRow[] }[] {
-  const orderHint = new Map(SPONSOR_TIERS.map((t, i) => [t.toLowerCase(), i]));
+  const orderHint = new Map<string, number>();
+  SPONSOR_TIERS.forEach((t, i) => {
+    orderHint.set(t.toLowerCase(), i);
+    // allow short labels like "Gold" to sort with "Gold Sponsor"
+    const short = t.replace(/\s+sponsor$/i, '').toLowerCase();
+    orderHint.set(short, i);
+  });
   const groups = new Map<string, EditionSponsorRow[]>();
 
   for (const row of rows) {
-    const tier = row.tier || 'Supporter';
+    const tier = row.tier || 'Bronze Sponsor';
     const list = groups.get(tier) || [];
     list.push(row);
     groups.set(tier, list);
@@ -256,8 +258,8 @@ export function groupSponsorsByTier(rows: EditionSponsorRow[]): { tier: string; 
 
   return [...groups.entries()]
     .sort((a, b) => {
-      const ai = orderHint.get(a[0].toLowerCase()) ?? 100;
-      const bi = orderHint.get(b[0].toLowerCase()) ?? 100;
+      const ai = orderHint.get(a[0].toLowerCase()) ?? orderHint.get(a[0].replace(/\s+sponsor$/i, '').toLowerCase()) ?? 100;
+      const bi = orderHint.get(b[0].toLowerCase()) ?? orderHint.get(b[0].replace(/\s+sponsor$/i, '').toLowerCase()) ?? 100;
       if (ai !== bi) return ai - bi;
       return a[0].localeCompare(b[0]);
     })

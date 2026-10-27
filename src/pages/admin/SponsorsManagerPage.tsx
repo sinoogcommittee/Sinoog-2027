@@ -19,7 +19,7 @@ const emptyForm = {
   name: '',
   website_url: '',
   logo_path: '',
-  tier: 'Supporter',
+  tier: 'Bronze Sponsor',
   sort_order: 0,
   published: false,
 };
@@ -95,7 +95,7 @@ export function SponsorsManagerPage() {
       name: row.sponsor.name,
       website_url: row.sponsor.website_url || '',
       logo_path: row.sponsor.logo_path || '',
-      tier: row.tier || 'Supporter',
+      tier: row.tier || 'Bronze Sponsor',
       sort_order: row.sort_order,
       published: row.published,
     });
@@ -344,19 +344,20 @@ export function SponsorsManagerPage() {
               <div className="sponsor-form__row">
                 <div className="sponsor-form__field">
                   <label htmlFor="sponsor-tier">Tier</label>
-                  <input
+                  <select
                     id="sponsor-tier"
-                    type="text"
-                    list="sponsor-tier-options"
-                    placeholder="Supporter"
                     value={form.tier}
                     onChange={(e) => setForm((c) => ({ ...c, tier: e.target.value }))}
-                  />
-                  <datalist id="sponsor-tier-options">
+                  >
                     {SPONSOR_TIERS.map((tier) => (
-                      <option key={tier} value={tier} />
+                      <option key={tier} value={tier}>
+                        {tier}
+                      </option>
                     ))}
-                  </datalist>
+                    {!(SPONSOR_TIERS as readonly string[]).includes(form.tier) && form.tier ? (
+                      <option value={form.tier}>{form.tier} (current)</option>
+                    ) : null}
+                  </select>
                 </div>
                 <div className="sponsor-form__field">
                   <label htmlFor="sponsor-order">Sort order</label>
