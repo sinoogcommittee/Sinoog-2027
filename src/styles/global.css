@@ -4287,3 +4287,139 @@ button:focus-visible {
     margin-top: -2px;
   }
 }
+
+/* Registrations toolbar — modern search (mobile + desktop) */
+.registrations-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+}
+
+.registrations-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 260px;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 14px;
+  min-height: 48px;
+  background: #f7f3ec;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 2px rgba(43, 35, 32, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.registrations-search:focus-within {
+  background: #fff;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(214, 157, 46, 0.22);
+}
+
+.registrations-search svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
+}
+
+.registrations-search input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  padding: 12px 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.registrations-search input::placeholder {
+  color: #9a8f86;
+}
+
+.registrations-search input[type='search']::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.registrations-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 220px;
+}
+
+.registrations-filters select {
+  flex: 1 1 140px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #d4c5b9;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+/* Keep Review / Delete actions on the right on all breakpoints */
+.registrations-table .registration-row-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .registrations-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .registrations-search {
+    flex: none;
+    width: 100%;
+    max-width: none;
+    min-height: 50px;
+    padding: 0 16px;
+    border-radius: 14px;
+  }
+
+  .registrations-search input {
+    font-size: 1rem;
+  }
+
+  .registrations-filters {
+    flex: none;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .registrations-filters select {
+    flex: none;
+    width: 100%;
+  }
+
+  .registrations-table .registration-row-actions {
+    justify-content: flex-end !important;
+  }
+
+  .registration-row-actions {
+    justify-content: flex-end !important;
+  }
+}
