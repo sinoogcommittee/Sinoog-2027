@@ -300,45 +300,55 @@ export function SponsorsManagerPage() {
 
       {modalOpen && (
         <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="sponsor-modal-title">
-          <div className="modal-card activity-modal">
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'start' }}>
+          <div className="modal-card sponsor-modal">
+            <div className="sponsor-modal__header">
               <div>
                 <p className="eyebrow">Sinoog 2027</p>
                 <h2 id="sponsor-modal-title">{editingId ? 'Edit sponsor' : 'Add sponsor'}</h2>
+                <p className="sponsor-modal__lede">
+                  {editingId
+                    ? 'Update recognition details for this partner.'
+                    : 'Add a partner name, optional logo, and publish when ready.'}
+                </p>
               </div>
-              <button type="button" className="button button--ghost" onClick={closeModal} aria-label="Close">
+              <button type="button" className="sponsor-modal__close" onClick={closeModal} aria-label="Close">
                 <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={(e) => void handleSave(e)} style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
-              <label>
-                Organization name
+            <form className="sponsor-form" onSubmit={(e) => void handleSave(e)}>
+              <div className="sponsor-form__field">
+                <label htmlFor="sponsor-name">Organization name</label>
                 <input
+                  id="sponsor-name"
                   type="text"
                   required
+                  placeholder="e.g. Sto. Niño Parish Pastoral Council"
                   value={form.name}
                   onChange={(e) => setForm((c) => ({ ...c, name: e.target.value }))}
                   autoComplete="organization"
                 />
-              </label>
+              </div>
 
-              <label>
-                Website URL
+              <div className="sponsor-form__field">
+                <label htmlFor="sponsor-url">Website URL</label>
                 <input
+                  id="sponsor-url"
                   type="url"
-                  placeholder="https://"
+                  placeholder="https://example.com"
                   value={form.website_url}
                   onChange={(e) => setForm((c) => ({ ...c, website_url: e.target.value }))}
                 />
-              </label>
+              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem' }}>
-                <label>
-                  Tier
+              <div className="sponsor-form__row">
+                <div className="sponsor-form__field">
+                  <label htmlFor="sponsor-tier">Tier</label>
                   <input
+                    id="sponsor-tier"
                     type="text"
                     list="sponsor-tier-options"
+                    placeholder="Supporter"
                     value={form.tier}
                     onChange={(e) => setForm((c) => ({ ...c, tier: e.target.value }))}
                   />
@@ -347,79 +357,73 @@ export function SponsorsManagerPage() {
                       <option key={tier} value={tier} />
                     ))}
                   </datalist>
-                </label>
-                <label>
-                  Sort order
+                </div>
+                <div className="sponsor-form__field">
+                  <label htmlFor="sponsor-order">Sort order</label>
                   <input
+                    id="sponsor-order"
                     type="number"
+                    inputMode="numeric"
                     value={form.sort_order}
                     onChange={(e) => setForm((c) => ({ ...c, sort_order: Number(e.target.value) }))}
                   />
-                </label>
-              </div>
-
-              <div>
-                <span style={{ display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.35rem' }}>
-                  Logo
-                </span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
-                  {form.logo_path ? (
-                    <img
-                      src={getSponsorLogoUrl(form.logo_path)}
-                      alt=""
-                      style={{ width: 72, height: 72, objectFit: 'contain', background: '#fff', border: '1px solid var(--line)', borderRadius: 8, padding: 6 }}
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        width: 72,
-                        height: 72,
-                        display: 'grid',
-                        placeItems: 'center',
-                        background: '#f7f3ec',
-                        border: '1px dashed var(--line)',
-                        borderRadius: 8,
-                      }}
-                    >
-                      <HeartHandshake size={22} />
-                    </div>
-                  )}
-                  <label className="button button--secondary button--sm" style={{ cursor: 'pointer' }}>
-                    <Upload size={14} /> {uploading ? 'Uploading…' : 'Upload logo'}
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      hidden
-                      disabled={uploading}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] || null;
-                        e.target.value = '';
-                        void handleLogoUpload(file);
-                      }}
-                    />
-                  </label>
-                  {form.logo_path && (
-                    <button
-                      type="button"
-                      className="button button--ghost button--sm"
-                      onClick={() => setForm((c) => ({ ...c, logo_path: '' }))}
-                    >
-                      Remove logo
-                    </button>
-                  )}
                 </div>
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div className="sponsor-form__field">
+                <span className="sponsor-form__label" id="sponsor-logo-label">
+                  Logo
+                </span>
+                <div className="sponsor-form__logo" aria-labelledby="sponsor-logo-label">
+                  <div className={`sponsor-form__logo-preview${form.logo_path ? ' has-image' : ''}`}>
+                    {form.logo_path ? (
+                      <img src={getSponsorLogoUrl(form.logo_path)} alt="" />
+                    ) : (
+                      <HeartHandshake size={26} aria-hidden />
+                    )}
+                  </div>
+                  <div className="sponsor-form__logo-actions">
+                    <label className="button button--secondary button--sm sponsor-form__upload">
+                      <Upload size={14} /> {uploading ? 'Uploading…' : 'Upload logo'}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        hidden
+                        disabled={uploading}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          e.target.value = '';
+                          void handleLogoUpload(file);
+                        }}
+                      />
+                    </label>
+                    {form.logo_path && (
+                      <button
+                        type="button"
+                        className="button button--ghost button--sm"
+                        onClick={() => setForm((c) => ({ ...c, logo_path: '' }))}
+                      >
+                        Remove
+                      </button>
+                    )}
+                    <p className="sponsor-form__hint">JPEG, PNG, or WebP · up to 10 MB</p>
+                  </div>
+                </div>
+              </div>
+
+              <label className="sponsor-form__switch">
                 <input
                   type="checkbox"
                   checked={form.published}
                   onChange={(e) => setForm((c) => ({ ...c, published: e.target.checked }))}
                 />
-                Publish on the public sponsors page
+                <span>
+                  <strong>Publish on the public sponsors page</strong>
+                  <small>Unpublished partners stay visible only in this workspace.</small>
+                </span>
               </label>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.5rem' }}>
+              <div className="sponsor-form__actions">
                 <button type="button" className="button button--ghost" onClick={closeModal}>
                   Cancel
                 </button>
