@@ -36,6 +36,20 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | `011_cash_payments_and_finance.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — cash receiver attribution, financial records, audited voiding, and complete walk-in profile metadata applied successfully |
 | `012_sponsor_facebook_url.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — configured Supabase REST schema query confirmed `public.sponsors.facebook_url` is present |
 | `013_gallery_photo_video_collections.sql` | — | SQL Editor | Site administrator | PENDING — adds gallery collection year/media type fields and index; run before deploying the gallery manager |
+| `014_registration_documents_and_timeline.sql` | 2026-10-28 | SQL Editor | Site administrator | PARTIAL PASS — columns, trigger, and policy versions passed; its protection trigger blocked the initial backfill, corrected by migration `015` |
+| `015_registration_lifecycle_backfill_fix.sql` | — | SQL Editor | Site administrator | PENDING — permits one-time email/approval-date backfill while preserving immutable lifecycle snapshots afterward |
+
+## Registration policy and lifecycle package — October 28, 2026
+
+| Area | Result | Notes |
+| --- | --- | --- |
+| Combined review decision | RECORDED | The main administrator chose one-step payment review and registration approval. The existing trusted review function records the reviewer, review date, notes, status change, and audit entry. |
+| Separate finance verification gate | NOT REQUIRED | Finance records remain available to administrators, but approval does not require a second reviewer. |
+| Automatic refund workflow | NOT REQUIRED | Refund handling is not being productized. The public policy documents the non-refundable default and manual committee review for duplicates, clear errors, or full event cancellation. |
+| Waiver and terms | CODE COMPLETE | Full participant responsibilities, risk, emergency assistance, event changes, and acceptance record are published by the policy page. |
+| Privacy notice | CODE COMPLETE | Data categories, purposes, access, public results, retention, rights, minors, and support contact are documented. |
+| Guardian consent | CODE COMPLETE | Online minors receive a required guardian checkbox and consent record; walk-in minors receive an offline guardian consent record when the signed waiver is confirmed. |
+| Registration email and dates | PENDING SQL | UI and types are ready; apply migration `014`, then verify online and walk-in rows contain `registration_email`, `submitted_at`, and `approved_at`. |
 
 ## Live application acceptance tests — October 27, 2026
 

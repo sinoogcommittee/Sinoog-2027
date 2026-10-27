@@ -58,10 +58,10 @@ export const FALLBACK_RUN_EVENT: RunEvent = {
   official_started_by: null,
   gcash_number: '09260265423',
   gcash_account_name: null,
-  terms_version: '2027-v1',
-  terms_body: 'By registering for the Sinoog Run 2027, the participant certifies physical fitness and assumes all ordinary risks associated with road running. Medical teams and water stations will be deployed along all routes.',
-  privacy_version: '2027-v1',
-  privacy_body: 'Personal data collected will be used strictly for race registration, emergency contact, bib allocation, and finisher verification by the Sto. Niño Parish Sinoog Committee.',
+  terms_version: '2027-v2',
+  terms_body: 'I confirm that the submitted information is accurate, that I am fit for my selected category, and that I accept the ordinary risks of a public-road running event. I will follow route, safety, and medical instructions. I authorize reasonable emergency assistance. Registration fees are generally non-refundable after submission or approval, subject to the committee policy for duplicate payments, clear payment errors, or full event cancellation.',
+  privacy_version: '2027-v2',
+  privacy_body: 'The Sinoog Committee will use registration, contact, emergency, payment, consent, bib, QR, and timing information for event operations, safety, accounting, results, and audit. Private contact, emergency, payment-evidence, and QR-token data will not be published.',
 };
 
 export const FALLBACK_CATEGORIES: RunCategory[] = [
@@ -156,6 +156,7 @@ export interface RegistrationInput {
   emergency_relationship: string;
   emergency_mobile: string;
   accessibility_notes?: string | null;
+  guardian_consent?: boolean;
 }
 
 export interface AdminCashRegistrationInput extends RegistrationInput {
@@ -306,7 +307,9 @@ export async function submitRegistration(payload: RegistrationInput): Promise<Db
       fee_centavos: FALLBACK_CATEGORIES.find((category) => category.id === payload.category_id)?.fee_centavos ?? 0,
       currency: 'PHP',
       status: 'submitted',
+      registration_email: 'runner@sinoog.local',
       submitted_at: new Date().toISOString(),
+      approved_at: null,
       reviewed_by: null,
       reviewed_at: null,
       review_notes: null,
@@ -328,8 +331,9 @@ export async function submitRegistration(payload: RegistrationInput): Promise<Db
         status: 'unpaid',
       },
       consents: [
-        { id: 'demo-terms', consent_type: 'terms', version: '2027-v1', accepted: true, accepted_at: new Date().toISOString() },
-        { id: 'demo-privacy', consent_type: 'privacy', version: '2027-v1', accepted: true, accepted_at: new Date().toISOString() },
+        { id: 'demo-terms', consent_type: 'terms', version: '2027-v2', accepted: true, accepted_at: new Date().toISOString() },
+        { id: 'demo-privacy', consent_type: 'privacy', version: '2027-v2', accepted: true, accepted_at: new Date().toISOString() },
+        ...(payload.guardian_consent ? [{ id: 'demo-guardian', consent_type: 'guardian' as const, version: '2027-v2', accepted: true, accepted_at: new Date().toISOString() }] : []),
       ],
     };
 
@@ -353,6 +357,16 @@ export async function submitRegistration(payload: RegistrationInput): Promise<Db
     p_accessibility_notes: payload.accessibility_notes || '',
   });
   if (error || !reg) throw new Error(error?.message || 'Registration submission failed.');
+  if (payload.guardian_consent) {
+    const registration = reg as DbRunRegistration;
+    const { error: guardianError } = await supabase.from('registration_consents').upsert({
+      registration_id: registration.id,
+      consent_type: 'guardian',
+      version: '2027-v2',
+      accepted: true,
+    }, { onConflict: 'registration_id,consent_type,version' });
+    if (guardianError) throw new Error(`Registration saved, but guardian consent could not be recorded: ${guardianError.message}`);
+  }
   return reg as DbRunRegistration;
 }
 

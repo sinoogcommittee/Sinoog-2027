@@ -59,14 +59,55 @@ begin
     return;
   end if;
 
+  -- Migration 012 rules. Each attempt is rolled back on purpose (the 'NOT_BLOCKED' error).
+  declare
+    err text;
+  begin
+    begin
+      insert into public.run_registrations
+        (run_event_id, category_id, user_id, participant_name, division, birth_date, mobile,
+         emergency_name, emergency_mobile, fee_centavos, status)
+      values (ev, cat, '00000000-0000-0000-0000-00000000a001', 'Policy Test Runner', 'male', null, '09000000000',
+              'Test Contact', '09000000001', 0, 'draft');
+      raise exception 'NOT_BLOCKED';
+    exception when others then err := sqlerrm; end;
+    insert into pg_temp.test_results(test, result, detail) values
+      ('registration without a birth date is rejected',
+       case when err ilike '%birth date%' then 'PASS' when err = 'NOT_BLOCKED' then 'FAIL' else 'REVIEW' end, err);
+
+    begin
+      insert into public.run_registrations
+        (run_event_id, category_id, user_id, participant_name, division, birth_date, mobile,
+         emergency_name, emergency_mobile, fee_centavos, status)
+      values (ev, cat, '00000000-0000-0000-0000-00000000a001', 'Policy Test Runner', 'male', current_date + 30, '09000000000',
+              'Test Contact', '09000000001', 0, 'draft');
+      raise exception 'NOT_BLOCKED';
+    exception when others then err := sqlerrm; end;
+    insert into pg_temp.test_results(test, result, detail) values
+      ('registration with a future birth date is rejected',
+       case when err ilike '%birth date%' then 'PASS' when err = 'NOT_BLOCKED' then 'FAIL' else 'REVIEW' end, err);
+  end;
+
   insert into public.run_registrations
-    (run_event_id, category_id, user_id, participant_name, birth_date, mobile,
+    (run_event_id, category_id, user_id, participant_name, division, birth_date, mobile,
      emergency_name, emergency_mobile, fee_centavos, status)
   values
-    (ev, cat, '00000000-0000-0000-0000-00000000a001', 'Policy Test Runner', '1995-01-01', '09000000000',
+    (ev, cat, '00000000-0000-0000-0000-00000000a001', 'Policy Test Runner', 'male', '1995-01-01', '09000000000',
      'Test Contact', '09000000001', 0, 'draft'),
-    (ev, cat, '00000000-0000-0000-0000-00000000a002', 'Policy Test Other', '1995-01-01', '09000000002',
+    (ev, cat, '00000000-0000-0000-0000-00000000a002', 'Policy Test Other', 'female', '1995-01-01', '09000000002',
      'Test Contact', '09000000003', 0, 'draft');
+
+  -- Payments: runner A has an open (unpaid) payment, runner B has a verified payment with evidence.
+  insert into public.payments(registration_id, method, amount_centavos, status)
+  select id, 'GCash', 0,
+         (case when user_id = '00000000-0000-0000-0000-00000000a002' then 'verified' else 'unpaid' end)::public.payment_status
+  from public.run_registrations
+  where user_id in ('00000000-0000-0000-0000-00000000a001', '00000000-0000-0000-0000-00000000a002');
+
+  insert into public.payment_evidence(payment_id, object_path, original_name)
+  select p.id, r.user_id::text || '/policytest-fixture.webp', 'fixture.webp'
+  from public.payments p join public.run_registrations r on r.id = p.registration_id
+  where r.user_id = '00000000-0000-0000-0000-00000000a002';
 
   -- Runner A is suspended so we can check they cannot lift their own suspension.
   update public.profiles set suspended_at = now()
@@ -124,10 +165,43 @@ insert into tests(name, r, sub, q, expect) values
 ('anonymous cannot read payments', 'anon', null,
  $q$ select 1 from public.payments $q$, 'deny'),
 
+('runner cannot attach evidence from another runner''s folder', 'authenticated', '00000000-0000-0000-0000-00000000a001',
+ $q$ insert into public.payment_evidence(payment_id, object_path, original_name)
+     select p.id, '00000000-0000-0000-0000-00000000a002/policytest.webp', 'x.webp'
+     from public.payments p join public.run_registrations r on r.id = p.registration_id
+     where r.user_id = '00000000-0000-0000-0000-00000000a001' $q$, 'deny'),
+
+('runner cannot resubmit an already verified payment', 'authenticated', '00000000-0000-0000-0000-00000000a002',
+ $q$ select public.mark_manual_payment_submitted(
+       (select p.id from public.payments p join public.run_registrations r on r.id = p.registration_id
+        where r.user_id = '00000000-0000-0000-0000-00000000a002'), 'gcash', 'REF-12345', null) $q$, 'deny'),
+
+('runner cannot switch a verified payment to cash', 'authenticated', '00000000-0000-0000-0000-00000000a002',
+ $q$ select public.mark_manual_payment_submitted(
+       (select p.id from public.payments p join public.run_registrations r on r.id = p.registration_id
+        where r.user_id = '00000000-0000-0000-0000-00000000a002'), 'cash', null,
+       (select user_id from public.user_roles where role = 'admin' limit 1)) $q$, 'deny'),
+
+('runner cannot delete evidence of a verified payment', 'authenticated', '00000000-0000-0000-0000-00000000a002',
+ $q$ delete from public.payment_evidence
+     where payment_id in (select p.id from public.payments p join public.run_registrations r on r.id = p.registration_id
+                          where r.user_id = '00000000-0000-0000-0000-00000000a002') $q$, 'deny'),
+
+('runner cannot add a consent row directly', 'authenticated', '00000000-0000-0000-0000-00000000a001',
+ $q$ insert into public.registration_consents(registration_id, consent_type, version, accepted)
+     select id, 'marketing', 'policytest', true from public.run_registrations
+     where user_id = '00000000-0000-0000-0000-00000000a001' $q$, 'deny'),
+
 -- Controls: these must work, otherwise the harness itself is not exercising the policies.
 ('CONTROL runner can read own registration', 'authenticated', '00000000-0000-0000-0000-00000000a001',
  $q$ select 1 from public.run_registrations
      where user_id = '00000000-0000-0000-0000-00000000a001' $q$, 'allow'),
+
+('CONTROL runner can attach evidence from own folder to an open payment', 'authenticated', '00000000-0000-0000-0000-00000000a001',
+ $q$ insert into public.payment_evidence(payment_id, object_path, original_name)
+     select p.id, '00000000-0000-0000-0000-00000000a001/policytest.webp', 'x.webp'
+     from public.payments p join public.run_registrations r on r.id = p.registration_id
+     where r.user_id = '00000000-0000-0000-0000-00000000a001' $q$, 'allow'),
 
 ('CONTROL anonymous can read published activities', 'anon', null,
  $q$ select 1 from public.activities where status = 'published' $q$, 'allow');
@@ -156,7 +230,7 @@ begin
 
     if t.expect = 'deny' then
       if err is not null then
-        res := case when err ~* 'row-level security|permission denied|administrator|not authori|not allowed|only admin'
+        res := case when err ~* 'row-level security|permission denied|administrator|not authori|not allowed|only admin|no longer'
                     then 'PASS' else 'REVIEW' end;
         info := 'blocked with error: ' || err;
       elsif affected = 0 then
@@ -174,6 +248,38 @@ begin
 
     insert into pg_temp.test_results(test, result, detail) values (t.name, res, info);
   end loop;
+end $$;
+
+-- 3b. The last active administrator must not be removable. The delete is rolled back
+--     on purpose (the 'NOT_BLOCKED' error), so no administrator is ever actually removed.
+do $$
+declare err text; admins integer;
+begin
+  select count(*) into admins from public.user_roles where role = 'admin';
+  begin
+    delete from public.user_roles where role = 'admin';
+    raise exception 'NOT_BLOCKED';
+  exception when others then err := sqlerrm; end;
+  insert into pg_temp.test_results(test, result, detail) values
+    ('removing all administrators is blocked',
+     case when admins = 0 then 'REVIEW'
+          when err ilike '%last active administrator%' then 'PASS'
+          when err = 'NOT_BLOCKED' then 'FAIL' else 'REVIEW' end,
+     'admin roles present: ' || admins || '; result: ' || coalesce(err, ''));
+end $$;
+
+-- 3c. Sponsor links must be http(s). Rolled back on purpose (the 'NOT_BLOCKED' error).
+do $$
+declare err text;
+begin
+  begin
+    insert into public.sponsors(name, website_url) values ('policytest sponsor', 'javascript:alert(1)');
+    raise exception 'NOT_BLOCKED';
+  exception when others then err := sqlerrm; end;
+  insert into pg_temp.test_results(test, result, detail) values
+    ('sponsor link with a javascript: address is rejected',
+     case when err ilike '%sponsors_website_url_http%' then 'PASS'
+          when err = 'NOT_BLOCKED' then 'FAIL' else 'REVIEW' end, err);
 end $$;
 
 -- 4. Clean up fixtures (deleting the fake users cascades their profiles and registrations).

@@ -739,7 +739,9 @@ export interface Database {
           fee_centavos: number;
           currency: string;
           status: ReviewStatus;
+          registration_email: string | null;
           submitted_at: string | null;
+          approved_at: string | null;
           reviewed_by: string | null;
           reviewed_at: string | null;
           review_notes: string | null;
@@ -770,7 +772,9 @@ export interface Database {
           fee_centavos: number;
           currency?: string;
           status?: ReviewStatus;
+          registration_email?: string | null;
           submitted_at?: string | null;
+          approved_at?: string | null;
           reviewed_by?: string | null;
           reviewed_at?: string | null;
           review_notes?: string | null;
@@ -801,7 +805,9 @@ export interface Database {
           fee_centavos?: number;
           currency?: string;
           status?: ReviewStatus;
+          registration_email?: string | null;
           submitted_at?: string | null;
+          approved_at?: string | null;
           reviewed_by?: string | null;
           reviewed_at?: string | null;
           review_notes?: string | null;

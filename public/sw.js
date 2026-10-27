@@ -1,9 +1,8 @@
-const CACHE_NAME = 'sinoog-2027-shell-v1';
+const CACHE_NAME = 'sinoog-2027-shell-v2';
 const CORE_ASSETS = [
   '/',
   '/manifest.webmanifest',
   '/images/hero_section_art.webp',
-  '/images/hero_section_art.png',
 ];
 
 self.addEventListener('install', (event) => {

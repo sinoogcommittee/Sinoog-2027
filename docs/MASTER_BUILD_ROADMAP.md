@@ -1,6 +1,6 @@
 # Sinoog 2027 Website — Master Build Roadmap
 
-Last updated: October 27, 2026 — realigned to `main` @ `2f24eab` (mobile footer, automatic activity weekdays, sponsors, finance, and registration)
+Last updated: October 28, 2026 — registration documents and lifecycle tracking package prepared after `main` @ `2f24eab`
 Project folder: `E:\Programs\Sinoog 2027`  
 Repo: https://github.com/sinoogcommittee/Sinoog-2027 · Live: https://sinoog2027.onrender.com  
 Purpose: This is the primary implementation checklist and handoff document for taking the website from its current foundation to production, event-day operation, and post-event archiving.
@@ -712,7 +712,7 @@ Priority: **P1**
 | `/festival/guidelines` | Empty state | Versioned guidelines and downloadable files |
 | `/run` | Updated 3K/5K/10K categories, fees, kits, editable deadline/start display | Apply migration `007`; confirm capacities, age rules, deadline, start, and policy copy |
 | `/run/routes` | Confirmed 10K route text; 3K/5K marked pending | Approved route maps, checkpoints, water/medical points |
-| `/run/register` | Authenticated form, GCash/cash proof, status, bib/QR, result; **edit details when not approved**; live rehearsed | Monitor production; optional email notices; kit-claim later |
+| `/run/register` | Authenticated form, GCash/cash proof, finalized policy acceptance, minor guardian consent, status, bib/QR, result; **edit details when not approved**; live rehearsed | Apply `014`; monitor production; optional email notices; kit-claim later |
 | `/activities` | Published Supabase activities with fallback, filters, and print view | Remove production demo fallback and confirm all content |
 | `/activities/masses` | Live filtered schedule with corrected Jan. 6 fallback | Enter and approve the complete novena and Pontifical Mass schedule |
 | `/activities/nightly` | Empty state | Published nightly program |
@@ -726,11 +726,11 @@ Priority: **P1**
 | `/signin` | Runner sign-in/sign-up tabs (+ Google) | Periodic redirect and verification smoke tests |
 | `/login` | Separate committee-staff login (nav: Staff sign in) | Periodic suspended/session-expired checks |
 | `/forgot-password`, `/auth/reset-password`, `/auth/callback` | Implemented and routed | Configure redirect URLs and complete end-to-end tests |
-| `/account` | Profile editing implemented | Resolve lint warning; add account-security behavior and tests |
+| `/account` | Profile editing plus registration email, submitted/approved dates, and recorded consents | Apply `014`; add account-security behavior and tests |
 | `/account/registration` | Not a separate route; status is currently on `/run/register` | Decide route structure; add corrections, confirmation, payment/kit status, and QR |
 | `/delegation` | Missing | Delegation-head dashboard and submission workflow |
 | `/admin` | Role-aware dashboard index | Optional richer metrics/queues |
-| `/admin/registrations` | Evidence review, approval, bib/QR, walk-in, CSV/print, mobile search | Continue ops monitoring; export audit polish |
+| `/admin/registrations` | Combined payment/registration review, approval, lifecycle dates, runner email, bib/QR, walk-in, CSV/print, mobile search | Apply `014`; continue ops monitoring |
 | `/admin/run-timing` | Official-start control, camera/manual QR finish recording, ranking filters | Apply/test migration `007`; device rehearsal, offline contingency, result correction/audit policy |
 | `/admin/delegations` | Generic empty table | Assignments, review, revisions, deadlines, files |
 | `/admin/posts` | Functional news CRUD, preview, publishing, pinning, and image upload | Sanitize HTML, verify RLS/media security, and test publication workflow |
@@ -763,7 +763,7 @@ Before feature completion:
 Do the remaining work in this sequence:
 
 1. **Operate and monitor** live registration, payment proof, approval, bib/QR, and finance records; fix production bugs as they appear.
-2. Keep migrations `001`–`013`, edge functions, and redirect URLs documented after any Supabase change.
+2. Keep migrations `001`–`014`, edge functions, and redirect URLs documented after any Supabase change.
 3. Hygiene: remove unused legacy auth pages if still present; re-smoke RLS with separate role accounts after major deploys.
 4. Optional product polish: transactional email for approve/needs_changes/reject; kit claim workflow.
 5. **Only after Run ops stay stable** — complete Gallery migration/deployment verification, then prioritize the **Delegations** workspace. Sponsor administration is complete.
@@ -799,17 +799,21 @@ Do the remaining work in this sequence:
 - [ ] Transactional email notifications.
 - [ ] Kit claiming workflow beyond bib/QR display.
 
-### Deferred until the next token/session reset
+### Registration policy and review decisions
 
-- [ ] Separate payment verification from registration approval, including reviewer, date, notes, and payment-status audit records.
-- [ ] Add refund handling for verified payments tied to registrations that are later rejected or cancelled.
-- [ ] Finalize committee-approved waiver, privacy notice, refund policy, guardian consent, and public support contact where any wording remains incomplete.
+- [x] Main-administrator decision: keep payment review and registration approval as one admin action. Approval confirms the submitted payment, records reviewer/date/notes in the existing trusted workflow, and writes the audit log; no separate finance gate is required.
+- [x] Main-administrator decision: no automatic refund-handling module is required. The public policy states the non-refundable default and the limited cases reviewed manually by the committee.
+- [x] Finalized waiver, privacy notice, refund policy, guardian consent, and settings-driven public support contact in the local registration package.
+- [~] Migration `014_registration_documents_and_timeline.sql` added the registration-email snapshot and separate submitted/approved dates. Its initial backfill was blocked by its protection trigger; apply `015_registration_lifecycle_backfill_fix.sql`, then rerun verification `003`.
+
+### Deferred until a later work package
+
 - [ ] Complete remaining safety checks: final-slot concurrency, signed-URL expiry, new-user profile trigger, `updated_at` triggers, and restricted staff access.
 - [x] Main-administrator decision: registration opening remains under direct administrator control; no automatic post-testing closure task is required.
 
 ### Supabase operational notes
 
-1. Migrations through **`012`** are the current production baseline. Migration **`013_gallery_photo_video_collections.sql`** is pending manual application; never rewrite applied files afterward.
+1. Registration migration **`014`** has been applied. Apply **`015_registration_lifecycle_backfill_fix.sql`** to complete its existing-record backfill. Migration **`013_gallery_photo_video_collections.sql`** remains separately tracked; never rewrite applied migration files afterward.
 2. Edge functions `admin-create-runner` and `admin-manage-user` remain JWT-protected; only admin roles may invoke them.
 3. `payment-evidence` stays a private bucket; QR values remain derived from protected tokens (no public QR bucket required).
 4. Google OAuth may display `….supabase.co` on the consent screen — accepted without a paid custom domain; optional free branding only.
@@ -835,3 +839,5 @@ Do the remaining work in this sequence:
 | 2026-10-27 | `2f24eab` | Mobile footer link columns, centered copyright, and automatic activity weekday labels |
 | 2026-10-27 | Local uncommitted gallery package | Photo/video gallery, year filters, Facebook-style previews, compressed uploads, YouTube embeds, admin management, and pending migration `013` |
 | 2026-10-27 | Local uncommitted PWA package | Hero-art favicon and installed icon, manifest, service worker, and cross-platform install invitation |
+| 2026-10-28 | Local uncommitted registration-policy package | Final waiver/privacy/refund/guardian/support documents; registration email snapshot; submitted/approved timeline; combined payment-and-approval decision recorded; pending migration `014` |
+| 2026-10-28 | Migration `014` verification follow-up | Added `015_registration_lifecycle_backfill_fix.sql` after the lifecycle trigger prevented its own existing-record backfill |

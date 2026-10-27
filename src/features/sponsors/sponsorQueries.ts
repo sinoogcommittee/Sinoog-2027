@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase';
+import { requireOptionalHttpUrl } from '../../lib/safeUrl';
 import { getCurrentEdition } from '../editions/editionQueries';
 import { getPublicMediaUrl, uploadPublicImage } from '../media/mediaQueries';
 import type { DbSponsor } from '../../types';
@@ -120,8 +121,8 @@ export async function createEditionSponsor(input: SponsorInput, editionId?: stri
     .from('sponsors')
     .insert({
       name,
-      website_url: input.website_url?.trim() || null,
-      facebook_url: input.facebook_url?.trim() || null,
+      website_url: requireOptionalHttpUrl(input.website_url, 'Website'),
+      facebook_url: requireOptionalHttpUrl(input.facebook_url, 'Facebook page'),
       logo_path: input.logo_path || null,
     })
     .select('*')
@@ -175,8 +176,8 @@ export async function updateEditionSponsor(
     .from('sponsors')
     .update({
       name,
-      website_url: input.website_url?.trim() || null,
-      facebook_url: input.facebook_url?.trim() || null,
+      website_url: requireOptionalHttpUrl(input.website_url, 'Website'),
+      facebook_url: requireOptionalHttpUrl(input.facebook_url, 'Facebook page'),
       logo_path: input.logo_path || null,
     })
     .eq('id', sponsorId);

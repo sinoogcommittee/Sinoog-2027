@@ -277,6 +277,7 @@ export function RegistrationsManagerPage() {
       !searchQuery ||
       r.participant_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (r.registration_email || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.mobile.includes(searchQuery);
     const matchStatus = statusFilter === "all" || r.status === statusFilter;
     const matchCategory =
@@ -294,6 +295,7 @@ export function RegistrationsManagerPage() {
       "Runner Number",
       "Reference",
       "Participant",
+      "Registration Email",
       "Category",
       "Division",
       "Shirt Size",
@@ -305,6 +307,7 @@ export function RegistrationsManagerPage() {
       "Registered By User ID",
       "Status",
       "Submitted At",
+      "Approved At",
     ];
     const rows = filteredRegistrations.map((r) => {
       const cat = categories.find((c) => c.id === r.category_id)?.name || "Run";
@@ -312,6 +315,7 @@ export function RegistrationsManagerPage() {
         r.bib_number || "",
         r.reference,
         `"${r.participant_name.replace(/"/g, '""')}"`,
+        `"${(r.registration_email || "").replace(/"/g, '""')}"`,
         `"${cat}"`,
         r.division || "",
         r.shirt_size || "",
@@ -323,6 +327,7 @@ export function RegistrationsManagerPage() {
         r.registered_by || "",
         r.status,
         r.submitted_at || "",
+        r.approved_at || "",
       ].join(",");
     });
 
@@ -414,7 +419,7 @@ export function RegistrationsManagerPage() {
             <input
               id="registrations-search-input"
               type="search"
-              placeholder="Search name, reference, or mobile…"
+              placeholder="Search name, email, reference, or mobile…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoComplete="off"
@@ -1032,6 +1037,9 @@ export function RegistrationsManagerPage() {
               <div>
                 <strong>Mobile:</strong> {selectedReg.mobile}
               </div>
+              <div>
+                <strong>Email:</strong> {selectedReg.registration_email || "Not available"}
+              </div>
               <div style={{ gridColumn: "1 / -1" }}>
                 <strong>Address:</strong>{" "}
                 {selectedReg.locality || "Not provided"}
@@ -1062,6 +1070,14 @@ export function RegistrationsManagerPage() {
                   <code>{selectedReg.registered_by}</code>
                 </div>
               )}
+              <div>
+                <strong>Registration Submitted:</strong>{" "}
+                {selectedReg.submitted_at ? new Date(selectedReg.submitted_at).toLocaleString("en-PH", { timeZone: "Asia/Manila" }) : "Not recorded"}
+              </div>
+              <div>
+                <strong>Registration Approved:</strong>{" "}
+                {selectedReg.approved_at ? new Date(selectedReg.approved_at).toLocaleString("en-PH", { timeZone: "Asia/Manila" }) : "Pending approval"}
+              </div>
             </div>
 
             {selectedReg.accessibility_notes && (
@@ -1092,6 +1108,7 @@ export function RegistrationsManagerPage() {
               <h3>
                 <CreditCard size={18} /> {paymentDetails?.method || "Payment"} Review
               </h3>
+              <p className="form-message">Approving this entry confirms both the payment review and the runner registration in one step.</p>
               {paymentLoading ? (
                 <LoadingState message="Loading payment proof…" />
               ) : paymentDetails ? (

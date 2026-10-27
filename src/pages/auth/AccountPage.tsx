@@ -154,6 +154,7 @@ export function AccountPage() {
           const category = categories.find((item) => item.id === registration.category_id);
           const termsConsent = registrationState.consents.find((item) => item.consent_type === 'terms');
           const privacyConsent = registrationState.consents.find((item) => item.consent_type === 'privacy');
+          const guardianConsent = registrationState.consents.find((item) => item.consent_type === 'guardian');
           return (
             <section className="runner-account-registration" aria-labelledby="runner-registration-details">
               <div className="runner-account-registration__heading">
@@ -169,6 +170,7 @@ export function AccountPage() {
                 <div><dt>Category</dt><dd>{category?.name || 'Sinoog Run'}</dd></div>
                 <div><dt>Registration fee</dt><dd>{(registration.fee_centavos / 100).toLocaleString('en-PH', { style: 'currency', currency: registration.currency })}</dd></div>
                 <div><dt>Participant name</dt><dd>{registration.participant_name}</dd></div>
+                <div><dt>Registration email</dt><dd>{registration.registration_email || user?.email || 'Not available'}</dd></div>
                 <div><dt>Division</dt><dd>{registration.division === 'female' ? 'Female' : registration.division === 'male' ? 'Male' : 'Not provided'}</dd></div>
                 <div><dt>Birth date</dt><dd>{registration.birth_date || 'Not provided'}</dd></div>
                 <div><dt>Mobile number</dt><dd>{registration.mobile}</dd></div>
@@ -180,7 +182,8 @@ export function AccountPage() {
                 <div><dt>Emergency mobile</dt><dd>{registration.emergency_mobile}</dd></div>
                 <div className="runner-account-details__wide"><dt>Medical / assistance notes</dt><dd>{registration.accessibility_notes || 'None'}</dd></div>
                 <div><dt>Bib number</dt><dd>{registration.bib_number ? `#${registration.bib_number}` : 'Assigned after approval'}</dd></div>
-                <div><dt>Submitted</dt><dd>{registration.submitted_at ? new Date(registration.submitted_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : 'Not submitted'}</dd></div>
+                <div><dt>Registration submitted</dt><dd>{registration.submitted_at ? new Date(registration.submitted_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : 'Not submitted'}</dd></div>
+                <div><dt>Registration approved</dt><dd>{registration.approved_at ? new Date(registration.approved_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : 'Pending approval'}</dd></div>
                 <div><dt>Payment</dt><dd>{registrationState.payment ? `${registrationState.payment.method} · ${registrationState.payment.status}` : 'No payment record'}</dd></div>
                 <div><dt>Official result</dt><dd>{registrationState.result ? formatElapsed(registrationState.result.elapsed_milliseconds) : 'Not recorded'}</dd></div>
                 {registration.review_notes && <div className="runner-account-details__wide"><dt>Committee notes</dt><dd>{registration.review_notes}</dd></div>}
@@ -192,6 +195,7 @@ export function AccountPage() {
                 <ul>
                   <li><strong>Event waiver:</strong> {termsConsent?.accepted ? `Accepted · ${termsConsent.version} · ${new Date(termsConsent.accepted_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}` : 'No acceptance recorded'}</li>
                   <li><strong>Privacy notice:</strong> {privacyConsent?.accepted ? `Accepted · ${privacyConsent.version} · ${new Date(privacyConsent.accepted_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}` : 'No acceptance recorded'}</li>
+                  {guardianConsent && <li><strong>Parent / guardian consent:</strong> {guardianConsent.accepted ? `Accepted · ${guardianConsent.version} · ${new Date(guardianConsent.accepted_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}` : 'No acceptance recorded'}</li>}
                 </ul>
               </div>
             </section>

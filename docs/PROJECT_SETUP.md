@@ -23,8 +23,15 @@ Run the files in `supabase/migrations/` **in numeric order** in the Supabase SQL
 | 008 | `008_run_registration_and_timing_controls.sql` | Registration lifecycle and race-clock controls |
 | 009 | `009_atomic_activity_reordering.sql` | Atomic activity reordering |
 | 010 | `010_admin_account_deletion.sql` | Controlled permanent account deletion |
+| 011 | `011_cash_payments_and_finance.sql` | Cash receiver, manual payment submission, finance records |
+| 012 | `012_sponsor_facebook_url.sql` | Sponsor Facebook link column |
+| 013 | `013_gallery_photo_video_collections.sql` | Photo and video gallery collections |
+| 014 | `014_registration_documents_and_timeline.sql` | Registration email snapshot, approval time, policy versions |
+| 015 | `015_registration_lifecycle_backfill_fix.sql` | Fix for the 014 lifecycle trigger |
+| 016 | `016_security_hardening.sql` | Removes direct payment inserts by runners; only admins may change suspension |
+| 017 | `017_registration_integrity_and_admin_safety.sql` | Age, capacity and field checks; payment and evidence locking; last-admin protection; audit trail; sponsor link checks |
 
-Any later numbered migration (for example security hardening such as `011_...`) continues the same sequence. Add each new file to this table when you create it.
+Any later numbered migration continues the same sequence. Add each new file to this table when you create it.
 
 Before running `004`, replace `ADMIN_EMAIL_HERE` with the administrator's sign-in email. Create that user in Supabase Authentication first. The script can be rerun safely.
 
@@ -33,7 +40,7 @@ The schedule seeds stay in **draft** status. Confirm all times, distances, fees,
 ## Verification
 
 - `supabase/verification/001_foundation_verification.sql` and `002_foundation_summary.sql` are read-only checks. Replace `ADMIN_EMAIL_HERE` in them too.
-- `supabase/verification/003_policy_tests.sql` tries forbidden actions as a normal runner and as an anonymous visitor and reports PASS, FAIL or REVIEW. Run it on a **test project** (or off-hours on production, after reading it), and re-run it after any policy change.
+- `supabase/verification/003_policy_tests.sql` tries forbidden actions as a normal runner and as an anonymous visitor and reports PASS, FAIL or REVIEW. Run it after migration 017. Run it on a **test project** (or off-hours on production, after reading it), and re-run it after any policy change.
 - Record manual runs in [SUPABASE_VERIFICATION.md](SUPABASE_VERIFICATION.md).
 
 ## Edge Functions

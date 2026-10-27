@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, ChevronRight, Facebook, Globe, MapPin, Play, Sparkles } from 'lucide-react';
+import { ArrowRight, ChevronRight, Facebook, Globe, MapPin, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { SectionHeading } from '../../components/SectionHeading';
@@ -7,6 +7,8 @@ import { getCurrentEdition } from '../../features/editions/editionQueries';
 import { getPublishedActivities, formatActivityDateTime } from '../../features/activities/activityQueries';
 import { getPublishedPosts } from '../../features/content/postQueries';
 import { getPublicMediaUrl } from '../../features/media/mediaQueries';
+import { toSafeHttpUrl } from '../../lib/safeUrl';
+import { useAuth } from '../../features/auth/useAuth';
 import {
   getSponsorLogoUrl,
   listPublishedEditionSponsors,
@@ -16,6 +18,10 @@ import type { DbActivity, NewsPost } from '../../types';
 import { EmptyState, ErrorState, LoadingState } from '../../features/ui/FeedbackStates';
 
 export function HomePage() {
+  const { user, isDemoAdmin, loading: authLoading } = useAuth();
+  // While the session is still being restored, treat the visitor as signed in; the registration
+  // page itself waits for the session and sends anyone who is not signed in to the sign-in page.
+  const canRegister = authLoading || Boolean(user) || isDemoAdmin;
   const [activitiesList, setActivitiesList] = useState<DbActivity[]>([]);
   const [newsList, setNewsList] = useState<NewsPost[]>([]);
   const [sponsors, setSponsors] = useState<EditionSponsorRow[]>([]);
@@ -88,8 +94,8 @@ export function HomePage() {
               celebration rooted in tradition.
             </p>
             <div className="hero-actions">
-              <Button to="/run/register">
-                Register for the run <ArrowRight size={17} />
+              <Button to={canRegister ? '/run/register' : '/signin?next=/run/register'}>
+                {canRegister ? 'Register for the run' : 'Register for the run'} <ArrowRight size={17} />
               </Button>
               <Button to="/activities" variant="secondary">
                 View celebration schedule
@@ -139,10 +145,15 @@ export function HomePage() {
 
       <section className="section">
         <div className="container split-feature">
-          <div className="media-placeholder media-placeholder--video">
-            <button type="button" aria-label="Play celebration teaser">
-              <Play fill="currentColor" />
-            </button>
+          <div className="home-teaser">
+            <iframe
+              src="https://www.youtube.com/embed/nN_IQG98tLQ?si=1cFq8l9ZoyeCy50L"
+              title="Sinoog 2027 celebration teaser"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
             <span>2027 celebration teaser</span>
           </div>
           <div>
@@ -279,8 +290,8 @@ export function HomePage() {
             <div className="sponsor-strip sponsor-strip--live">
               {sponsors.map((row) => {
                 const logo = getSponsorLogoUrl(row.sponsor.logo_path);
-                const websiteUrl = row.sponsor.website_url || null;
-                const facebookUrl = row.sponsor.facebook_url || null;
+                const websiteUrl = toSafeHttpUrl(row.sponsor.website_url);
+                const facebookUrl = toSafeHttpUrl(row.sponsor.facebook_url);
                 return (
                   <div key={row.sponsor_id} className="sponsor-strip__card">
                     <div className="sponsor-strip__logo">

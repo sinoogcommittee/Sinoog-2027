@@ -13,6 +13,7 @@ import { SponsorsPage } from '../pages/public/SponsorsPage';
 import { AboutPage } from '../pages/public/AboutPage';
 import { PolicyPage } from '../pages/public/PolicyPage';
 import { RunRegistrationPage } from '../pages/public/RunRegistrationPage';
+import { RequireSignIn } from '../features/auth/RequireSignIn';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage'; 
 import { ResetPasswordPage } from '../pages/auth/ResetPasswordPage';
@@ -61,7 +62,7 @@ export default function App() {
         <Route path="/festival/guidelines" element={<FestivalPage section="guidelines" />} />
         <Route path="/run" element={<RunPage />} />
         <Route path="/run/routes" element={<RunPage section="routes" />} />
-        <Route path="/run/register" element={<RunRegistrationPage />} />
+        <Route path="/run/register" element={<RequireSignIn><RunRegistrationPage /></RequireSignIn>} />
         <Route path="/activities" element={<ActivitiesPage />} />
         <Route path="/activities/masses" element={<ActivitiesPage filter="mass" />} />
         <Route path="/activities/nightly" element={<ActivitiesPage filter="nightly" />} />

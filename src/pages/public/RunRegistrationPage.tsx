@@ -36,6 +36,18 @@ import { QRCodeSVG } from 'qrcode.react';
 import { getRunnerQrValue } from '../../features/run/runQueries';
 import { supabase } from '../../lib/supabase';
 
+function ageOnDate(birthDate: string, eventDate: string): number | null {
+  if (!birthDate || !eventDate) return null;
+  const birth = new Date(`${birthDate}T00:00:00Z`);
+  const event = new Date(`${eventDate.slice(0, 10)}T00:00:00Z`);
+  if (Number.isNaN(birth.getTime()) || Number.isNaN(event.getTime())) return null;
+  let age = event.getUTCFullYear() - birth.getUTCFullYear();
+  const beforeBirthday = event.getUTCMonth() < birth.getUTCMonth()
+    || (event.getUTCMonth() === birth.getUTCMonth() && event.getUTCDate() < birth.getUTCDate());
+  if (beforeBirthday) age -= 1;
+  return age;
+}
+
 export function RunRegistrationPage() {
   const { user, profile, isDemoAdmin, refresh } = useAuth();
   const { toast } = useToast();
@@ -63,6 +75,7 @@ export function RunRegistrationPage() {
   const [emergencyMobile, setEmergencyMobile] = useState('');
   const [accessibilityNotes, setAccessibilityNotes] = useState('');
   const [acceptedWaiver, setAcceptedWaiver] = useState(false);
+  const [acceptedGuardianConsent, setAcceptedGuardianConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -139,6 +152,8 @@ export function RunRegistrationPage() {
   }, [activeUserId, profileName, profileMobile, profileAddress]);
 
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId) || categories[0];
+  const ageAtRace = ageOnDate(birthDate, runEvent?.race_starts_at || '2027-01-09');
+  const requiresGuardianConsent = ageAtRace !== null && ageAtRace < 18;
 
   const handleRegisterAgain = async () => {
     const registration = userState.registration;
@@ -192,6 +207,10 @@ export function RunRegistrationPage() {
       setFormError('You must accept the event waiver and terms of participation.');
       return;
     }
+    if (requiresGuardianConsent && !acceptedGuardianConsent) {
+      setFormError('A parent or legal guardian must accept the guardian consent for a runner under 18.');
+      return;
+    }
     if (!activeUserId) {
       setFormError('You must sign in or create an account to submit your registration.');
       return;
@@ -226,6 +245,7 @@ export function RunRegistrationPage() {
         emergency_relationship: emergencyRelationship.trim(),
         emergency_mobile: emergencyMobile.trim(),
         accessibility_notes: accessibilityNotes.trim() || null,
+        guardian_consent: requiresGuardianConsent,
       });
 
       toast(`Registration submitted! Reference: ${reg.reference}`, 'success');
@@ -891,14 +911,12 @@ export function RunRegistrationPage() {
                 </div>
               </div>
 
-              <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: '6px', padding: '1rem', maxHeight: '160px', overflowY: 'auto', fontSize: '0.85rem', color: '#555', marginBottom: '1.25rem' }}>
+              <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: '6px', padding: '1rem', maxHeight: '220px', overflowY: 'auto', fontSize: '0.85rem', color: '#555', marginBottom: '1.25rem' }}>
                 <p style={{ margin: '0 0 0.5rem', fontWeight: 600 }}>PARTICIPANT WAIVER & RELEASE OF LIABILITY</p>
-                <p>
-                  I hereby certify that I am physically fit and sufficiently trained to participate in the Sinoog Run 2027. I assume all risks of road running, including traffic, weather conditions, and physical exertion. I release the Sto. Niño Parish Guinacot, the Sinoog Committee, and volunteers from any claims arising from my participation.
-                </p>
-                <p>
-                  I consent to the collection and processing of my personal details strictly for race operations, kit allocation, and safety verification under the Data Privacy Act.
-                </p>
+                <p>{runEvent?.terms_body || 'I confirm my fitness, accept the ordinary risks of the event, will follow safety instructions, and authorize reasonable emergency assistance.'}</p>
+                <p>{runEvent?.privacy_body || 'I consent to the use of my registration information for event operations, safety, payment review, bib and QR allocation, timing, results, and audit.'}</p>
+                <p>Registration fees are generally non-refundable after submission or approval. Duplicate payments, clear payment errors, and a full event cancellation are reviewed under the committee policy.</p>
+                <p><Link to="/terms" target="_blank">Read the complete terms, waiver, guardian consent, and refund policy</Link> · <Link to="/privacy" target="_blank">Read the privacy notice</Link></p>
               </div>
 
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer', marginBottom: '1.75rem' }}>
@@ -910,9 +928,24 @@ export function RunRegistrationPage() {
                   style={{ width: '18px', height: '18px', marginTop: '2px' }}
                 />
                 <span style={{ fontSize: '0.92rem', lineHeight: 1.4 }}>
-                  I have read and agree to the <strong>Sinoog Run Waiver</strong> and <strong>Privacy Notice</strong>.
+                  I have read and agree to the <strong>Sinoog Run Terms and Waiver</strong>, <strong>Refund Policy</strong>, and <strong>Privacy Notice</strong> (version {runEvent?.terms_version || '2027-v2'}).
                 </span>
               </label>
+
+              {requiresGuardianConsent && (
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer', marginBottom: '1.75rem', padding: '1rem', border: '1px solid var(--gold)', borderRadius: '6px', background: '#fff9e8' }}>
+                  <input
+                    type="checkbox"
+                    required
+                    checked={acceptedGuardianConsent}
+                    onChange={(e) => setAcceptedGuardianConsent(e.target.checked)}
+                    style={{ width: '18px', height: '18px', marginTop: '2px' }}
+                  />
+                  <span style={{ fontSize: '0.92rem', lineHeight: 1.4 }}>
+                    <strong>Parent / legal guardian consent:</strong> I have authority to consent for this runner, permit participation, accept the agreement on the runner’s behalf to the extent permitted by law, authorize reasonable emergency assistance, and confirm the emergency-contact information is accurate.
+                  </span>
+                </label>
+              )}
 
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <button type="button" className="button button--ghost" onClick={() => setStep(3)}>

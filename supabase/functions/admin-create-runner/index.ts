@@ -24,6 +24,15 @@ function defaultKey(variable: string): string | undefined {
   }
 }
 
+function isMinorOnRaceDay(birthDate: string): boolean {
+  const birth = new Date(`${birthDate}T00:00:00Z`);
+  const race = new Date('2027-01-09T00:00:00Z');
+  let age = race.getUTCFullYear() - birth.getUTCFullYear();
+  if (race.getUTCMonth() < birth.getUTCMonth()
+    || (race.getUTCMonth() === birth.getUTCMonth() && race.getUTCDate() < birth.getUTCDate())) age -= 1;
+  return age < 18;
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
@@ -127,6 +136,19 @@ Deno.serve(async (request) => {
   if (registrationError || !registration) {
     await serviceClient.auth.admin.deleteUser(created.user.id);
     return json({ error: registrationError?.message || 'Unable to save the cash registration.' }, 400);
+  }
+
+  if (isMinorOnRaceDay(String(body.birth_date))) {
+    const { error: guardianConsentError } = await serviceClient.from('registration_consents').upsert({
+      registration_id: registration.id,
+      consent_type: 'guardian',
+      version: '2027-v2-offline',
+      accepted: true,
+    }, { onConflict: 'registration_id,consent_type,version' });
+    if (guardianConsentError) {
+      await serviceClient.auth.admin.deleteUser(created.user.id);
+      return json({ error: `Unable to record the signed guardian consent: ${guardianConsentError.message}` }, 400);
+    }
   }
 
   return json({ registration });

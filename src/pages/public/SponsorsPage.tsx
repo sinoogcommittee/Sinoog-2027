@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Facebook, Globe, HeartHandshake } from 'lucide-react';
 import { PageHero } from '../../components/PageHero';
+import { toSafeHttpUrl } from '../../lib/safeUrl';
 import { LoadingState, EmptyState } from '../../features/ui/FeedbackStates';
 import {
   getSponsorLogoUrl,
@@ -70,8 +71,8 @@ export function SponsorsPage() {
                   <div className="sponsors-public__grid">
                     {group.items.map((row) => {
                       const logo = getSponsorLogoUrl(row.sponsor.logo_path);
-                      const facebookUrl = row.sponsor.facebook_url || null;
-                      const websiteUrl = row.sponsor.website_url || null;
+                      const facebookUrl = toSafeHttpUrl(row.sponsor.facebook_url);
+                      const websiteUrl = toSafeHttpUrl(row.sponsor.website_url);
 
                       return (
                         <div key={row.sponsor_id} className="sponsors-public__card">
