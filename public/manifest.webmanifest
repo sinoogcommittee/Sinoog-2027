@@ -1,0 +1,56 @@
+{
+  "id": "/",
+  "name": "Sinoog 2027 — Sto. Niño Parish Guinacot",
+  "short_name": "Sinoog 2027",
+  "description": "Official schedules, announcements, gallery, and Sinoog Run services for Sto. Niño Parish — Guinacot.",
+  "lang": "en-PH",
+  "dir": "ltr",
+  "start_url": "/?source=installed-app",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#fffdf8",
+  "theme_color": "#741f29",
+  "categories": ["events", "lifestyle", "social"],
+  "icons": [
+    {
+      "src": "/images/hero_section_art.webp",
+      "sizes": "1200x1200",
+      "type": "image/webp",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/hero_section_art.png",
+      "sizes": "1200x1200",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/hero_section_art.png",
+      "sizes": "1200x1200",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Celebration schedule",
+      "short_name": "Schedule",
+      "url": "/activities",
+      "icons": [{ "src": "/images/hero_section_art.webp", "sizes": "1200x1200", "type": "image/webp" }]
+    },
+    {
+      "name": "Sinoog Run",
+      "short_name": "Run",
+      "url": "/run",
+      "icons": [{ "src": "/images/hero_section_art.webp", "sizes": "1200x1200", "type": "image/webp" }]
+    },
+    {
+      "name": "Photo and video gallery",
+      "short_name": "Gallery",
+      "url": "/gallery",
+      "icons": [{ "src": "/images/hero_section_art.webp", "sizes": "1200x1200", "type": "image/webp" }]
+    }
+  ]
+}

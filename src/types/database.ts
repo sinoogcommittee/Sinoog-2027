@@ -329,6 +329,8 @@ export interface Database {
           title: string;
           slug: string;
           description: string | null;
+          year: number;
+          media_type: 'photo' | 'video';
           status: ContentStatus;
           cover_media_id: string | null;
           created_at: string;
@@ -340,6 +342,8 @@ export interface Database {
           title: string;
           slug: string;
           description?: string | null;
+          year?: number;
+          media_type?: 'photo' | 'video';
           status?: ContentStatus;
           cover_media_id?: string | null;
           created_at?: string;
@@ -351,6 +355,8 @@ export interface Database {
           title?: string;
           slug?: string;
           description?: string | null;
+          year?: number;
+          media_type?: 'photo' | 'video';
           status?: ContentStatus;
           cover_media_id?: string | null;
           created_at?: string;
@@ -1256,6 +1262,9 @@ export type Edition = Database['public']['Tables']['editions']['Row'];
 export type Profile = Database['public']['Tables']['profiles']['Row'];
 export type DbActivity = Database['public']['Tables']['activities']['Row'];
 export type DbPost = Database['public']['Tables']['posts']['Row'];
+export type DbMediaAsset = Database['public']['Tables']['media_assets']['Row'];
+export type DbAlbum = Database['public']['Tables']['albums']['Row'];
+export type DbAlbumItem = Database['public']['Tables']['album_items']['Row'];
 export type DbSiteSetting = Database['public']['Tables']['site_settings']['Row'];
 export type DbSponsor = Database['public']['Tables']['sponsors']['Row'];
 export type DbDelegation = Database['public']['Tables']['delegations']['Row'];

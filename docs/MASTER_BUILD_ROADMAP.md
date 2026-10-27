@@ -1,6 +1,6 @@
 # Sinoog 2027 Website — Master Build Roadmap
 
-Last updated: October 27, 2026 — realigned to `main` @ `835861c` (finance, registration, sponsor administration, public sponsor presentation)
+Last updated: October 27, 2026 — realigned to `main` @ `2f24eab` (mobile footer, automatic activity weekdays, sponsors, finance, and registration)
 Project folder: `E:\Programs\Sinoog 2027`  
 Repo: https://github.com/sinoogcommittee/Sinoog-2027 · Live: https://sinoog2027.onrender.com  
 Purpose: This is the primary implementation checklist and handoff document for taking the website from its current foundation to production, event-day operation, and post-event archiving.
@@ -33,11 +33,12 @@ The novena begins January 6, 2027. Committee-approved GCash instructions, privac
 
 ## 3. Current implementation snapshot
 
-Audit basis: source tree, routes, feature modules, admin screens, and GitHub `main` at commit `835861c` (October 27, 2026). Committee confirmed live registration rehearsal, production application of migrations `011` and `012`, runner edit-before-approve, and approved GCash / privacy / terms / Mass schedule content.
+Audit basis: source tree, routes, feature modules, admin screens, and GitHub `main` at commit `2f24eab` (October 27, 2026). Committee confirmed live registration rehearsal, production application of migrations `011` and `012`, runner edit-before-approve, and approved GCash / privacy / terms / Mass schedule content.
 
 ### Completed foundation and operations
 
 - [x] React 19 and TypeScript project created with Vite; CI workflow runs install, lint, unit tests, and production build.
+- [x] Installable web app foundation: parish-art favicon/app icon, web manifest, production service worker, standalone display, and a responsive Android/iOS/desktop installation invitation with platform-specific instructions.
 - [x] Responsive public navigation, footer, page layouts, parish/committee logos, and official church map.
 - [x] Public routes for home, festival, participants, guidelines, run, routes, registration, activities, Masses, nightly activities, news, gallery, sponsors, about, privacy, terms, runner sign-in, staff login, account, and 404.
 - [x] Protected committee workspace with overview, activities, posts, registrations, race timing, finance, users, settings, and delegations (shell) routes; role-filtered portal navigation.
@@ -56,8 +57,8 @@ Audit basis: source tree, routes, feature modules, admin screens, and GitHub `ma
 - [x] Administrator financial workspace (`FinancePage` + `financeQueries`) tracks verified collections, pending payments, cash accountability, other income/expenses, balance, CSV exports (migration `011` **applied in production**).
 - [x] Sponsor administration creates and edits partners, uploads logos, assigns Diamond/Gold/Silver/Bronze tiers, controls ordering/publication, and supports website/Facebook links. Published sponsors appear on `/sponsors` and the home page; migration `012` is applied.
 - [x] Administrator user management: profiles, staff roles, suspension/reactivation, last-admin checks, create staff; edge functions `admin-create-runner` and `admin-manage-user`.
-- [x] Migrations through **`012_sponsor_facebook_url.sql`** exist in repo; production includes `011` and `012`.
-- [x] GitHub `main` at `835861c` (*feat(sponsors and home): added fb link for sponsors*).
+- [~] Migrations through **`013_gallery_photo_video_collections.sql`** exist in repo; production includes `011` and `012`, while `013` awaits manual SQL Editor application.
+- [x] GitHub `main` at `2f24eab` (*footer mobile view in two columns, activities auto day*).
 - [x] Committee-approved GCash text, privacy notice, terms/waiver content, and Mass schedule content on the live site.
 - [x] Responsive audit for public, auth, and admin routes; mobile registrations search toolbar; portal topbar matched to sidebar color.
 
@@ -66,7 +67,7 @@ Audit basis: source tree, routes, feature modules, admin screens, and GitHub `ma
 - [~] Activities, News, Settings, Registrations, Users, and Finance CRUD exist; continue periodic RLS and multi-role smoke tests after deploys.
 - [~] Payment verification vs registration approval can be refined further (workflow is operational).
 - [~] Public feature switches and announcement banner are editable; not every switch is fully consumed on every public surface.
-- [~] Gallery, festival participants/guidelines, and **delegations** remain placeholder or shell screens. Sponsor administration and public presentation are operational.
+- [~] Gallery photo/video management and public viewing are implemented locally and await migration `013` plus deployment. Festival participants/guidelines and **delegations** remain placeholder or shell screens.
 - [~] Google consent screen may still show `….supabase.co` (accepted without paid custom domain; optional brand verification only).
 - [~] Email confirmation enforcement before final registration and production redirect allowlist should be re-checked after each environment change.
 
@@ -75,7 +76,7 @@ Audit basis: source tree, routes, feature modules, admin screens, and GitHub `ma
 - [ ] Full payment-refund automation and complete payment audit trail productization beyond current finance records.
 - [ ] Authenticated kit lookup and kit claiming beyond bib/QR display.
 - [ ] **Delegation-head workspace** (assignment, roster, private music, revisions, approval) — **deferred until Run ops remain stable**.
-- [ ] **Gallery administration** connected to Supabase — **deferred**. Sponsor administration is complete.
+- [~] **Gallery administration** is connected to the existing album/media foundation in code; run migration `013`, deploy, and complete live CRUD/upload smoke tests. Sponsor administration is complete.
 - [ ] Transactional email provider and retryable notifications.
 - [ ] Application-wide audit-event creation for every sensitive action.
 - [ ] Full automated integration/e2e/RLS test suite (unit/build/lint exist; deeper suite open).
@@ -126,7 +127,7 @@ Priority: **P0**
 - [x] Initialize Git in `E:\Programs\Sinoog 2027`.
 - [x] Create and connect the GitHub repository at `sinoogcommittee/Sinoog-2027`.
 - [x] Confirm `.gitignore` excludes `.env`, `.env.local`, `node_modules`, `dist`, editor files, logs, key files, and temporary outputs.
-- [x] Application work through commit `835861c` is committed on `main` (finance, registration, sponsor administration, public sponsor presentation, and prior Run/auth/admin work).
+- [x] Application work through commit `2f24eab` is committed on `main` (mobile footer, automatic activity weekdays, sponsors, finance, registration, and prior Run/auth/admin work).
 - [~] Use `main` as the production branch. Local `main` tracks `origin/main`; branch-protection status is not yet verified.
 - [x] `.github/workflows/ci.yml` runs exact dependency installation, lint, unit tests, and the production build for pushes and pull requests targeting `main` or `develop`.
 - [ ] Create a separate development or staging workflow.
@@ -280,17 +281,17 @@ Completion gate: A `news_in_charge` user can publish and correct an article but 
 
 Priority: **P1**
 
-- [ ] Build the public media upload pipeline.
+- [~] Build the public media upload pipeline. Administrator photo upload and YouTube entries are implemented; deeper retry/cancellation hardening remains.
 - [ ] Validate file type, actual content, file size, dimensions, and upload ownership on the server side.
-- [ ] Correct image orientation and strip location metadata.
-- [ ] Create responsive WebP derivatives, with an appropriate fallback if required.
+- [~] Correct image orientation and strip location metadata. Canvas re-encoding strips common metadata; explicitly verify phone orientation behavior.
+- [~] Create responsive WebP derivatives, with an appropriate fallback if required. A storage-efficient WebP upload is implemented; multiple responsive derivatives remain optional.
 - [ ] Keep posters readable; use less aggressive compression for graphics containing text.
 - [ ] Define original-file retention and storage quotas.
 - [ ] Add upload progress, retry, cancellation, and failure cleanup.
-- [ ] Build `GalleryManagerPage.tsx` with albums by year and event.
-- [ ] Add album title, slug, description, cover, ordering, captions, credits, alt text, and publication state.
-- [ ] Add an accessible public lightbox with keyboard and close controls.
-- [ ] Add approved video URLs, thumbnails, and click-to-load embeds.
+- [x] Build and route `GalleryManagerPage.tsx` with photo/video collections by year.
+- [~] Add album title, generated slug, description, automatic cover, media ordering, basic captions/alt text, and publication state. Manual reordering and per-item metadata editing remain.
+- [x] Add a responsive public viewer with keyboard arrows, Escape, close controls, thumbnails, and previous/current filters.
+- [x] Add validated YouTube links/embed codes, thumbnails, and privacy-enhanced embeds without rendering pasted HTML.
 - [ ] Confirm permission to publish media involving children, performers, music, or third-party footage.
 - [ ] Keep payment evidence and delegation files entirely separate from public media processing.
 
@@ -717,7 +718,7 @@ Priority: **P1**
 | `/activities/nightly` | Empty state | Published nightly program |
 | `/news` | Live Supabase posts with search/filter and fallback | Remove production fallback, add pagination and final category behavior |
 | `/news/:slug` | Live article route | Sanitize article HTML before rendering and complete media/error behavior |
-| `/gallery` | Visual placeholders | Published albums, optimized media, accessible viewer |
+| `/gallery` | Photo/video tabs, current/previous filters, Facebook-style collection previews, and accessible viewer | Apply `013`, deploy, and verify published media on production |
 | `/sponsors` | Published sponsors grouped by Diamond/Gold/Silver/Bronze tier with logo and external links | Continue content approval and URL checks |
 | `/about` | Parish content and live map | Approved parish history and official contacts |
 | `/privacy` | Committee-approved content live | Keep version/effective date current if policies change |
@@ -734,7 +735,7 @@ Priority: **P1**
 | `/admin/delegations` | Generic empty table | Assignments, review, revisions, deadlines, files |
 | `/admin/posts` | Functional news CRUD, preview, publishing, pinning, and image upload | Sanitize HTML, verify RLS/media security, and test publication workflow |
 | `/admin/activities` | Functional CRUD with scrollable form and date-scoped ordering | Atomic reorder, archive policy, schedule validation, and multi-role tests |
-| `/admin/gallery` | Missing | Album and media management |
+| `/admin/gallery` | Year-based collection CRUD, publication controls, compressed multi-photo upload, and individual YouTube embeds | Apply `013`; complete live CRUD/storage smoke tests and optional manual ordering |
 | `/admin/sponsors` | Functional sponsor CRUD, logo upload, tier/order, publication, website and Facebook fields | Add contact notes only if the committee needs them; continue RLS smoke tests |
 | `/admin/finance` | Financial records, cash accountability, income/expense, CSV | Operational post-`011`; refine refund productization |
 | `/admin/users` | Live list, profile edits, roles, suspension/reactivation, last-admin check | Trusted invitations, atomic guards, audit log, deletion policy, RLS tests |
@@ -762,16 +763,16 @@ Before feature completion:
 Do the remaining work in this sequence:
 
 1. **Operate and monitor** live registration, payment proof, approval, bib/QR, and finance records; fix production bugs as they appear.
-2. Keep migrations `001`–`012`, edge functions, and redirect URLs documented after any Supabase change.
+2. Keep migrations `001`–`013`, edge functions, and redirect URLs documented after any Supabase change.
 3. Hygiene: remove unused legacy auth pages if still present; re-smoke RLS with separate role accounts after major deploys.
 4. Optional product polish: transactional email for approve/needs_changes/reject; kit claim workflow.
-5. **Only after Run ops stay stable** — pick one committee priority: **Delegations** workspace or Gallery administration. Sponsor administration is complete.
+5. **Only after Run ops stay stable** — complete Gallery migration/deployment verification, then prioritize the **Delegations** workspace. Sponsor administration is complete.
 6. Expand automated tests (integration, e2e, policy) around the stable Run path.
 7. Formal staging, backup/restore rehearsal, and controlled launch/event-day/archive procedures as the event approaches.
 
 ## 33. Immediate next work package
 
-**Handoff checkpoint:** `main` @ **`835861c`** (*feat(sponsors and home): added fb link for sponsors*), October 27, 2026.
+**Handoff checkpoint:** `main` @ **`2f24eab`** (*footer mobile view in two columns, activities auto day*), October 27, 2026.
 
 ### Confirmed complete (do not re-open as blockers)
 
@@ -794,7 +795,7 @@ Do the remaining work in this sequence:
 ### Explicitly later (P2)
 
 - [ ] Delegations full workspace.
-- [ ] Gallery administration.
+- [~] Gallery administration is implemented locally; migration `013`, deployment, and live acceptance testing remain.
 - [ ] Transactional email notifications.
 - [ ] Kit claiming workflow beyond bib/QR display.
 
@@ -808,7 +809,7 @@ Do the remaining work in this sequence:
 
 ### Supabase operational notes
 
-1. Migrations through **`012`** are the current production baseline. Never rewrite applied files; add **`013_…`** for new changes.
+1. Migrations through **`012`** are the current production baseline. Migration **`013_gallery_photo_video_collections.sql`** is pending manual application; never rewrite applied files afterward.
 2. Edge functions `admin-create-runner` and `admin-manage-user` remain JWT-protected; only admin roles may invoke them.
 3. `payment-evidence` stays a private bucket; QR values remain derived from protected tokens (no public QR bucket required).
 4. Google OAuth may display `….supabase.co` on the consent screen — accepted without a paid custom domain; optional free branding only.
@@ -831,3 +832,6 @@ Do the remaining work in this sequence:
 | 2026-10-26 | `8701391` and local uncommitted work | Responsive audit; sanitization; Run build handoff |
 | 2026-10-27 | `d14e658` | Finance + registration fixes; live Run ops confirmed; `011` production; defer delegations/gallery/sponsors |
 | 2026-10-27 | `835861c` | Sponsor admin/public/home integration; tier ranking; Facebook links; `012` production; sponsor database type aligned |
+| 2026-10-27 | `2f24eab` | Mobile footer link columns, centered copyright, and automatic activity weekday labels |
+| 2026-10-27 | Local uncommitted gallery package | Photo/video gallery, year filters, Facebook-style previews, compressed uploads, YouTube embeds, admin management, and pending migration `013` |
+| 2026-10-27 | Local uncommitted PWA package | Hero-art favicon and installed icon, manifest, service worker, and cross-platform install invitation |

@@ -28,9 +28,11 @@ import { RegistrationsManagerPage } from '../pages/admin/RegistrationsManagerPag
 import { UsersManagerPage } from '../pages/admin/UsersManagerPage';
 import { FinancePage } from '../pages/admin/FinancePage';
 import { SponsorsManagerPage } from '../pages/admin/SponsorsManagerPage';
+import { GalleryManagerPage } from '../pages/admin/GalleryManagerPage';
 import { NotFoundPage } from '../pages/public/NotFoundPage';
 import { RequireAdmin } from '../components/RequireAdmin';
 import { ScrollToTop } from '../components/ScrollToTop';
+import { InstallAppPrompt } from '../components/InstallAppPrompt';
 import { RequireRole } from '../features/auth/RequireRole';
 import { useAuth } from '../features/auth/useAuth';
 
@@ -50,6 +52,7 @@ export default function App() {
   return (
     <>
     <ScrollToTop />
+    <InstallAppPrompt />
     <Routes>
       <Route element={<PublicLayout />}>
         <Route path="/" element={<HomePage />} />
@@ -97,6 +100,7 @@ export default function App() {
             <Route path="users" element={<UsersManagerPage />} />
             <Route path="finance" element={<FinancePage />} />
             <Route path="sponsors" element={<SponsorsManagerPage />} />
+            <Route path="gallery" element={<GalleryManagerPage />} />
           </Route>
 
           <Route element={<RequireRole role="news_in_charge" />}>

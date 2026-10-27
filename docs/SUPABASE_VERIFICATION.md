@@ -35,6 +35,7 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | `010_admin_account_deletion.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — migration applied; suspended/rejected-account deletion and administrator audit tracking confirmed through the deployed management workflow |
 | `011_cash_payments_and_finance.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — cash receiver attribution, financial records, audited voiding, and complete walk-in profile metadata applied successfully |
 | `012_sponsor_facebook_url.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — configured Supabase REST schema query confirmed `public.sponsors.facebook_url` is present |
+| `013_gallery_photo_video_collections.sql` | — | SQL Editor | Site administrator | PENDING — adds gallery collection year/media type fields and index; run before deploying the gallery manager |
 
 ## Live application acceptance tests — October 27, 2026
 
