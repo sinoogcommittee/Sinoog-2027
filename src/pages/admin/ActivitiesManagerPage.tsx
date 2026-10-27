@@ -355,7 +355,7 @@ export function ActivitiesManagerPage() {
                   <div className="activity-table__cell activity-table__schedule" style={{ fontSize: '0.9rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#2c221e' }}>
                       <Calendar size={14} color="#781d22" />
-                      <span>{dt.date}</span>
+                      <span>{dt.weekday}, {dt.date}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#6d6158', fontSize: '0.82rem' }}>
                       <Clock size={13} />

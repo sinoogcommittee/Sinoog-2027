@@ -1046,6 +1046,15 @@ button:focus-visible {
   font-size: 0.72rem;
   letter-spacing: 0.15em;
 }
+.timeline time .timeline-weekday {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 .timeline h2 {
   font:
     600 1.6rem Fraunces,
@@ -1337,7 +1346,8 @@ button:focus-visible {
   padding-top: 22px;
   margin-top: 45px;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  text-align: center;
   color: #ad9290;
   font-size: 0.75rem;
 }
@@ -1692,9 +1702,25 @@ button:focus-visible {
   }
   .news-grid,
   .feature-cards,
-  .gallery-grid,
-  .footer-grid {
+  .gallery-grid {
     grid-template-columns: 1fr;
+  }
+  .footer-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 34px 18px;
+  }
+  .footer-grid .footer-identity {
+    grid-column: 1 / -1;
+  }
+  .footer-grid .footer-links {
+    min-width: 0;
+  }
+  .footer-grid .footer-links h3 {
+    margin-top: 0;
+  }
+  .footer-grid .footer-links a {
+    align-items: flex-start;
+    line-height: 1.35;
   }
   .news-card--featured {
     grid-column: auto;

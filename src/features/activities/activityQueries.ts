@@ -234,16 +234,22 @@ export async function deleteActivity(id: string): Promise<void> {
 export function formatActivityDateTime(isoString: string | null | undefined): {
   date: string;
   time: string;
+  weekday: string;
 } {
   if (!isoString) {
-    return { date: 'Date TBA', time: 'Time TBA' };
+    return { date: 'Date TBA', time: 'Time TBA', weekday: 'Day TBA' };
   }
 
   try {
     const d = new Date(isoString);
     if (isNaN(d.getTime())) {
-      return { date: 'Date TBA', time: 'Time TBA' };
+      return { date: 'Date TBA', time: 'Time TBA', weekday: 'Day TBA' };
     }
+
+    const weekday = d.toLocaleDateString('en-US', {
+      timeZone: 'Asia/Manila',
+      weekday: 'long',
+    });
 
     const date = d.toLocaleDateString('en-US', {
       timeZone: 'Asia/Manila',
@@ -259,9 +265,9 @@ export function formatActivityDateTime(isoString: string | null | undefined): {
       hour12: true,
     });
 
-    return { date, time };
+    return { date, time, weekday };
   } catch {
-    return { date: 'Date TBA', time: 'Time TBA' };
+    return { date: 'Date TBA', time: 'Time TBA', weekday: 'Day TBA' };
   }
 }
 

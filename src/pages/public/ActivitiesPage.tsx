@@ -130,7 +130,8 @@ export function ActivitiesPage({ filter: routeFilter }: { filter?: 'mass' | 'nig
                 const dayNum = a.starts_at ? new Date(a.starts_at).getDate().toString().padStart(2, '0') : '--';
                 return (
                   <article key={a.id}>
-                    <time>
+                    <time dateTime={a.starts_at ?? undefined}>
+                      <span className="timeline-weekday">{dt.weekday}</span>
                       <strong>{dayNum}</strong>
                       <span>JAN 2027</span>
                     </time>

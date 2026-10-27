@@ -80,7 +80,7 @@ export function PublicLayout() {
       </main>
       <footer className="site-footer">
         <div className="container footer-grid">
-          <div>
+          <div className="footer-identity">
             <div className="brand brand--light">
               <LogoMark type="parish" />
               <span>
@@ -98,14 +98,14 @@ export function PublicLayout() {
               </span>
             </div>
           </div>
-          <div>
+          <div className="footer-links">
             <h3>Explore</h3>
             <Link to="/festival">Festival</Link>
             <Link to="/run">Sinoog Run</Link>
             <Link to="/activities">Masses & activities</Link>
             <Link to="/news">News</Link>
           </div>
-          <div>
+          <div className="footer-links">
             <h3>Information</h3>
             <Link to="/about">About & contact</Link>
             <Link to="/privacy">Privacy</Link>
@@ -118,7 +118,6 @@ export function PublicLayout() {
         </div>
         <div className="container footer-bottom">
           <span>© 2027 Sinoog Committee</span>
-          <span>Times shown in Philippine Standard Time</span>
         </div>
       </footer>
     </div>

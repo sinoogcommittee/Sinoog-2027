@@ -34,6 +34,7 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | `009_atomic_activity_reordering.sql` | 2026-10-26 | SQL Editor | Site administrator | PASS — atomic reordering function found; UI acceptance test remains |
 | `010_admin_account_deletion.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — migration applied; suspended/rejected-account deletion and administrator audit tracking confirmed through the deployed management workflow |
 | `011_cash_payments_and_finance.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — cash receiver attribution, financial records, audited voiding, and complete walk-in profile metadata applied successfully |
+| `012_sponsor_facebook_url.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — configured Supabase REST schema query confirmed `public.sponsors.facebook_url` is present |
 
 ## Live application acceptance tests — October 27, 2026
 
@@ -79,6 +80,14 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | Control: runner can read their own registration | PASS | Worked as expected and returned one row. |
 | Control: anonymous visitor can read published activities | PASS | Worked as expected and returned 15 rows. |
 
+## Sponsor deployment verification — October 27, 2026
+
+| Area | Result | Notes |
+| --- | --- | --- |
+| Migration 012 schema | PASS | Direct query through the configured Supabase project confirmed the `facebook_url` sponsor column. |
+| Public sponsor routes | PASS | `/` and `/sponsors` both returned HTTP 200 from Render. |
+| Sponsor source integration | PASS | Database types now include `facebook_url`; lint, unit tests, and the production build pass at the `835861c` sponsor checkpoint plus the type-alignment fix. |
+
 ## Type regeneration
 
 After every applied migration, regenerate the live database types from the linked project:
@@ -98,3 +107,4 @@ Review the generated diff before replacing or merging `src/types/database.ts`. N
 - `updated_at` trigger test on a disposable record.
 - Signed-URL expiry verification.
 - Registration final-slot concurrency test.
+- Live sponsor CRUD smoke test: add, edit, publish, unpublish, delete, and confirm home/public visibility with a disposable sponsor.

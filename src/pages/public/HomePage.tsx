@@ -189,7 +189,7 @@ export function HomePage() {
                     <span className={`activity-type activity-type--${a.type}`}>{a.type}</span>
                     <h3>{a.title}</h3>
                     <p>
-                      {dt.time} · {a.venue || 'Guinacot'}
+                      {dt.weekday} · {dt.time} · {a.venue || 'Guinacot'}
                     </p>
                   </div>
                   <ChevronRight />

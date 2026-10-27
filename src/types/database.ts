@@ -381,6 +381,7 @@ export interface Database {
           id: string;
           name: string;
           website_url: string | null;
+          facebook_url: string | null;
           logo_path: string | null;
           created_at: string;
         };
@@ -388,6 +389,7 @@ export interface Database {
           id?: string;
           name: string;
           website_url?: string | null;
+          facebook_url?: string | null;
           logo_path?: string | null;
           created_at?: string;
         };
@@ -395,6 +397,7 @@ export interface Database {
           id?: string;
           name?: string;
           website_url?: string | null;
+          facebook_url?: string | null;
           logo_path?: string | null;
           created_at?: string;
         };

@@ -1,6 +1,6 @@
 # Sinoog 2027 Website — Master Build Roadmap
 
-Last updated: October 27, 2026 — realigned to `main` @ `d14e658` (finance page, registration fixes, live Run ops confirmed)
+Last updated: October 27, 2026 — realigned to `main` @ `835861c` (finance, registration, sponsor administration, public sponsor presentation)
 Project folder: `E:\Programs\Sinoog 2027`  
 Repo: https://github.com/sinoogcommittee/Sinoog-2027 · Live: https://sinoog2027.onrender.com  
 Purpose: This is the primary implementation checklist and handoff document for taking the website from its current foundation to production, event-day operation, and post-event archiving.
@@ -33,7 +33,7 @@ The novena begins January 6, 2027. Committee-approved GCash instructions, privac
 
 ## 3. Current implementation snapshot
 
-Audit basis: source tree, routes, feature modules, admin screens, and GitHub `main` at commit `d14e658` (October 27, 2026). Committee confirmed live registration rehearsal, production application of migration `011`, runner edit-before-approve, and approved GCash / privacy / terms / Mass schedule content.
+Audit basis: source tree, routes, feature modules, admin screens, and GitHub `main` at commit `835861c` (October 27, 2026). Committee confirmed live registration rehearsal, production application of migrations `011` and `012`, runner edit-before-approve, and approved GCash / privacy / terms / Mass schedule content.
 
 ### Completed foundation and operations
 
@@ -45,7 +45,7 @@ Audit basis: source tree, routes, feature modules, admin screens, and GitHub `ma
 - [x] Shared `AuthProvider` loads session, profile, roles, suspension state, and role-derived access flags; `RequireRole` / `RequireAdmin`, access-denied, loading, and sign-out.
 - [x] Shared toast, loading, empty, error, and confirmation-dialog components.
 - [x] Typed database model at `src/types/database.ts`.
-- [x] Feature query modules for editions/settings, activities, posts, run, finance, media, and users.
+- [x] Feature query modules for editions/settings, activities, posts, run, finance, sponsors, media, and users.
 - [x] Public Home, Activities, News, News Article, Run, and Run Registration request live Supabase data; production no longer substitutes published demonstration records on empty/error responses.
 - [x] Activities administration: list, create, edit, publish/unpublish, delete, date-scoped reorder (migration `009`).
 - [x] News administration: list, search/filter, create, edit, preview, publish/unpublish, pin/unpin, image upload, delete; DOMPurify allowlist with automated tests.
@@ -54,9 +54,10 @@ Audit basis: source tree, routes, feature modules, admin screens, and GitHub `ma
 - [x] **Sinoog Run end-to-end:** online registration, GCash or cash proof, walk-in cash, admin review, unique bib/QR, race timing, CSV/print; **live rehearsal completed** (sign-up → submit → payment → approve → bib/QR).
 - [x] **Runner edit-before-approve:** runners may change registration details only while status is not approved.
 - [x] Administrator financial workspace (`FinancePage` + `financeQueries`) tracks verified collections, pending payments, cash accountability, other income/expenses, balance, CSV exports (migration `011` **applied in production**).
+- [x] Sponsor administration creates and edits partners, uploads logos, assigns Diamond/Gold/Silver/Bronze tiers, controls ordering/publication, and supports website/Facebook links. Published sponsors appear on `/sponsors` and the home page; migration `012` is applied.
 - [x] Administrator user management: profiles, staff roles, suspension/reactivation, last-admin checks, create staff; edge functions `admin-create-runner` and `admin-manage-user`.
-- [x] Migrations through **`011_cash_payments_and_finance.sql`** exist in repo; production includes `011`.
-- [x] GitHub `main` at `d14e658` (*added finance page. fix registration bugs*).
+- [x] Migrations through **`012_sponsor_facebook_url.sql`** exist in repo; production includes `011` and `012`.
+- [x] GitHub `main` at `835861c` (*feat(sponsors and home): added fb link for sponsors*).
 - [x] Committee-approved GCash text, privacy notice, terms/waiver content, and Mass schedule content on the live site.
 - [x] Responsive audit for public, auth, and admin routes; mobile registrations search toolbar; portal topbar matched to sidebar color.
 
@@ -65,9 +66,8 @@ Audit basis: source tree, routes, feature modules, admin screens, and GitHub `ma
 - [~] Activities, News, Settings, Registrations, Users, and Finance CRUD exist; continue periodic RLS and multi-role smoke tests after deploys.
 - [~] Payment verification vs registration approval can be refined further (workflow is operational).
 - [~] Public feature switches and announcement banner are editable; not every switch is fully consumed on every public surface.
-- [~] Gallery, sponsors, festival participants/guidelines, and **delegations** remain placeholder or shell screens (public pages exist; admin depth deferred).
+- [~] Gallery, festival participants/guidelines, and **delegations** remain placeholder or shell screens. Sponsor administration and public presentation are operational.
 - [~] Google consent screen may still show `….supabase.co` (accepted without paid custom domain; optional brand verification only).
-- [~] Legacy unused auth page files (`SignUpPage` / `RunnerLoginPage`) may still exist beside the active `RunnerAuthPage` flow.
 - [~] Email confirmation enforcement before final registration and production redirect allowlist should be re-checked after each environment change.
 
 ### Not yet implemented (deferred or later)
@@ -75,7 +75,7 @@ Audit basis: source tree, routes, feature modules, admin screens, and GitHub `ma
 - [ ] Full payment-refund automation and complete payment audit trail productization beyond current finance records.
 - [ ] Authenticated kit lookup and kit claiming beyond bib/QR display.
 - [ ] **Delegation-head workspace** (assignment, roster, private music, revisions, approval) — **deferred until Run ops remain stable**.
-- [ ] **Sponsor and gallery administration** connected to Supabase — **deferred**.
+- [ ] **Gallery administration** connected to Supabase — **deferred**. Sponsor administration is complete.
 - [ ] Transactional email provider and retryable notifications.
 - [ ] Application-wide audit-event creation for every sensitive action.
 - [ ] Full automated integration/e2e/RLS test suite (unit/build/lint exist; deeper suite open).
@@ -83,7 +83,7 @@ Audit basis: source tree, routes, feature modules, admin screens, and GitHub `ma
 
 ### Immediate posture (October 27, 2026)
 
-Registration and payment flows have been rehearsed live. Keep monitoring production, fix bugs as they appear, and do not block on gallery/sponsors/delegations. Prefer **operate and harden** over new major modules until the committee prioritizes the next deferred area.
+Registration and payment flows have been rehearsed live. Keep monitoring production, fix bugs as they appear, and do not block on gallery or delegations. Prefer **operate and harden** over new major modules until the committee prioritizes the next deferred area.
 
 ## 4. Definition of finished
 
@@ -126,7 +126,7 @@ Priority: **P0**
 - [x] Initialize Git in `E:\Programs\Sinoog 2027`.
 - [x] Create and connect the GitHub repository at `sinoogcommittee/Sinoog-2027`.
 - [x] Confirm `.gitignore` excludes `.env`, `.env.local`, `node_modules`, `dist`, editor files, logs, key files, and temporary outputs.
-- [x] Application work through commit `d14e658` is committed on `main` (finance page, registration fixes, prior Run/auth/admin work).
+- [x] Application work through commit `835861c` is committed on `main` (finance, registration, sponsor administration, public sponsor presentation, and prior Run/auth/admin work).
 - [~] Use `main` as the production branch. Local `main` tracks `origin/main`; branch-protection status is not yet verified.
 - [x] `.github/workflows/ci.yml` runs exact dependency installation, lint, unit tests, and the production build for pushes and pull requests targeting `main` or `develop`.
 - [ ] Create a separate development or staging workflow.
@@ -177,8 +177,8 @@ Completion gate: The security matrix passes using separate test accounts for eve
 
 Priority: **P0**
 
-- [~] Feature folders exist for auth, content, activities, editions, media, run, users, and shared UI. Delegations, sponsors, and a dedicated payment-review module still need implementation.
-- [~] Typed Supabase queries exist for editions/settings, activities, posts, run records, and public media; complete the remaining modules and verify all return/error types.
+- [~] Feature folders exist for auth, content, activities, editions, finance, media, run, sponsors, users, and shared UI. Delegations and a dedicated payment-review module still need implementation.
+- [~] Typed Supabase queries exist for editions/settings, activities, posts, run records, sponsors, finance, and public media; complete the remaining modules and verify all return/error types.
 - [x] Add a shared authentication/session provider.
 - [x] Add role, profile, suspension, and derived-permission loading to the shared auth context.
 - [~] Authentication state change and refresh handling exist; add an explicit session-expired message and recovery flow.
@@ -198,7 +198,7 @@ Priority: **P0**
 
 ### Public account flows
 
-- [x] Provide runner sign-in and sign-up in `RunnerAuthPage.tsx`; `/signup` redirects to its sign-up tab. A separate unused `SignUpPage.tsx` remains and should be removed or intentionally adopted.
+- [x] Provide runner sign-in and sign-up in `RunnerAuthPage.tsx`; `/signup` redirects to its sign-up tab. Obsolete `SignUpPage.tsx` and `RunnerLoginPage.tsx` files were removed in `50aa234`.
 - [x] Google sign-in is implemented for runner entry with a safe `/auth/callback` return path; provider is enabled in production. Consent may still show `….supabase.co` (accepted). Re-test redirect allowlist after domain changes.
 - [~] Supabase email confirmation handling exists; explicitly block final registration until the email is verified and test it.
 - [x] Create and route `ForgotPasswordPage.tsx`, `ResetPasswordPage.tsx`, and `AuthCallbackPage.tsx`.
@@ -300,13 +300,13 @@ Completion gate: An authorized editor can upload a large phone photo, publish op
 
 Priority: **P1**
 
-- [ ] Build `SponsorsManagerPage.tsx`.
-- [ ] Create sponsor records with name, approved logo, website, contact notes, and active state.
-- [ ] Assign sponsors to the 2027 edition and a recognition tier.
-- [ ] Define tier order and logo-size rules.
-- [ ] Preview the sponsor page before publishing.
-- [ ] Validate external website URLs.
-- [ ] Use meaningful alt text and retain correct logo proportions.
+- [x] Build and route `SponsorsManagerPage.tsx`.
+- [~] Create sponsor records with name, approved logo, website, Facebook page, and publication state. Private contact notes are not modeled.
+- [x] Assign sponsors to the 2027 edition and a recognition tier.
+- [x] Define Diamond, Gold, Silver, and Bronze tier order and responsive logo-size rules.
+- [x] Show published sponsors by tier on `/sponsors` and a published sponsor strip on the home page.
+- [~] Accept external website and Facebook URLs; add stricter URL validation if malformed input becomes an operational issue.
+- [x] Use sponsor-name logo alt text publicly and retain correct logo proportions.
 - [ ] Record committee approval before publishing a logo or website link.
 
 Completion gate: Sponsor order and tier presentation can be changed without source edits.
@@ -705,7 +705,7 @@ Priority: **P1**
 
 | Route | Current state | Required finish work |
 |---|---|---|
-| `/` | Responsive UI with Supabase queries and local fallbacks | Remove production demo fallbacks; complete live settings, media, sponsors, and event-state behavior |
+| `/` | Responsive live-data UI including published sponsor strip | Complete live settings, media, and event-state behavior |
 | `/festival` | Informational shell | Approved story, program, public participants, official media |
 | `/festival/participants` | Empty state | Approved delegation public profiles and ordering |
 | `/festival/guidelines` | Empty state | Versioned guidelines and downloadable files |
@@ -718,7 +718,7 @@ Priority: **P1**
 | `/news` | Live Supabase posts with search/filter and fallback | Remove production fallback, add pagination and final category behavior |
 | `/news/:slug` | Live article route | Sanitize article HTML before rendering and complete media/error behavior |
 | `/gallery` | Visual placeholders | Published albums, optimized media, accessible viewer |
-| `/sponsors` | Empty state | Published sponsors grouped by tier |
+| `/sponsors` | Published sponsors grouped by Diamond/Gold/Silver/Bronze tier with logo and external links | Continue content approval and URL checks |
 | `/about` | Parish content and live map | Approved parish history and official contacts |
 | `/privacy` | Committee-approved content live | Keep version/effective date current if policies change |
 | `/terms` | Committee-approved content live | Keep version current if rules change |
@@ -735,7 +735,7 @@ Priority: **P1**
 | `/admin/posts` | Functional news CRUD, preview, publishing, pinning, and image upload | Sanitize HTML, verify RLS/media security, and test publication workflow |
 | `/admin/activities` | Functional CRUD with scrollable form and date-scoped ordering | Atomic reorder, archive policy, schedule validation, and multi-role tests |
 | `/admin/gallery` | Missing | Album and media management |
-| `/admin/sponsors` | Missing | Sponsor and tier management |
+| `/admin/sponsors` | Functional sponsor CRUD, logo upload, tier/order, publication, website and Facebook fields | Add contact notes only if the committee needs them; continue RLS smoke tests |
 | `/admin/finance` | Financial records, cash accountability, income/expense, CSV | Operational post-`011`; refine refund productization |
 | `/admin/users` | Live list, profile edits, roles, suspension/reactivation, last-admin check | Trusted invitations, atomic guards, audit log, deletion policy, RLS tests |
 | `/admin/settings` | Includes editable GCash, registration window/deadline, planned start, edition, contacts, switches, and banner | Apply migration `007`; consume switches publicly; add SEO, audit, and permission tests |
@@ -762,16 +762,16 @@ Before feature completion:
 Do the remaining work in this sequence:
 
 1. **Operate and monitor** live registration, payment proof, approval, bib/QR, and finance records; fix production bugs as they appear.
-2. Keep migrations `001`–`011`, edge functions, and redirect URLs documented after any Supabase change.
+2. Keep migrations `001`–`012`, edge functions, and redirect URLs documented after any Supabase change.
 3. Hygiene: remove unused legacy auth pages if still present; re-smoke RLS with separate role accounts after major deploys.
 4. Optional product polish: transactional email for approve/needs_changes/reject; kit claim workflow.
-5. **Only after Run ops stay stable** — pick one committee priority: **Delegations** workspace **or** Gallery admin **or** Sponsors admin.
+5. **Only after Run ops stay stable** — pick one committee priority: **Delegations** workspace or Gallery administration. Sponsor administration is complete.
 6. Expand automated tests (integration, e2e, policy) around the stable Run path.
 7. Formal staging, backup/restore rehearsal, and controlled launch/event-day/archive procedures as the event approaches.
 
 ## 33. Immediate next work package
 
-**Handoff checkpoint:** `main` @ **`d14e658`** (*added finance page. fix registration bugs*), October 27, 2026.
+**Handoff checkpoint:** `main` @ **`835861c`** (*feat(sponsors and home): added fb link for sponsors*), October 27, 2026.
 
 ### Confirmed complete (do not re-open as blockers)
 
@@ -782,25 +782,33 @@ Do the remaining work in this sequence:
 - [x] Staff vs runner sign-in separation; Google sign-in for runners; finance admin page.
 - [x] Registration and timing controls from migrations `007`/`008` in operational use.
 - [x] Responsive layout audit for public, auth, and admin routes (including registrations mobile search).
+- [x] Sponsor administration, tiered public sponsor page, home sponsor strip, website/Facebook links, and migration `012`.
 
 ### Active focus now
 
 - [ ] Monitor production queues (registrations pending review, payment proofs, finance balance).
 - [ ] After each deploy: smoke-test runner register, admin approve, and one staff login.
 - [ ] Keep `docs/SUPABASE_VERIFICATION.md` and this roadmap HEAD/date current when shipping packages.
-- [ ] Optional hygiene: delete or clearly archive unused `SignUpPage.tsx` / `RunnerLoginPage.tsx` if still in tree.
+- [ ] After sponsor changes: smoke-test add/edit/publish/unpublish/delete and public/home visibility.
 
 ### Explicitly later (P2)
 
 - [ ] Delegations full workspace.
 - [ ] Gallery administration.
-- [ ] Sponsors administration.
 - [ ] Transactional email notifications.
 - [ ] Kit claiming workflow beyond bib/QR display.
 
+### Deferred until the next token/session reset
+
+- [ ] Separate payment verification from registration approval, including reviewer, date, notes, and payment-status audit records.
+- [ ] Add refund handling for verified payments tied to registrations that are later rejected or cancelled.
+- [ ] Finalize committee-approved waiver, privacy notice, refund policy, guardian consent, and public support contact where any wording remains incomplete.
+- [ ] Complete remaining safety checks: final-slot concurrency, signed-URL expiry, new-user profile trigger, `updated_at` triggers, and restricted staff access.
+- [x] Main-administrator decision: registration opening remains under direct administrator control; no automatic post-testing closure task is required.
+
 ### Supabase operational notes
 
-1. Migrations through **`011`** are the current production baseline. Never rewrite applied files; add **`012_…`** for new changes.
+1. Migrations through **`012`** are the current production baseline. Never rewrite applied files; add **`013_…`** for new changes.
 2. Edge functions `admin-create-runner` and `admin-manage-user` remain JWT-protected; only admin roles may invoke them.
 3. `payment-evidence` stays a private bucket; QR values remain derived from protected tokens (no public QR bucket required).
 4. Google OAuth may display `….supabase.co` on the consent screen — accepted without a paid custom domain; optional free branding only.
@@ -822,3 +830,4 @@ Do the remaining work in this sequence:
 |------|------------|------|
 | 2026-10-26 | `8701391` and local uncommitted work | Responsive audit; sanitization; Run build handoff |
 | 2026-10-27 | `d14e658` | Finance + registration fixes; live Run ops confirmed; `011` production; defer delegations/gallery/sponsors |
+| 2026-10-27 | `835861c` | Sponsor admin/public/home integration; tier ranking; Facebook links; `012` production; sponsor database type aligned |
