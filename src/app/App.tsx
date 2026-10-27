@@ -27,6 +27,7 @@ import { PostsManagerPage } from '../pages/admin/PostsManagerPage';
 import { RegistrationsManagerPage } from '../pages/admin/RegistrationsManagerPage';
 import { UsersManagerPage } from '../pages/admin/UsersManagerPage';
 import { FinancePage } from '../pages/admin/FinancePage';
+import { SponsorsManagerPage } from '../pages/admin/SponsorsManagerPage';
 import { NotFoundPage } from '../pages/public/NotFoundPage';
 import { RequireAdmin } from '../components/RequireAdmin';
 import { ScrollToTop } from '../components/ScrollToTop';
@@ -95,6 +96,7 @@ export default function App() {
             <Route path="run-timing" element={<Suspense fallback={<div className="admin-page">Loading race timing…</div>}><RunTimingPage /></Suspense>} />
             <Route path="users" element={<UsersManagerPage />} />
             <Route path="finance" element={<FinancePage />} />
+            <Route path="sponsors" element={<SponsorsManagerPage />} />
           </Route>
 
           <Route element={<RequireRole role="news_in_charge" />}>

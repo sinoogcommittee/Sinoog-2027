@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   UserCog,
   CircleDollarSign,
+  Handshake,
 } from 'lucide-react';
 import { LogoMark } from '../components/LogoMark';
 import { useAuth } from '../features/auth/useAuth';
@@ -24,6 +25,7 @@ const items = [
   ['Delegations', '/admin/delegations', ShieldCheck, 'delegation'],
   ['Users & Staff', '/admin/users', UserCog, 'admin'],
   ['Financial records', '/admin/finance', CircleDollarSign, 'admin'],
+  ['Sponsors', '/admin/sponsors', Handshake, 'admin'],
   ['Website settings', '/admin/settings', Settings, 'admin'],
 ] as const;
 
