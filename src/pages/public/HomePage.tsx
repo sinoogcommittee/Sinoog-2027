@@ -154,7 +154,6 @@ export function HomePage() {
               referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
             />
-            <span>2027 celebration teaser</span>
           </div>
           <div>
             <SectionHeading
