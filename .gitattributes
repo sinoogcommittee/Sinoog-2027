@@ -1,0 +1,12 @@
+# Normalise line endings so Windows and CI produce identical diffs.
+* text=auto eol=lf
+
+# Binary files: never touch.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.webp binary
+*.gif  binary
+*.ico  binary
+*.docx binary
+*.woff2 binary

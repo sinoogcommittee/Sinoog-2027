@@ -17,7 +17,7 @@ Purpose: This is the primary implementation checklist and handoff document for t
 - Backend: Supabase Postgres, Auth, Storage, and later Edge Functions where needed
 - Source control: GitHub
 - Frontend hosting: Render Static Site
-- Initial administrator account: `rieldiango24@gmail.com`
+- Initial administrator account: kept out of the public repository (see `004_promote_first_admin.sql`)
 
 The novena begins January 6, 2027. The individual Mass times, celebrants, venues, and confirmation of the complete novena and Pontifical Mass schedule still require parish approval.
 
@@ -162,9 +162,9 @@ Priority: **P0**
 - [ ] Confirm `001_schema.sql` completed successfully.
 - [ ] Confirm `002_security_and_storage.sql` completed successfully.
 - [ ] Confirm the corrected `003_seed_placeholders.sql` was applied only if placeholder records are wanted.
-- [ ] Run `004_promote_first_admin.sql` and confirm the result shows `rieldiango24@gmail.com` with `admin` and `public_user` roles.
+- [ ] Run `004_promote_first_admin.sql` and confirm the result shows the administrator account with `admin` and `public_user` roles.
 - [ ] Run `005_correct_novena_start_date.sql` and confirm the result shows run date January 9, novena start January 6, and fiesta date January 15.
-- [~] `SUPABASE_VERIFICATION.md` now provides the migration record; fill in the applied date, method, verifier, and result from the live Supabase project.
+- [~] `docs/SUPABASE_VERIFICATION.md` now provides the migration record; fill in the applied date, method, verifier, and result from the live Supabase project.
 - [ ] Do not treat the optional activity seed as official content; it remains draft until reviewed.
 
 ### Inspect database objects
@@ -174,7 +174,7 @@ Priority: **P0**
 - [ ] Confirm the profile-creation trigger works for a newly created test user.
 - [ ] Confirm `updated_at` triggers change timestamps during updates.
 - [~] A typed database model exists at `src/types/database.ts`; verify it matches the current live Supabase schema and document how it was generated.
-- [x] Document a repeatable linked-project type-generation process in `SUPABASE_VERIFICATION.md`.
+- [x] Document a repeatable linked-project type-generation process in `docs/SUPABASE_VERIFICATION.md`.
 
 ### Verify Row Level Security
 
@@ -776,7 +776,7 @@ Before feature completion:
 Do the remaining work in this sequence:
 
 1. Review, commit, and push the current activity dialog/date-order changes; keep `main` deployable.
-2. Verify migrations `001`–`005`, first-admin roles, Storage buckets, and the complete RLS matrix in the live Supabase project.
+2. Verify migrations `001`–`010`, first-admin roles, Storage buckets, and the complete RLS matrix in the live Supabase project.
 3. Remove published demo fallbacks from configured production behavior and sanitize all staff-authored HTML.
 4. Resolve the two lint warnings and add route-level code splitting before the application grows further.
 5. Apply and permission-test migration `007`, then deploy the `admin-create-runner` Edge Function for safe runner-account creation.
@@ -796,7 +796,7 @@ The next development session should complete this exact work package before regi
 - [ ] Verify activity ordering with two dates and multiple same-date activities; reordering one date must not change the other date.
 - [~] Migration `009_atomic_activity_reordering.sql` and the updated activity client replace multi-update reordering with one atomic, audited function; apply it and verify two concurrent administrator edits.
 - [ ] Commit and push the current activity changes; record the new commit here.
-- [ ] Confirm migrations `001`–`005`, `rieldiango24@gmail.com` roles, Storage buckets, and live schema/type alignment.
+- [ ] Confirm migrations `001`–`010`, initial administrator roles, Storage buckets, and live schema/type alignment.
 - [ ] Test anonymous, runner, news staff, delegation head, administrator, and suspended-user access using separate accounts and direct Supabase requests.
 - [x] Remove published demo fallback behavior in production and show honest loading/empty/error/retry states.
 - [x] Sanitize article HTML during save, admin preview, and public rendering with a strict allowlist and automated unsafe-markup tests.
@@ -818,7 +818,7 @@ Do not begin collecting runner or delegation personal information until the priv
 7. Confirm the signed-in staff account has an `admin` row in `user_roles`; the Edge Functions refuse all other roles.
 8. Test one online GCash runner and one administrator-created cash runner. Confirm account login, unique bib, unique QR, `registration_source`, `registered_by`, payment status, CSV, print layout, official start, finish scan, and runner result.
 
-The read-only `supabase/verification/001_foundation_verification.sql` detail query, consolidated `002_foundation_summary.sql`, and `SUPABASE_VERIFICATION.md` checklist cover the first live verification pass for tables, enums, trusted functions, buckets, RLS, policies, triggers, the first administrator, event dates, run configuration, and operational indexes. CLI migration history is unavailable because the current migrations were applied through the SQL Editor, so the manual record is authoritative.
+The read-only `supabase/verification/001_foundation_verification.sql` detail query, consolidated `002_foundation_summary.sql`, and `docs/SUPABASE_VERIFICATION.md` checklist cover the first live verification pass for tables, enums, trusted functions, buckets, RLS, policies, triggers, the first administrator, event dates, run configuration, and operational indexes. CLI migration history is unavailable because the current migrations were applied through the SQL Editor, so the manual record is authoritative.
 
 Foundation verification result on October 26, 2026: 12 operational checks passed, CLI migration history was informational, and the only failed expectation was the launch-state guard because live registration is currently open. The administrator confirmed that registration should remain open temporarily for deployment testing. Close it after testing unless the committee explicitly approves public launch. Detailed role, Storage, concurrency, and end-to-end workflow tests are still required.
 

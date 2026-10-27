@@ -4,6 +4,9 @@ import { supabase } from '../../lib/supabase';
 import type { AppRole, Profile } from '../../types';
 import { AuthContext } from './authState';
 
+// The offline demo administrator only exists in local development builds.
+const readDemoFlag = () => import.meta.env.DEV && sessionStorage.getItem('sinoog-demo-admin') === '1';
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -35,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     if (!supabase) {
-      const demo = sessionStorage.getItem('sinoog-demo-admin') === '1';
+      const demo = readDemoFlag();
       setIsDemoAdmin(demo);
       if (demo) {
         setRoles(['admin', 'public_user']);
@@ -56,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (activeUser) {
         await fetchProfileAndRoles(activeUser.id);
       } else {
-        const demo = sessionStorage.getItem('sinoog-demo-admin') === '1';
+        const demo = readDemoFlag();
         setIsDemoAdmin(demo);
         if (demo) {
           setRoles(['admin', 'public_user']);
@@ -79,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function initializeAuth() {
       if (!supabase) {
         if (!mounted) return;
-        const demo = sessionStorage.getItem('sinoog-demo-admin') === '1';
+        const demo = readDemoFlag();
         setIsDemoAdmin(demo);
         if (demo) {
           setRoles(['admin', 'public_user']);
@@ -101,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (activeUser) {
           await fetchProfileAndRoles(activeUser.id);
         } else {
-          const demo = sessionStorage.getItem('sinoog-demo-admin') === '1';
+          const demo = readDemoFlag();
           setIsDemoAdmin(demo);
           if (demo) {
             setRoles(['admin', 'public_user']);
@@ -134,7 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (newSession?.user) {
         await fetchProfileAndRoles(newSession.user.id);
       } else {
-        const demo = sessionStorage.getItem('sinoog-demo-admin') === '1';
+        const demo = readDemoFlag();
         setIsDemoAdmin(demo);
         if (demo) {
           setRoles(['admin', 'public_user']);

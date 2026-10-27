@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": { "name": "Sinoog 2027", "productType": "festival and parish event website", "stack": ["React", "TypeScript", "Vite", "Supabase"] },
-  "sources": { "tokens": ["src/styles/global.css"], "components": ["src/components"], "assets": ["public/images/parish_logo.webp", "public/images/committee_logo.png"], "instructions": ["Sinoog-2027-Website-Plan.md"] },
+  "sources": { "tokens": ["src/styles/global.css"], "components": ["src/components"], "assets": ["public/images/parish_logo.webp", "public/images/committee_logo.webp"], "instructions": ["docs/Sinoog-2027-Website-Plan.md"] },
   "design": { "colorMode": "light", "colors": { "primary": "#741f29", "primaryDark": "#4c121b", "accent": "#d69d2e", "surface": "#fffdf8", "mutedSurface": "#f7f0df", "text": "#2b2320" }, "typography": { "display": "Fraunces", "body": "DM Sans" }, "spacing": { "section": "90px desktop / 65px mobile" }, "radius": { "control": "8px", "cards": "0-4px" }, "shadows": { "elevated": "0 18px 50px rgba(74,39,20,.1)" }, "motion": { "default": "restrained; honor prefers-reduced-motion" }, "density": "comfortable" },
   "components": { "installed": [], "preferredPrimitives": ["Button", "PageHero", "SectionHeading", "StatusBadge"], "patterns": ["editorial festival landing", "timeline schedule", "committee data workspace"] },
   "constraints": { "must": ["mobile-first", "accessible focus states", "clear unconfirmed-content states", "separate route page files"], "avoid": ["autoplay video", "invented event details", "excessive gradients", "glass effects"] },

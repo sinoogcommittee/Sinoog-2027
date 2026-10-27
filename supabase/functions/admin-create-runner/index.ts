@@ -1,7 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+// Set the ALLOWED_ORIGIN function secret to the site URL (for example
+// https://sinoog2027.onrender.com) to restrict browser access. Defaults to '*'.
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGIN') || '*',
+  'Vary': 'Origin',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
@@ -47,6 +50,9 @@ Deno.serve(async (request) => {
   const { data: role } = await serviceClient.from('user_roles').select('role')
     .eq('user_id', caller.id).eq('role', 'admin').maybeSingle();
   if (!role) return json({ error: 'Administrator access is required.' }, 403);
+  const { data: callerProfile } = await serviceClient.from('profiles').select('suspended_at')
+    .eq('id', caller.id).maybeSingle();
+  if (callerProfile?.suspended_at) return json({ error: 'Your account is suspended.' }, 403);
 
   let body: Record<string, unknown>;
   try {

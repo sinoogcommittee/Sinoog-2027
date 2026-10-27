@@ -1,3 +1,5 @@
+-- NOTE: replace every ADMIN_EMAIL_HERE below with the administrator's sign-in email
+-- before running. The real address is intentionally not stored in this public repository.
 -- Sinoog 2027 read-only Supabase foundation verification.
 -- Run in the Supabase SQL Editor after migrations 001-008.
 -- Every row in the check sections should report `true` in the `present` column.
@@ -71,7 +73,7 @@ order by event_object_schema, event_object_table;
 select u.email, array_agg(ur.role order by ur.role) as roles
 from auth.users u
 left join public.user_roles ur on ur.user_id=u.id
-where lower(u.email)=lower('rieldiango24@gmail.com')
+where lower(u.email)=lower('ADMIN_EMAIL_HERE')
 group by u.email;
 
 -- Expected roles: admin and public_user.
@@ -99,6 +101,6 @@ where schemaname='public'
 order by tablename, indexname;
 
 -- 12. Migration history availability. Manual SQL Editor runs may not appear
--- in this table; record all manual runs in SUPABASE_VERIFICATION.md.
+-- in this table; record all manual runs in docs/SUPABASE_VERIFICATION.md.
 select to_regclass('supabase_migrations.schema_migrations') is not null
        as cli_migration_history_available;

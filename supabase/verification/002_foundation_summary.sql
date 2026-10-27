@@ -1,3 +1,5 @@
+-- NOTE: replace every ADMIN_EMAIL_HERE below with the administrator's sign-in email
+-- before running. The real address is intentionally not stored in this public repository.
 -- Sinoog 2027 consolidated Supabase foundation verification.
 -- Run this after migrations 001-009. It returns one result table so the
 -- Supabase SQL Editor can display every high-level check at the same time.
@@ -68,18 +70,18 @@ rls_check as (
 admin_check as (
   select exists (
            select 1 from auth.users u
-           where lower(u.email) = lower('rieldiango24@gmail.com')
+           where lower(u.email) = lower('ADMIN_EMAIL_HERE')
          ) as user_exists,
          exists (
            select 1 from auth.users u
            join public.user_roles ur on ur.user_id = u.id
-           where lower(u.email) = lower('rieldiango24@gmail.com')
+           where lower(u.email) = lower('ADMIN_EMAIL_HERE')
              and ur.role = 'admin'
          ) as has_admin,
          exists (
            select 1 from auth.users u
            join public.user_roles ur on ur.user_id = u.id
-           where lower(u.email) = lower('rieldiango24@gmail.com')
+           where lower(u.email) = lower('ADMIN_EMAIL_HERE')
              and ur.role = 'public_user'
          ) as has_public_user
 ),
@@ -179,7 +181,7 @@ union all
 select 140, 'CLI migration history', 'INFO',
        case
          when to_regclass('supabase_migrations.schema_migrations') is null
-           then 'Unavailable: record SQL Editor runs manually in SUPABASE_VERIFICATION.md'
+           then 'Unavailable: record SQL Editor runs manually in docs/SUPABASE_VERIFICATION.md'
          else 'Available'
        end
 order by sort_order;

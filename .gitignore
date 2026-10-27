@@ -63,3 +63,8 @@ Desktop.ini
 *.orig
 *.rej
 ~$*
+
+# Database exports and backups must never be committed
+backups/
+*.dump
+*.sql.gz

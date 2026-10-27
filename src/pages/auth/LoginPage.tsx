@@ -94,7 +94,7 @@ export function LoginPage() {
           </Button>
         </form>
 
-        {!isSupabaseConfigured && (
+        {import.meta.env.DEV && !isSupabaseConfigured && (
           <button
             type="button"
             className="demo-link"

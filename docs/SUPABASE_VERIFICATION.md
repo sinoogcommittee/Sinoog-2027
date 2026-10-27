@@ -9,7 +9,7 @@ Use this document to record the live database checks separately from source-code
 3. Confirm every required table, enum, and function reports `present = true`.
 4. Confirm the three Storage buckets appear with the expected privacy settings.
 5. Confirm every application table has `rls_enabled = true`.
-6. Confirm `rieldiango24@gmail.com` has both `admin` and `public_user`.
+6. Confirm the initial administrator account has both `admin` and `public_user`.
 7. Confirm the current edition dates are January 6, 9, and 15, 2027, and registration remains closed until launch approval.
 8. Paste the date, operator, migration method, and any failed check below.
 
