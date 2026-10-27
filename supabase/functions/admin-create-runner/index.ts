@@ -82,10 +82,24 @@ Deno.serve(async (request) => {
     email,
     password: String(body.temporary_password),
     email_confirm: true,
-    user_metadata: { full_name: String(body.participant_name).trim() },
+    user_metadata: {
+      full_name: String(body.participant_name).trim(),
+      mobile: String(body.mobile).trim(),
+      locality: String(body.locality).trim(),
+    },
   });
   if (createError || !created.user) {
     return json({ error: createError?.message || 'Unable to create the runner login.' }, 400);
+  }
+
+  const { error: profileError } = await serviceClient.from('profiles').update({
+    full_name: String(body.participant_name).trim(),
+    mobile: String(body.mobile).trim(),
+    locality: String(body.locality).trim(),
+  }).eq('id', created.user.id);
+  if (profileError) {
+    await serviceClient.auth.admin.deleteUser(created.user.id);
+    return json({ error: `Unable to save the runner profile: ${profileError.message}` }, 400);
   }
 
   const { data: registration, error: registrationError } = await serviceClient.rpc(

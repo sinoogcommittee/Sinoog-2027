@@ -848,6 +848,7 @@ export interface Database {
           verified_by: string | null;
           verified_at: string | null;
           rejection_reason: string | null;
+          received_by: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -863,6 +864,7 @@ export interface Database {
           verified_by?: string | null;
           verified_at?: string | null;
           rejection_reason?: string | null;
+          received_by?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -878,6 +880,61 @@ export interface Database {
           verified_by?: string | null;
           verified_at?: string | null;
           rejection_reason?: string | null;
+          received_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      financial_transactions: {
+        Row: {
+          id: string;
+          transaction_type: 'income' | 'expense';
+          category: string;
+          description: string;
+          amount_centavos: number;
+          currency: string;
+          method: string | null;
+          reference: string | null;
+          transaction_date: string;
+          payment_id: string | null;
+          created_by: string | null;
+          voided_at: string | null;
+          voided_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          transaction_type: 'income' | 'expense';
+          category: string;
+          description: string;
+          amount_centavos: number;
+          currency?: string;
+          method?: string | null;
+          reference?: string | null;
+          transaction_date?: string;
+          payment_id?: string | null;
+          created_by: string;
+          voided_at?: string | null;
+          voided_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          transaction_type?: 'income' | 'expense';
+          category?: string;
+          description?: string;
+          amount_centavos?: number;
+          currency?: string;
+          method?: string | null;
+          reference?: string | null;
+          transaction_date?: string;
+          payment_id?: string | null;
+          created_by?: string | null;
+          voided_at?: string | null;
+          voided_by?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -1105,6 +1162,23 @@ export interface Database {
       };
       mark_gcash_payment_submitted: {
         Args: { p_payment_id: string; p_payer_reference: string };
+        Returns: undefined;
+      };
+      mark_manual_payment_submitted: {
+        Args: {
+          p_payment_id: string;
+          p_method: string;
+          p_payer_reference?: string | null;
+          p_received_by?: string | null;
+        };
+        Returns: undefined;
+      };
+      list_cash_payment_receivers: {
+        Args: Record<PropertyKey, never>;
+        Returns: Array<{ user_id: string; full_name: string }>;
+      };
+      void_financial_transaction: {
+        Args: { p_transaction_id: string };
         Returns: undefined;
       };
       review_run_registration: {

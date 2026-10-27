@@ -19,9 +19,13 @@ import {
   deleteRejectedRegistration,
   submitRegistration,
   submitPaymentEvidence,
+  getCashPaymentReceivers,
+  EMERGENCY_RELATIONSHIPS,
   type RunCategory,
   type RunEvent,
   type UserRegistrationState,
+  type CashPaymentReceiver,
+  type ManualPaymentMethod,
 } from '../../features/run/runQueries';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import { useAuth } from '../../features/auth/useAuth';
@@ -64,6 +68,9 @@ export function RunRegistrationPage() {
 
   // Payment Form Fields
   const [payerReference, setPayerReference] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<ManualPaymentMethod>('GCash');
+  const [cashReceiverId, setCashReceiverId] = useState('');
+  const [cashReceivers, setCashReceivers] = useState<CashPaymentReceiver[]>([]);
   const [paymentFile, setPaymentFile] = useState<File | null>(null);
   const [uploadingProof, setUploadingProof] = useState(false);
   const [restartingRegistration, setRestartingRegistration] = useState(false);
@@ -90,6 +97,16 @@ export function RunRegistrationPage() {
         );
         setRunEvent(rEvent);
         setCategories(rCats);
+        if (activeUserId) {
+          try {
+            const receivers = await getCashPaymentReceivers();
+            if (!mounted) return;
+            setCashReceivers(receivers);
+            setCashReceiverId((current) => current || receivers[0]?.user_id || '');
+          } catch (receiverError) {
+            console.warn('Cash receiver list is not available yet:', receiverError);
+          }
+        }
         if (rCats.length > 0) {
           setSelectedCategoryId(rCats[0].id);
         }
@@ -232,8 +249,12 @@ export function RunRegistrationPage() {
   const handlePaymentProofSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!userState.payment) return;
-    if (!payerReference.trim()) {
+    if (paymentMethod === 'GCash' && !payerReference.trim()) {
       toast('Please enter the transaction reference number from your receipt.', 'error');
+      return;
+    }
+    if (paymentMethod === 'Cash' && !cashReceiverId) {
+      toast('Please select the administrator who received your cash payment.', 'error');
       return;
     }
     if (!paymentFile) {
@@ -246,7 +267,11 @@ export function RunRegistrationPage() {
       const compression = await submitPaymentEvidence(
         userState.payment.id,
         activeUserId || 'guest',
-        payerReference.trim(),
+        {
+          method: paymentMethod,
+          payerReference: payerReference.trim(),
+          receivedBy: cashReceiverId,
+        },
         paymentFile
       );
       toast(`Payment proof compressed to ${Math.max(1, Math.round(compression.compressedBytes / 1024))} KB and submitted.`, 'success');
@@ -388,11 +413,14 @@ export function RunRegistrationPage() {
                   ) : (
                     <>
                       <div style={{ background: '#faf8f4', border: '1px solid var(--line)', borderRadius: '6px', padding: '1.25rem', marginBottom: '1.5rem', fontSize: '0.92rem' }}>
-                        <p style={{ margin: '0 0 0.5rem', fontWeight: 600 }}>Pay the exact registration fee through GCash:</p>
+                        <p style={{ margin: '0 0 0.5rem', fontWeight: 600 }}>
+                          {paymentMethod === 'GCash' ? 'Pay the exact registration fee through GCash:' : 'Pay the exact registration fee in cash to an authorized administrator:'}
+                        </p>
                         <ul style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.6 }}>
-                          <li><strong>GCash number:</strong> {runEvent?.gcash_number || '09260265423'}</li>
-                          {runEvent?.gcash_account_name && <li><strong>Account name:</strong> {runEvent.gcash_account_name}</li>}
+                          {paymentMethod === 'GCash' && <li><strong>GCash number:</strong> {runEvent?.gcash_number || '09260265423'}</li>}
+                          {paymentMethod === 'GCash' && runEvent?.gcash_account_name && <li><strong>Account name:</strong> {runEvent.gcash_account_name}</li>}
                           <li><strong>Amount:</strong> {feeFormatted}</li>
+                          {paymentMethod === 'Cash' && <li>Ask for a receipt and upload a clear photo as proof.</li>}
                         </ul>
                       </div>
 
@@ -403,32 +431,47 @@ export function RunRegistrationPage() {
                               Payment Method
                             </label>
                             <select
-                              value="GCash"
-                              disabled
+                              value={paymentMethod}
+                              onChange={(e) => setPaymentMethod(e.target.value as ManualPaymentMethod)}
                               style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
                             >
                               <option value="GCash">GCash</option>
+                              <option value="Cash">Cash</option>
                             </select>
                           </div>
 
                           <div>
                             <label style={{ display: 'block', fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.25rem' }}>
-                              Reference / Transaction ID <span style={{ color: '#c53030' }}>*</span>
+                              {paymentMethod === 'GCash' ? 'Reference / Transaction ID' : 'Cash received by'} <span style={{ color: '#c53030' }}>*</span>
                             </label>
-                            <input
-                              type="text"
-                              required
-                              placeholder="e.g. 1002348921"
-                              value={payerReference}
-                              onChange={(e) => setPayerReference(e.target.value)}
-                              style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                            />
+                            {paymentMethod === 'GCash' ? (
+                              <input
+                                type="text"
+                                required
+                                placeholder="e.g. 1002348921"
+                                value={payerReference}
+                                onChange={(e) => setPayerReference(e.target.value)}
+                                style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
+                              />
+                            ) : (
+                              <select
+                                required
+                                value={cashReceiverId}
+                                onChange={(e) => setCashReceiverId(e.target.value)}
+                                style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
+                              >
+                                <option value="">Select administrator</option>
+                                {cashReceivers.map((receiver) => (
+                                  <option key={receiver.user_id} value={receiver.user_id}>{receiver.full_name}</option>
+                                ))}
+                              </select>
+                            )}
                           </div>
                         </div>
 
                         <div>
                           <label style={{ display: 'block', fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.25rem' }}>
-                            GCash Screenshot <span style={{ color: '#c53030' }}>*</span>
+                            {paymentMethod === 'GCash' ? 'GCash Screenshot' : 'Proof of Cash Payment'} <span style={{ color: '#c53030' }}>*</span>
                           </label>
                           <input
                             type="file"
@@ -777,14 +820,15 @@ export function RunRegistrationPage() {
                     <label style={{ display: 'block', fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.25rem' }}>
                       Relationship <span style={{ color: '#c53030' }}>*</span>
                     </label>
-                    <input
-                      type="text"
+                    <select
                       required
-                      placeholder="e.g. Spouse / Parent / Sibling"
                       value={emergencyRelationship}
                       onChange={(e) => setEmergencyRelationship(e.target.value)}
                       style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                    />
+                    >
+                      <option value="">Select relationship</option>
+                      {EMERGENCY_RELATIONSHIPS.map((relationship) => <option key={relationship}>{relationship}</option>)}
+                    </select>
                   </div>
 
                   <div>

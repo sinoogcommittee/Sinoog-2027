@@ -1,7 +1,7 @@
 -- NOTE: replace every ADMIN_EMAIL_HERE below with the administrator's sign-in email
 -- before running. The real address is intentionally not stored in this public repository.
 -- Sinoog 2027 consolidated Supabase foundation verification.
--- Run this after migrations 001-009. It returns one result table so the
+-- Run this after migrations 001-011. It returns one result table so the
 -- Supabase SQL Editor can display every high-level check at the same time.
 
 with
@@ -12,7 +12,8 @@ required_tables(name) as (values
   ('delegation_entries'), ('delegation_participants'), ('delegation_files'),
   ('run_events'), ('run_categories'), ('run_routes'), ('run_registrations'),
   ('registration_consents'), ('payments'), ('payment_evidence'), ('payment_events'),
-  ('kit_claims'), ('audit_logs'), ('notification_outbox'), ('run_finish_records')
+  ('kit_claims'), ('audit_logs'), ('notification_outbox'), ('run_finish_records'),
+  ('financial_transactions')
 ),
 table_check as (
   select count(*) filter (where to_regclass('public.' || name) is not null) as found,
@@ -37,7 +38,8 @@ required_functions(name) as (values
   ('review_run_registration'), ('start_run_timing'), ('record_run_finish'),
   ('get_my_run_result'), ('admin_register_cash_runner'),
   ('delete_rejected_run_registration'), ('reset_run_timing'),
-  ('reorder_activity_for_date')
+  ('reorder_activity_for_date'), ('mark_manual_payment_submitted'),
+  ('list_cash_payment_receivers'), ('void_financial_transaction')
 ),
 function_check as (
   select count(*) filter (where exists (

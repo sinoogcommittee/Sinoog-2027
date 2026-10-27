@@ -2,6 +2,20 @@ import { supabase } from '../../lib/supabase';
 import type { DbRunRegistration } from '../../types';
 import { compressPaymentImage } from './compressPaymentImage';
 
+export const EMERGENCY_RELATIONSHIPS = [
+  'Parent',
+  'Spouse',
+  'Sibling',
+  'Child',
+  'Guardian',
+  'Relative',
+  'Friend',
+  'Other',
+] as const;
+
+export type ManualPaymentMethod = 'GCash' | 'Cash';
+export interface CashPaymentReceiver { user_id: string; full_name: string }
+
 export interface RunCategory {
   id: string;
   run_event_id: string;
@@ -172,6 +186,7 @@ export interface UserRegistrationState {
     payer_reference: string | null;
     status: 'unpaid' | 'submitted' | 'verified' | 'rejected' | 'refunded';
     rejection_reason?: string | null;
+    received_by?: string | null;
     evidence?: Array<{ id: string; object_path: string; uploaded_at: string }>;
   } | null;
   consents: Array<{
@@ -245,6 +260,7 @@ export async function getUserRegistration(
         payer_reference: payData.payer_reference,
         status: payData.status,
         rejection_reason: payData.rejection_reason,
+        received_by: payData.received_by,
         evidence: evidenceData?.map((e) => ({
           id: e.id,
           object_path: e.object_path,
@@ -340,10 +356,17 @@ export async function submitRegistration(payload: RegistrationInput): Promise<Db
   return reg as DbRunRegistration;
 }
 
+export async function getCashPaymentReceivers(): Promise<CashPaymentReceiver[]> {
+  if (!supabase) return [{ user_id: 'demo-admin', full_name: 'Sinoog Administrator' }];
+  const { data, error } = await supabase.rpc('list_cash_payment_receivers');
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
 export async function submitPaymentEvidence(
   paymentId: string,
   userId: string,
-  payerReference: string,
+  payment: { method: ManualPaymentMethod; payerReference?: string; receivedBy?: string },
   file: File
 ): Promise<{ originalBytes: number; compressedBytes: number }> {
   const compressedFile = await compressPaymentImage(file);
@@ -354,8 +377,9 @@ export async function submitPaymentEvidence(
       const state = JSON.parse(stored) as UserRegistrationState;
       if (state.payment) {
         state.payment.status = 'submitted';
-        state.payment.method = 'GCash';
-        state.payment.payer_reference = payerReference;
+        state.payment.method = payment.method;
+        state.payment.payer_reference = payment.method === 'GCash' ? payment.payerReference || null : null;
+        state.payment.received_by = payment.method === 'Cash' ? payment.receivedBy || null : null;
         state.payment.evidence = [
           {
             id: 'demo-ev-' + Date.now(),
@@ -398,9 +422,11 @@ export async function submitPaymentEvidence(
   }
 
   // Update payments record
-  const { error: payError } = await supabase.rpc('mark_gcash_payment_submitted', {
+  const { error: payError } = await supabase.rpc('mark_manual_payment_submitted', {
     p_payment_id: paymentId,
-    p_payer_reference: payerReference,
+    p_method: payment.method,
+    p_payer_reference: payment.method === 'GCash' ? payment.payerReference || null : null,
+    p_received_by: payment.method === 'Cash' ? payment.receivedBy || null : null,
   });
 
   if (payError) {
@@ -465,6 +491,7 @@ export interface AdminPaymentDetails {
   payer_reference: string | null;
   status: 'unpaid' | 'submitted' | 'verified' | 'rejected' | 'refunded';
   submitted_at: string | null;
+  received_by: string | null;
   evidence: Array<{ id: string; object_path: string; signed_url: string | null; bytes: number | null }>;
 }
 
@@ -488,6 +515,7 @@ export async function getAdminPaymentDetails(registrationId: string): Promise<Ad
     payer_reference: payment.payer_reference,
     status: payment.status,
     submitted_at: payment.submitted_at,
+    received_by: payment.received_by,
     evidence: signedEvidence,
   };
 }

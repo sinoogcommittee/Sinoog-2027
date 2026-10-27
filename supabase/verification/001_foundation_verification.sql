@@ -1,7 +1,7 @@
 -- NOTE: replace every ADMIN_EMAIL_HERE below with the administrator's sign-in email
 -- before running. The real address is intentionally not stored in this public repository.
 -- Sinoog 2027 read-only Supabase foundation verification.
--- Run in the Supabase SQL Editor after migrations 001-008.
+-- Run in the Supabase SQL Editor after migrations 001-011.
 -- Every row in the check sections should report `true` in the `present` column.
 
 -- 1. Required public tables.
@@ -12,7 +12,8 @@ with expected(name) as (values
   ('delegation_entries'), ('delegation_participants'), ('delegation_files'),
   ('run_events'), ('run_categories'), ('run_routes'), ('run_registrations'),
   ('registration_consents'), ('payments'), ('payment_evidence'), ('payment_events'),
-  ('kit_claims'), ('audit_logs'), ('notification_outbox'), ('run_finish_records')
+  ('kit_claims'), ('audit_logs'), ('notification_outbox'), ('run_finish_records'),
+  ('financial_transactions')
 )
 select 'table' as object_type, expected.name,
        to_regclass('public.' || expected.name) is not null as present
@@ -33,8 +34,9 @@ with expected(name) as (values
   ('submit_run_registration'), ('mark_gcash_payment_submitted'),
   ('review_run_registration'), ('start_run_timing'), ('record_run_finish'),
   ('get_my_run_result'), ('admin_register_cash_runner'),
-  ('delete_rejected_run_registration'), ('reset_run_timing')
-  ,('reorder_activity_for_date')
+  ('delete_rejected_run_registration'), ('reset_run_timing'),
+  ('reorder_activity_for_date'), ('mark_manual_payment_submitted'),
+  ('list_cash_payment_receivers'), ('void_financial_transaction')
 )
 select 'function' as object_type, expected.name,
        exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
@@ -97,7 +99,7 @@ where e.is_current=true;
 select schemaname, tablename, indexname, indexdef
 from pg_indexes
 where schemaname='public'
-  and tablename in ('activities','posts','run_registrations','run_finish_records')
+  and tablename in ('activities','posts','run_registrations','run_finish_records','financial_transactions')
 order by tablename, indexname;
 
 -- 12. Migration history availability. Manual SQL Editor runs may not appear

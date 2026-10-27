@@ -3,7 +3,9 @@ import { useAuth } from './useAuth';
 import { AccessDeniedPage } from './AccessDeniedPage';
 import { LoadingState } from '../ui/FeedbackStates';
 
-export function RequireRole({ role = 'admin' }: { role?: 'admin' | 'news_in_charge' | 'delegation_head' | 'public_user' }) {
+type RequiredRole = 'admin' | 'staff' | 'news_in_charge' | 'delegation_head' | 'public_user';
+
+export function RequireRole({ role = 'admin' }: { role?: RequiredRole }) {
   const { user, isDemoAdmin, isAdmin, isNewsInCharge, isDelegationHead, loading, isSuspended } = useAuth();
   const location = useLocation();
 
@@ -21,6 +23,7 @@ export function RequireRole({ role = 'admin' }: { role?: 'admin' | 'news_in_char
 
   const hasAccess =
     isAdmin ||
+    (role === 'staff' && (isNewsInCharge || isDelegationHead)) ||
     (role === 'news_in_charge' && isNewsInCharge) ||
     (role === 'delegation_head' && isDelegationHead) ||
     (role === 'public_user' && Boolean(user || isDemoAdmin));
@@ -30,7 +33,12 @@ export function RequireRole({ role = 'admin' }: { role?: 'admin' | 'news_in_char
   }
 
   if (!hasAccess) {
-    return <AccessDeniedPage requiredRole={role} />;
+    return (
+      <AccessDeniedPage
+        requiredRole={role}
+        reason={role === 'staff' ? 'A committee staff role is required to open this workspace.' : undefined}
+      />
+    );
   }
 
   return <Outlet />;

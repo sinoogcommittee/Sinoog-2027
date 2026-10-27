@@ -25,6 +25,7 @@ import {
   adminCreateCashRunner,
   deleteRejectedRegistration,
   type AdminCashRegistrationInput,
+  EMERGENCY_RELATIONSHIPS,
 } from "../../features/run/runQueries";
 import { getCurrentEdition } from "../../features/editions/editionQueries";
 import { StatusBadge } from "../../components/StatusBadge";
@@ -851,7 +852,7 @@ export function RegistrationsManagerPage() {
                     </label>
                     <label>
                       Relationship
-                      <input
+                      <select
                         required
                         value={walkIn.emergency_relationship}
                         onChange={(e) =>
@@ -860,7 +861,12 @@ export function RegistrationsManagerPage() {
                             emergency_relationship: e.target.value,
                           })
                         }
-                      />
+                      >
+                        <option value="">Select relationship</option>
+                        {EMERGENCY_RELATIONSHIPS.map((relationship) => (
+                          <option key={relationship}>{relationship}</option>
+                        ))}
+                      </select>
                     </label>
                     <label>
                       Emergency mobile
@@ -905,6 +911,7 @@ export function RegistrationsManagerPage() {
                         currency: "PHP",
                       })}
                     </span>
+                    <small>Automatically recorded under the administrator creating this entry.</small>
                   </div>
                 </div>
                 <label className="walk-in-consent">
@@ -1083,7 +1090,7 @@ export function RegistrationsManagerPage() {
 
             <div className="registration-payment-review">
               <h3>
-                <CreditCard size={18} /> GCash Payment Review
+                <CreditCard size={18} /> {paymentDetails?.method || "Payment"} Review
               </h3>
               {paymentLoading ? (
                 <LoadingState message="Loading payment proof…" />
@@ -1101,8 +1108,11 @@ export function RegistrationsManagerPage() {
                       )}
                     </span>
                     <span>
+                      <strong>Method:</strong> {paymentDetails.method}
+                    </span>
+                    <span>
                       <strong>Reference:</strong>{" "}
-                      {paymentDetails.payer_reference || "Not supplied"}
+                      {paymentDetails.payer_reference || (paymentDetails.method.toLowerCase() === "cash" ? "Cash receipt" : "Not supplied")}
                     </span>
                   </div>
                   {paymentDetails.evidence.length > 0 ? (
@@ -1116,14 +1126,13 @@ export function RegistrationsManagerPage() {
                             target="_blank"
                             rel="noreferrer"
                           >
-                            <ExternalLink size={16} /> Open submitted GCash
-                            screenshot
+                            <ExternalLink size={16} /> Open submitted payment proof
                           </a>
                         ),
                     )
                   ) : (
                     <p className="form-message">
-                      No payment screenshot has been uploaded.
+                      No payment proof has been uploaded.
                     </p>
                   )}
                 </>

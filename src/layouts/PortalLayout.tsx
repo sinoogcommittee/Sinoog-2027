@@ -10,27 +10,41 @@ import {
   Settings,
   ShieldCheck,
   UserCog,
+  CircleDollarSign,
 } from 'lucide-react';
 import { LogoMark } from '../components/LogoMark';
 import { useAuth } from '../features/auth/useAuth';
 
 const items = [
-  ['Overview', '/admin', Home],
-  ['Activities & Schedule', '/admin/activities', Calendar],
-  ['News posts', '/admin/posts', Newspaper],
-  ['Registrations', '/admin/registrations', ClipboardCheck],
-  ['Race timing', '/admin/run-timing', Flag],
-  ['Delegations', '/admin/delegations', ShieldCheck],
-  ['Users & Staff', '/admin/users', UserCog],
-  ['Website settings', '/admin/settings', Settings],
+  ['Overview', '/admin', Home, 'admin'],
+  ['Activities & Schedule', '/admin/activities', Calendar, 'admin'],
+  ['News posts', '/admin/posts', Newspaper, 'news'],
+  ['Registrations', '/admin/registrations', ClipboardCheck, 'admin'],
+  ['Race timing', '/admin/run-timing', Flag, 'admin'],
+  ['Delegations', '/admin/delegations', ShieldCheck, 'delegation'],
+  ['Users & Staff', '/admin/users', UserCog, 'admin'],
+  ['Financial records', '/admin/finance', CircleDollarSign, 'admin'],
+  ['Website settings', '/admin/settings', Settings, 'admin'],
 ] as const;
 
 export function PortalLayout() {
   const navigate = useNavigate();
-  const { user, profile, isDemoAdmin, isAdmin, signOut } = useAuth();
+  const { user, profile, isDemoAdmin, isAdmin, isNewsInCharge, isDelegationHead, signOut } = useAuth();
 
   const displayName = profile?.full_name || (user?.email ? user.email.split('@')[0] : isDemoAdmin ? 'Demo Administrator' : 'Administrator');
   const displayEmail = user?.email || (isDemoAdmin ? 'local-preview@sinoog2027.internal' : 'Administrator account');
+  const roleLabel = isAdmin
+    ? 'Admin'
+    : isNewsInCharge && isDelegationHead
+      ? 'News staff · Delegation head'
+      : isNewsInCharge
+        ? 'News staff'
+        : 'Delegation head';
+  const visibleItems = items.filter(([, , , access]) =>
+    isAdmin ||
+    (access === 'news' && isNewsInCharge) ||
+    (access === 'delegation' && isDelegationHead),
+  );
 
   async function handleSignOut() {
     await signOut();
@@ -49,7 +63,7 @@ export function PortalLayout() {
         </Link>
         <div className="portal-nav-scroll">
           <nav aria-label="Committee workspace navigation">
-            {items.map(([label, path, Icon]) => (
+            {visibleItems.map(([label, path, Icon]) => (
               <NavLink
                 className="portal-nav-item"
                 key={path}
@@ -77,7 +91,7 @@ export function PortalLayout() {
       <div className="portal-content">
         <header className="portal-topbar">
           <div>
-            <span>{displayName} {isAdmin ? '(Admin)' : ''}</span>
+            <span>{displayName} ({roleLabel})</span>
             <small>{displayEmail}</small>
           </div>
         </header>

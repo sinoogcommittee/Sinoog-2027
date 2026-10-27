@@ -32,6 +32,52 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | `007_run_registration_workflow.sql` | 2026-10-26 | SQL Editor | Site administrator | PASS — required registration functions found; end-to-end acceptance test remains |
 | `008_run_registration_and_timing_controls.sql` | 2026-10-26 | SQL Editor | Site administrator | PASS — required timing/control functions found; end-to-end acceptance test remains |
 | `009_atomic_activity_reordering.sql` | 2026-10-26 | SQL Editor | Site administrator | PASS — atomic reordering function found; UI acceptance test remains |
+| `010_admin_account_deletion.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — migration applied; suspended/rejected-account deletion and administrator audit tracking confirmed through the deployed management workflow |
+| `011_cash_payments_and_finance.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — cash receiver attribution, financial records, audited voiding, and complete walk-in profile metadata applied successfully |
+
+## Live application acceptance tests — October 27, 2026
+
+| Area | Result | Notes |
+| --- | --- | --- |
+| Staff account creation | PASS | Newly deployed `admin-manage-user` function successfully created a staff account. |
+| Staff account editing | PASS | Profile details, roles, account state, and the supported account-management actions were successfully tested. |
+| Staff account deletion | PASS | Eligible account deletion succeeded and retained the acting-administrator audit trail. |
+| Walk-in runner creation | PASS | The latest deployed `admin-create-runner` function successfully created a walk-in runner. |
+| Updated `admin-create-runner` deployment | PASS | The function version containing complete walk-in profile metadata was deployed and tested. |
+
+## Cash payment and finance acceptance tests — October 27, 2026
+
+| Area | Result | Notes |
+| --- | --- | --- |
+| Emergency relationship selection | PASS | Online and walk-in registration use the controlled relationship dropdown. |
+| Online GCash submission | PASS | GCash reference and compressed private payment proof were accepted. |
+| Online cash submission | PASS | Runner selected the receiving administrator and uploaded proof of cash payment. |
+| Walk-in cash attribution | PASS | Cash was automatically recorded under the administrator who created the walk-in registration. |
+| Walk-in runner profile autofill | PASS | Full name, mobile number, and address appeared in the runner profile after sign-in. |
+| Financial income and expense entry | PASS | Administrator successfully recorded and viewed financial entries and updated totals. |
+| Audited financial-entry voiding | PASS | Voided entry was excluded from active totals and retained through the audited void workflow. |
+| Finance CSV export | PASS | Filtered registration payment records exported successfully. |
+| Finance route authorization | PASS | Administrator could access `/admin/finance`; news and delegation staff were denied access. |
+
+## RLS and Storage policy tests — October 27, 2026
+
+| Test | Result | Detail |
+| --- | --- | --- |
+| Runner cannot insert a payment row, including a forged `verified` payment | PASS | Blocked with `new row violates row-level security policy for table "payments"`. |
+| Runner cannot approve their own registration | PASS | Update affected or exposed zero rows. |
+| Runner cannot lift their own suspension | PASS | Blocked with `Only administrators can change suspension status.` |
+| Runner cannot edit another runner's profile | PASS | Update affected or exposed zero rows. |
+| Runner cannot grant themselves the administrator role | PASS | Blocked with `new row violates row-level security policy for table "user_roles"`. |
+| Runner cannot read another runner's registration | PASS | Query exposed zero rows. |
+| Runner cannot read audit logs | PASS | Query exposed zero rows. |
+| Runner cannot read payment webhook events | PASS | Query exposed zero rows. |
+| Runner cannot upload into another runner's payment-evidence folder | PASS | Blocked with `new row violates row-level security policy for table "objects"`. |
+| Anonymous visitor cannot read draft activities | PASS | Query exposed zero rows. |
+| Anonymous visitor cannot read profiles | PASS | Query exposed zero rows. |
+| Anonymous visitor cannot read run registrations | PASS | Query exposed zero rows. |
+| Anonymous visitor cannot read payments | PASS | Query exposed zero rows. |
+| Control: runner can read their own registration | PASS | Worked as expected and returned one row. |
+| Control: anonymous visitor can read published activities | PASS | Worked as expected and returned 15 rows. |
 
 ## Type regeneration
 
@@ -47,8 +93,7 @@ Review the generated diff before replacing or merging `src/types/database.ts`. N
 
 ## Still required after the foundation query
 
-- Separate anonymous, runner A, runner B, news staff, delegation head, administrator, and suspended-user test accounts.
-- Direct REST and Storage attempts for permitted and forbidden operations.
+- Confirm the deployed route-level experience with dedicated `news_in_charge` and `delegation_head` test accounts.
 - Profile-trigger test with a newly created fictional account.
 - `updated_at` trigger test on a disposable record.
 - Signed-URL expiry verification.

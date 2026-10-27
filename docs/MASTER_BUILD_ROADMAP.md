@@ -52,6 +52,9 @@ Audit basis: source tree, route configuration, feature queries, admin screens, G
 - [x] News administration supports list, search/filter, create, edit, preview, publish/unpublish, pin/unpin, image upload, and delete operations.
 - [x] Settings administration edits edition identity, dates, registration switch, contact information, feature switches, and announcement-banner values.
 - [x] A runner registration form, own-registration status view, payment-evidence upload flow, and a registration-review screen have been implemented in source.
+- [x] Online registration supports GCash or cash proof, records the selected administrator receiving cash, and uses a controlled relationship list.
+- [x] Walk-in creation attributes cash to the signed-in administrator and copies the submitted name, mobile number, and address into the runner profile.
+- [x] An administrator-only financial workspace tracks verified registration collections, pending payments, cash accountability, other income, expenses, balance, and CSV exports.
 - [x] Initial schema, RLS/Storage policies, optional seed, first-admin, and corrected-novena-date migrations exist through `005`.
 - [x] Git repository exists on `main` and tracks `origin/main`; initial commit `d3b4890` is on GitHub.
 - [x] `.gitignore` protects environment files, dependencies, build output, Supabase local state, logs, and key files.
@@ -410,6 +413,7 @@ Priority: **P0 before paid registration opens**
 - [~] Administrator-editable GCash number/account name are implemented; verified recipient/account name remains to be supplied.
 - [~] The form displays fee/currency and migration `007` snapshots the database category fee server-side; apply and test it.
 - [x] Allow runner to submit a payment reference and private proof file.
+- [x] Allow online runners to select GCash or Cash; cash submissions identify the authorized administrator receiving payment and require proof.
 - [~] GCash JPG/PNG/WebP screenshots are canvas-reencoded to WebP before upload, with cleanup on metadata failure; server-side content inspection remains.
 - [~] Store evidence in the private `payment-evidence` bucket under a user/registration path; verify Storage policies and signed access with separate accounts.
 - [~] Registration review loads a short-lived private screenshot URL, GCash reference, amount, and payment state; test with separate accounts.
@@ -418,6 +422,7 @@ Priority: **P0 before paid registration opens**
 - [ ] Keep payment verification separate from registration approval.
 - [ ] Provide a paid-but-rejected resolution and refund-recording workflow.
 - [ ] Log every payment decision.
+- [~] Migration `011_cash_payments_and_finance.sql` adds cash-receiver attribution, administrator-only income/expense records, audited voiding, and the finance dashboard data model; apply and verify it in Supabase.
 
 Payment states:
 

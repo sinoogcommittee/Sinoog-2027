@@ -26,11 +26,24 @@ import { SettingsPage } from '../pages/admin/SettingsPage';
 import { PostsManagerPage } from '../pages/admin/PostsManagerPage';
 import { RegistrationsManagerPage } from '../pages/admin/RegistrationsManagerPage';
 import { UsersManagerPage } from '../pages/admin/UsersManagerPage';
+import { FinancePage } from '../pages/admin/FinancePage';
 import { NotFoundPage } from '../pages/public/NotFoundPage';
 import { RequireAdmin } from '../components/RequireAdmin';
 import { ScrollToTop } from '../components/ScrollToTop';
+import { RequireRole } from '../features/auth/RequireRole';
+import { useAuth } from '../features/auth/useAuth';
 
 const RunTimingPage = lazy(() => import('../pages/admin/RunTimingPage').then((module) => ({ default: module.RunTimingPage })));
+
+function CommitteeWorkspaceIndex() {
+  const { isAdmin, isNewsInCharge, isDelegationHead } = useAuth();
+
+  if (isAdmin) return <AdminDashboardPage />;
+  if (isNewsInCharge) return <Navigate to="/admin/posts" replace />;
+  if (isDelegationHead) return <Navigate to="/admin/delegations" replace />;
+
+  return <Navigate to="/" replace />;
+}
 
 export default function App() {
   return (
@@ -71,16 +84,26 @@ export default function App() {
         <Route path="*" element={<NotFoundPage />} />
       </Route>
 
-      <Route element={<RequireAdmin />}>
+      <Route element={<RequireRole role="staff" />}>
         <Route path="/admin" element={<PortalLayout />}>
-          <Route index element={<AdminDashboardPage />} />
-          <Route path="activities" element={<ActivitiesManagerPage />} />
-          <Route path="posts" element={<PostsManagerPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-          <Route path="registrations" element={<RegistrationsManagerPage />} />
-          <Route path="run-timing" element={<Suspense fallback={<div className="admin-page">Loading race timing…</div>}><RunTimingPage /></Suspense>} />
-          <Route path="delegations" element={<AdminListPage type="delegations" />} />
-          <Route path="users" element={<UsersManagerPage />} />
+          <Route index element={<CommitteeWorkspaceIndex />} />
+
+          <Route element={<RequireAdmin />}>
+            <Route path="activities" element={<ActivitiesManagerPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="registrations" element={<RegistrationsManagerPage />} />
+            <Route path="run-timing" element={<Suspense fallback={<div className="admin-page">Loading race timing…</div>}><RunTimingPage /></Suspense>} />
+            <Route path="users" element={<UsersManagerPage />} />
+            <Route path="finance" element={<FinancePage />} />
+          </Route>
+
+          <Route element={<RequireRole role="news_in_charge" />}>
+            <Route path="posts" element={<PostsManagerPage />} />
+          </Route>
+
+          <Route element={<RequireRole role="delegation_head" />}>
+            <Route path="delegations" element={<AdminListPage type="delegations" />} />
+          </Route>
         </Route>
       </Route>
 
