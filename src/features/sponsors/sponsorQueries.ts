@@ -18,17 +18,24 @@ export interface EditionSponsorRow {
   tier: string;
   sort_order: number;
   published: boolean;
-  sponsor: DbSponsor;
+  sponsor: SponsorRecord;
 }
 
 export interface SponsorInput {
   name: string;
   website_url: string | null;
+  facebook_url: string | null;
   logo_path: string | null;
   tier: string;
   sort_order: number;
   published: boolean;
 }
+
+/** Sponsor row as used in the app (includes optional facebook_url after migration 012). */
+export type SponsorRecord = DbSponsor & {
+  facebook_url?: string | null;
+};
+
 
 function logoUrl(path: string | null | undefined): string {
   if (!path) return '';
@@ -57,7 +64,7 @@ export async function listEditionSponsorsForAdmin(editionId?: string): Promise<E
 
   return (data || []).map((row) => {
     const sponsorRaw = row.sponsor as unknown;
-    const sponsor = (Array.isArray(sponsorRaw) ? sponsorRaw[0] : sponsorRaw) as DbSponsor;
+    const sponsor = (Array.isArray(sponsorRaw) ? sponsorRaw[0] : sponsorRaw) as SponsorRecord;
     return {
       edition_id: row.edition_id as string,
       sponsor_id: row.sponsor_id as string,
@@ -88,7 +95,7 @@ export async function listPublishedEditionSponsors(editionId?: string): Promise<
 
   return (data || []).map((row) => {
     const sponsorRaw = row.sponsor as unknown;
-    const sponsor = (Array.isArray(sponsorRaw) ? sponsorRaw[0] : sponsorRaw) as DbSponsor;
+    const sponsor = (Array.isArray(sponsorRaw) ? sponsorRaw[0] : sponsorRaw) as SponsorRecord;
     return {
       edition_id: row.edition_id as string,
       sponsor_id: row.sponsor_id as string,
@@ -114,6 +121,7 @@ export async function createEditionSponsor(input: SponsorInput, editionId?: stri
     .insert({
       name,
       website_url: input.website_url?.trim() || null,
+      facebook_url: input.facebook_url?.trim() || null,
       logo_path: input.logo_path || null,
     })
     .select('*')
@@ -146,7 +154,7 @@ export async function createEditionSponsor(input: SponsorInput, editionId?: stri
     tier: link.tier,
     sort_order: link.sort_order,
     published: link.published,
-    sponsor: sponsor as DbSponsor,
+    sponsor: sponsor as SponsorRecord,
   };
 }
 
@@ -168,6 +176,7 @@ export async function updateEditionSponsor(
     .update({
       name,
       website_url: input.website_url?.trim() || null,
+      facebook_url: input.facebook_url?.trim() || null,
       logo_path: input.logo_path || null,
     })
     .eq('id', sponsorId);

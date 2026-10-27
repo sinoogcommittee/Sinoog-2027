@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, ChevronRight, MapPin, Play, Sparkles } from 'lucide-react';
+import { ArrowRight, ChevronRight, Facebook, Globe, MapPin, Play, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { SectionHeading } from '../../components/SectionHeading';
@@ -279,8 +279,10 @@ export function HomePage() {
             <div className="sponsor-strip sponsor-strip--live">
               {sponsors.map((row) => {
                 const logo = getSponsorLogoUrl(row.sponsor.logo_path);
-                const inner = (
-                  <>
+                const websiteUrl = row.sponsor.website_url || null;
+                const facebookUrl = row.sponsor.facebook_url || null;
+                return (
+                  <div key={row.sponsor_id} className="sponsor-strip__card">
                     <div className="sponsor-strip__logo">
                       {logo ? (
                         <img src={logo} alt="" />
@@ -290,21 +292,34 @@ export function HomePage() {
                     </div>
                     <strong>{row.sponsor.name}</strong>
                     <small>{row.tier}</small>
-                  </>
-                );
-                return row.sponsor.website_url ? (
-                  <a
-                    key={row.sponsor_id}
-                    className="sponsor-strip__card"
-                    href={row.sponsor.website_url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {inner}
-                  </a>
-                ) : (
-                  <div key={row.sponsor_id} className="sponsor-strip__card">
-                    {inner}
+                    {(websiteUrl || facebookUrl) && (
+                      <div className="sponsor-strip__links">
+                        {websiteUrl && (
+                          <a
+                            href={websiteUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="sponsors-public__icon-link"
+                            aria-label={`${row.sponsor.name} website`}
+                            title="Website"
+                          >
+                            <Globe size={18} aria-hidden />
+                          </a>
+                        )}
+                        {facebookUrl && (
+                          <a
+                            href={facebookUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="sponsors-public__icon-link sponsors-public__icon-link--fb"
+                            aria-label={`${row.sponsor.name} on Facebook`}
+                            title="Facebook"
+                          >
+                            <Facebook size={18} aria-hidden />
+                          </a>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}

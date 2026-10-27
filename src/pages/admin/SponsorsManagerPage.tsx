@@ -18,6 +18,7 @@ import {
 const emptyForm = {
   name: '',
   website_url: '',
+  facebook_url: '',
   logo_path: '',
   tier: 'Bronze Sponsor',
   sort_order: 0,
@@ -94,6 +95,7 @@ export function SponsorsManagerPage() {
     setForm({
       name: row.sponsor.name,
       website_url: row.sponsor.website_url || '',
+      facebook_url: row.sponsor.facebook_url || '',
       logo_path: row.sponsor.logo_path || '',
       tier: row.tier || 'Bronze Sponsor',
       sort_order: row.sort_order,
@@ -129,6 +131,7 @@ export function SponsorsManagerPage() {
       const payload = {
         name: form.name,
         website_url: form.website_url || null,
+        facebook_url: form.facebook_url || null,
         logo_path: form.logo_path || null,
         tier: form.tier,
         sort_order: Number(form.sort_order) || 0,
@@ -339,6 +342,18 @@ export function SponsorsManagerPage() {
                   value={form.website_url}
                   onChange={(e) => setForm((c) => ({ ...c, website_url: e.target.value }))}
                 />
+              </div>
+
+              <div className="sponsor-form__field">
+                <label htmlFor="sponsor-facebook">Facebook page</label>
+                <input
+                  id="sponsor-facebook"
+                  type="url"
+                  placeholder="https://facebook.com/yourpage"
+                  value={form.facebook_url}
+                  onChange={(e) => setForm((c) => ({ ...c, facebook_url: e.target.value }))}
+                />
+                <p className="sponsor-form__hint">Optional. Shown next to the website link when set.</p>
               </div>
 
               <div className="sponsor-form__row">

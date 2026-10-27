@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ExternalLink, HeartHandshake } from 'lucide-react';
+import { Facebook, Globe, HeartHandshake } from 'lucide-react';
 import { PageHero } from '../../components/PageHero';
 import { LoadingState, EmptyState } from '../../features/ui/FeedbackStates';
 import {
@@ -70,33 +70,43 @@ export function SponsorsPage() {
                   <div className="sponsors-public__grid">
                     {group.items.map((row) => {
                       const logo = getSponsorLogoUrl(row.sponsor.logo_path);
-                      const card = (
-                        <>
+                      const facebookUrl = row.sponsor.facebook_url || null;
+                      const websiteUrl = row.sponsor.website_url || null;
+
+                      return (
+                        <div key={row.sponsor_id} className="sponsors-public__card">
                           <div className="sponsors-public__logo">
                             {logo ? <img src={logo} alt={`${row.sponsor.name} logo`} /> : <HeartHandshake size={28} />}
                           </div>
                           <strong>{row.sponsor.name}</strong>
-                          {row.sponsor.website_url && (
-                            <span className="sponsors-public__link">
-                              Visit site <ExternalLink size={14} />
-                            </span>
+                          {(websiteUrl || facebookUrl) && (
+                            <div className="sponsors-public__links">
+                              {websiteUrl && (
+                                <a
+                                  href={websiteUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="sponsors-public__icon-link"
+                                  aria-label={`${row.sponsor.name} website`}
+                                  title="Website"
+                                >
+                                  <Globe size={18} aria-hidden />
+                                </a>
+                              )}
+                              {facebookUrl && (
+                                <a
+                                  href={facebookUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="sponsors-public__icon-link sponsors-public__icon-link--fb"
+                                  aria-label={`${row.sponsor.name} on Facebook`}
+                                  title="Facebook"
+                                >
+                                  <Facebook size={18} aria-hidden />
+                                </a>
+                              )}
+                            </div>
                           )}
-                        </>
-                      );
-
-                      return row.sponsor.website_url ? (
-                        <a
-                          key={row.sponsor_id}
-                          className="sponsors-public__card"
-                          href={row.sponsor.website_url}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {card}
-                        </a>
-                      ) : (
-                        <div key={row.sponsor_id} className="sponsors-public__card">
-                          {card}
                         </div>
                       );
                     })}
