@@ -3,6 +3,7 @@ export type AuthErrorKind =
   | 'request_rate_limit'
   | 'email_send_failed'
   | 'email_not_confirmed'
+  | 'invalid_credentials'
   | 'other';
 
 type AuthErrorLike = { message?: string; code?: string; status?: number } | null | undefined;
@@ -31,6 +32,11 @@ export function describeAuthError(
       message:
         'Your email address is not confirmed yet. Open the confirmation link we sent you, or request a new one.',
     };
+  }
+  if (code === 'invalid_credentials' || /invalid login credentials/.test(text)) {
+    // Supabase gives the same answer for a wrong password and for an email with no account,
+    // on purpose, so that nobody can find out which emails are registered.
+    return { kind: 'invalid_credentials', message: 'Incorrect email or password.' };
   }
   if (/error sending/.test(text)) {
     return {

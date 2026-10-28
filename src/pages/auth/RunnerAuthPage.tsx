@@ -5,6 +5,7 @@ import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 import { useAuth } from '../../features/auth/useAuth';
 import { GoogleSignInButton } from '../../features/auth/GoogleSignInButton';
 import { describeAuthError } from '../../lib/authErrors';
+import { safeNextPath } from '../../lib/safeNext';
 
 type Mode = 'signin' | 'signup';
 
@@ -14,7 +15,7 @@ export function RunnerAuthPage() {
   const { user, isAdmin, isDemoAdmin, loading: authLoading, refresh } = useAuth();
 
   const mode: Mode = searchParams.get('mode') === 'signup' ? 'signup' : 'signin';
-  const nextPath = searchParams.get('next') || '';
+  const nextPath = safeNextPath(searchParams.get('next'), '');
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -26,6 +27,7 @@ export function RunnerAuthPage() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [noAccountHint, setNoAccountHint] = useState(false);
   const [resendIn, setResendIn] = useState(0);
 
   // Count down the cooldown between confirmation emails.
@@ -48,6 +50,8 @@ export function RunnerAuthPage() {
 
   function setMode(next: Mode) {
     setMessage('');
+    setNeedsConfirmation(false);
+    setNoAccountHint(false);
     setSuccess(false);
     const params = new URLSearchParams(searchParams);
     if (next === 'signup') params.set('mode', 'signup');
@@ -92,6 +96,7 @@ export function RunnerAuthPage() {
         const info = describeAuthError(error);
         setMessage(info.message);
         setNeedsConfirmation(info.kind === 'email_not_confirmed');
+        setNoAccountHint(info.kind === 'invalid_credentials');
         return;
       }
       await refresh();
@@ -255,6 +260,32 @@ export function RunnerAuthPage() {
               />
             </label>
             {message && <p className="form-message">{message}</p>}
+            {noAccountHint && (
+              <p>
+                New here?{' '}
+                <button
+                  type="button"
+                  className="demo-link"
+                  style={{ display: 'inline', padding: 0 }}
+                  onClick={() => setMode('signup')}
+                >
+                  Create a runner account
+                </button>
+                . Already registered? <Link to="/forgot-password">Reset your password</Link>.
+              </p>
+            )}
+            {needsConfirmation && (
+              <p>
+                <button
+                  type="button"
+                  className="button button--secondary button--sm"
+                  onClick={() => void handleResend()}
+                  disabled={resendIn > 0}
+                >
+                  {resendIn > 0 ? `Resend in ${resendIn}s` : 'Resend confirmation email'}
+                </button>
+              </p>
+            )}
             <Button type="submit" disabled={loading || !isSupabaseConfigured}>
               {loading ? 'Signing in…' : 'Sign in'}
             </Button>
@@ -314,18 +345,6 @@ export function RunnerAuthPage() {
               />
             </label>
             {message && <p className="form-message">{message}</p>}
-            {needsConfirmation && (
-              <p>
-                <button
-                  type="button"
-                  className="button button--secondary button--sm"
-                  onClick={() => void handleResend()}
-                  disabled={resendIn > 0}
-                >
-                  {resendIn > 0 ? `Resend in ${resendIn}s` : 'Resend confirmation email'}
-                </button>
-              </p>
-            )}
             <Button type="submit" disabled={loading || !isSupabaseConfigured}>
               {loading ? 'Creating account…' : 'Create runner account'}
             </Button>

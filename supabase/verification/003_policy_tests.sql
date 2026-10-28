@@ -206,6 +206,14 @@ insert into tests(name, r, sub, q, expect) values
 ('CONTROL anonymous can read published activities', 'anon', null,
  $q$ select 1 from public.activities where status = 'published' $q$, 'allow');
 
+-- Runner a001 is suspended in the fixtures (migration 018). This runs after the control test
+-- above has attached evidence to a001's open payment.
+insert into tests(name, r, sub, q, expect) values
+('suspended runner cannot submit a payment', 'authenticated', '00000000-0000-0000-0000-00000000a001',
+ $q$ select public.mark_manual_payment_submitted(
+       (select p.id from public.payments p join public.run_registrations r on r.id = p.registration_id
+        where r.user_id = '00000000-0000-0000-0000-00000000a001'), 'gcash', 'REF-12345', null) $q$, 'deny');
+        
 -- 3. Run them, each under the right role and identity.
 do $$
 declare
@@ -230,7 +238,7 @@ begin
 
     if t.expect = 'deny' then
       if err is not null then
-        res := case when err ~* 'row-level security|permission denied|administrator|not authori|not allowed|only admin|no longer'
+        res := case when err ~* 'row-level security|permission denied|administrator|not authori|not allowed|only admin|no longer|suspended'
                     then 'PASS' else 'REVIEW' end;
         info := 'blocked with error: ' || err;
       elsif affected = 0 then

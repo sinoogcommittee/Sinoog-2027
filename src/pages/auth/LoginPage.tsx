@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 import { useAuth } from '../../features/auth/useAuth';
+import { describeAuthError } from '../../lib/authErrors';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ export function LoginPage() {
         password,
       });
       if (error) {
-        setMessage(error.message);
+        setMessage(describeAuthError(error).message);
         return;
       }
       await refresh();

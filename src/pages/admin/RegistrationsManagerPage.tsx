@@ -33,6 +33,7 @@ import { LoadingState, EmptyState } from "../../features/ui/FeedbackStates";
 import { useToast } from "../../features/ui/useToast";
 import type { DbRunRegistration } from "../../types";
 import { QRCodeSVG } from "qrcode.react";
+import { generateTemporaryPassword } from "../../lib/temporaryPassword";
 
 export function RegistrationsManagerPage() {
   const { toast } = useToast();
@@ -129,16 +130,12 @@ export function RegistrationsManagerPage() {
   }, [toast]);
 
   const openWalkInRegistration = () => {
-    const random = crypto
-      .getRandomValues(new Uint32Array(1))[0]
-      .toString(36)
-      .slice(0, 6);
     setCreatedCredentials(null);
     setWalkIn((current) => ({
       ...current,
       run_event_id: runEventId,
       category_id: current.category_id || categories[0]?.id || "",
-      temporary_password: `Sinoog!${random}7`,
+      temporary_password: generateTemporaryPassword(),
     }));
     setShowWalkIn(true);
   };

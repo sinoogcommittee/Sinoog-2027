@@ -30,6 +30,7 @@ Run the files in `supabase/migrations/` **in numeric order** in the Supabase SQL
 | 015 | `015_registration_lifecycle_backfill_fix.sql` | Fix for the 014 lifecycle trigger |
 | 016 | `016_security_hardening.sql` | Removes direct payment inserts by runners; only admins may change suspension |
 | 017 | `017_registration_integrity_and_admin_safety.sql` | Age, capacity and field checks; payment and evidence locking; last-admin protection; audit trail; sponsor link checks |
+| 018 | `018_suspended_accounts_cannot_register.sql` | Suspended accounts cannot register or submit payments |
 
 Any later numbered migration continues the same sequence. Add each new file to this table when you create it.
 
