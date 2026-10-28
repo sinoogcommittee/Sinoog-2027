@@ -38,6 +38,23 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | `013_gallery_photo_video_collections.sql` | — | SQL Editor | Site administrator | PENDING — adds gallery collection year/media type fields and index; run before deploying the gallery manager |
 | `014_registration_documents_and_timeline.sql` | 2026-10-28 | SQL Editor | Site administrator | PARTIAL PASS — columns, trigger, and policy versions passed; its protection trigger blocked the initial backfill, corrected by migration `015` |
 | `015_registration_lifecycle_backfill_fix.sql` | — | SQL Editor | Site administrator | PENDING — permits one-time email/approval-date backfill while preserving immutable lifecycle snapshots afterward |
+| `016_security_hardening.sql` | Confirm live status | SQL Editor | Site administrator | Present in repository; record live application result |
+| `017_registration_integrity_and_admin_safety.sql` | Confirm live status | SQL Editor | Site administrator | Present in repository; record live application result |
+| `018_suspended_accounts_cannot_register.sql` | Confirm live status | SQL Editor | Site administrator | Present in repository; record live application result |
+| `019_gallery_collection_order.sql` | Confirm live status | SQL Editor | Site administrator | Present in repository; record live application result |
+| `020_financial_reporting_dimensions.sql` | — | SQL Editor | Site administrator | PENDING — adds financial allocation, counterparties, recorder enforcement, creation audit, and reporting index |
+
+## Financial reporting enhancement — October 28, 2026
+
+| Area | Result | Notes |
+| --- | --- | --- |
+| Cash inflow categories | CODE COMPLETE | Sponsorships, PFC Budget, Donations, and Others. |
+| Expense categories | CODE COMPLETE | Cash prizes, subsidy, shirts, honorarium, stage/program, trophies, tarpaulins, working budget, sound, photo/video coverage, tokens/certificates, and Others. |
+| Payment methods | CODE COMPLETE | Cash, GCash, and Bank controlled selections. |
+| Allocation reporting | CODE COMPLETE | Overall, Sinoog Festival, Sinoog Run, and General views with inflow, expense, pending-registration, and balance totals. |
+| Recorder audit | PENDING SQL | Migration `020` forces the signed-in administrator into `created_by` and writes a creation audit row. |
+| Reporting exports | CODE COMPLETE | Detailed ledger CSV, category/scope summary CSV, registration-payment audit CSV, and print layout. |
+| Live acceptance | PENDING | Apply `020`, run `004_financial_reporting_summary.sql`, then test create, filter, void, print, and export on production. |
 
 ## Registration policy and lifecycle package — October 28, 2026
 

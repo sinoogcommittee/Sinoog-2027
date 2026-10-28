@@ -59,59 +59,54 @@ export function ActivitiesPage({ filter: routeFilter }: { filter?: 'mass' | 'nig
 
       <section className="section">
         <div className="container">
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: '1rem',
-              marginBottom: '2rem',
-            }}
-          >
-            <div className="filter-pills" style={{ margin: 0 }}>
+          <div className="public-filter-bar public-filter-bar--schedule">
+            <nav className="public-filter-tabs public-filter-tabs--activities" aria-label="Filter celebration schedule">
               <Link
                 to="/activities"
-                className={activeFilter === 'all' ? 'active' : ''}
+                className={activeFilter === 'all' ? 'is-active' : ''}
+                aria-current={activeFilter === 'all' ? 'page' : undefined}
                 onClick={() => setManualFilter('all')}
               >
                 All Events
               </Link>
               <Link
                 to="/activities/masses"
-                className={activeFilter === 'mass' ? 'active' : ''}
+                className={activeFilter === 'mass' ? 'is-active' : ''}
+                aria-current={activeFilter === 'mass' ? 'page' : undefined}
                 onClick={() => setManualFilter('mass')}
               >
                 Novena & Masses
               </Link>
               <Link
                 to="/activities/nightly"
-                className={activeFilter === 'nightly' ? 'active' : ''}
+                className={activeFilter === 'nightly' ? 'is-active' : ''}
+                aria-current={activeFilter === 'nightly' ? 'page' : undefined}
                 onClick={() => setManualFilter('nightly')}
               >
                 Nightly Programs
               </Link>
               <button
                 type="button"
-                className={activeFilter === 'run' ? 'active' : ''}
+                className={activeFilter === 'run' ? 'is-active' : ''}
+                aria-pressed={activeFilter === 'run'}
                 onClick={() => setManualFilter('run')}
               >
                 Sinoog Run
               </button>
               <button
                 type="button"
-                className={activeFilter === 'festival' ? 'active' : ''}
+                className={activeFilter === 'festival' ? 'is-active' : ''}
+                aria-pressed={activeFilter === 'festival'}
                 onClick={() => setManualFilter('festival')}
               >
                 Festival Showdown
               </button>
-            </div>
+            </nav>
 
             <button
               type="button"
               className="button button--secondary button--sm"
               onClick={() => window.print()}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
             >
               <Printer size={16} /> Print schedule
             </button>

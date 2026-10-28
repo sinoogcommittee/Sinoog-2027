@@ -47,17 +47,8 @@ export function NewsPage() {
 
       <section className="section">
         <div className="container">
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '1rem',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '2rem',
-            }}
-          >
-            <label className="search-field modern-search" htmlFor="news-search-input" style={{ flex: '1 1 300px' }}>
+          <div className="public-filter-bar public-filter-bar--news">
+            <label className="search-field modern-search public-filter-search" htmlFor="news-search-input">
               <Search size={18} aria-hidden="true" />
               <input
                 id="news-search-input"
@@ -74,12 +65,13 @@ export function NewsPage() {
               />
             </label>
 
-            <div className="filter-pills" style={{ margin: 0 }}>
+            <div className="public-filter-tabs public-filter-tabs--news" role="group" aria-label="Filter announcements by category">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   type="button"
-                  className={selectedCategory === cat ? 'active' : ''}
+                  className={selectedCategory === cat ? 'is-active' : ''}
+                  aria-pressed={selectedCategory === cat}
                   onClick={() => {
                     setSelectedCategory(cat);
                     setLoading(true);

@@ -54,7 +54,7 @@ Audit basis: source tree, routes, feature modules, admin screens, and GitHub `ma
 - [x] **Auth separation:** staff sign-in only in main nav (`/login`); runner sign-in/sign-up on the Sinoog Run page (`/signin` tabs); Google OAuth for runners; forgot/reset/callback routes.
 - [x] **Sinoog Run end-to-end:** online registration, GCash or cash proof, walk-in cash, admin review, unique bib/QR, race timing, CSV/print; **live rehearsal completed** (sign-up → submit → payment → approve → bib/QR).
 - [x] **Runner edit-before-approve:** runners may change registration details only while status is not approved.
-- [x] Administrator financial workspace (`FinancePage` + `financeQueries`) tracks verified collections, pending payments, cash accountability, other income/expenses, balance, CSV exports (migration `011` **applied in production**).
+- [~] Administrator financial workspace now tracks cash inflows and expenses by Overall/Festival/Run/General allocation, controlled categories and payment modes, counterparties, purpose, responsible recorder, void history, registration collections, printable reports, and detailed/summary/payment CSV exports. Apply and verify migration `020`.
 - [x] Sponsor administration creates and edits partners, uploads logos, assigns Diamond/Gold/Silver/Bronze tiers, controls ordering/publication, and supports website/Facebook links. Published sponsors appear on `/sponsors` and the home page; migration `012` is applied.
 - [x] Administrator user management: profiles, staff roles, suspension/reactivation, last-admin checks, create staff; edge functions `admin-create-runner` and `admin-manage-user`.
 - [~] Migrations through **`013_gallery_photo_video_collections.sql`** exist in repo; production includes `011` and `012`, while `013` awaits manual SQL Editor application.
@@ -737,7 +737,7 @@ Priority: **P1**
 | `/admin/activities` | Functional CRUD with scrollable form and date-scoped ordering | Atomic reorder, archive policy, schedule validation, and multi-role tests |
 | `/admin/gallery` | Year-based collection CRUD, publication controls, compressed multi-photo upload, and individual YouTube embeds | Apply `013`; complete live CRUD/storage smoke tests and optional manual ordering |
 | `/admin/sponsors` | Functional sponsor CRUD, logo upload, tier/order, publication, website and Facebook fields | Add contact notes only if the committee needs them; continue RLS smoke tests |
-| `/admin/finance` | Financial records, cash accountability, income/expense, CSV | Operational post-`011`; refine refund productization |
+| `/admin/finance` | Auditable cashbook for cash inflows/expenses, Overall/Festival/Run/General balances, registration collections, recorder tracking, print, detailed/summary/payment CSV exports | Apply `020`; smoke-test entry, scope totals, void history, mobile layout, and exports |
 | `/admin/users` | Live list, profile edits, roles, suspension/reactivation, last-admin check | Trusted invitations, atomic guards, audit log, deletion policy, RLS tests |
 | `/admin/settings` | Includes editable GCash, registration window/deadline, planned start, edition, contacts, switches, and banner | Apply migration `007`; consume switches publicly; add SEO, audit, and permission tests |
 
@@ -788,6 +788,7 @@ Do the remaining work in this sequence:
 ### Active focus now
 
 - [ ] Monitor production queues (registrations pending review, payment proofs, finance balance).
+- [~] Apply `020_financial_reporting_dimensions.sql`, run verification `004`, then test cash inflow, expense, scope filtering, voiding, recorder names, print, and all three CSV exports.
 - [ ] After each deploy: smoke-test runner register, admin approve, and one staff login.
 - [ ] Keep `docs/SUPABASE_VERIFICATION.md` and this roadmap HEAD/date current when shipping packages.
 - [ ] After sponsor changes: smoke-test add/edit/publish/unpublish/delete and public/home visibility.
@@ -841,3 +842,4 @@ Do the remaining work in this sequence:
 | 2026-10-27 | Local uncommitted PWA package | Hero-art favicon and installed icon, manifest, service worker, and cross-platform install invitation |
 | 2026-10-28 | Local uncommitted registration-policy package | Final waiver/privacy/refund/guardian/support documents; registration email snapshot; submitted/approved timeline; combined payment-and-approval decision recorded; pending migration `014` |
 | 2026-10-28 | Migration `014` verification follow-up | Added `015_registration_lifecycle_backfill_fix.sql` after the lifecycle trigger prevented its own existing-record backfill |
+| 2026-10-28 | Local finance reporting enhancement | Cash inflow/expense categories, allocation reporting, counterparties, recorder audit, void history, responsive ledger, print and CSV reports; pending migration `020` |

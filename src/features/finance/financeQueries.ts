@@ -3,6 +3,8 @@ import type { Database, DbRunRegistration, Profile } from '../../types';
 
 type PaymentRow = Database['public']['Tables']['payments']['Row'];
 type FinancialTransactionRow = Database['public']['Tables']['financial_transactions']['Row'];
+export type FinanceScope = 'general' | 'festival' | 'run';
+export type FinanceMethod = 'cash' | 'gcash' | 'bank';
 
 export interface FinancePayment extends PaymentRow {
   participant_name: string;
@@ -14,7 +16,12 @@ export interface FinancePayment extends PaymentRow {
 
 export interface FinanceSnapshot {
   payments: FinancePayment[];
-  transactions: FinancialTransactionRow[];
+  transactions: FinanceTransaction[];
+}
+
+export interface FinanceTransaction extends FinancialTransactionRow {
+  recorder_name: string;
+  voided_by_name: string | null;
 }
 
 export interface FinancialTransactionInput {
@@ -24,6 +31,9 @@ export interface FinancialTransactionInput {
   amount_centavos: number;
   method?: string | null;
   reference?: string | null;
+  counterparty_name: string;
+  received_by_name?: string | null;
+  event_scope: FinanceScope;
   transaction_date: string;
   created_by: string;
 }
@@ -36,7 +46,7 @@ export async function getFinanceSnapshot(): Promise<FinanceSnapshot> {
     supabase.from('run_registrations').select('*'),
     supabase.from('run_categories').select('id,name'),
     supabase.from('profiles').select('*'),
-    supabase.from('financial_transactions').select('*').is('voided_at', null).order('transaction_date', { ascending: false }).order('created_at', { ascending: false }),
+    supabase.from('financial_transactions').select('*').order('transaction_date', { ascending: false }).order('created_at', { ascending: false }),
   ]);
 
   const error = paymentResult.error || registrationResult.error || categoryResult.error || profileResult.error || transactionResult.error;
@@ -62,7 +72,11 @@ export async function getFinanceSnapshot(): Promise<FinanceSnapshot> {
 
   return {
     payments,
-    transactions: (transactionResult.data as FinancialTransactionRow[]) ?? [],
+    transactions: ((transactionResult.data as FinancialTransactionRow[]) ?? []).map((transaction) => ({
+      ...transaction,
+      recorder_name: transaction.created_by ? profileById.get(transaction.created_by) || 'Former administrator' : 'System / unavailable',
+      voided_by_name: transaction.voided_by ? profileById.get(transaction.voided_by) || 'Former administrator' : null,
+    })),
   };
 }
 

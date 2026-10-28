@@ -916,6 +916,9 @@ export interface Database {
           currency: string;
           method: string | null;
           reference: string | null;
+          counterparty_name: string | null;
+          received_by_name: string | null;
+          event_scope: 'general' | 'festival' | 'run';
           transaction_date: string;
           payment_id: string | null;
           created_by: string | null;
@@ -933,6 +936,9 @@ export interface Database {
           currency?: string;
           method?: string | null;
           reference?: string | null;
+          counterparty_name?: string | null;
+          received_by_name?: string | null;
+          event_scope?: 'general' | 'festival' | 'run';
           transaction_date?: string;
           payment_id?: string | null;
           created_by: string;
@@ -950,6 +956,9 @@ export interface Database {
           currency?: string;
           method?: string | null;
           reference?: string | null;
+          counterparty_name?: string | null;
+          received_by_name?: string | null;
+          event_scope?: 'general' | 'festival' | 'run';
           transaction_date?: string;
           payment_id?: string | null;
           created_by?: string | null;
