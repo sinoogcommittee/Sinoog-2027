@@ -1,5 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Clock, Map, PackageOpen, Route, ArrowRight, CheckCircle2, LogIn } from 'lucide-react';
+import {
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  LogIn,
+  Map,
+  PackageOpen,
+  Route,
+  Ruler,
+  X,
+} from 'lucide-react';
 import { Button } from '../../components/Button';
 import { PageHero } from '../../components/PageHero';
 import { SectionHeading } from '../../components/SectionHeading';
@@ -13,6 +23,15 @@ import { getCurrentEdition } from '../../features/editions/editionQueries';
 import { useAuth } from '../../features/auth/useAuth';
 import type { DbRunRegistration } from '../../types';
 
+function formatFee(centavos: number) {
+  return (centavos / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
+}
+
+function formatKm(meters: number) {
+  const km = meters / 1000;
+  return Number.isInteger(km) ? `${km}K` : `${km} km`;
+}
+
 export function RunPage({ section }: { section?: 'routes' }) {
   const { user, isDemoAdmin } = useAuth();
   const signedIn = Boolean(user) || isDemoAdmin;
@@ -21,6 +40,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
   const [runEvent, setRunEvent] = useState<RunEvent | null>(null);
   const [registrationOpen, setRegistrationOpen] = useState(false);
   const [registration, setRegistration] = useState<DbRunRegistration | null>(null);
+  const [sizeChartOpen, setSizeChartOpen] = useState(false);
   const activeUserId = user?.id || (isDemoAdmin ? 'demo-user-123' : null);
 
   useEffect(() => {
@@ -33,9 +53,9 @@ export function RunPage({ section }: { section?: 'routes' }) {
         if (!mounted) return;
         const now = Date.now();
         setRegistrationOpen(
-          ed.registration_open
-          && (!event.registration_opens_at || now >= new Date(event.registration_opens_at).getTime())
-          && (!event.registration_closes_at || now <= new Date(event.registration_closes_at).getTime())
+          ed.registration_open &&
+            (!event.registration_opens_at || now >= new Date(event.registration_opens_at).getTime()) &&
+            (!event.registration_closes_at || now <= new Date(event.registration_closes_at).getTime()),
         );
         setRunEvent(event);
         setCategories(cats);
@@ -56,6 +76,17 @@ export function RunPage({ section }: { section?: 'routes' }) {
   const hasActiveRegistration = Boolean(registration && !['rejected', 'cancelled'].includes(registration.status));
   const isApproved = registration?.status === 'approved';
 
+  const primaryRegisterHref = signedIn
+    ? '/run/register'
+    : '/signin?next=/run/register';
+  const primaryRegisterLabel = isApproved
+    ? 'Registered'
+    : hasActiveRegistration
+      ? 'Registration status'
+      : registrationOpen
+        ? 'Register now'
+        : 'Registration status';
+
   return (
     <>
       <PageHero
@@ -63,25 +94,19 @@ export function RunPage({ section }: { section?: 'routes' }) {
         title={section === 'routes' ? 'Official Run Routes' : 'Run With Purpose'}
         description="Begin our parish celebration with a shared stride through the scenic roads of Guinacot, Guindulman, Bohol."
       >
-        <div className="button-row">
+        {/* Single primary CTA row — avoids empty secondary box in the hero */}
+        <div className="run-hero-actions">
+          <Button to={primaryRegisterHref}>
+            {primaryRegisterLabel} <ArrowRight size={17} />
+          </Button>
           {signedIn ? (
-            <>
-              <Button to="/run/register">
-                {isApproved ? 'Registered' : hasActiveRegistration ? 'Registration status' : registrationOpen ? 'Register now' : 'Registration status'}
-              </Button>
-              <Button to="/account" variant="secondary">
-                My runner account
-              </Button>
-            </>
+            <Button to="/account" variant="ghost">
+              My runner account
+            </Button>
           ) : (
-            <>
-              <Button to="/signin">
-                <LogIn size={17} /> Runner sign in
-              </Button>
-              <Button to="/signin?mode=signup" variant="secondary">
-                New runner? Sign up
-              </Button>
-            </>
+            <Button to="/signin" variant="ghost">
+              <LogIn size={17} /> Runner sign in
+            </Button>
           )}
           <Button to={section === 'routes' ? '/run' : '/run/routes'} variant="ghost">
             {section === 'routes' ? 'Run overview' : 'View routes'}
@@ -92,154 +117,136 @@ export function RunPage({ section }: { section?: 'routes' }) {
       <section className="section">
         <div className="container">
           {section === 'routes' ? (
-            <div>
+            <div className="run-routes">
               <SectionHeading
                 eyebrow="Course Guide"
                 title="Routes & Checkpoints"
-                description="All distance categories begin and finish at the Guinacot Parish Grounds with complete medical posts and water stations."
+                description="All distance categories begin and finish at the Guinacot Parish Grounds. Water stations and medical posts will be marked on the official course once approved."
               />
 
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                  gap: '1.5rem',
-                  marginTop: '2rem',
-                }}
-              >
-                {categories.map((category) => (
-                  <div key={category.id} style={{ background: '#fff', border: '1px solid var(--line)', padding: '1.75rem', borderRadius: '8px' }}>
-                    <span className="activity-type activity-type--run">{category.distance_meters / 1000} Kilometers</span>
-                    <h3 style={{ fontFamily: 'Fraunces, serif', fontSize: '1.35rem', margin: '0.5rem 0' }}>{category.name}</h3>
-                    <p style={{ color: 'var(--muted)', fontSize: '0.92rem', lineHeight: 1.6 }}>
-                      {category.distance_meters === 10000
-                        ? 'Sto. Niño Guinacot Parish → Stampa Cabantian → Cansiwang Road → Guinacot High School Road → Back to Parish'
-                        : 'The official route and checkpoints will be announced after committee approval.'}
-                    </p>
-                    <div style={{ borderTop: '1px solid #eee', paddingTop: '1rem', marginTop: '1rem', fontSize: '0.85rem' }}>
-                      <strong>Race start:</strong>{' '}
-                      {runEvent?.race_starts_at
-                        ? new Date(runEvent.race_starts_at).toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Manila' })
-                        : 'To be announced'}
-                    </div>
-                  </div>
-                ))}
+              <div className="run-route-map" aria-label="Route map placeholder">
+                <div className="run-route-map__canvas">
+                  <Map size={28} aria-hidden />
+                  <p>
+                    <strong>Interactive route map</strong>
+                  </p>
+                  <p>
+                    Official GPX / route graphics with water stations, medical tents, and turn-around points will appear
+                    here after committee and safety approval.
+                  </p>
+                </div>
+                <ul className="run-route-map__legend">
+                  <li>
+                    <span className="run-route-map__dot run-route-map__dot--start" /> Start / Finish — Parish Grounds
+                  </li>
+                  <li>
+                    <span className="run-route-map__dot run-route-map__dot--water" /> Water stations — TBA
+                  </li>
+                  <li>
+                    <span className="run-route-map__dot run-route-map__dot--med" /> Medical tents — TBA
+                  </li>
+                </ul>
               </div>
 
-              <div className="route-placeholder" style={{ marginTop: '2.5rem' }}>
-                <Map />
-                <h2>Official GPS Map in Review</h2>
-                <p>
-                  The municipal engineering and traffic management committee is reviewing the final road barricade plan.
-                  Verified map diagrams will be published here.
-                </p>
+              <div className="run-category-grid">
+                {categories.map((category) => (
+                  <article key={category.id} className="run-category-card">
+                    <span className="activity-type activity-type--run">{formatKm(category.distance_meters)}</span>
+                    <h3>{category.name}</h3>
+                    <p>
+                      {category.distance_meters === 10000
+                        ? 'Longer loop for experienced runners. Full course details pending safety approval.'
+                        : category.distance_meters === 5000
+                          ? 'Community stride through Guinacot. Checkpoints to be published with the official map.'
+                          : 'Fun run distance for families and first-time participants.'}
+                    </p>
+                    <strong>{formatFee(category.fee_centavos)}</strong>
+                  </article>
+                ))}
               </div>
             </div>
           ) : (
             <>
               <SectionHeading
-                eyebrow="Event Information"
-                title="Distance Categories & Race Kits"
-                description="Choose the distance that fits your training and celebrate with our community."
+                eyebrow="Distance categories"
+                title="Choose your stride"
+                description="Fees and kit inclusions follow the committee-approved categories. Registration uses the same options in the wizard."
               />
 
-              {!signedIn && (
-                <div
-                  className="notice"
-                  style={{ marginBottom: '1.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}
-                >
-                  <LogIn size={20} />
-                  <span style={{ flex: '1 1 220px' }}>
-                    <strong>Runner account required.</strong> Sign in or create a free runner account before registration.
-                  </span>
-                  <Button to="/signin" variant="secondary">
-                    Runner sign in
-                  </Button>
-                  <Button to="/signin?mode=signup" variant="ghost">
-                    Sign up
-                  </Button>
-                </div>
-              )}
-
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                  gap: '1.5rem',
-                  marginBottom: '3rem',
-                }}
-              >
+              <div className="run-category-grid">
                 {categories.map((c) => {
-                  const feeFormatted = (c.fee_centavos / 100).toLocaleString('en-PH', {
-                    style: 'currency',
-                    currency: 'PHP',
-                  });
-                  const isRegisteredCategory = hasActiveRegistration && registration?.category_id === c.id;
-                  return (
-                    <div
-                      key={c.id}
-                      style={{
-                        background: '#fff',
-                        border: '1px solid var(--line)',
-                        borderRadius: '8px',
-                        padding: '2rem',
-                        boxShadow: 'var(--shadow)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                      }}
-                    >
-                      <div>
-                        <span className="activity-type activity-type--run">{c.distance_meters / 1000} KM</span>
-                        <h3 style={{ fontFamily: 'Fraunces, serif', fontSize: '1.4rem', margin: '0.5rem 0 0.25rem' }}>
-                          {c.name}
-                        </h3>
-                        <p style={{ color: 'var(--wine)', fontWeight: 700, fontSize: '1.5rem', margin: '0.25rem 0 1rem' }}>
-                          {feeFormatted}
-                        </p>
-                        <p style={{ fontSize: '0.92rem', color: 'var(--muted)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-                          {c.kit_description}
-                        </p>
-                      </div>
+                  const isRegisteredCategory =
+                    hasActiveRegistration && registration?.category_id === c.id;
+                  const canRegisterHere = registrationOpen && !hasActiveRegistration;
 
-                      <div
-                        style={{
-                          borderTop: '1px solid #eee',
-                          paddingTop: '1rem',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <small style={{ color: 'var(--muted)' }}>
-                          Age: {c.min_age ? `${c.min_age}+ yrs` : 'Open'}
-                        </small>
-                        {hasActiveRegistration ? (
-                          <button
-                            type="button"
-                            className="button button--secondary button--sm"
-                            disabled
-                            aria-label={isRegisteredCategory ? `${c.name} registered` : `${c.name} unavailable because you already registered`}
-                          >
-                            {isRegisteredCategory ? (isApproved ? 'Registered' : 'Registration submitted') : 'Already registered'}
-                            {isRegisteredCategory && <CheckCircle2 size={14} />}
-                          </button>
-                        ) : (
-                          <Button
-                            to={signedIn ? '/run/register' : '/signin?next=/run/register'}
-                            variant="secondary"
-                            style={{ padding: '8px 14px', fontSize: '0.85rem' }}
-                          >
-                            {signedIn ? <>Register <ArrowRight size={14} /></> : <>Sign in to register <ArrowRight size={14} /></>}
+                  return (
+                    <article key={c.id} className="run-category-card">
+                      <span className="activity-type activity-type--run">{formatKm(c.distance_meters)}</span>
+                      <h3>{c.name}</h3>
+                      <p className="run-category-card__price">{formatFee(c.fee_centavos)}</p>
+                      {c.kit_description ? (
+                        <p className="run-category-card__kit-text">{c.kit_description}</p>
+                      ) : (
+                        <ul className="run-category-card__kit">
+                          <li>Event singlet / race kit</li>
+                          <li>Bib number</li>
+                          <li>Finisher recognition as announced</li>
+                        </ul>
+                      )}
+                      {c.min_age != null || c.max_age != null ? (
+                        <p className="run-category-card__age">
+                          Age:{' '}
+                          {c.min_age != null && c.max_age != null
+                            ? `${c.min_age}–${c.max_age}`
+                            : c.min_age != null
+                              ? `${c.min_age}+`
+                              : `up to ${c.max_age}`}
+                        </p>
+                      ) : (
+                        <p className="run-category-card__age">Age requirements as published at registration</p>
+                      )}
+                      <div className="run-category-card__action">
+                        {isRegisteredCategory ? (
+                          <span className="run-category-card__status">
+                            {isApproved ? 'Registered' : 'Registration submitted'} <CheckCircle2 size={14} />
+                          </span>
+                        ) : hasActiveRegistration ? (
+                          <span className="run-category-card__status run-category-card__status--muted">
+                            Already registered in another category
+                          </span>
+                        ) : canRegisterHere ? (
+                          <Button to={signedIn ? '/run/register' : '/signin?next=/run/register'} variant="secondary">
+                            {signedIn ? (
+                              <>
+                                Register <ArrowRight size={14} />
+                              </>
+                            ) : (
+                              <>
+                                Sign in to register <ArrowRight size={14} />
+                              </>
+                            )}
                           </Button>
+                        ) : (
+                          <span className="run-category-card__status run-category-card__status--muted">
+                            Registration closed or not yet open
+                          </span>
                         )}
                       </div>
-                    </div>
+                    </article>
                   );
                 })}
               </div>
 
-              <div className="feature-cards">
+              <div className="run-utility-row">
+                <button type="button" className="button button--ghost button--sm" onClick={() => setSizeChartOpen(true)}>
+                  <Ruler size={16} aria-hidden /> View size chart
+                </button>
+                <Button to="/run/routes" variant="ghost">
+                  <Route size={16} aria-hidden /> Route map & checkpoints
+                </Button>
+              </div>
+
+              <div className="feature-cards run-highlights">
                 <article>
                   <Route />
                   <h3>Scenic Route</h3>
@@ -249,13 +256,21 @@ export function RunPage({ section }: { section?: 'routes' }) {
                 <article>
                   <PackageOpen />
                   <h3>Official Race Kit</h3>
-                  <p>Event singlet, bib, finisher medal, and refreshments included.</p>
+                  <p>Event singlet, bib, and finisher items as announced for each category.</p>
                   <strong>Exclusive Edition</strong>
                 </article>
                 <article>
                   <Clock />
                   <h3>Race-Day Guide</h3>
-                  <p>{runEvent?.race_starts_at ? `Race starts at ${new Date(runEvent.race_starts_at).toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Manila' })}.` : 'Race start time will be announced soon.'}</p>
+                  <p>
+                    {runEvent?.race_starts_at
+                      ? `Race starts at ${new Date(runEvent.race_starts_at).toLocaleTimeString('en-PH', {
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          timeZone: 'Asia/Manila',
+                        })}.`
+                      : 'Race start time will be announced soon.'}
+                  </p>
                   <strong>January 9, 2027</strong>
                 </article>
               </div>
@@ -271,12 +286,92 @@ export function RunPage({ section }: { section?: 'routes' }) {
               )}
               <div className="notice" style={{ marginTop: '1rem' }}>
                 <Clock size={20} />
-                <span><strong>Registration deadline:</strong>{' '}{runEvent?.registration_closes_at ? new Date(runEvent.registration_closes_at).toLocaleString('en-PH', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Manila' }) : 'To be announced soon'}</span>
+                <span>
+                  <strong>Registration deadline:</strong>{' '}
+                  {runEvent?.registration_closes_at
+                    ? new Date(runEvent.registration_closes_at).toLocaleString('en-PH', {
+                        dateStyle: 'long',
+                        timeStyle: 'short',
+                        timeZone: 'Asia/Manila',
+                      })
+                    : 'To be announced soon'}
+                </span>
               </div>
             </>
           )}
         </div>
       </section>
+
+      {sizeChartOpen && (
+        <div
+          className="size-chart-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="size-chart-title"
+          onMouseDown={(e) => {
+            if (e.currentTarget === e.target) setSizeChartOpen(false);
+          }}
+        >
+          <div className="size-chart-modal__panel">
+            <header>
+              <h2 id="size-chart-title">Event singlet size guide</h2>
+              <button type="button" className="gallery-icon-button" onClick={() => setSizeChartOpen(false)} aria-label="Close">
+                <X />
+              </button>
+            </header>
+            <div className="size-chart-modal__body">
+              <p>
+                Use this guide when choosing your shirt size during registration. Measurements are approximate; final
+                sizing follows the supplier chart published by the committee.
+              </p>
+              <table className="size-chart-table">
+                <thead>
+                  <tr>
+                    <th>Size</th>
+                    <th>Chest (in)</th>
+                    <th>Length (in)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>XS</td>
+                    <td>32–34</td>
+                    <td>25</td>
+                  </tr>
+                  <tr>
+                    <td>S</td>
+                    <td>34–36</td>
+                    <td>26</td>
+                  </tr>
+                  <tr>
+                    <td>M</td>
+                    <td>36–38</td>
+                    <td>27</td>
+                  </tr>
+                  <tr>
+                    <td>L</td>
+                    <td>38–40</td>
+                    <td>28</td>
+                  </tr>
+                  <tr>
+                    <td>XL</td>
+                    <td>40–42</td>
+                    <td>29</td>
+                  </tr>
+                  <tr>
+                    <td>2XL</td>
+                    <td>42–44</td>
+                    <td>30</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p className="size-chart-modal__note">
+                If a supplier chart is uploaded by the committee, it will replace this reference table.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

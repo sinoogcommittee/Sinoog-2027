@@ -11,6 +11,10 @@ import {
   ArrowLeft,
   Upload,
   Lock,
+  Copy,
+  Check,
+  Ruler,
+  X,
 } from 'lucide-react';
 import { PageHero } from '../../components/PageHero';
 import {
@@ -69,6 +73,8 @@ export function RunRegistrationPage() {
   const [locality, setLocality] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [shirtSize, setShirtSize] = useState('M');
+  const [sizeChartOpen, setSizeChartOpen] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [clubName, setClubName] = useState('');
   const [emergencyName, setEmergencyName] = useState('');
   const [emergencyRelationship, setEmergencyRelationship] = useState('');
@@ -309,6 +315,18 @@ export function RunRegistrationPage() {
     }
   };
 
+
+  const copyText = async (key: string, value: string) => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedKey(key);
+      window.setTimeout(() => setCopiedKey((current) => (current === key ? null : current)), 2000);
+    } catch {
+      toast('Unable to copy. Please select the text manually.', 'error');
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ minHeight: '60vh', display: 'grid', placeItems: 'center' }}>
@@ -341,9 +359,20 @@ export function RunRegistrationPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #eee', paddingBottom: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                   <small style={{ color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Registration Reference</small>
-                  <h2 style={{ fontSize: '1.8rem', color: 'var(--wine)', margin: 0, fontFamily: 'monospace' }}>
-                    {reg.reference}
-                  </h2>
+                  <div className="copy-field">
+                    <h2 style={{ fontSize: '1.8rem', color: 'var(--wine)', margin: 0, fontFamily: 'monospace' }}>
+                      {reg.reference}
+                    </h2>
+                    <button
+                      type="button"
+                      className="copy-field__btn"
+                      onClick={() => void copyText('reference', reg.reference)}
+                      aria-label="Copy registration reference"
+                    >
+                      {copiedKey === 'reference' ? <Check size={16} /> : <Copy size={16} />}
+                      {copiedKey === 'reference' ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                   <StatusBadge tone={reg.status === 'approved' ? 'success' : reg.status === 'rejected' ? 'danger' : 'warning'}>
@@ -437,7 +466,21 @@ export function RunRegistrationPage() {
                           {paymentMethod === 'GCash' ? 'Pay the exact registration fee through GCash:' : 'Pay the exact registration fee in cash to an authorized administrator:'}
                         </p>
                         <ul style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.6 }}>
-                          {paymentMethod === 'GCash' && <li><strong>GCash number:</strong> {runEvent?.gcash_number || '09260265423'}</li>}
+                          {paymentMethod === 'GCash' && (
+                            <li className="copy-field copy-field--inline">
+                              <strong>GCash number:</strong>{' '}
+                              <span>{runEvent?.gcash_number || '09260265423'}</span>
+                              <button
+                                type="button"
+                                className="copy-field__btn"
+                                onClick={() => void copyText('gcash', runEvent?.gcash_number || '09260265423')}
+                                aria-label="Copy GCash number"
+                              >
+                                {copiedKey === 'gcash' ? <Check size={14} /> : <Copy size={14} />}
+                                {copiedKey === 'gcash' ? 'Copied' : 'Copy'}
+                              </button>
+                            </li>
+                          )}
                           {paymentMethod === 'GCash' && runEvent?.gcash_account_name && <li><strong>Account name:</strong> {runEvent.gcash_account_name}</li>}
                           <li><strong>Amount:</strong> {feeFormatted}</li>
                           {paymentMethod === 'Cash' && <li>Ask for a receipt and upload a clear photo as proof.</li>}
@@ -604,20 +647,29 @@ export function RunRegistrationPage() {
           )}
 
           {/* Stepper Header */}
-          <div className="registration-stepper" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid var(--line)', paddingBottom: '0.75rem', marginBottom: '2rem' }}>
-            <span style={{ fontWeight: step === 1 ? 700 : 500, color: step === 1 ? 'var(--wine)' : 'var(--muted)' }}>
-              1. Distance
-            </span>
-            <span style={{ fontWeight: step === 2 ? 700 : 500, color: step === 2 ? 'var(--wine)' : 'var(--muted)' }}>
-              2. Runner Info
-            </span>
-            <span style={{ fontWeight: step === 3 ? 700 : 500, color: step === 3 ? 'var(--wine)' : 'var(--muted)' }}>
-              3. Emergency
-            </span>
-            <span style={{ fontWeight: step === 4 ? 700 : 500, color: step === 4 ? 'var(--wine)' : 'var(--muted)' }}>
-              4. Review & Waiver
-            </span>
-          </div>
+          <ol className="registration-stepper registration-stepper--pills" aria-label="Registration progress">
+            {[
+              { n: 1 as const, label: 'Distance' },
+              { n: 2 as const, label: 'Runner Info' },
+              { n: 3 as const, label: 'Emergency' },
+              { n: 4 as const, label: 'Review & Waiver' },
+            ].map((item) => (
+              <li
+                key={item.n}
+                className={
+                  step === item.n
+                    ? 'is-active'
+                    : step > item.n
+                      ? 'is-done'
+                      : ''
+                }
+                aria-current={step === item.n ? 'step' : undefined}
+              >
+                <span className="registration-stepper__num">{item.n}</span>
+                <span className="registration-stepper__label">{item.label}</span>
+              </li>
+            ))}
+          </ol>
 
           {formError && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#991b1b', marginBottom: '1.25rem', fontSize: '0.9rem' }}>
@@ -771,9 +823,14 @@ export function RunRegistrationPage() {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.25rem' }}>
-                      Event Singlet / Shirt Size <span style={{ color: '#c53030' }}>*</span>
-                    </label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
+                      <label style={{ display: 'block', fontWeight: 600, fontSize: '0.88rem', margin: 0 }}>
+                        Event Singlet / Shirt Size <span style={{ color: '#c53030' }}>*</span>
+                      </label>
+                      <button type="button" className="button button--ghost button--sm" onClick={() => setSizeChartOpen(true)}>
+                        <Ruler size={14} aria-hidden /> Size chart
+                      </button>
+                    </div>
                     <select
                       value={shirtSize}
                       onChange={(e) => setShirtSize(e.target.value)}
@@ -963,6 +1020,48 @@ export function RunRegistrationPage() {
           )}
         </div>
       </section>
+
+      {sizeChartOpen && (
+        <div
+          className="size-chart-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reg-size-chart-title"
+          onMouseDown={(e) => {
+            if (e.currentTarget === e.target) setSizeChartOpen(false);
+          }}
+        >
+          <div className="size-chart-modal__panel">
+            <header>
+              <h2 id="reg-size-chart-title">Event singlet size guide</h2>
+              <button type="button" className="gallery-icon-button" onClick={() => setSizeChartOpen(false)} aria-label="Close size chart">
+                <X />
+              </button>
+            </header>
+            <div className="size-chart-modal__body">
+              <p>Choose the size that best matches your usual fit. Final kit sizing follows the supplier chart when published.</p>
+              <table className="size-chart-table">
+                <thead>
+                  <tr>
+                    <th>Size</th>
+                    <th>Chest (in)</th>
+                    <th>Length (in)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>XS</td><td>32–34</td><td>25</td></tr>
+                  <tr><td>S</td><td>34–36</td><td>26</td></tr>
+                  <tr><td>M</td><td>36–38</td><td>27</td></tr>
+                  <tr><td>L</td><td>38–40</td><td>28</td></tr>
+                  <tr><td>XL</td><td>40–42</td><td>29</td></tr>
+                  <tr><td>2XL</td><td>42–44</td><td>30</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
     </>
   );
 }

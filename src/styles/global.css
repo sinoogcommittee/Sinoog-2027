@@ -7578,7 +7578,7 @@ button:focus-visible {
   font-size: 0.94rem;
   line-height: 1.5;
   display: -webkit-box;
-  line-clamp: 3;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -7773,4 +7773,276 @@ button:focus-visible {
     flex: 1 1 100%;
     width: 100%;
   }
+}
+
+/* ========== Sinoog Run page + registration wizard polish ========== */
+
+.run-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+  align-items: center;
+}
+.run-hero-actions .button--ghost {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+.run-hero-actions .button--ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.run-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin: 1.5rem 0 1.75rem;
+}
+.run-category-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1.5rem 1.35rem 1.35rem;
+  box-shadow: 0 8px 24px rgba(65, 10, 18, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.run-category-card h3 {
+  font-family: Fraunces, serif;
+  font-size: 1.35rem;
+  margin: 0.25rem 0;
+}
+.run-category-card__price {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--wine);
+  margin: 0;
+}
+.run-category-card__kit {
+  margin: 0.35rem 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.run-category-card__kit-text {
+  margin: 0.35rem 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.run-category-card__age {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #7a6558;
+}
+.run-category-card__action {
+  margin-top: auto;
+  padding-top: 0.75rem;
+}
+.run-category-card__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--wine);
+}
+.run-category-card__status--muted {
+  color: #8a7468;
+  font-weight: 600;
+}
+
+.run-utility-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 1.75rem;
+}
+
+.run-route-map {
+  margin: 1.5rem 0 2rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+}
+.run-route-map__canvas {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  background: linear-gradient(180deg, #fffaf0 0%, #f3ebe3 100%);
+  color: #5c3d0a;
+}
+.run-route-map__canvas p {
+  margin: 0.35rem auto 0;
+  max-width: 42ch;
+  color: #6b5a52;
+  font-size: 0.92rem;
+}
+.run-route-map__legend {
+  list-style: none;
+  margin: 0;
+  padding: 14px 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  border-top: 1px solid var(--line);
+  font-size: 0.85rem;
+  color: #5c3d0a;
+}
+.run-route-map__dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.run-route-map__dot--start { background: var(--wine); }
+.run-route-map__dot--water { background: #2b6cb0; }
+.run-route-map__dot--med { background: #c53030; }
+
+.registration-stepper--pills {
+  list-style: none;
+  margin: 0 0 1.75rem;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.registration-stepper--pills li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #faf6ef;
+  color: #7a6558;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.registration-stepper--pills .registration-stepper__num {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #efe6da;
+  color: var(--wine);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.registration-stepper--pills li.is-active {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, #fff8e8 0%, #fff 100%);
+  color: var(--wine);
+  box-shadow: 0 4px 14px rgba(201, 162, 39, 0.18);
+}
+.registration-stepper--pills li.is-active .registration-stepper__num {
+  background: var(--wine);
+  color: #fff;
+}
+.registration-stepper--pills li.is-done {
+  border-color: rgba(116, 31, 41, 0.25);
+  color: var(--wine);
+}
+.registration-stepper--pills li.is-done .registration-stepper__num {
+  background: var(--wine);
+  color: #fff;
+}
+@media (max-width: 640px) {
+  .registration-stepper--pills {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.copy-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.copy-field--inline {
+  align-items: baseline;
+}
+.copy-field__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--wine);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+.copy-field__btn:hover {
+  border-color: var(--gold);
+  background: #fffaf0;
+}
+
+.size-chart-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(21, 9, 11, 0.72);
+}
+.size-chart-modal__panel {
+  width: min(480px, 100%);
+  max-height: calc(100dvh - 40px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+.size-chart-modal__panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.size-chart-modal__panel h2 {
+  margin: 0;
+  font-family: Fraunces, serif;
+  font-size: 1.25rem;
+  color: var(--wine);
+}
+.size-chart-modal__body {
+  padding: 18px;
+}
+.size-chart-modal__body p {
+  margin: 0 0 14px;
+  color: #554941;
+  font-size: 0.92rem;
+}
+.size-chart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.size-chart-table th,
+.size-chart-table td {
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  text-align: left;
+}
+.size-chart-table th {
+  background: #faf6ef;
+  color: var(--wine);
+}
+.size-chart-modal__note {
+  margin-top: 12px !important;
+  font-size: 0.82rem !important;
+  color: #8a7468 !important;
 }
