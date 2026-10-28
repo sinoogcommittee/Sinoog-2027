@@ -84,12 +84,30 @@ export function HomePage() {
       {/* 01. HERO TO COUNTDOWN */}
       <section className="home-hero">
         <div className="home-hero__pattern" />
+        <div className="home-hero__bamboo home-hero__bamboo--left" aria-hidden="true">
+          <span className="bamboo-stalk bamboo-stalk--one" />
+          <span className="bamboo-stalk bamboo-stalk--two" />
+          <span className="bamboo-stalk bamboo-stalk--three" />
+          <span className="bamboo-leaf bamboo-leaf--one" />
+          <span className="bamboo-leaf bamboo-leaf--two" />
+          <span className="bamboo-leaf bamboo-leaf--three" />
+          <span className="bamboo-leaf bamboo-leaf--four" />
+        </div>
+        <div className="home-hero__bamboo home-hero__bamboo--right" aria-hidden="true">
+          <span className="bamboo-stalk bamboo-stalk--one" />
+          <span className="bamboo-stalk bamboo-stalk--two" />
+          <span className="bamboo-stalk bamboo-stalk--three" />
+          <span className="bamboo-leaf bamboo-leaf--one" />
+          <span className="bamboo-leaf bamboo-leaf--two" />
+          <span className="bamboo-leaf bamboo-leaf--three" />
+          <span className="bamboo-leaf bamboo-leaf--four" />
+        </div>
         <div className="container home-hero__inner">
           <div className="home-hero__copy">
             <p className="hero-kicker">
               <Sparkles size={16} /> Faith · Culture · Community
             </p>
-            <h1 className="hero-title">
+            <h1>
               One faith.
               <br />
               <em>One celebration.</em>
@@ -133,6 +151,24 @@ export function HomePage() {
 
       {/* Parish Emblem & Devotional Highlight (mobile / transitional) */}
       <section className="parish-emblem-band" aria-label="Sto. Niño Parish">
+        <div className="parish-emblem-band__bamboo parish-emblem-band__bamboo--left" aria-hidden="true">
+          <span className="bamboo-stalk bamboo-stalk--one" />
+          <span className="bamboo-stalk bamboo-stalk--two" />
+          <span className="bamboo-stalk bamboo-stalk--three" />
+          <span className="bamboo-leaf bamboo-leaf--one" />
+          <span className="bamboo-leaf bamboo-leaf--two" />
+          <span className="bamboo-leaf bamboo-leaf--three" />
+          <span className="bamboo-leaf bamboo-leaf--four" />
+        </div>
+        <div className="parish-emblem-band__bamboo parish-emblem-band__bamboo--right" aria-hidden="true">
+          <span className="bamboo-stalk bamboo-stalk--one" />
+          <span className="bamboo-stalk bamboo-stalk--two" />
+          <span className="bamboo-stalk bamboo-stalk--three" />
+          <span className="bamboo-leaf bamboo-leaf--one" />
+          <span className="bamboo-leaf bamboo-leaf--two" />
+          <span className="bamboo-leaf bamboo-leaf--three" />
+          <span className="bamboo-leaf bamboo-leaf--four" />
+        </div>
         <div className="container parish-emblem-band__inner">
           <div className="hero-emblem">
             <picture className="hero-artwork">

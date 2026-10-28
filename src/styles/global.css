@@ -691,6 +691,27 @@ button:focus-visible {
     #fff 29px 30px
   );
 }
+.home-hero__bamboo {
+  display: none;
+  position: absolute;
+  z-index: 1;
+  bottom: 96px;
+  width: 118px;
+  height: 350px;
+  opacity: 0.18;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 20px rgba(20, 0, 4, 0.28));
+}
+.home-hero__bamboo--left {
+  left: 5px;
+  transform: scale(1.46) rotate(-5deg);
+  transform-origin: bottom left;
+}
+.home-hero__bamboo--right {
+  right: 5px;
+  transform: scale(-1.46, 1.46) rotate(-5deg);
+  transform-origin: bottom right;
+}
 .home-hero__inner {
   min-height: 620px;
   display: grid;
@@ -698,7 +719,8 @@ button:focus-visible {
   align-items: center;
   gap: 70px;
   position: relative;
-  padding-block: 90px 95px;
+  z-index: 2;
+  padding-block: 75px 95px;
 }
 .hero-kicker,
 .eyebrow {
@@ -727,6 +749,19 @@ button:focus-visible {
 .home-hero h1 em {
   font-style: normal;
   color: var(--gold-light);
+}
+@media (min-width: 900px) {
+  .home-hero__bamboo {
+    display: block;
+  }
+  .home-hero h1 {
+    font-size: clamp(3.7rem, 6.5vw, 5.7rem);
+  }
+  .home-hero h1 em {
+    display: inline-block;
+    font-size: 0.82em;
+    white-space: nowrap;
+  }
 }
 .hero-lead {
   font-size: 1.08rem;
@@ -1369,25 +1404,6 @@ button:focus-visible {
     margin-bottom: 26px;
     padding: 7px;
     border-radius: 8px;
-  }
-  .hero-lead {
-    font-size: 0.8rem;
-    max-width: 660px;
-    color: #f7e8e2;
-    padding-top: 10px;
-    padding-bottom: 10px;
-  }
-  .hero-kicker,
-  .eyebrow {
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    font-weight: 700;
-    font-size: 0.74rem;
-    color: var(--gold);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 20px;
   }
   .public-filter-tabs--activities,
   .public-filter-tabs--news {
@@ -6088,7 +6104,7 @@ button:focus-visible {
   .home-hero__inner {
     grid-template-columns: minmax(0, 1fr);
     gap: 24px;
-    padding-bottom: 90px;
+    padding-bottom: 72px;
   }
   .hero-emblem {
     display: grid;
@@ -6794,6 +6810,86 @@ button:focus-visible {
 }
 .parish-emblem-band__inner {
   position: relative;
+  z-index: 2;
+}
+.parish-emblem-band__bamboo {
+  position: absolute;
+  z-index: 1;
+  bottom: -38px;
+  width: 118px;
+  height: 350px;
+  opacity: 0.3;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 14px rgba(20, 0, 4, 0.24));
+}
+.parish-emblem-band__bamboo--left {
+  left: -12px;
+  transform: rotate(-5deg);
+  transform-origin: bottom center;
+}
+.parish-emblem-band__bamboo--right {
+  right: -12px;
+  transform: scaleX(-1) rotate(-5deg);
+  transform-origin: bottom center;
+}
+.bamboo-stalk {
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  border: 1px solid rgba(245, 223, 171, 0.3);
+  border-radius: 999px 999px 3px 3px;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(245, 223, 171, 0.76) 0 34px,
+    rgba(214, 157, 46, 0.3) 34px 38px,
+    rgba(76, 18, 27, 0.46) 38px 41px
+  );
+  box-shadow: inset -2px 0 rgba(76, 18, 27, 0.22);
+}
+.bamboo-stalk--one {
+  left: 13px;
+  height: 328px;
+}
+.bamboo-stalk--two {
+  left: 48px;
+  height: 280px;
+  transform: rotate(7deg);
+  transform-origin: bottom center;
+}
+.bamboo-stalk--three {
+  left: 80px;
+  height: 232px;
+  transform: rotate(13deg);
+  transform-origin: bottom center;
+}
+.bamboo-leaf {
+  position: absolute;
+  width: 44px;
+  height: 16px;
+  border: 1px solid rgba(245, 223, 171, 0.22);
+  border-radius: 100% 0 100% 0;
+  background: rgba(245, 223, 171, 0.64);
+  transform-origin: 100% 50%;
+}
+.bamboo-leaf--one {
+  left: 8px;
+  top: 54px;
+  transform: rotate(-34deg);
+}
+.bamboo-leaf--two {
+  left: 24px;
+  top: 112px;
+  transform: scaleX(-1) rotate(-27deg);
+}
+.bamboo-leaf--three {
+  left: 51px;
+  top: 145px;
+  transform: rotate(-20deg);
+}
+.bamboo-leaf--four {
+  left: 69px;
+  top: 205px;
+  transform: scaleX(-1) rotate(-18deg);
 }
 .parish-emblem-band__inner::before,
 .parish-emblem-band__inner::after {
@@ -6874,6 +6970,15 @@ button:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .parish-emblem-band .hero-artwork img {
     animation: none;
+  }
+}
+@media (max-width: 350px) {
+  .parish-emblem-band__bamboo {
+    opacity: 0.24;
+    transform: scale(0.9) rotate(-5deg);
+  }
+  .parish-emblem-band__bamboo--right {
+    transform: scale(-0.9, 0.9) rotate(-5deg);
   }
 }
 /* On larger screens the desktop emblem in the hero is enough; hide the band */
@@ -7988,10 +8093,9 @@ button:focus-visible {
     max-width: 100%;
     min-width: 0;
     min-height: 36px;
-    padding: 10px 10px;
+    padding: 7px 10px;
     font-size: 0.76rem;
     gap: 5px;
-    margin-bottom: 30px;
   }
   .hero-action-label--desktop {
     display: none;
