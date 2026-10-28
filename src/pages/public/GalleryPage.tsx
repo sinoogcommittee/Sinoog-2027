@@ -17,8 +17,32 @@ function GalleryPreview({ asset, title }: { asset: GalleryAsset; title: string }
   const source = asset.kind === 'video' ? getYouTubeThumbnail(asset.object_path) : asset.publicUrl;
   return (
     <div className="gallery-collection-card__image">
-      {source ? <img src={source} alt={asset.kind === 'image' ? asset.alt_text || title : ''} loading="lazy" /> : <Camera aria-hidden="true" />}
-      {asset.kind === 'video' && <span className="gallery-play-mark"><Play size={18} fill="currentColor" /></span>}
+      {source ? (
+        <img
+          src={source}
+          alt={asset.kind === 'image' ? asset.alt_text || title : ''}
+          loading="lazy"
+          onError={(event) => {
+            // maxresdefault is missing on some older videos — fall back to 16:9 mqdefault, then hq720
+            const img = event.currentTarget;
+            const idMatch = img.src.match(/\/vi\/([a-zA-Z0-9_-]{11})\//);
+            if (!idMatch) return;
+            const id = idMatch[1];
+            if (img.src.includes('maxresdefault')) {
+              img.src = `https://i.ytimg.com/vi/${id}/hq720.jpg`;
+            } else if (img.src.includes('hq720')) {
+              img.src = `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+            }
+          }}
+        />
+      ) : (
+        <Camera aria-hidden="true" />
+      )}
+      {asset.kind === 'video' && (
+        <span className="gallery-play-mark">
+          <Play size={18} fill="currentColor" />
+        </span>
+      )}
     </div>
   );
 }
@@ -27,8 +51,12 @@ function AlbumCard({ album, onOpen }: { album: GalleryAlbum; onOpen: () => void 
   const previewItems = album.items.slice(0, 5);
   const remaining = Math.max(0, album.items.length - 5);
   return (
-    <article className="gallery-collection-card">
-      <button type="button" className={`gallery-collage gallery-collage--${Math.min(previewItems.length, 5)}`} onClick={onOpen}>
+    <article className={`gallery-collection-card${album.media_type === 'video' ? ' gallery-collection-card--video' : ''}`}>
+      <button
+        type="button"
+        className={`gallery-collage gallery-collage--${Math.min(previewItems.length, 5)}${album.media_type === 'video' ? ' gallery-collage--video' : ''}`}
+        onClick={onOpen}
+      >
         {previewItems.length > 0 ? previewItems.map((asset, index) => (
           <div className="gallery-collage__cell" key={asset.id}>
             <GalleryPreview asset={asset} title={album.title} />

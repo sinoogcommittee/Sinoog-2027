@@ -61,7 +61,8 @@ export function normalizeYouTubeEmbed(value: string): string {
 
 export function getYouTubeThumbnail(value: string): string {
   const id = getYouTubeId(value);
-  return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : '';
+  // maxresdefault is true 16:9 (no letterbox bars). hqdefault is 4:3 with black bars.
+  return id ? `https://i.ytimg.com/vi/${id}/maxresdefault.jpg` : '';
 }
 
 function mapAsset(asset: DbMediaAsset): GalleryAsset {
