@@ -4,6 +4,7 @@ import type { Edition, Json } from '../../types/database';
 export const DEFAULT_EDITION: Edition = {
   id: 'current-2027',
   year: 2027,
+  sort_order: 1,
   name: 'Sinoog 2027',
   parish_name: 'Sto. Niño Parish — Guinacot',
   location: 'Guinacot, Guindulman, Bohol',

@@ -20,6 +20,7 @@ export interface Database {
         Row: {
           id: string;
           year: number;
+          sort_order: number;
           name: string;
           parish_name: string;
           location: string;
@@ -50,6 +51,7 @@ export interface Database {
         Update: {
           id?: string;
           year?: number;
+          sort_order?: number;          
           name?: string;
           parish_name?: string;
           location?: string;
@@ -330,6 +332,7 @@ export interface Database {
           slug: string;
           description: string | null;
           year: number;
+          sort_order: number;
           media_type: 'photo' | 'video';
           status: ContentStatus;
           cover_media_id: string | null;
@@ -343,6 +346,7 @@ export interface Database {
           slug: string;
           description?: string | null;
           year?: number;
+          sort_order?: number;
           media_type?: 'photo' | 'video';
           status?: ContentStatus;
           cover_media_id?: string | null;
@@ -356,6 +360,7 @@ export interface Database {
           slug?: string;
           description?: string | null;
           year?: number;
+          sort_order?: number;
           media_type?: 'photo' | 'video';
           status?: ContentStatus;
           cover_media_id?: string | null;
@@ -1149,6 +1154,13 @@ export interface Database {
       [_ in never]: never;
     };
     Functions: {
+      reorder_gallery_album: {
+        Args: {
+          p_album_id: string;
+          p_requested_position: number;
+        };
+        Returns: undefined;
+      };
       reorder_activity_for_date: {
         Args: {
           p_activity_id: string;

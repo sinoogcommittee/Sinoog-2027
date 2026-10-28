@@ -10,6 +10,7 @@ import {
   deleteGalleryItem,
   getGalleryAlbumsForAdmin,
   getYouTubeThumbnail,
+  reorderGalleryAlbum,
   updateGalleryAlbum,
   uploadGalleryPhotos,
   type GalleryAlbum,
@@ -20,19 +21,15 @@ import { ConfirmDialog, EmptyState, LoadingState } from '../../features/ui/Feedb
 import { useToast } from '../../features/ui/useToast';
 import type { ContentStatus } from '../../types';
 
-const CURRENT_YEAR = 2027;
-
 interface AlbumFormState {
   title: string;
   description: string;
-  year: number;
   status: ContentStatus;
 }
 
 const emptyAlbumForm: AlbumFormState = {
   title: '',
   description: '',
-  year: CURRENT_YEAR,
   status: 'draft',
 };
 
@@ -55,6 +52,7 @@ export function GalleryManagerPage() {
   const [videoDescription, setVideoDescription] = useState('');
   const [videoEmbed, setVideoEmbed] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const [positionDrafts, setPositionDrafts] = useState<Record<string, string>>({});
 
   const load = useCallback(async (type = mediaType) => {
     setLoading(true);
@@ -62,6 +60,7 @@ export function GalleryManagerPage() {
       const [edition, rows] = await Promise.all([getCurrentEdition(), getGalleryAlbumsForAdmin(type)]);
       setEditionId(edition.id);
       setAlbums(rows);
+      setPositionDrafts({});
     } catch (err: unknown) {
       toast(err instanceof Error ? err.message : 'Unable to load gallery collections.', 'error');
     } finally {
@@ -81,7 +80,7 @@ export function GalleryManagerPage() {
 
   const openCreate = () => {
     setEditingAlbum(null);
-    setAlbumForm({ ...emptyAlbumForm, year: CURRENT_YEAR });
+    setAlbumForm(emptyAlbumForm);
     setAlbumModalOpen(true);
   };
 
@@ -90,7 +89,6 @@ export function GalleryManagerPage() {
     setAlbumForm({
       title: album.title,
       description: album.description || '',
-      year: album.year,
       status: album.status,
     });
     setAlbumModalOpen(true);
@@ -114,7 +112,6 @@ export function GalleryManagerPage() {
         await updateGalleryAlbum(editingAlbum.id, {
           title: albumForm.title.trim(),
           description: albumForm.description.trim() || null,
-          year: Number(albumForm.year),
           status: albumForm.status,
         });
         toast('Gallery collection updated.', 'success');
@@ -123,11 +120,10 @@ export function GalleryManagerPage() {
           edition_id: editionId,
           title: albumForm.title.trim(),
           description: albumForm.description.trim() || null,
-          year: Number(albumForm.year),
           media_type: mediaType,
           status: albumForm.status,
         });
-        toast(`${mediaType === 'photo' ? 'Photo' : 'Video'} collection created.`, 'success');
+        toast(`${mediaType === 'photo' ? 'Photo' : 'Video'} collection created at the end of the list.`, 'success');
       }
       closeAlbumModal();
       await load();
@@ -146,6 +142,39 @@ export function GalleryManagerPage() {
       await load();
     } catch (err: unknown) {
       toast(err instanceof Error ? err.message : 'Unable to change publication status.', 'error');
+    }
+  };
+
+  const commitPosition = async (album: GalleryAlbum, currentPosition: number) => {
+    const draft = positionDrafts[album.id];
+    if (draft === undefined) return;
+    const requested = Math.round(Number(draft));
+    const clearDraft = () =>
+      setPositionDrafts((current) => {
+        const next = { ...current };
+        delete next[album.id];
+        return next;
+      });
+    if (!Number.isFinite(requested) || requested < 1) {
+      clearDraft();
+      toast('Enter a position of 1 or higher.', 'error');
+      return;
+    }
+    const target = Math.min(requested, albums.length);
+    if (target === currentPosition) {
+      clearDraft();
+      return;
+    }
+    setSaving(true);
+    try {
+      await reorderGalleryAlbum(album.id, target);
+      toast(`“${album.title}” moved to position ${target}.`, 'success');
+      await load();
+    } catch (err: unknown) {
+      clearDraft();
+      toast(err instanceof Error ? err.message : 'Unable to change the order.', 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -215,19 +244,26 @@ export function GalleryManagerPage() {
     <div className="admin-page gallery-admin-page">
       <div className="admin-heading">
         <div>
-          <p className="eyebrow">Celebration archive</p>
+          <p className="eyebrow">Gallery</p>
           <h1>Photo & video gallery</h1>
-          <p>Create year-based collections, upload compressed photos, add YouTube videos, and control publication.</p>
+          <p>Create collections, add photos or YouTube videos, and choose the order they appear on the public gallery.</p>
         </div>
         <div className="gallery-admin-heading__actions">
-          <Link to="/gallery" className="button button--secondary"><Eye size={16} /> Public gallery</Link>
-          <button type="button" className="button button--primary" onClick={openCreate}><Plus size={16} /> New collection</button>
+          <Link to="/gallery" className="button button--ghost button--sm"><Eye size={15} /> Public gallery</Link>
+          <button type="button" className="button button--primary button--sm" onClick={openCreate}><Plus size={15} /> New collection</button>
         </div>
       </div>
 
-      <div className="gallery-switcher gallery-switcher--admin" aria-label="Gallery management type">
-        <button type="button" className={mediaType === 'photo' ? 'active' : ''} onClick={() => setMediaType('photo')}><Images size={18} /> Photos</button>
-        <button type="button" className={mediaType === 'video' ? 'active' : ''} onClick={() => setMediaType('video')}><Video size={18} /> Videos</button>
+      <div className="gallery-admin-toolbar">
+        <div className="gallery-switcher gallery-switcher--admin" aria-label="Gallery management type">
+          <button type="button" className={mediaType === 'photo' ? 'active' : ''} onClick={() => setMediaType('photo')}><Images size={17} /> Photos</button>
+          <button type="button" className={mediaType === 'video' ? 'active' : ''} onClick={() => setMediaType('video')}><Video size={17} /> Videos</button>
+        </div>
+        <p className="gallery-admin-toolbar__hint">
+          {albums.length > 0
+            ? `${albums.length} collection${albums.length === 1 ? '' : 's'}. Change a Position number to reorder the public gallery.`
+            : 'No collections yet.'}
+        </p>
       </div>
 
       {loading ? (
@@ -236,33 +272,57 @@ export function GalleryManagerPage() {
         <section className="admin-panel">
           <EmptyState
             title={`No ${mediaType} collections yet`}
-            message={`Create a ${mediaType} collection for 2027 or a previous celebration year.`}
-            action={<button type="button" className="button button--primary" onClick={openCreate}><Plus size={16} /> New collection</button>}
+            message={`Create a ${mediaType} collection to start building the gallery.`}
+            action={<button type="button" className="button button--primary button--sm" onClick={openCreate}><Plus size={15} /> New collection</button>}
           />
         </section>
       ) : (
         <div className="gallery-admin-grid">
-          {albums.map((album) => {
+          {albums.map((album, index) => {
             const preview = album.items[0];
             const previewSource = preview?.kind === 'video' ? getYouTubeThumbnail(preview.object_path) : preview?.publicUrl;
+            const position = index + 1;
             return (
               <article className="gallery-admin-card" key={album.id}>
                 <div className="gallery-admin-card__preview">
-                  {previewSource ? <img src={previewSource} alt="" /> : album.media_type === 'photo' ? <Images /> : <Video />}
+                  {previewSource ? <img src={previewSource} alt="" loading="lazy" /> : album.media_type === 'photo' ? <Images /> : <Video />}
                   {album.media_type === 'video' && previewSource && <span className="gallery-play-mark"><Play size={18} fill="currentColor" /></span>}
+                  <span className="gallery-admin-card__order" title="Position in the public gallery">#{position}</span>
+                  <span className="gallery-admin-card__status">
+                    <StatusBadge tone={album.status === 'published' ? 'success' : album.status === 'draft' ? 'warning' : 'neutral'}>{album.status}</StatusBadge>
+                  </span>
                 </div>
                 <div className="gallery-admin-card__body">
-                  <div className="gallery-admin-card__heading">
-                    <div><span>{album.year}</span><h2>{album.title}</h2></div>
-                    <StatusBadge tone={album.status === 'published' ? 'success' : album.status === 'draft' ? 'warning' : 'neutral'}>{album.status}</StatusBadge>
-                  </div>
-                  {album.description && <p>{album.description}</p>}
-                  <strong>{album.items.length} {album.media_type === 'photo' ? 'photos' : 'videos'}</strong>
-                  <div className="gallery-admin-card__actions">
-                    <button type="button" className="button button--primary button--sm" onClick={() => setManageAlbumId(album.id)}><Upload size={15} /> Manage media</button>
-                    <button type="button" className="button button--ghost button--sm" onClick={() => openEdit(album)} aria-label={`Edit ${album.title}`} title="Edit collection"><Pencil size={16} /></button>
-                    <button type="button" className="button button--secondary button--sm" onClick={() => void handleTogglePublished(album)}>{album.status === 'published' ? 'Move to draft' : 'Publish'}</button>
-                    <button type="button" className="button button--ghost button--sm" onClick={() => setDeleteTarget({ type: 'album', album })} aria-label={`Delete ${album.title}`} title="Delete collection"><Trash2 size={16} /></button>
+                  <h2>{album.title}</h2>
+                  <p className="gallery-admin-card__meta">
+                    {album.items.length} {album.media_type === 'photo' ? (album.items.length === 1 ? 'photo' : 'photos') : (album.items.length === 1 ? 'video' : 'videos')}
+                  </p>
+                  {album.description && <p className="gallery-admin-card__desc">{album.description}</p>}
+                  <div className="gallery-admin-card__controls">
+                    <label className="gallery-admin-card__position">
+                      <span>Position</span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={1}
+                        max={albums.length}
+                        value={positionDrafts[album.id] ?? String(position)}
+                        disabled={saving}
+                        onChange={(event) => setPositionDrafts((current) => ({ ...current, [album.id]: event.target.value }))}
+                        onBlur={() => void commitPosition(album, position)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') event.currentTarget.blur();
+                        }}
+                        aria-label={`Position of ${album.title}`}
+                      />
+                      <span>of {albums.length}</span>
+                    </label>
+                    <div className="gallery-admin-card__actions">
+                      <button type="button" className="button button--primary button--sm" onClick={() => setManageAlbumId(album.id)}><Upload size={14} /> Manage media</button>
+                      <button type="button" className="button button--secondary button--sm" onClick={() => void handleTogglePublished(album)}>{album.status === 'published' ? 'Unpublish' : 'Publish'}</button>
+                      <button type="button" className="button button--ghost button--sm gallery-admin-icon" onClick={() => openEdit(album)} aria-label={`Edit ${album.title}`} title="Edit collection"><Pencil size={15} /></button>
+                      <button type="button" className="button button--ghost button--sm gallery-admin-icon" onClick={() => setDeleteTarget({ type: 'album', album })} aria-label={`Delete ${album.title}`} title="Delete collection"><Trash2 size={15} /></button>
+                    </div>
                   </div>
                 </div>
               </article>
@@ -279,12 +339,9 @@ export function GalleryManagerPage() {
               <button type="button" className="icon-button" onClick={closeAlbumModal} aria-label="Close"><X /></button>
             </div>
             <label>Collection title<input value={albumForm.title} onChange={(event) => setAlbumForm((current) => ({ ...current, title: event.target.value }))} required maxLength={140} /></label>
-            <div className="responsive-two-column">
-              <label>Celebration year<input type="number" min="1900" max="2100" value={albumForm.year} onChange={(event) => setAlbumForm((current) => ({ ...current, year: Number(event.target.value) }))} required /></label>
-              <label>Publication status<select value={albumForm.status} onChange={(event) => setAlbumForm((current) => ({ ...current, status: event.target.value as ContentStatus }))}><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
-            </div>
-            <label>Description<textarea rows={4} value={albumForm.description} onChange={(event) => setAlbumForm((current) => ({ ...current, description: event.target.value }))} placeholder="Describe this celebration collection…" /></label>
-            <p className="form-help">Published collections appear immediately in the public Gallery. Draft and archived collections stay hidden.</p>
+            <label>Publication status<select value={albumForm.status} onChange={(event) => setAlbumForm((current) => ({ ...current, status: event.target.value as ContentStatus }))}><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+            <label>Description<textarea rows={3} value={albumForm.description} onChange={(event) => setAlbumForm((current) => ({ ...current, description: event.target.value }))} placeholder="Describe this collection…" /></label>
+            <p className="form-help">Published collections appear in the public Gallery. Draft and archived collections stay hidden. New collections are added at the end; change their Position on the list to move them.</p>
             <div className="modal-actions"><button type="button" className="button button--ghost" onClick={closeAlbumModal}>Cancel</button><button type="submit" className="button button--primary" disabled={saving}>{saving ? 'Saving…' : 'Save collection'}</button></div>
           </form>
         </div>
@@ -294,7 +351,7 @@ export function GalleryManagerPage() {
         <div className="modal-overlay gallery-media-overlay" role="dialog" aria-modal="true" aria-labelledby="gallery-media-title">
           <div className="modal-card gallery-media-modal">
             <div className="modal-title-row">
-              <div><p className="eyebrow">{managedAlbum.year} · {managedAlbum.status}</p><h2 id="gallery-media-title">{managedAlbum.title}</h2></div>
+              <div><p className="eyebrow">{managedAlbum.media_type === 'photo' ? 'Photo' : 'Video'} collection · {managedAlbum.status}</p><h2 id="gallery-media-title">{managedAlbum.title}</h2></div>
               <button type="button" className="icon-button" onClick={() => setManageAlbumId(null)} aria-label="Close media manager"><X /></button>
             </div>
 

@@ -31,6 +31,7 @@ Run the files in `supabase/migrations/` **in numeric order** in the Supabase SQL
 | 016 | `016_security_hardening.sql` | Removes direct payment inserts by runners; only admins may change suspension |
 | 017 | `017_registration_integrity_and_admin_safety.sql` | Age, capacity and field checks; payment and evidence locking; last-admin protection; audit trail; sponsor link checks |
 | 018 | `018_suspended_accounts_cannot_register.sql` | Suspended accounts cannot register or submit payments |
+| 019 | `019_gallery_collection_order.sql` | Gallery collection order numbers (photos and videos) and the reorder function |
 
 Any later numbered migration continues the same sequence. Add each new file to this table when you create it.
 

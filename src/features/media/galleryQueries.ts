@@ -18,7 +18,6 @@ export interface GalleryAlbumInput {
   edition_id: string;
   title: string;
   description?: string | null;
-  year: number;
   media_type: GalleryMediaType;
   status: ContentStatus;
 }
@@ -109,7 +108,7 @@ async function hydrateAlbums(albumRows: DbAlbum[]): Promise<GalleryAlbum[]> {
         .map((item) => assetMap.get(item.media_id))
         .filter((asset): asset is GalleryAsset => Boolean(asset)),
     }))
-    .sort((a, b) => b.year - a.year || b.created_at.localeCompare(a.created_at));
+    .sort((a, b) => a.sort_order - b.sort_order || b.created_at.localeCompare(a.created_at));
 }
 
 export async function getPublishedGalleryAlbums(mediaType: GalleryMediaType): Promise<GalleryAlbum[]> {
@@ -122,7 +121,7 @@ export async function getPublishedGalleryAlbums(mediaType: GalleryMediaType): Pr
     .select('*')
     .eq('status', 'published')
     .eq('media_type', mediaType)
-    .order('year', { ascending: false })
+    .order('sort_order', { ascending: true })
     .order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
   return hydrateAlbums((data || []) as DbAlbum[]);
@@ -133,7 +132,7 @@ export async function getGalleryAlbumsForAdmin(mediaType?: GalleryMediaType): Pr
     if (isLocalDemoMode) return [];
     throw new Error('The website database is not configured.');
   }
-  let query = supabase.from('albums').select('*').order('year', { ascending: false }).order('created_at', { ascending: false });
+  let query = supabase.from('albums').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: false });
   if (mediaType) query = query.eq('media_type', mediaType);
   const { data, error } = await query;
   if (error) throw new Error(error.message);
@@ -142,10 +141,19 @@ export async function getGalleryAlbumsForAdmin(mediaType?: GalleryMediaType): Pr
 
 export async function createGalleryAlbum(input: GalleryAlbumInput): Promise<DbAlbum> {
   if (!supabase) throw new Error('Supabase is not connected.');
-  const slug = `${slugify(input.title)}-${input.year}-${Date.now().toString(36)}`;
+  const slug = `${slugify(input.title)}-${Date.now().toString(36)}`;
+  // A new collection goes to the end of its list; the committee can move it afterwards.
+  const { data: last, error: lastError } = await supabase
+    .from('albums')
+    .select('sort_order')
+    .eq('media_type', input.media_type)
+    .order('sort_order', { ascending: false })
+    .limit(1);
+  if (lastError) throw new Error(lastError.message);
+  const sortOrder = ((last?.[0]?.sort_order as number | undefined) ?? 0) + 1;
   const { data, error } = await supabase
     .from('albums')
-    .insert({ ...input, slug })
+    .insert({ ...input, slug, sort_order: sortOrder })
     .select('*')
     .single();
   if (error) throw new Error(error.message);
@@ -154,12 +162,21 @@ export async function createGalleryAlbum(input: GalleryAlbumInput): Promise<DbAl
 
 export async function updateGalleryAlbum(
   albumId: string,
-  input: Partial<Pick<DbAlbum, 'title' | 'description' | 'year' | 'status'>>,
+  input: Partial<Pick<DbAlbum, 'title' | 'description' | 'status'>>,
 ): Promise<void> {
   if (!supabase) throw new Error('Supabase is not connected.');
   const { error } = await supabase.from('albums').update(input).eq('id', albumId);
   if (error) throw new Error(error.message);
   if (input.status) await syncAlbumAssetVisibility(albumId, input.status === 'published');
+}
+
+export async function reorderGalleryAlbum(albumId: string, position: number): Promise<void> {
+  if (!supabase) throw new Error('Supabase is not connected.');
+  const { error } = await supabase.rpc('reorder_gallery_album', {
+    p_album_id: albumId,
+    p_requested_position: Math.round(position),
+  });
+  if (error) throw new Error(error.message);
 }
 
 async function syncAlbumAssetVisibility(albumId: string, isPublic: boolean): Promise<void> {

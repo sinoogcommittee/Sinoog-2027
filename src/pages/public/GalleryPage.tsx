@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Camera, ChevronLeft, ChevronRight, Images, Play, Video, X } from 'lucide-react';
 import { PageHero } from '../../components/PageHero';
-import { getCurrentEdition } from '../../features/editions/editionQueries';
 import {
   getPublishedGalleryAlbums,
   getYouTubeThumbnail,
@@ -10,8 +9,6 @@ import {
   type GalleryMediaType,
 } from '../../features/media/galleryQueries';
 import { EmptyState, ErrorState, LoadingState } from '../../features/ui/FeedbackStates';
-
-type GalleryPeriod = 'current' | 'previous';
 
 function GalleryPreview({ asset, title }: { asset: GalleryAsset; title: string }) {
   const source = asset.kind === 'video' ? getYouTubeThumbnail(asset.object_path) : asset.publicUrl;
@@ -71,7 +68,6 @@ function AlbumCard({ album, onOpen }: { album: GalleryAlbum; onOpen: () => void 
       </button>
       <div className="gallery-collection-card__body">
         <div>
-          <span className="eyebrow">{album.year} celebration</span>
           <h2>{album.title}</h2>
         </div>
         <span className="gallery-collection-card__count">
@@ -88,8 +84,6 @@ function AlbumCard({ album, onOpen }: { album: GalleryAlbum; onOpen: () => void 
 
 export function GalleryPage() {
   const [mediaType, setMediaType] = useState<GalleryMediaType>('photo');
-  const [period, setPeriod] = useState<GalleryPeriod>('current');
-  const [currentYear, setCurrentYear] = useState(2027);
   const [albums, setAlbums] = useState<GalleryAlbum[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,9 +95,7 @@ export function GalleryPage() {
     setLoading(true);
     setError(null);
     try {
-      const [edition, list] = await Promise.all([getCurrentEdition(), getPublishedGalleryAlbums(mediaType)]);
-      setCurrentYear(edition.year);
-      setAlbums(list);
+      setAlbums(await getPublishedGalleryAlbums(mediaType));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Unable to load the gallery.');
     } finally {
@@ -127,10 +119,6 @@ export function GalleryPage() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [activeAlbum]);
 
-  const visibleAlbums = useMemo(() => albums.filter((album) => (
-    period === 'current' ? album.year === currentYear : album.year < currentYear
-  )), [albums, currentYear, period]);
-
   const openAlbum = (album: GalleryAlbum) => {
     if (album.items.length === 0) return;
     setActiveIndex(0);
@@ -144,7 +132,7 @@ export function GalleryPage() {
       <PageHero
         eyebrow="Celebration archive"
         title="Photo & video gallery"
-        description="View moments from the current Sinoog celebration and previous years of faith, culture, and community."
+        description="Browse photo and video collections of faith, culture, and community from the Sinoog celebrations."
       />
       <section className="section gallery-page">
         <div className="container">
@@ -156,27 +144,19 @@ export function GalleryPage() {
               <Video size={18} /> Videos
             </button>
           </div>
-          <div className="gallery-period-switcher" aria-label="Celebration year group">
-            <button type="button" className={period === 'current' ? 'active' : ''} onClick={() => setPeriod('current')}>
-              Current celebration ({currentYear})
-            </button>
-            <button type="button" className={period === 'previous' ? 'active' : ''} onClick={() => setPeriod('previous')}>
-              Previous celebrations
-            </button>
-          </div>
 
           {loading ? (
             <LoadingState message={`Loading ${mediaType === 'photo' ? 'photo' : 'video'} collections…`} />
           ) : error ? (
             <ErrorState message={error} onRetry={() => setReloadKey((value) => value + 1)} />
-          ) : visibleAlbums.length === 0 ? (
+          ) : albums.length === 0 ? (
             <EmptyState
-              title={`No ${period === 'current' ? currentYear : 'previous'} ${mediaType} collections yet`}
+              title={`No ${mediaType} collections yet`}
               message="Published collections will appear here after the Sinoog Committee adds and approves them."
             />
           ) : (
             <div className="gallery-collections-grid">
-              {visibleAlbums.map((album) => <AlbumCard key={album.id} album={album} onOpen={() => openAlbum(album)} />)}
+              {albums.map((album) => <AlbumCard key={album.id} album={album} onOpen={() => openAlbum(album)} />)}
             </div>
           )}
         </div>
@@ -189,7 +169,7 @@ export function GalleryPage() {
           <div className="gallery-viewer__panel">
             <header>
               <div>
-                <span>{activeAlbum.year} · {activeIndex + 1} of {activeAlbum.items.length}</span>
+                <span>{activeIndex + 1} of {activeAlbum.items.length}</span>
                 <h2 id="gallery-viewer-title">{activeAlbum.title}</h2>
               </div>
               <button type="button" className="gallery-icon-button" onClick={() => setActiveAlbum(null)} aria-label="Close gallery viewer"><X /></button>
