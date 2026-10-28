@@ -94,9 +94,17 @@ export function PortalLayout() {
       </aside>
       <div className="portal-content">
         <header className="portal-topbar">
-          <div>
-            <span>{displayName} ({roleLabel})</span>
-            <small>{displayEmail}</small>
+          <Link className="portal-topbar-brand brand brand--light" to="/" title="Sinoog 2027 home">
+            <LogoMark type="committee" />
+            <span>
+              <strong>Sinoog 2027</strong>
+              <small>Committee workspace</small>
+            </span>
+          </Link>
+          <div className="portal-topbar-user" title={`${displayName} (${roleLabel}) · ${displayEmail}`}>
+            <span className="portal-topbar-user-name">{displayName}</span>
+            <small className="portal-topbar-user-role">{roleLabel}</small>
+            <small className="portal-topbar-user-email">{displayEmail}</small>
           </div>
         </header>
         <main>

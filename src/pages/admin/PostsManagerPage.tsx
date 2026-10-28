@@ -319,55 +319,32 @@ export function PostsManagerPage() {
             }
           />
         ) : (
-          <div className="admin-table">
-            <div className="admin-table__head" style={{ gridTemplateColumns: '2.5fr 1fr 1fr 100px 140px' }}>
+          <div className="admin-table posts-admin-table">
+            <div className="admin-table__head posts-table__grid posts-table__head">
               <span>Title & Slug</span>
               <span>Category</span>
-              <span>Published / Updated</span>
+              <span>Published</span>
               <span>Status</span>
-              <span style={{ textAlign: 'right' }}>Actions</span>
+              <span className="posts-table__actions-label">Actions</span>
             </div>
 
             {filteredPosts.map((post) => (
-              <div
-                key={post.id}
-                className="admin-table__row posts-table__row"
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '2.5fr 1fr 1fr 100px 140px',
-                  padding: '1rem',
-                  borderBottom: '1px solid #ede4dc',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                }}
-              >
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    {post.pinned && <Pin size={14} color="#d69d2e" fill="#d69d2e" />}
-                    <strong style={{ fontSize: '1.05rem', color: '#3d1214' }}>{post.title}</strong>
+              <div key={post.id} className="posts-table__grid posts-table__row">
+                <div className="posts-table__cell posts-table__title">
+                  <div className="posts-table__title-row">
+                    {post.pinned && (
+                      <Pin size={14} color="#d69d2e" fill="#d69d2e" aria-label="Pinned" />
+                    )}
+                    <strong>{post.title}</strong>
                   </div>
-                  <small style={{ color: '#888', display: 'block', fontSize: '0.8rem' }}>
-                    /news/{post.slug}
-                  </small>
+                  <small>/news/{post.slug}</small>
                 </div>
 
-                <div>
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      fontSize: '0.85rem',
-                      fontWeight: 600,
-                      padding: '0.2rem 0.5rem',
-                      borderRadius: '4px',
-                      backgroundColor: '#f5efe6',
-                      color: '#634b35',
-                    }}
-                  >
-                    {post.category}
-                  </span>
+                <div className="posts-table__cell posts-table__category">
+                  <span className="posts-table__category-pill">{post.category}</span>
                 </div>
 
-                <div style={{ fontSize: '0.85rem', color: '#6d6158' }}>
+                <div className="posts-table__cell posts-table__date">
                   {post.published_at ? (
                     new Date(post.published_at).toLocaleDateString('en-US', {
                       timeZone: 'Asia/Manila',
@@ -376,31 +353,45 @@ export function PostsManagerPage() {
                       year: 'numeric',
                     })
                   ) : (
-                    <span>Not published</span>
+                    <span className="posts-table__unpublished">Not published</span>
                   )}
                 </div>
 
-                <div>
-                  <StatusBadge tone={post.status === 'published' ? 'success' : post.status === 'draft' ? 'warning' : 'neutral'}>
+                <div className="posts-table__cell posts-table__status">
+                  <StatusBadge
+                    tone={
+                      post.status === 'published'
+                        ? 'success'
+                        : post.status === 'draft'
+                          ? 'warning'
+                          : 'neutral'
+                    }
+                  >
                     {post.status}
                   </StatusBadge>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
+                <div className="posts-table__cell posts-table__actions">
                   <button
                     type="button"
                     className="button button--ghost"
-                    style={{ padding: '0.35rem' }}
                     title={post.pinned ? 'Unpin post' : 'Pin post to top'}
                     onClick={() => void handleTogglePinned(post)}
                   >
-                    <Pin size={16} color={post.pinned ? '#d69d2e' : '#aaa'} fill={post.pinned ? '#d69d2e' : 'none'} />
+                    <Pin
+                      size={16}
+                      color={post.pinned ? '#d69d2e' : '#aaa'}
+                      fill={post.pinned ? '#d69d2e' : 'none'}
+                    />
                   </button>
                   <button
                     type="button"
                     className="button button--ghost"
-                    style={{ padding: '0.35rem' }}
-                    title={post.status === 'published' ? 'Unpublish (make draft)' : 'Publish to live website'}
+                    title={
+                      post.status === 'published'
+                        ? 'Unpublish (make draft)'
+                        : 'Publish to live website'
+                    }
                     onClick={() => void handleToggleStatus(post)}
                   >
                     <Globe size={16} color={post.status === 'published' ? '#1b7340' : '#888'} />
@@ -408,7 +399,6 @@ export function PostsManagerPage() {
                   <button
                     type="button"
                     className="button button--ghost"
-                    style={{ padding: '0.35rem' }}
                     title="Edit article"
                     onClick={() => openEditModal(post)}
                   >
@@ -416,8 +406,7 @@ export function PostsManagerPage() {
                   </button>
                   <button
                     type="button"
-                    className="button button--ghost"
-                    style={{ padding: '0.35rem', color: '#c53030' }}
+                    className="button button--ghost posts-table__delete"
                     title="Delete article"
                     onClick={() => setDeleteTarget(post)}
                   >
