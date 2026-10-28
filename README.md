@@ -76,3 +76,5 @@ design-assets/  full-size logo masters (not deployed)
 - Only the Supabase URL and **publishable** key belong in `VITE_` variables. Never expose the secret or service-role key in browser code.
 - Never commit `.env.local`, database dumps or `backups/`.
 - Access is enforced by Row Level Security and Storage policies, not only by the interface. After any change to policies, run `supabase/verification/003_policy_tests.sql` on a test project.
+
+

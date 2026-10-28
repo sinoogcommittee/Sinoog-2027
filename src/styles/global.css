@@ -6934,3 +6934,200 @@ button:focus-visible {
     padding-bottom: 72px;
   }
 }
+
+/* ========== Festival page ========== */
+
+.festival-intro {
+  max-width: 720px;
+  font-size: 1.05rem;
+  color: var(--ink, #2a1a12);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.feature-cards--pillars {
+  grid-template-columns: repeat(3, 1fr);
+}
+@media (max-width: 800px) {
+  .feature-cards--pillars {
+    grid-template-columns: 1fr;
+  }
+}
+
+.parade-map {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px 20px 24px;
+  box-shadow: 0 8px 28px rgba(65, 10, 18, 0.05);
+}
+.parade-map__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 22px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #5c3d0a;
+  margin-bottom: 12px;
+}
+.parade-map__dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.parade-map__dot--assembly {
+  background: #c9a227;
+}
+.parade-map__dot--flow {
+  background: #9b2226;
+}
+.parade-map__dot--arena {
+  background: #5c0a12;
+  border-radius: 2px;
+}
+.parade-map__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: linear-gradient(180deg, #fffaf0 0%, #f7efe0 100%);
+  border-radius: 12px;
+  border: 1px solid #f0e4cc;
+}
+.parade-map__note {
+  font-size: 0.82rem;
+  color: #6b5a52;
+  margin: 14px 0 16px;
+}
+.parade-map__cta {
+  display: inline-flex;
+}
+
+.festival-docs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.festival-docs__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+.festival-docs__copy {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  min-width: 0;
+}
+.festival-docs__copy svg {
+  color: var(--wine);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.festival-docs__copy strong {
+  display: block;
+  font-size: 0.98rem;
+}
+.festival-docs__copy p {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #6b5a52;
+}
+.festival-docs__download,
+.festival-docs__pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.festival-docs__download {
+  background: var(--wine);
+  color: #fff;
+}
+.festival-docs__pending {
+  background: #f5efe6;
+  color: #7a6558;
+  border: 1px solid var(--line);
+}
+
+.festival-accordion-list {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.festival-accordion {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+.festival-accordion__trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--ink, #2a1a12);
+  cursor: pointer;
+  text-align: left;
+}
+.festival-accordion__trigger svg {
+  transition: transform 0.2s ease;
+  color: var(--wine);
+  flex-shrink: 0;
+}
+.festival-accordion.is-open .festival-accordion__trigger svg {
+  transform: rotate(180deg);
+}
+.festival-accordion__panel {
+  padding: 0 18px 18px;
+  border-top: 1px solid var(--line);
+  margin-top: 0;
+  padding-top: 14px;
+}
+.festival-accordion__panel p {
+  margin: 0 0 8px;
+  color: #4a3a32;
+}
+.festival-accordion__hint {
+  font-size: 0.85rem;
+  color: #8a7468 !important;
+  font-style: italic;
+}
+
+.festival-cta-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  max-width: 320px;
+}
+.festival-cta-stack .button {
+  justify-content: center;
+}
+@media (min-width: 560px) {
+  .festival-cta-stack {
+    flex-direction: row;
+    max-width: none;
+  }
+}
