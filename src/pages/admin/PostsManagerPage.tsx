@@ -259,23 +259,25 @@ export function PostsManagerPage() {
       </div>
 
       <section className="admin-panel">
-        <div className="table-tools" style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
-          <label style={{ flex: '1 1 240px' }}>
-            <Search size={16} />
+        <div className="table-tools">
+          <label className="modern-search" htmlFor="posts-search-input">
+            <Search size={18} aria-hidden="true" />
             <input
-              type="text"
+              id="posts-search-input"
+              type="search"
               placeholder="Search announcements…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              autoComplete="off"
+              enterKeyHint="search"
             />
           </label>
 
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div className="table-tools-filters">
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
               aria-label="Filter by category"
-              style={{ padding: '0.45rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
             >
               <option value="all">All Categories</option>
               <option value="Announcement">Announcement</option>
@@ -289,7 +291,6 @@ export function PostsManagerPage() {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               aria-label="Filter by status"
-              style={{ padding: '0.45rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
             >
               <option value="all">All Statuses</option>
               <option value="published">Published</option>

@@ -57,9 +57,11 @@ export function NewsPage() {
               marginBottom: '2rem',
             }}
           >
-            <label className="search-field" style={{ flex: '1 1 300px' }}>
-              <Search size={16} />
+            <label className="search-field modern-search" htmlFor="news-search-input" style={{ flex: '1 1 300px' }}>
+              <Search size={18} aria-hidden="true" />
               <input
+                id="news-search-input"
+                type="search"
                 aria-label="Search news"
                 placeholder="Search announcements…"
                 value={searchTerm}
@@ -67,6 +69,8 @@ export function NewsPage() {
                   setSearchTerm(e.target.value);
                   setLoading(true);
                 }}
+                autoComplete="off"
+                enterKeyHint="search"
               />
             </label>
 

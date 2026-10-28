@@ -1,9 +1,10 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 import { useAuth } from '../../features/auth/useAuth';
 import { GoogleSignInButton } from '../../features/auth/GoogleSignInButton';
+import { describeAuthError } from '../../lib/authErrors';
 
 type Mode = 'signin' | 'signup';
 
@@ -24,6 +25,15 @@ export function RunnerAuthPage() {
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [resendIn, setResendIn] = useState(0);
+
+  // Count down the cooldown between confirmation emails.
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const timer = window.setTimeout(() => setResendIn((seconds) => seconds - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [resendIn]);
 
   const title = useMemo(
     () => (mode === 'signup' ? 'Create a runner account' : 'Runner sign in'),
@@ -45,6 +55,26 @@ export function RunnerAuthPage() {
     setSearchParams(params, { replace: true });
   }
 
+  async function handleResend() {
+    if (!supabase || resendIn > 0) return;
+    const target = email.trim();
+    if (!target) {
+      setMessage('Enter your email address first.');
+      return;
+    }
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: target,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (error) {
+      setMessage(describeAuthError(error).message);
+      return;
+    }
+    setMessage('A new confirmation email was sent. Check your inbox and spam folder.');
+    setResendIn(60);
+  }
+
   async function handleSignIn(e: FormEvent) {
     e.preventDefault();
     setMessage('');
@@ -59,7 +89,9 @@ export function RunnerAuthPage() {
         password,
       });
       if (error) {
-        setMessage(error.message);
+        const info = describeAuthError(error);
+        setMessage(info.message);
+        setNeedsConfirmation(info.kind === 'email_not_confirmed');
         return;
       }
       await refresh();
@@ -104,7 +136,18 @@ export function RunnerAuthPage() {
         },
       });
       if (error) {
-        setMessage(error.message);
+        const info = describeAuthError(error);
+        setMessage(
+          info.kind === 'email_rate_limit' || info.kind === 'email_send_failed'
+            ? `${info.message} You can also use Continue with Google above, which does not need an email.`
+            : info.message,
+        );
+        return;
+      }
+      if (data.session) {
+        // Email confirmation is switched off in Supabase, so the new account is already signed in.
+        await refresh();
+        navigate(nextPath.startsWith('/') && !nextPath.startsWith('//') ? nextPath : '/account');
         return;
       }
       if (data.user) {
@@ -179,8 +222,18 @@ export function RunnerAuthPage() {
               <strong>Check your email.</strong> We sent a confirmation link to <em>{email}</em>. After confirming,
               return here to sign in.
             </p>
-            <p style={{ marginTop: '1rem' }}>
-              <button type="button" className="button button--secondary button--sm" onClick={() => setMode('signin')}>
+            <p>Did not receive it? Check your spam folder first, then request a new one.</p>
+            {message && <p className="form-message">{message}</p>}
+            <p style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="button button--secondary button--sm"
+                onClick={() => void handleResend()}
+                disabled={resendIn > 0}
+              >
+                {resendIn > 0 ? `Resend in ${resendIn}s` : 'Resend confirmation email'}
+              </button>
+              <button type="button" className="button button--ghost button--sm" onClick={() => setMode('signin')}>
                 Back to sign in
               </button>
             </p>
@@ -261,6 +314,18 @@ export function RunnerAuthPage() {
               />
             </label>
             {message && <p className="form-message">{message}</p>}
+            {needsConfirmation && (
+              <p>
+                <button
+                  type="button"
+                  className="button button--secondary button--sm"
+                  onClick={() => void handleResend()}
+                  disabled={resendIn > 0}
+                >
+                  {resendIn > 0 ? `Resend in ${resendIn}s` : 'Resend confirmation email'}
+                </button>
+              </p>
+            )}
             <Button type="submit" disabled={loading || !isSupabaseConfigured}>
               {loading ? 'Creating account…' : 'Create runner account'}
             </Button>

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { isSupabaseConfigured, supabase } from '../../lib/supabase';
+import { describeAuthError } from '../../lib/authErrors';
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -24,7 +25,7 @@ export function ForgotPasswordPage() {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });
       if (error) {
-        setMessage(error.message);
+        setMessage(describeAuthError(error).message);
         return;
       }
       setSent(true);

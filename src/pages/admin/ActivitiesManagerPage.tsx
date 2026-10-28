@@ -248,23 +248,25 @@ export function ActivitiesManagerPage() {
       </div>
 
       <section className="admin-panel">
-        <div className="table-tools" style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
-          <label style={{ flex: '1 1 240px' }}>
-            <Search size={16} />
+        <div className="table-tools">
+          <label className="modern-search" htmlFor="activities-search-input">
+            <Search size={18} aria-hidden="true" />
             <input
-              type="text"
+              id="activities-search-input"
+              type="search"
               placeholder="Search by title, venue, or celebrant…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              autoComplete="off"
+              enterKeyHint="search"
             />
           </label>
 
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div className="table-tools-filters">
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               aria-label="Filter by activity type"
-              style={{ padding: '0.45rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
             >
               <option value="all">All Types</option>
               <option value="mass">Masses</option>
@@ -278,7 +280,6 @@ export function ActivitiesManagerPage() {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               aria-label="Filter by publication status"
-              style={{ padding: '0.45rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
             >
               <option value="all">All Statuses</option>
               <option value="published">Published</option>

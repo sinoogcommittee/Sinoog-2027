@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
-import { ExternalLink, HeartHandshake, Pencil, Plus, Trash2, Upload, X } from 'lucide-react';
+import { Search, ExternalLink, HeartHandshake, Pencil, Plus, Trash2, Upload, X } from 'lucide-react';
 import { LoadingState, EmptyState } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
@@ -194,17 +194,21 @@ export function SponsorsManagerPage() {
       </div>
 
       <section className="admin-panel">
-        <div className="table-tools" style={{ gap: '0.75rem', flexWrap: 'wrap' }}>
-          <label className="search-field" style={{ flex: '1 1 240px', maxWidth: '100%' }}>
+        <div className="table-tools">
+          <label className="modern-search" htmlFor="sponsors-search-input">
+            <Search size={18} aria-hidden="true" />
             <input
+              id="sponsors-search-input"
               type="search"
               placeholder="Search name, tier, or website…"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               aria-label="Search sponsors"
+              autoComplete="off"
+              enterKeyHint="search"
             />
           </label>
-          <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
+          <span style={{ color: 'var(--muted)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
             {rows.filter((r) => r.published).length} published · {rows.length} total
           </span>
         </div>

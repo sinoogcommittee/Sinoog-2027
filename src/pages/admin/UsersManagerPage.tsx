@@ -287,20 +287,22 @@ export function UsersManagerPage() {
 
       <section className="admin-panel users-admin-panel">
         <div className="table-tools users-toolbar">
-          <label className="users-toolbar__search">
-            <Search size={16} />
+          <label className="users-toolbar__search" htmlFor="users-search-input">
+            <Search size={18} aria-hidden="true" />
             <input
-              type="text"
+              id="users-search-input"
+              type="search"
               placeholder="Search by name, mobile, or address…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              autoComplete="off"
+              enterKeyHint="search"
             />
           </label>
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value as typeof roleFilter)}
             aria-label="Filter by role"
-            style={{ padding: '0.45rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
           >
             <option value="all">All accounts</option>
             <option value="admin">Administrators</option>
