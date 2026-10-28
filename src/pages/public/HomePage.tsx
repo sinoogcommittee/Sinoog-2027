@@ -102,6 +102,9 @@ export function HomePage() {
               <Button to={registerHref}>
                 Register for the run <ArrowRight size={17} />
               </Button>
+              <Button to="/activities" variant="secondary">
+                View celebration schedule
+              </Button>
             </div>
           </div>
           <div className="hero-emblem home-hero__emblem-desktop">
