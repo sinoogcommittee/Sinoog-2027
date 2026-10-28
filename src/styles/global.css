@@ -6677,3 +6677,260 @@ button:focus-visible {
   color: #0d65d9;
   background: #f0f6ff;
 }
+
+/* ========== Home landing — countdown, emblem band, run CTA, map, mobile dock ========== */
+
+.countdown-bar {
+  background: linear-gradient(135deg, #c9a227 0%, #e7af3f 45%, #f5dfab 100%);
+  color: #3b1c08;
+  padding: 18px 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 -8px 24px rgba(65, 10, 18, 0.18);
+}
+.countdown-bar--past {
+  flex-direction: column;
+  gap: 4px;
+  padding: 22px 16px;
+}
+.countdown-bar__label {
+  font-family: Fraunces, serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+.countdown-bar__tag {
+  font-style: italic;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+.countdown-bar__units {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 52px;
+}
+.countdown-unit__value {
+  font-family: Fraunces, serif;
+  font-size: clamp(1.55rem, 5vw, 2.15rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.countdown-unit__label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  margin-top: 4px;
+  opacity: 0.85;
+}
+.countdown-sep {
+  font-family: Fraunces, serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  opacity: 0.55;
+  margin-bottom: 14px;
+}
+
+.parish-emblem-band {
+  background: #fff;
+  padding: 36px 0 28px;
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+}
+.parish-emblem-band .hero-artwork img {
+  width: min(180px, 42vw);
+  height: auto;
+  margin: 0 auto;
+  display: block;
+}
+.parish-emblem-band .hero-emblem > p {
+  margin-top: 18px;
+  font-size: 1.35rem;
+  letter-spacing: 0.12em;
+}
+.parish-emblem-band .hero-emblem > small {
+  display: block;
+  margin-top: 4px;
+  color: var(--wine);
+  font-style: italic;
+}
+/* On larger screens the desktop emblem in the hero is enough; hide the band */
+@media (min-width: 900px) {
+  .parish-emblem-band {
+    display: none;
+  }
+}
+@media (max-width: 899px) {
+  .home-hero__emblem-desktop {
+    display: none;
+  }
+  .home-hero__inner {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding-block: 48px 28px;
+    gap: 0;
+  }
+  .home-hero h1 {
+    font-size: clamp(2.6rem, 11vw, 3.6rem);
+  }
+}
+
+.run-cta-band {
+  background: var(--wine);
+  color: #fff;
+  padding: 48px 0;
+}
+.run-cta-band__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.run-cta-band__eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin: 0 0 8px;
+}
+.run-cta-band h2 {
+  font-family: Fraunces, serif;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+.run-cta-band p {
+  margin: 0;
+  color: #f0dcd6;
+  max-width: 420px;
+}
+.run-cta-band .button--secondary {
+  border-color: rgba(255, 255, 255, 0.45);
+  color: #3b1c08;
+  background: var(--gold-light);
+}
+
+.home-teaser__caption {
+  font-size: 0.78rem;
+  color: var(--muted, #6b5a52);
+  margin: 10px 0 0;
+  text-align: center;
+}
+
+.home-news-teasers {
+  margin-top: 36px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+}
+.home-news-teasers__title {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--wine);
+  margin: 0 0 14px;
+}
+.home-news-teasers ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.home-news-teasers a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.home-news-teasers a:hover {
+  border-color: var(--gold);
+  box-shadow: 0 4px 14px rgba(65, 10, 18, 0.06);
+}
+
+.parish-map__directions {
+  margin-left: auto;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--wine);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+}
+.parish-map__directions:hover {
+  border-color: var(--gold);
+  background: #fffaf0;
+}
+
+/* Floating mobile quick dock */
+.mobile-quick-dock {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: rgba(255, 252, 247, 0.96);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line);
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  gap: 8px;
+  box-shadow: 0 -6px 24px rgba(65, 10, 18, 0.08);
+}
+.mobile-quick-dock__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 6px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--wine);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+.mobile-quick-dock__item:hover,
+.mobile-quick-dock__item:focus-visible {
+  background: rgba(201, 162, 39, 0.12);
+}
+.mobile-quick-dock__icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+@media (max-width: 767px) {
+  .mobile-quick-dock {
+    display: flex;
+  }
+  /* Leave room so content is not hidden behind the dock */
+  .site-shell {
+    padding-bottom: 72px;
+  }
+}

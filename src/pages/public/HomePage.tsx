@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, ChevronRight, Facebook, Globe, MapPin, Sparkles } from 'lucide-react';
+import { ArrowRight, Facebook, Globe, MapPin, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/Button';
+import { CountdownTimer } from '../../components/CountdownTimer';
 import { SectionHeading } from '../../components/SectionHeading';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import { getPublishedActivities, formatActivityDateTime } from '../../features/activities/activityQueries';
 import { getPublishedPosts } from '../../features/content/postQueries';
-import { getPublicMediaUrl } from '../../features/media/mediaQueries';
 import { toSafeHttpUrl } from '../../lib/safeUrl';
 import { useAuth } from '../../features/auth/useAuth';
 import {
@@ -22,6 +22,7 @@ export function HomePage() {
   // While the session is still being restored, treat the visitor as signed in; the registration
   // page itself waits for the session and sends anyone who is not signed in to the sign-in page.
   const canRegister = authLoading || Boolean(user) || isDemoAdmin;
+  const registerHref = canRegister ? '/run/register' : '/signin?next=/run/register';
   const [activitiesList, setActivitiesList] = useState<DbActivity[]>([]);
   const [newsList, setNewsList] = useState<NewsPost[]>([]);
   const [sponsors, setSponsors] = useState<EditionSponsorRow[]>([]);
@@ -39,16 +40,19 @@ export function HomePage() {
         getPublishedActivities(),
         getPublishedPosts(),
         listPublishedEditionSponsors(),
-      ]).then(([, acts, posts, sponsorRows]) => {
-        if (!active) return;
-        setActivitiesList(acts.slice(0, 4));
-        setNewsList(posts.slice(0, 3));
-        setSponsors(sponsorRows.slice(0, 8));
-      }).catch((error: unknown) => {
-        if (active) setContentError(error instanceof Error ? error.message : 'Unable to load official updates.');
-      }).finally(() => {
-        if (active) setContentLoading(false);
-      });
+      ])
+        .then(([, acts, posts, sponsorRows]) => {
+          if (!active) return;
+          setActivitiesList(acts.slice(0, 6));
+          setNewsList(posts.slice(0, 3));
+          setSponsors(sponsorRows.slice(0, 8));
+        })
+        .catch((error: unknown) => {
+          if (active) setContentError(error instanceof Error ? error.message : 'Unable to load official updates.');
+        })
+        .finally(() => {
+          if (active) setContentLoading(false);
+        });
     }, 0);
 
     return () => {
@@ -66,7 +70,7 @@ export function HomePage() {
     {
       date: 'January 9, 2027',
       label: 'Sinoog Run',
-      note: 'Opening event · Registration details coming soon',
+      note: 'Opening event · Registration details coming',
     },
     {
       date: 'January 15, 2027',
@@ -77,6 +81,7 @@ export function HomePage() {
 
   return (
     <>
+      {/* 01. HERO TO COUNTDOWN */}
       <section className="home-hero">
         <div className="home-hero__pattern" />
         <div className="container home-hero__inner">
@@ -94,22 +99,12 @@ export function HomePage() {
               celebration rooted in tradition.
             </p>
             <div className="hero-actions">
-              <Button to={canRegister ? '/run/register' : '/signin?next=/run/register'}>
-                {canRegister ? 'Register for the run' : 'Register for the run'} <ArrowRight size={17} />
+              <Button to={registerHref}>
+                Register for the run <ArrowRight size={17} />
               </Button>
-              <Button to="/activities" variant="secondary">
-                View celebration schedule
-              </Button>
-            </div>
-            <div className="hero-location">
-              <MapPin />
-              <span>
-                <strong>Sto. Niño Parish</strong>
-                <small>Guinacot, Guindulman, Bohol</small>
-              </span>
             </div>
           </div>
-          <div className="hero-emblem">
+          <div className="hero-emblem home-hero__emblem-desktop">
             <picture className="hero-artwork">
               <source srcSet="/images/hero_section_art.webp" type="image/webp" />
               <img
@@ -125,9 +120,33 @@ export function HomePage() {
             <small>Viva Pit Señor!</small>
           </div>
         </div>
-        <div className="wave-divider" />
+
+        {/* Festival Live Countdown Bar — immediately under hero */}
+        <CountdownTimer />
       </section>
 
+      {/* Parish Emblem & Devotional Highlight (mobile / transitional) */}
+      <section className="parish-emblem-band" aria-label="Sto. Niño Parish">
+        <div className="container parish-emblem-band__inner">
+          <div className="hero-emblem">
+            <picture className="hero-artwork">
+              <source srcSet="/images/hero_section_art.webp" type="image/webp" />
+              <img
+                src="/images/hero_section_art.png"
+                alt="Sto. Niño Parish seal"
+                width="400"
+                height="400"
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
+            <p>Sto. Niño Parish</p>
+            <small>SINOOG 2027 · Viva Pit Señor!</small>
+          </div>
+        </div>
+      </section>
+
+      {/* 02. TIMELINE TO STORY — Key Dates Preview */}
       <section className="date-band">
         <div className="container date-grid">
           {celebrationKeyDates.map((item, i) => (
@@ -143,17 +162,19 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* Video Highlight + More than a festival */}
       <section className="section">
         <div className="container split-feature">
           <div className="home-teaser">
             <iframe
               src="https://www.youtube.com/embed/nN_IQG98tLQ?si=1cFq8l9ZoyeCy50L"
-              title="Sinoog 2027 celebration teaser"
+              title="2026 Parochial Fiesta Celebration — Sto. Niño Parish Guinacot"
               loading="lazy"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
             />
+            <p className="home-teaser__caption">2026 Parochial Fiesta Celebration · Sto. Niño Parish — Guinacot</p>
           </div>
           <div>
             <SectionHeading
@@ -172,6 +193,7 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* Upcoming Schedule & News Teasers */}
       <section className="section section--cream">
         <div className="container">
           <div className="heading-row">
@@ -181,112 +203,89 @@ export function HomePage() {
             </Link>
           </div>
           <div className="schedule-list">
-            {contentLoading ? <LoadingState message="Loading the official schedule…" /> : contentError ? (
-              <ErrorState message={contentError} onRetry={() => { setContentLoading(true); setReloadKey((value) => value + 1); }} />
+            {contentLoading ? (
+              <LoadingState message="Loading the official schedule…" />
+            ) : contentError ? (
+              <ErrorState
+                message={contentError}
+                onRetry={() => {
+                  setContentLoading(true);
+                  setReloadKey((value) => value + 1);
+                }}
+              />
             ) : activitiesList.length === 0 ? (
-              <EmptyState title="Schedule confirmation in progress" message="Published activities will appear here after committee approval." />
-            ) : activitiesList.map((a) => {
-              const dt = formatActivityDateTime(a.starts_at);
-              const dayStr = a.starts_at
-                ? new Date(a.starts_at).getDate().toString().padStart(2, '0')
-                : '--';
-              return (
-                <article key={a.id}>
-                  <time>
-                    <span>{dayStr}</span>JAN
-                  </time>
-                  <div>
-                    <span className={`activity-type activity-type--${a.type}`}>{a.type}</span>
-                    <h3>{a.title}</h3>
-                    <p>
-                      {dt.weekday} · {dt.time} · {a.venue || 'Guinacot'}
-                    </p>
-                  </div>
-                  <ChevronRight />
-                </article>
-              );
-            })}
+              <EmptyState
+                title="Schedule confirmation in progress"
+                message="Published activities will appear here after committee approval."
+              />
+            ) : (
+              activitiesList.map((a) => {
+                const dt = formatActivityDateTime(a.starts_at);
+                const dayStr = a.starts_at
+                  ? new Date(a.starts_at).getDate().toString().padStart(2, '0')
+                  : '--';
+                const monthStr = a.starts_at
+                  ? new Date(a.starts_at).toLocaleString('en-US', { month: 'short', timeZone: 'Asia/Manila' }).toUpperCase()
+                  : 'JAN';
+                return (
+                  <article key={a.id}>
+                    <time>
+                      <span>{dayStr}</span>
+                      {monthStr}
+                    </time>
+                    <div>
+                      <span className={`activity-type activity-type--${a.type}`}>{a.type}</span>
+                      <h3>{a.title}</h3>
+                      <p>
+                        {dt.weekday} · {dt.time} · {a.venue || 'Guinacot'}
+                      </p>
+                    </div>
+                  </article>
+                );
+              })
+            )}
           </div>
+
+          {newsList.length > 0 && (
+            <div className="home-news-teasers">
+              <h3 className="home-news-teasers__title">Latest from the committee</h3>
+              <ul>
+                {newsList.map((post) => (
+                  <li key={post.id}>
+                    <Link to={`/news/${post.slug}`}>
+                      <span>{post.title}</span>
+                      <ArrowRight size={14} />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </section>
 
-      <section className="section">
-        <div className="container">
-          <div className="heading-row">
-            <SectionHeading eyebrow="From the committee" title="Latest news & announcements" />
-            <Link to="/news">
-              All news <ArrowRight size={16} />
-            </Link>
-          </div>
-          <div className="news-grid">
-            {contentLoading ? <LoadingState message="Loading official announcements…" /> : contentError ? (
-              <ErrorState message={contentError} onRetry={() => { setContentLoading(true); setReloadKey((value) => value + 1); }} />
-            ) : newsList.length === 0 ? (
-              <EmptyState title="No published announcements" message="Committee announcements will appear here once published." />
-            ) : newsList.map((post, i) => (
-              <Link
-                to={`/news/${post.slug}`}
-                className={`news-card ${i === 0 ? 'news-card--featured' : ''}`}
-                key={post.id}
-              >
-                <div
-                  className="news-card__image"
-                  style={
-                    post.featuredImagePath
-                      ? {
-                          backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.7), transparent), url(${getPublicMediaUrl(post.featuredImagePath)})`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                        }
-                      : undefined
-                  }
-                >
-                  <span>{post.category}</span>
-                </div>
-                <div className="news-card__body">
-                  <small>{post.publishedAt}</small>
-                  <h3>{post.title}</h3>
-                  <p>{post.excerpt}</p>
-                  <span className="text-link">
-                    Read story <ArrowRight size={15} />
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="section section--wine">
-        <div className="container cta-panel">
+      {/* Sinoog Run CTA banner */}
+      <section className="run-cta-band">
+        <div className="container run-cta-band__inner">
           <div>
-            <p className="eyebrow">Sinoog Run · January 9</p>
+            <p className="run-cta-band__eyebrow">Sinoog Run · January 9</p>
             <h2>Start the celebration in motion.</h2>
-            <p>
-              Run with the community and receive the official event kit. Distances, rates, and the approved route will be
-              announced soon.
-            </p>
+            <p>Run with the community and receive the Sinoog nest tile.</p>
           </div>
-          <Button to="/run">
-            See run details <ArrowRight size={17} />
+          <Button to="/run" variant="secondary">
+            See run details <ArrowRight size={16} />
           </Button>
         </div>
       </section>
 
+      {/* Sponsor Banner Strip */}
       <section className="section">
         <div className="container">
-          <SectionHeading
-            eyebrow="With gratitude"
-            title="Our celebration partners"
-            description={
-              sponsors.length > 0
-                ? 'Partners supporting the parish fiesta and Sinoog Festival.'
-                : 'Sponsor names and recognition tiers will appear here after committee approval.'
-            }
-            align="center"
-          />
-          {sponsors.length > 0 ? (
-            <div className="sponsor-strip sponsor-strip--live">
+          <SectionHeading eyebrow="Our celebration partners" title="Sponsors & supporters" />
+          {contentLoading ? (
+            <LoadingState message="Loading partners…" />
+          ) : sponsors.length > 0 ? (
+            <div className="sponsor-strip sponsor-strip--cards">
               {sponsors.map((row) => {
                 const logo = getSponsorLogoUrl(row.sponsor.logo_path);
                 const websiteUrl = toSafeHttpUrl(row.sponsor.website_url);
@@ -349,6 +348,53 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Interactive Location Card */}
+      <section className="section section--cream">
+        <div className="container">
+          <SectionHeading eyebrow="Visit us" title="Get Directions" />
+          <div className="parish-map">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3932.4016530129584!2d124.45346527408904!3d9.732003590360158!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33aa0b0701b97f05%3A0x68fff2cb8e8183a1!2sSto.%20Ni%C3%B1o%20Parish%20-%20Guinacot%2C%20Guindulman%2C%20Bohol!5e0!3m2!1sen!2sph!4v1792984627890!5m2!1sen!2sph"
+              title="Map of Sto. Niño Parish — Guinacot"
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
+            <div className="parish-map__caption">
+              <MapPin size={18} />
+              <span>
+                <strong>Sto. Niño Parish</strong>
+                <small>Guinacot, Guindulman, Bohol</small>
+              </span>
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Sto.%20Ni%C3%B1o%20Parish%20Guinacot%20Guindulman%20Bohol"
+                target="_blank"
+                rel="noreferrer"
+                className="parish-map__directions"
+              >
+                1-tap directions
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Floating Mobile Quick Dock */}
+      <nav className="mobile-quick-dock" aria-label="Quick actions">
+        <Link to={registerHref} className="mobile-quick-dock__item">
+          <span className="mobile-quick-dock__icon" aria-hidden>
+            🏃
+          </span>
+          <span>Register for Run</span>
+        </Link>
+        <Link to="/activities" className="mobile-quick-dock__item">
+          <span className="mobile-quick-dock__icon" aria-hidden>
+            📅
+          </span>
+          <span>Schedule</span>
+        </Link>
+      </nav>
     </>
   );
 }
