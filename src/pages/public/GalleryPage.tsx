@@ -20,7 +20,6 @@ function GalleryPreview({ asset, title }: { asset: GalleryAsset; title: string }
           alt={asset.kind === 'image' ? asset.alt_text || title : ''}
           loading="lazy"
           onError={(event) => {
-            // maxresdefault is missing on some older videos — fall back to 16:9 mqdefault, then hq720
             const img = event.currentTarget;
             const idMatch = img.src.match(/\/vi\/([a-zA-Z0-9_-]{11})\//);
             if (!idMatch) return;
@@ -47,35 +46,59 @@ function GalleryPreview({ asset, title }: { asset: GalleryAsset; title: string }
 function AlbumCard({ album, onOpen }: { album: GalleryAlbum; onOpen: () => void }) {
   const previewItems = album.items.slice(0, 5);
   const remaining = Math.max(0, album.items.length - 5);
+  const isPhoto = album.media_type === 'photo';
+  const countLabel =
+    album.items.length === 1
+      ? isPhoto
+        ? '1 photo'
+        : '1 video'
+      : isPhoto
+        ? `${album.items.length} photos`
+        : `${album.items.length} videos`;
+
   return (
-    <article className={`gallery-collection-card${album.media_type === 'video' ? ' gallery-collection-card--video' : ''}`}>
+    <article
+      className={`gallery-collection-card${album.media_type === 'video' ? ' gallery-collection-card--video' : ''}`}
+    >
       <button
         type="button"
-        className={`gallery-collage gallery-collage--${Math.min(previewItems.length, 5)}${album.media_type === 'video' ? ' gallery-collage--video' : ''}`}
+        className={`gallery-collage gallery-collage--${Math.min(previewItems.length, 5)}${
+          album.media_type === 'video' ? ' gallery-collage--video' : ''
+        }`}
         onClick={onOpen}
+        aria-label={`Open ${album.title}`}
       >
-        {previewItems.length > 0 ? previewItems.map((asset, index) => (
-          <div className="gallery-collage__cell" key={asset.id}>
-            <GalleryPreview asset={asset} title={album.title} />
-            {index === 4 && remaining > 0 && <span className="gallery-collage__more">+{remaining}</span>}
-          </div>
-        )) : (
+        {previewItems.length > 0 ? (
+          previewItems.map((asset, index) => (
+            <div className="gallery-collage__cell" key={asset.id}>
+              <GalleryPreview asset={asset} title={album.title} />
+              {index === 4 && remaining > 0 && (
+                <span className="gallery-collage__more">+{remaining}</span>
+              )}
+            </div>
+          ))
+        ) : (
           <span className="gallery-collage__empty">
-            {album.media_type === 'photo' ? <Images size={34} /> : <Video size={34} />}
+            {isPhoto ? <Images size={34} /> : <Video size={34} />}
             Media coming soon
           </span>
         )}
       </button>
       <div className="gallery-collection-card__body">
-        <div>
+        <div className="gallery-collection-card__heading">
           <h2>{album.title}</h2>
+          <span className="gallery-collection-card__count">{countLabel}</span>
         </div>
-        <span className="gallery-collection-card__count">
-          {album.items.length} {album.media_type === 'photo' ? (album.items.length === 1 ? 'photo' : 'photos') : (album.items.length === 1 ? 'video' : 'videos')}
-        </span>
-        {album.description && <p>{album.description}</p>}
-        <button type="button" className="button button--secondary button--sm" onClick={onOpen} disabled={album.items.length === 0}>
-          View {album.media_type === 'photo' ? 'photos' : 'videos'}
+        {album.description && (
+          <p className="gallery-collection-card__excerpt">{album.description}</p>
+        )}
+        <button
+          type="button"
+          className="button button--secondary button--sm"
+          onClick={onOpen}
+          disabled={album.items.length === 0}
+        >
+          View {isPhoto ? 'photos' : 'videos'}
         </button>
       </div>
     </article>
@@ -112,11 +135,20 @@ export function GalleryPage() {
     if (!activeAlbum) return;
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setActiveAlbum(null);
-      if (event.key === 'ArrowLeft') setActiveIndex((value) => (value - 1 + activeAlbum.items.length) % activeAlbum.items.length);
-      if (event.key === 'ArrowRight') setActiveIndex((value) => (value + 1) % activeAlbum.items.length);
+      if (event.key === 'ArrowLeft') {
+        setActiveIndex((value) => (value - 1 + activeAlbum.items.length) % activeAlbum.items.length);
+      }
+      if (event.key === 'ArrowRight') {
+        setActiveIndex((value) => (value + 1) % activeAlbum.items.length);
+      }
     };
     window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = prevOverflow;
+    };
   }, [activeAlbum]);
 
   const openAlbum = (album: GalleryAlbum) => {
@@ -132,16 +164,30 @@ export function GalleryPage() {
       <PageHero
         eyebrow="Celebration archive"
         title="Photo & video gallery"
-        description="Browse photo and video collections of faith, culture, and community from the Sinoog celebrations."
+        description="Collections of faith, culture, and community from past Sinoog celebrations — browse by photos or videos."
       />
+
       <section className="section gallery-page">
         <div className="container">
-          <div className="gallery-switcher" aria-label="Gallery type">
-            <button type="button" className={mediaType === 'photo' ? 'active' : ''} onClick={() => setMediaType('photo')}>
-              <Images size={18} /> Photos
+          {/* Segmented controller: Photos | Videos */}
+          <div className="gallery-switcher gallery-switcher--segmented" role="tablist" aria-label="Gallery type">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mediaType === 'photo'}
+              className={mediaType === 'photo' ? 'active' : ''}
+              onClick={() => setMediaType('photo')}
+            >
+              <Images size={18} aria-hidden /> Photos
             </button>
-            <button type="button" className={mediaType === 'video' ? 'active' : ''} onClick={() => setMediaType('video')}>
-              <Video size={18} /> Videos
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mediaType === 'video'}
+              className={mediaType === 'video' ? 'active' : ''}
+              onClick={() => setMediaType('video')}
+            >
+              <Video size={18} aria-hidden /> Videos
             </button>
           </div>
 
@@ -156,27 +202,49 @@ export function GalleryPage() {
             />
           ) : (
             <div className="gallery-collections-grid">
-              {albums.map((album) => <AlbumCard key={album.id} album={album} onOpen={() => openAlbum(album)} />)}
+              {albums.map((album) => (
+                <AlbumCard key={album.id} album={album} onOpen={() => openAlbum(album)} />
+              ))}
             </div>
           )}
         </div>
       </section>
 
+      {/* Full-screen lightbox / in-page video player — existing behaviour retained */}
       {activeAlbum && activeAsset && (
-        <div className="gallery-viewer" role="dialog" aria-modal="true" aria-labelledby="gallery-viewer-title" onMouseDown={(event) => {
-          if (event.currentTarget === event.target) setActiveAlbum(null);
-        }}>
+        <div
+          className="gallery-viewer"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="gallery-viewer-title"
+          onMouseDown={(event) => {
+            if (event.currentTarget === event.target) setActiveAlbum(null);
+          }}
+        >
           <div className="gallery-viewer__panel">
             <header>
               <div>
-                <span>{activeIndex + 1} of {activeAlbum.items.length}</span>
+                <span>
+                  {activeIndex + 1} of {activeAlbum.items.length}
+                </span>
                 <h2 id="gallery-viewer-title">{activeAlbum.title}</h2>
               </div>
-              <button type="button" className="gallery-icon-button" onClick={() => setActiveAlbum(null)} aria-label="Close gallery viewer"><X /></button>
+              <button
+                type="button"
+                className="gallery-icon-button"
+                onClick={() => setActiveAlbum(null)}
+                aria-label="Close gallery viewer"
+              >
+                <X />
+              </button>
             </header>
+
             <div className="gallery-viewer__stage">
               {activeAsset.kind === 'image' ? (
-                <img src={activeAsset.publicUrl} alt={activeAsset.alt_text || activeAlbum.title} />
+                <img
+                  src={activeAsset.publicUrl}
+                  alt={activeAsset.alt_text || activeAlbum.title}
+                />
               ) : (
                 <iframe
                   src={activeAsset.object_path}
@@ -189,22 +257,57 @@ export function GalleryPage() {
               )}
               {activeAlbum.items.length > 1 && (
                 <>
-                  <button type="button" className="gallery-viewer__nav gallery-viewer__nav--prev" onClick={() => setActiveIndex((value) => (value - 1 + activeAlbum.items.length) % activeAlbum.items.length)} aria-label="Previous item"><ChevronLeft /></button>
-                  <button type="button" className="gallery-viewer__nav gallery-viewer__nav--next" onClick={() => setActiveIndex((value) => (value + 1) % activeAlbum.items.length)} aria-label="Next item"><ChevronRight /></button>
+                  <button
+                    type="button"
+                    className="gallery-viewer__nav gallery-viewer__nav--prev"
+                    onClick={() =>
+                      setActiveIndex(
+                        (value) => (value - 1 + activeAlbum.items.length) % activeAlbum.items.length,
+                      )
+                    }
+                    aria-label="Previous item"
+                  >
+                    <ChevronLeft />
+                  </button>
+                  <button
+                    type="button"
+                    className="gallery-viewer__nav gallery-viewer__nav--next"
+                    onClick={() =>
+                      setActiveIndex((value) => (value + 1) % activeAlbum.items.length)
+                    }
+                    aria-label="Next item"
+                  >
+                    <ChevronRight />
+                  </button>
                 </>
               )}
             </div>
-            {(activeAsset.title || activeAsset.caption || activeAlbum.description) && (
+
+            {(activeAsset.title ||
+              activeAsset.caption ||
+              activeAsset.credit ||
+              activeAlbum.description) && (
               <div className="gallery-viewer__caption">
                 {activeAsset.title && <strong>{activeAsset.title}</strong>}
                 <p>{activeAsset.caption || activeAlbum.description}</p>
+                {activeAsset.credit && (
+                  <small className="gallery-viewer__credit">Photo credit: {activeAsset.credit}</small>
+                )}
               </div>
             )}
+
             <div className="gallery-viewer__thumbs" aria-label="Collection items">
               {activeAlbum.items.map((asset, index) => {
-                const source = asset.kind === 'video' ? getYouTubeThumbnail(asset.object_path) : asset.publicUrl;
+                const source =
+                  asset.kind === 'video' ? getYouTubeThumbnail(asset.object_path) : asset.publicUrl;
                 return (
-                  <button type="button" className={index === activeIndex ? 'active' : ''} key={asset.id} onClick={() => setActiveIndex(index)} aria-label={`View item ${index + 1}`}>
+                  <button
+                    type="button"
+                    className={index === activeIndex ? 'active' : ''}
+                    key={asset.id}
+                    onClick={() => setActiveIndex(index)}
+                    aria-label={`View item ${index + 1}`}
+                  >
                     {source && <img src={source} alt="" loading="lazy" />}
                     {asset.kind === 'video' && <Play size={15} fill="currentColor" />}
                   </button>
