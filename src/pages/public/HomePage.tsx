@@ -16,6 +16,7 @@ import {
 } from '../../features/sponsors/sponsorQueries';
 import type { DbActivity, NewsPost } from '../../types';
 import { EmptyState, ErrorState, LoadingState } from '../../features/ui/FeedbackStates';
+import { Card } from '../../components/m3/Card';
 
 export function HomePage() {
   const { user, isDemoAdmin, loading: authLoading } = useAuth();
@@ -80,7 +81,7 @@ export function HomePage() {
   ];
 
   return (
-    <>
+    <main className="m3-home-page">
       {/* 01. HERO TO COUNTDOWN */}
       <section className="home-hero">
         <div className="home-hero__pattern" />
@@ -193,17 +194,18 @@ export function HomePage() {
       </section>
 
       {/* 02. TIMELINE TO STORY — Key Dates Preview */}
-      <section className="date-band">
+      <section className="date-band" aria-labelledby="home-key-dates-title">
+        <h2 id="home-key-dates-title" className="sr-only">Key celebration dates</h2>
         <div className="container date-grid">
           {celebrationKeyDates.map((item, i) => (
-            <article key={item.label}>
+            <Card as="article" variant="filled" key={item.label}>
               <span className="date-index">0{i + 1}</span>
               <div>
                 <strong>{item.date}</strong>
                 <h3>{item.label}</h3>
                 <p>{item.note}</p>
               </div>
-            </article>
+            </Card>
           ))}
         </div>
       </section>
@@ -211,7 +213,7 @@ export function HomePage() {
       {/* Video Highlight + More than a festival */}
       <section className="section">
         <div className="container split-feature">
-          <div className="home-teaser">
+          <Card variant="elevated" className="home-teaser">
             <iframe
               src="https://www.youtube.com/embed/nN_IQG98tLQ?si=1cFq8l9ZoyeCy50L"
               title="2026 Parochial Fiesta Celebration — Sto. Niño Parish Guinacot"
@@ -221,7 +223,7 @@ export function HomePage() {
               allowFullScreen
             />
             <p className="home-teaser__caption">2026 Parochial Fiesta Celebration · Sto. Niño Parish — Guinacot</p>
-          </div>
+          </Card>
           <div>
             <SectionHeading
               eyebrow="A celebration with meaning"
@@ -274,7 +276,7 @@ export function HomePage() {
                   ? new Date(a.starts_at).toLocaleString('en-US', { month: 'short', timeZone: 'Asia/Manila' }).toUpperCase()
                   : 'JAN';
                 return (
-                  <article key={a.id}>
+                  <Card as="article" variant="filled" key={a.id}>
                     <time>
                       <span>{dayStr}</span>
                       {monthStr}
@@ -286,7 +288,7 @@ export function HomePage() {
                         {dt.weekday} · {dt.time} · {a.venue || 'Guinacot'}
                       </p>
                     </div>
-                  </article>
+                  </Card>
                 );
               })
             )}
@@ -298,7 +300,7 @@ export function HomePage() {
               <ul>
                 {newsList.map((post) => (
                   <li key={post.id}>
-                    <Link to={`/news/${post.slug}`}>
+                    <Link to={`/news/${post.slug}`} className="m3-home-news-link">
                       <span>{post.title}</span>
                       <ArrowRight size={14} />
                     </Link>
@@ -337,7 +339,7 @@ export function HomePage() {
                 const websiteUrl = toSafeHttpUrl(row.sponsor.website_url);
                 const facebookUrl = toSafeHttpUrl(row.sponsor.facebook_url);
                 return (
-                  <div key={row.sponsor_id} className="sponsor-strip__card">
+                  <Card key={row.sponsor_id} variant="outlined" className="sponsor-strip__card">
                     <div className="sponsor-strip__logo">
                       {logo ? (
                         <img src={logo} alt="" />
@@ -375,7 +377,7 @@ export function HomePage() {
                         )}
                       </div>
                     )}
-                  </div>
+                  </Card>
                 );
               })}
             </div>
@@ -399,7 +401,7 @@ export function HomePage() {
       <section className="section section--cream">
         <div className="container">
           <SectionHeading eyebrow="Visit us" title="Get Directions" />
-          <div className="parish-map">
+          <Card variant="outlined" className="parish-map">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3932.4016530129584!2d124.45346527408904!3d9.732003590360158!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33aa0b0701b97f05%3A0x68fff2cb8e8183a1!2sSto.%20Ni%C3%B1o%20Parish%20-%20Guinacot%2C%20Guindulman%2C%20Bohol!5e0!3m2!1sen!2sph!4v1792984627890!5m2!1sen!2sph"
               title="Map of Sto. Niño Parish — Guinacot"
@@ -422,10 +424,9 @@ export function HomePage() {
                 1-tap directions
               </a>
             </div>
-          </div>
+          </Card>
         </div>
       </section>
-
-    </>
+    </main>
   );
 }

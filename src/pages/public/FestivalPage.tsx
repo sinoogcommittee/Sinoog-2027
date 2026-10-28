@@ -11,6 +11,7 @@ import {
 import { Button } from '../../components/Button';
 import { PageHero } from '../../components/PageHero';
 import { SectionHeading } from '../../components/SectionHeading';
+import { Card } from '../../components/m3/Card';
 
 type FestivalSection = 'participants' | 'guidelines' | undefined;
 
@@ -19,19 +20,19 @@ const GUIDELINE_DOCS = [
     id: 'guidelines',
     title: 'Official Festival Guidelines (PDF)',
     note: 'Eligibility, deadlines, performance requirements, and judging overview.',
-    available: false,
+    href: undefined,
   },
   {
     id: 'registration',
     title: 'Registration Form (PDF)',
     note: 'Delegation entry form for barangay and school contingents.',
-    available: false,
+    href: undefined,
   },
   {
     id: 'criteria',
     title: 'Judging Criteria (PDF)',
     note: 'Scoring categories for street dancing and ritual showdown.',
-    available: false,
+    href: undefined,
   },
 ] as const;
 
@@ -76,7 +77,7 @@ function AccordionPanel({
 
 function ParadeMapGraphic() {
   return (
-    <div className="parade-map" aria-label="Parade and showdown route schematic">
+    <Card variant="outlined" className="parade-map" aria-label="Parade and showdown route schematic">
       <div className="parade-map__legend">
         <span>
           <i className="parade-map__dot parade-map__dot--assembly" /> Parade assembly
@@ -149,10 +150,10 @@ function ParadeMapGraphic() {
       <p className="parade-map__note">
         Route details and assembly points will be confirmed by the committee. This schematic is illustrative only.
       </p>
-      <Button to="/activities" variant="secondary" className="parade-map__cta">
-        View schedule for parade day <ArrowRight size={16} />
+      <Button to="/activities" variant="outlined" className="parade-map__cta" leadingIcon={<ArrowRight size={18} />}>
+        View parade schedule
       </Button>
-    </div>
+    </Card>
   );
 }
 
@@ -177,21 +178,21 @@ function MainFestivalView() {
       <section className="section section--cream">
         <div className="container">
           <div className="feature-cards feature-cards--pillars">
-            <article>
+            <Card as="article" variant="filled">
               <Music size={28} aria-hidden />
               <h3>Festival performances</h3>
               <p>Delegations share stories of faith and community through movement, music, and color.</p>
-            </article>
-            <article>
+            </Card>
+            <Card as="article" variant="filled">
               <Users size={28} aria-hidden />
               <h3>Participating communities</h3>
               <p>Meet the approved groups representing Guindulman and beyond.</p>
-            </article>
-            <article>
+            </Card>
+            <Card as="article" variant="filled">
               <FileText size={28} aria-hidden />
               <h3>Clear guidelines</h3>
               <p>Access the latest official rules, submission deadlines, and required documents when published.</p>
-            </article>
+            </Card>
           </div>
         </div>
       </section>
@@ -216,7 +217,7 @@ function MainFestivalView() {
           />
           <ul className="festival-docs">
             {GUIDELINE_DOCS.map((doc) => (
-              <li key={doc.id} className="festival-docs__item">
+              <Card as="li" variant="outlined" key={doc.id} className="festival-docs__item">
                 <div className="festival-docs__copy">
                   <FileText size={20} aria-hidden />
                   <div>
@@ -224,8 +225,8 @@ function MainFestivalView() {
                     <p>{doc.note}</p>
                   </div>
                 </div>
-                {doc.available ? (
-                  <a className="festival-docs__download" href="#" download>
+                {doc.href ? (
+                  <a className="festival-docs__download" href={doc.href} download>
                     <Download size={18} aria-hidden />
                     Download
                   </a>
@@ -235,7 +236,7 @@ function MainFestivalView() {
                     Coming soon
                   </span>
                 )}
-              </li>
+              </Card>
             ))}
           </ul>
         </div>
@@ -279,14 +280,14 @@ function ParticipantsView() {
           title="Delegations taking part"
           description="Approved groups will be listed here with community, team lead, and performance theme once published."
         />
-        <div className="empty-state">
+        <Card variant="filled" className="empty-state festival-empty-state">
           <Users size={40} aria-hidden />
           <h3>Participants will be announced</h3>
           <p>
             Contingents and official delegations appear after committee review. Check back as Sinoog 2027 approaches, or
             follow parish announcements for the first published roster.
           </p>
-          <div className="button-row" style={{ justifyContent: 'center', marginTop: 20 }}>
+          <div className="button-row festival-empty-state__actions">
             <Button to="/festival" variant="secondary">
               Back to festival overview
             </Button>
@@ -294,7 +295,7 @@ function ParticipantsView() {
               Read guidelines
             </Button>
           </div>
-        </div>
+        </Card>
       </div>
     </section>
   );
@@ -311,7 +312,7 @@ function GuidelinesView() {
         />
         <ul className="festival-docs">
           {GUIDELINE_DOCS.map((doc) => (
-            <li key={doc.id} className="festival-docs__item">
+            <Card as="li" variant="outlined" key={doc.id} className="festival-docs__item">
               <div className="festival-docs__copy">
                 <FileText size={20} aria-hidden />
                 <div>
@@ -323,10 +324,10 @@ function GuidelinesView() {
                 <Download size={18} aria-hidden />
                 Coming soon
               </span>
-            </li>
+            </Card>
           ))}
         </ul>
-        <div className="content-card" style={{ marginTop: 28 }}>
+        <Card variant="filled" className="content-card festival-delegation-note">
           <MapPin size={22} aria-hidden />
           <h3>For delegation heads</h3>
           <p>
@@ -336,7 +337,7 @@ function GuidelinesView() {
           <Button to="/festival" variant="secondary">
             Back to festival overview
           </Button>
-        </div>
+        </Card>
       </div>
     </section>
   );
@@ -358,7 +359,7 @@ export function FestivalPage({ section }: { section?: FestivalSection }) {
         : 'A vibrant expression of devotion, identity, and community in honor of the Sto. Niño.';
 
   return (
-    <>
+    <main className="m3-festival-page">
       <PageHero eyebrow="January 15 · Guinacot" title={title} description={description} />
       {section === 'participants' ? (
         <ParticipantsView />
@@ -367,6 +368,6 @@ export function FestivalPage({ section }: { section?: FestivalSection }) {
       ) : (
         <MainFestivalView />
       )}
-    </>
+    </main>
   );
 }

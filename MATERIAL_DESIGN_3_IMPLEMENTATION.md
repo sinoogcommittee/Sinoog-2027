@@ -539,9 +539,9 @@ For each migrated task: TypeScript build, lint, existing unit tests, keyboard te
 | P1-005 | Fields/search/select/check controls | shared components | P1-001/003 | P0 | validation semantics | IN REVIEW |
 | P1-006 | Dialog/snackbar/progress/states | shared UI | P1-004 | P0 | focus/live regions | COMPLETED (`Dialog.tsx`, `FeedbackStates.tsx`, `ToastContext.tsx`, `components.css`) |
 | P1-007 | Public navigation/footer | `PublicLayout.tsx` | P1-004/006 | P0 | adaptive nav | COMPLETED (`PublicLayout.tsx`, `public-overrides.css`) |
-| P1-008 | Home | `HomePage.tsx` | P1-007 | P1 | Section 15.1 | NOT STARTED |
+| P1-008 | Home | `HomePage.tsx` | P1-007 | P1 | Section 15.1 | COMPLETED (`Card`, `Button`; responsive verification passed) |
 | P1-009 | Festival routes | `FestivalPage.tsx` | primitives | P1 | Sections 15.2–4 | NOT STARTED |
-| P1-010 | Run routes | `RunPage.tsx` | primitives | P1 | Sections 15.5–6 | NOT STARTED |
+| P1-010 | Run routes | `RunPage.tsx` | primitives | P1 | Sections 15.5–6 | COMPLETED (`Card`, `Button`, `Dialog`; responsive verification passed) |
 | P1-011 | Registration/account | registration/account pages | fields/dialogs | P0 | payload parity | COMPLETED (`RunRegistrationPage.tsx`, `TextArea.tsx`, `AccountPage.tsx`) |
 | P1-012 | Activities | `ActivitiesPage.tsx` | chips/cards | P1 | print/export parity | NOT STARTED |
 | P1-013 | News/article | news pages | search/chips | P1 | sanitizer parity | NOT STARTED |
@@ -592,7 +592,9 @@ Starts only after explicit approval and Phase 1 review.
 | P1-007 | 1 | Public top app bar + modal drawer | P0 | COMPLETED | `src/layouts/PublicLayout.tsx`, `src/styles/m3/public-overrides.css` | Sticky top app bar with inline navigation on expanded (>=840px), accessible modal drawer on compact/medium, focus restoration, zero layout shift |
 | P1-011 | 1 | Run registration & account | P0 | COMPLETED | `src/pages/public/RunRegistrationPage.tsx`, `src/components/m3/TextArea.tsx`, `src/styles/m3/fields.css`, `src/pages/auth/AccountPage.tsx` | Full 4-step wizard converted to M3 Button/TextField/SelectField/TextArea/Checkbox/Dialog. Size chart uses accessible Dialog primitive. 100% payload and logic parity |
 | P1-016 | 1 | Auth pages & callback | P0 | COMPLETED | `src/pages/auth/{LoginPage,ForgotPasswordPage,ResetPasswordPage,RunnerAuthPage,AccountPage,AuthCallbackPage}.tsx` | All 6 auth routes converted to M3 fields and state components; PKCE / OAuth / email callback verified |
-| P1-008–010, 012–015, 017–018 | 1 | Public pages & QA | P0–P2 | IN PROGRESS | see Section 22 | Next: P1-010 (RunPage / routes), P1-008 (HomePage), P1-009 (FestivalPage) |
+| P1-010 | 1 | Run overview and routes | P1 | COMPLETED | `src/pages/public/RunPage.tsx`, `src/styles/m3/public-overrides.css` | M3 cards, route surface, notices, utility actions, and accessible size dialog; business logic unchanged |
+| P1-008 | 1 | Home landing page | P1 | COMPLETED | `src/pages/public/HomePage.tsx`, `src/styles/m3/public-overrides.css` | Editorial M3 milestone, schedule, news, sponsor, video, and map surfaces; branded hero and data behavior preserved |
+| P1-009, 012–015, 017–018 | 1 | Remaining public pages & QA | P0–P2 | IN PROGRESS | see Section 22 | Next: P1-009 (FestivalPage), then P1-012 (Activities) |
 | P2-001–016 | 2 | Admin/settings migration | P0–P2 | NOT STARTED | see Section 23 | Explicit approval required |
 
 ## 25. Implementation Change Log
@@ -608,6 +610,8 @@ Starts only after explicit approval and Phase 1 review.
 | 2026-10-29 | P1-007 | EDITED `src/layouts/PublicLayout.tsx`, `src/styles/m3/public-overrides.css`, this document | Upgraded public top app bar: sticky header, branded logo, inline navigation on expanded screens (≥840px), hamburger menu button on compact/medium. Built accessible modal navigation drawer with backdrop scrim, Escape key handler, focus trap, and inert state when closed. Zero layout shift. Derived-state route close prevents effect-state lint warnings. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings, 0 errors); `npm test` passed (26/26 tests). | None |
 | 2026-10-29 | P1-011 | NEW `src/components/m3/TextArea.tsx`; EDITED `src/pages/public/RunRegistrationPage.tsx`, `src/styles/m3/fields.css`, this document | Converted full 4-step runner registration wizard to M3 components: `Button`, `TextField`, `SelectField`, `TextArea`, `Checkbox`, `Dialog`, and `InlineMessage`. Singlet size guide modal converted to M3 `Dialog` primitive. Payment proof form inputs upgraded. Business logic, age calculation, guardian consent condition, Supabase profile upsert, and `submitRegistration` payloads verified identical. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings, 0 errors); `npm test` passed (26/26 tests). | None |
 | 2026-10-29 | P1-016 | EDITED `src/pages/auth/AuthCallbackPage.tsx`, this document | Upgraded PKCE / OAuth callback page with M3 `LoadingState` and `InlineMessage`. Safe redirect logic, admin auto-promotion, and session exchange preserved. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings, 0 errors); `npm test` passed (26/26 tests). | None |
+| 2026-10-29 | P1-010 | EDITED `src/pages/public/RunPage.tsx`, `src/styles/m3/public-overrides.css`, this document | Migrated run overview and route guide to M3 outlined/filled cards, semantic tonal surfaces, 44 px actions, status containers, and the shared focus-managed `Dialog` for the singlet size guide. Added semantic table caption and row/column headers. Registration-state, category, fee, route, deadline, and Supabase loading logic remained unchanged. | `npm run build` passed; `npm run lint` passed; `npm test` passed (26/26); `21st review` reported 0 errors and 0 warnings (5 existing token-scope color infos); `/run` and `/run/routes` checked at 390, 768, and 1440 px with no horizontal overflow and no sub-44 px run-page actions; mobile dialog fit and focus verified. | Category-card populated state still depends on live Supabase data during visual QA. |
+| 2026-10-29 | P1-008 | EDITED `src/pages/public/HomePage.tsx`, `src/styles/m3/public-overrides.css`, `.21st/design.json`, this document | Migrated key-date, video, schedule, news, sponsor, and parish-map content to semantic M3 surfaces while preserving the parish artwork, bamboo motif, countdown, data queries, registration routing, embeds, and loading/error/empty states. Added a reusable screen-reader-only utility and restored a readable mobile Full schedule action. | `npm run build` passed; `npm run lint` passed; `npm test` passed (26/26); `21st review` reported 0 errors and 0 warnings (5 pre-existing dark-surface token infos); `/` checked at 390, 768, and 1440 px with no horizontal overflow, 48 px hero actions, responsive schedule grids, and full-page mobile visual review. | Cross-origin YouTube and Google Maps content appears blank in automated full-page screenshots but their iframe markup and behavior were unchanged. |
 
 Future entries must record exact files, build/lint/test results, viewports checked, and unresolved regressions. Do not mark `COMPLETED` from code change alone.
 
@@ -639,11 +643,11 @@ Phase 1 completes only when all public/auth routes meet these criteria and an ex
 
 ## 28. Next Implementation Task
 
-**1. P1-010 — Run overview and routes (`RunPage.tsx`).** Standardize race overview, distance category cards, route notes, route checkpoints, and kit info cards with M3 cards and typography.
+**1. P1-009 — Festival routes (`FestivalPage.tsx`).** Migrate feature cards, expansion panels, guidelines, participant states, and document actions while preserving the festival data and delegation workflows.
 
-**2. P1-008 — Home page (`HomePage.tsx`).** Editorial M3 surface rhythm, responsive milestone cards, activity and news preview cards, sponsor logo band.
+**2. P1-012 — Activities (`ActivitiesPage.tsx`).** Migrate schedule filters, utility actions, timeline cards, and empty/loading/error states without changing print or calendar behavior.
 
-**3. P1-009 — Festival routes (`FestivalPage.tsx`).** Expansion panels, guidelines, and participant accordion review.
+**3. P1-013 — News (`NewsPage.tsx`, `NewsDetailPage.tsx`).** Migrate search, filter, article-card, and article-detail surfaces with unchanged post loading and routing.
 
 ## 29. Decisions Log
 

@@ -8,11 +8,12 @@ import {
   PackageOpen,
   Route,
   Ruler,
-  X,
 } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { PageHero } from '../../components/PageHero';
 import { SectionHeading } from '../../components/SectionHeading';
+import { Card } from '../../components/m3/Card';
+import { Dialog } from '../../components/m3/Dialog';
 import {
   getRunEventAndCategories,
   getUserRegistration,
@@ -114,7 +115,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
         </div>
       </PageHero>
 
-      <section className="section">
+      <section className="section m3-run-page">
         <div className="container">
           {section === 'routes' ? (
             <div className="run-routes">
@@ -124,7 +125,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
                 description="All distance categories begin and finish at the Guinacot Parish Grounds. Water stations and medical posts will be marked on the official course once approved."
               />
 
-              <div className="run-route-map" aria-label="Route map placeholder">
+              <Card variant="outlined" className="run-route-map" aria-label="Route map placeholder">
                 <div className="run-route-map__canvas">
                   <Map size={28} aria-hidden />
                   <p>
@@ -146,11 +147,11 @@ export function RunPage({ section }: { section?: 'routes' }) {
                     <span className="run-route-map__dot run-route-map__dot--med" /> Medical tents — TBA
                   </li>
                 </ul>
-              </div>
+              </Card>
 
               <div className="run-category-grid">
                 {categories.map((category) => (
-                  <article key={category.id} className="run-category-card">
+                  <Card key={category.id} as="article" variant="outlined" className="run-category-card">
                     <span className="activity-type activity-type--run">{formatKm(category.distance_meters)}</span>
                     <h3>{category.name}</h3>
                     <p>
@@ -161,7 +162,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
                           : 'Fun run distance for families and first-time participants.'}
                     </p>
                     <strong>{formatFee(category.fee_centavos)}</strong>
-                  </article>
+                  </Card>
                 ))}
               </div>
             </div>
@@ -180,7 +181,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
                   const canRegisterHere = registrationOpen && !hasActiveRegistration;
 
                   return (
-                    <article key={c.id} className="run-category-card">
+                    <Card key={c.id} as="article" variant="outlined" className="run-category-card">
                       <span className="activity-type activity-type--run">{formatKm(c.distance_meters)}</span>
                       <h3>{c.name}</h3>
                       <p className="run-category-card__price">{formatFee(c.fee_centavos)}</p>
@@ -232,34 +233,34 @@ export function RunPage({ section }: { section?: 'routes' }) {
                           </span>
                         )}
                       </div>
-                    </article>
+                    </Card>
                   );
                 })}
               </div>
 
               <div className="run-utility-row">
-                <button type="button" className="button button--ghost button--sm" onClick={() => setSizeChartOpen(true)}>
-                  <Ruler size={16} aria-hidden /> View size chart
-                </button>
-                <Button to="/run/routes" variant="ghost">
-                  <Route size={16} aria-hidden /> Route map & checkpoints
+                <Button type="button" variant="text" size="small" leadingIcon={<Ruler size={18} />} onClick={() => setSizeChartOpen(true)}>
+                  View size chart
+                </Button>
+                <Button to="/run/routes" variant="text" size="small" leadingIcon={<Route size={18} />}>
+                  Route map & checkpoints
                 </Button>
               </div>
 
               <div className="feature-cards run-highlights">
-                <article>
+                <Card as="article" variant="filled">
                   <Route />
                   <h3>Scenic Route</h3>
                   <p>Official course details will be published after committee and safety approval.</p>
                   <strong>Route confirmation pending</strong>
-                </article>
-                <article>
+                </Card>
+                <Card as="article" variant="filled">
                   <PackageOpen />
                   <h3>Official Race Kit</h3>
                   <p>Event singlet, bib, and finisher items as announced for each category.</p>
                   <strong>Exclusive Edition</strong>
-                </article>
-                <article>
+                </Card>
+                <Card as="article" variant="filled">
                   <Clock />
                   <h3>Race-Day Guide</h3>
                   <p>
@@ -272,11 +273,11 @@ export function RunPage({ section }: { section?: 'routes' }) {
                       : 'Race start time will be announced soon.'}
                   </p>
                   <strong>January 9, 2027</strong>
-                </article>
+                </Card>
               </div>
 
               {!registrationOpen && (
-                <div className="notice" style={{ marginTop: '2rem' }}>
+                <div className="notice m3-run-notice m3-run-notice--registration">
                   <CheckCircle2 size={20} />
                   <span>
                     <strong>Registration status:</strong> Portal will open once final committee approvals and payment
@@ -284,7 +285,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
                   </span>
                 </div>
               )}
-              <div className="notice" style={{ marginTop: '1rem' }}>
+              <div className="notice m3-run-notice">
                 <Clock size={20} />
                 <span>
                   <strong>Registration deadline:</strong>{' '}
@@ -302,76 +303,37 @@ export function RunPage({ section }: { section?: 'routes' }) {
         </div>
       </section>
 
-      {sizeChartOpen && (
-        <div
-          className="size-chart-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="size-chart-title"
-          onMouseDown={(e) => {
-            if (e.currentTarget === e.target) setSizeChartOpen(false);
-          }}
-        >
-          <div className="size-chart-modal__panel">
-            <header>
-              <h2 id="size-chart-title">Event singlet size guide</h2>
-              <button type="button" className="gallery-icon-button" onClick={() => setSizeChartOpen(false)} aria-label="Close">
-                <X />
-              </button>
-            </header>
-            <div className="size-chart-modal__body">
-              <p>
-                Use this guide when choosing your shirt size during registration. Measurements are approximate; final
-                sizing follows the supplier chart published by the committee.
-              </p>
-              <table className="size-chart-table">
-                <thead>
-                  <tr>
-                    <th>Size</th>
-                    <th>Chest (in)</th>
-                    <th>Length (in)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>XS</td>
-                    <td>32–34</td>
-                    <td>25</td>
-                  </tr>
-                  <tr>
-                    <td>S</td>
-                    <td>34–36</td>
-                    <td>26</td>
-                  </tr>
-                  <tr>
-                    <td>M</td>
-                    <td>36–38</td>
-                    <td>27</td>
-                  </tr>
-                  <tr>
-                    <td>L</td>
-                    <td>38–40</td>
-                    <td>28</td>
-                  </tr>
-                  <tr>
-                    <td>XL</td>
-                    <td>40–42</td>
-                    <td>29</td>
-                  </tr>
-                  <tr>
-                    <td>2XL</td>
-                    <td>42–44</td>
-                    <td>30</td>
-                  </tr>
-                </tbody>
-              </table>
-              <p className="size-chart-modal__note">
-                If a supplier chart is uploaded by the committee, it will replace this reference table.
-              </p>
-            </div>
-          </div>
+      <Dialog
+        open={sizeChartOpen}
+        title="Event singlet size guide"
+        onClose={() => setSizeChartOpen(false)}
+        className="m3-run-size-dialog"
+        actions={<Button type="button" variant="text" onClick={() => setSizeChartOpen(false)}>Close</Button>}
+      >
+        <p>
+          Use this guide when choosing your shirt size during registration. Measurements are approximate; final
+          sizing follows the supplier chart published by the committee.
+        </p>
+        <div className="m3-run-size-table-wrap">
+          <table className="size-chart-table">
+            <caption className="sr-only">Approximate event singlet measurements</caption>
+            <thead>
+              <tr><th scope="col">Size</th><th scope="col">Chest (in)</th><th scope="col">Length (in)</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">XS</th><td>32–34</td><td>25</td></tr>
+              <tr><th scope="row">S</th><td>34–36</td><td>26</td></tr>
+              <tr><th scope="row">M</th><td>36–38</td><td>27</td></tr>
+              <tr><th scope="row">L</th><td>38–40</td><td>28</td></tr>
+              <tr><th scope="row">XL</th><td>40–42</td><td>29</td></tr>
+              <tr><th scope="row">2XL</th><td>42–44</td><td>30</td></tr>
+            </tbody>
+          </table>
         </div>
-      )}
+        <p className="size-chart-modal__note">
+          If a supplier chart is uploaded by the committee, it will replace this reference table.
+        </p>
+      </Dialog>
     </>
   );
 }
