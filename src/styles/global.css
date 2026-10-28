@@ -7131,3 +7131,194 @@ button:focus-visible {
     max-width: none;
   }
 }
+
+/* ========== Activities / Celebration Schedule ========== */
+
+.schedule-utility {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.public-filter-bar--schedule {
+  align-items: flex-start;
+}
+@media (min-width: 900px) {
+  .public-filter-bar--schedule {
+    align-items: center;
+  }
+}
+
+.schedule-timeline {
+  margin-top: 12px;
+  display: grid;
+  gap: 36px;
+}
+
+.schedule-day {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 6px 22px rgba(65, 10, 18, 0.04);
+}
+.schedule-day--today {
+  border-color: var(--gold);
+  box-shadow: 0 8px 28px rgba(201, 162, 39, 0.15);
+}
+
+.schedule-day__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 18px 22px;
+  background: linear-gradient(180deg, #fffaf3 0%, #f7efe6 100%);
+  border-bottom: 1px solid var(--line);
+}
+.schedule-day__header time {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  color: var(--wine);
+}
+.schedule-day__weekday {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #7a6558;
+}
+.schedule-day__num {
+  font-family: Fraunces, serif;
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.schedule-day__month {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7a6558;
+}
+
+.happening-today-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--wine);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.schedule-day__cards {
+  display: grid;
+  gap: 0;
+}
+.schedule-card {
+  padding: 22px 22px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.schedule-card:last-child {
+  border-bottom: 0;
+}
+.schedule-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.schedule-card__title {
+  font-family: Fraunces, serif;
+  font-size: clamp(1.25rem, 2.5vw, 1.55rem);
+  font-weight: 600;
+  margin: 0 0 12px;
+  line-height: 1.25;
+  color: var(--ink, #2a1a12);
+}
+.schedule-card__details {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.schedule-card__details li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted, #6b5a52);
+  font-size: 0.95rem;
+}
+.schedule-card__details svg {
+  flex-shrink: 0;
+  color: var(--wine);
+}
+.schedule-card__desc {
+  margin: 0 0 14px;
+  color: #554941;
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+.schedule-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+.schedule-card__cal-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--wine);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+}
+.schedule-card__cal-link:hover {
+  color: #5c0a12;
+  text-decoration: underline;
+}
+
+.celebrant-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f3ebe3;
+  border: 1px solid #e5d8cb;
+  color: #5c3d0a;
+  font-size: 0.75rem;
+  font-weight: 600;
+  max-width: 100%;
+}
+.celebrant-badge svg {
+  flex-shrink: 0;
+}
+
+@media print {
+  .site-header,
+  .site-footer,
+  .public-filter-bar,
+  .schedule-card__actions,
+  .mobile-quick-dock,
+  .install-prompt {
+    display: none !important;
+  }
+  .schedule-day {
+    break-inside: avoid;
+    box-shadow: none;
+  }
+}
