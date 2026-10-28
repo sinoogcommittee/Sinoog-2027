@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
+import { TextField } from '../../components/m3/TextField';
 import { LoadingState } from '../../features/ui/FeedbackStates';
 import { useAuth } from '../../features/auth/useAuth';
 import { useToast } from '../../features/ui/useToast';
@@ -102,37 +103,28 @@ export function AccountPage() {
 
         <div className="admin-panel" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
           <form onSubmit={(e) => void handleSave(e)} style={{ display: 'grid', gap: '1rem' }}>
-            <label>
-              Full name
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                autoComplete="name"
-                style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-              />
-            </label>
-            <label>
-              Mobile number
-              <input
-                type="tel"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                autoComplete="tel"
-                style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-              />
-            </label>
-            <label>
-              Address
-              <input
-                type="text"
-                value={locality}
-                onChange={(e) => setLocality(e.target.value)}
-                autoComplete="street-address"
-                placeholder="House/Street, Barangay, Municipality, Province"
-                style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-              />
-            </label>
+            <TextField
+              label="Full name"
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              autoComplete="name"
+            />
+            <TextField
+              label="Mobile number"
+              type="tel"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+              autoComplete="tel"
+            />
+            <TextField
+              label="Address"
+              type="text"
+              value={locality}
+              onChange={(e) => setLocality(e.target.value)}
+              autoComplete="street-address"
+              placeholder="House/Street, Barangay, Municipality, Province"
+            />
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               <Button type="submit" disabled={saving || isDemoAdmin}>
                 {saving ? 'Saving…' : 'Save profile'}

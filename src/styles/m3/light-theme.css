@@ -1,0 +1,63 @@
+/*
+ * Sinoog 2027 — Material 3 colour roles (LIGHT)
+ * Task P1-001. Additive only: nothing in the app consumes these yet.
+ * Derived from parish wine (#741F29), gold (#D69D2E) and warm cream.
+ * Contrast of every on-* pair was verified >= 4.5:1 (WCAG 2.2 AA).
+ */
+:root,
+[data-theme="light"] {
+  --md-sys-color-primary: #7b2936;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #ffd9dd;
+  --md-sys-color-on-primary-container: #300008;
+
+  --md-sys-color-secondary: #735b24;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #ffe8a6;
+  --md-sys-color-on-secondary-container: #241a00;
+
+  --md-sys-color-tertiary: #4e6547;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #d0ebc4;
+  --md-sys-color-on-tertiary-container: #0c2009;
+
+  --md-sys-color-error: #ba1a1a;
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #ffdad6;
+  --md-sys-color-on-error-container: #410002;
+
+  --md-sys-color-surface: #fff8f6;
+  --md-sys-color-on-surface: #211a1b;
+  --md-sys-color-surface-bright: #fff8f6;
+  --md-sys-color-surface-dim: #e6d6d7;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #fff0f1;
+  --md-sys-color-surface-container: #faeaeb;
+  --md-sys-color-surface-container-high: #f4e4e5;
+  --md-sys-color-surface-container-highest: #eedfe0;
+  --md-sys-color-on-surface-variant: #524345;
+  --md-sys-color-outline: #857376;
+  --md-sys-color-outline-variant: #d8c1c4;
+
+  --md-sys-color-inverse-surface: #372f30;
+  --md-sys-color-inverse-on-surface: #fceeef;
+  --md-sys-color-inverse-primary: #ffb2bc;
+  --md-sys-color-surface-tint: #7b2936;
+  --md-sys-color-scrim: #000000;
+
+  /* Semantic extensions (not part of core M3) */
+  --md-ext-color-success: #236a50;
+  --md-ext-color-on-success: #ffffff;
+  --md-ext-color-success-container: #bdefd8;
+  --md-ext-color-on-success-container: #002116;
+
+  --md-ext-color-warning: #7a5900;
+  --md-ext-color-on-warning: #ffffff;
+  --md-ext-color-warning-container: #ffdfa0;
+  --md-ext-color-on-warning-container: #261900;
+
+  --md-ext-color-info: #315e8a;
+  --md-ext-color-on-info: #ffffff;
+  --md-ext-color-info-container: #d2e4ff;
+  --md-ext-color-on-info-container: #001c37;
+}

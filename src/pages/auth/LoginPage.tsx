@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
+import { TextField } from '../../components/m3/TextField';
 import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 import { useAuth } from '../../features/auth/useAuth';
 import { describeAuthError } from '../../lib/authErrors';
@@ -69,26 +70,22 @@ export function LoginPage() {
         </p>
 
         <form onSubmit={(e) => void submit(e)}>
-          <label>
-            Email address
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
-          </label>
-          <label>
-            Password
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
-          </label>
+          <TextField
+            label="Email address"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+          />
+          <TextField
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+          />
           {message && <p className="form-message">{message}</p>}
           <Button type="submit" disabled={loading}>
             {loading ? 'Signing in…' : 'Sign in to workspace'}

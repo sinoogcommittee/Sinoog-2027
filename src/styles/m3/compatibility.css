@@ -1,0 +1,25 @@
+/*
+ * Sinoog 2027 — legacy -> Material 3 compatibility map
+ * Task P1-001. INTENTIONALLY CONTAINS NO DECLARATIONS.
+ *
+ * The legacy variables in src/styles/global.css (:root) keep their original
+ * values so the live site does not change colour. Remapping them now would
+ * alter the look (e.g. legacy wine #741f29 vs M3 primary #7b2936).
+ *
+ * Planned remap, to be applied one scope at a time in later tasks
+ * (public pages under .public-theme in Phase 1, admin under .admin-theme in Phase 2):
+ *
+ *   --wine        -> var(--md-sys-color-primary)
+ *   --wine-dark   -> var(--md-sys-color-on-primary-container)
+ *   --gold        -> var(--md-sys-color-secondary)
+ *   --gold-light  -> var(--md-sys-color-secondary-container)
+ *   --cream       -> var(--md-sys-color-surface-container-low)
+ *   --white       -> var(--md-sys-color-surface)
+ *   --ink         -> var(--md-sys-color-on-surface)
+ *   --muted       -> var(--md-sys-color-on-surface-variant)
+ *   --line        -> var(--md-sys-color-outline-variant)
+ *   --green       -> var(--md-ext-color-success)
+ *   --shadow      -> var(--md-sys-elevation-level2)
+ *
+ * Remove this file once both phases have converged and the legacy names are gone.
+ */

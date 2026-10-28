@@ -1,0 +1,167 @@
+/*
+ * Sinoog 2027 — Material 3 non-colour tokens
+ * Task P1-001. Typography, shape, spacing, elevation, motion, state layers.
+ * Additive only: no existing selector uses these names yet.
+ * Font families reuse the fonts already loaded by global.css.
+ */
+:root {
+  /* ---------- Typography ---------- */
+  --md-ref-typeface-brand: "DM Sans", system-ui, sans-serif;
+  --md-ref-typeface-plain: "DM Sans", system-ui, sans-serif;
+  --md-ref-typeface-display: Fraunces, Georgia, serif; /* expressive public headings only */
+
+  --md-sys-typescale-display-large-size: 3.5625rem;   /* 57 */
+  --md-sys-typescale-display-large-line: 4rem;        /* 64 */
+  --md-sys-typescale-display-large-weight: 600;
+  --md-sys-typescale-display-large-tracking: -0.25px;
+  --md-sys-typescale-display-medium-size: 2.8125rem;  /* 45 */
+  --md-sys-typescale-display-medium-line: 3.25rem;    /* 52 */
+  --md-sys-typescale-display-medium-weight: 600;
+  --md-sys-typescale-display-medium-tracking: 0;
+  --md-sys-typescale-display-small-size: 2.25rem;     /* 36 */
+  --md-sys-typescale-display-small-line: 2.75rem;     /* 44 */
+  --md-sys-typescale-display-small-weight: 600;
+  --md-sys-typescale-display-small-tracking: 0;
+
+  --md-sys-typescale-headline-large-size: 2rem;       /* 32 */
+  --md-sys-typescale-headline-large-line: 2.5rem;     /* 40 */
+  --md-sys-typescale-headline-large-weight: 600;
+  --md-sys-typescale-headline-large-tracking: 0;
+  --md-sys-typescale-headline-medium-size: 1.75rem;   /* 28 */
+  --md-sys-typescale-headline-medium-line: 2.25rem;   /* 36 */
+  --md-sys-typescale-headline-medium-weight: 600;
+  --md-sys-typescale-headline-medium-tracking: 0;
+  --md-sys-typescale-headline-small-size: 1.5rem;     /* 24 */
+  --md-sys-typescale-headline-small-line: 2rem;       /* 32 */
+  --md-sys-typescale-headline-small-weight: 600;
+  --md-sys-typescale-headline-small-tracking: 0;
+
+  --md-sys-typescale-title-large-size: 1.375rem;      /* 22 */
+  --md-sys-typescale-title-large-line: 1.75rem;       /* 28 */
+  --md-sys-typescale-title-large-weight: 600;
+  --md-sys-typescale-title-large-tracking: 0;
+  --md-sys-typescale-title-medium-size: 1rem;         /* 16 */
+  --md-sys-typescale-title-medium-line: 1.5rem;       /* 24 */
+  --md-sys-typescale-title-medium-weight: 600;
+  --md-sys-typescale-title-medium-tracking: 0.15px;
+  --md-sys-typescale-title-small-size: 0.875rem;      /* 14 */
+  --md-sys-typescale-title-small-line: 1.25rem;       /* 20 */
+  --md-sys-typescale-title-small-weight: 600;
+  --md-sys-typescale-title-small-tracking: 0.1px;
+
+  --md-sys-typescale-body-large-size: 1rem;           /* 16 */
+  --md-sys-typescale-body-large-line: 1.5rem;         /* 24 */
+  --md-sys-typescale-body-large-weight: 400;
+  --md-sys-typescale-body-large-tracking: 0.5px;
+  --md-sys-typescale-body-medium-size: 0.875rem;      /* 14 */
+  --md-sys-typescale-body-medium-line: 1.25rem;       /* 20 */
+  --md-sys-typescale-body-medium-weight: 400;
+  --md-sys-typescale-body-medium-tracking: 0.25px;
+  --md-sys-typescale-body-small-size: 0.75rem;        /* 12 */
+  --md-sys-typescale-body-small-line: 1rem;           /* 16 */
+  --md-sys-typescale-body-small-weight: 400;
+  --md-sys-typescale-body-small-tracking: 0.4px;
+
+  --md-sys-typescale-label-large-size: 0.875rem;      /* 14 */
+  --md-sys-typescale-label-large-line: 1.25rem;       /* 20 */
+  --md-sys-typescale-label-large-weight: 600;
+  --md-sys-typescale-label-large-tracking: 0.1px;
+  --md-sys-typescale-label-medium-size: 0.75rem;      /* 12 */
+  --md-sys-typescale-label-medium-line: 1rem;         /* 16 */
+  --md-sys-typescale-label-medium-weight: 600;
+  --md-sys-typescale-label-medium-tracking: 0.5px;
+  --md-sys-typescale-label-small-size: 0.6875rem;     /* 11 */
+  --md-sys-typescale-label-small-line: 1rem;          /* 16 */
+  --md-sys-typescale-label-small-weight: 600;
+  --md-sys-typescale-label-small-tracking: 0.5px;
+
+  /* ---------- Shape ---------- */
+  --md-sys-shape-corner-none: 0;
+  --md-sys-shape-corner-extra-small: 4px;
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-large: 16px;
+  --md-sys-shape-corner-extra-large: 28px;
+  --md-sys-shape-corner-full: 999px;
+
+  /* ---------- Spacing scale (px) ---------- */
+  --md-space-0: 0;
+  --md-space-1: 4px;
+  --md-space-2: 8px;
+  --md-space-3: 12px;
+  --md-space-4: 16px;
+  --md-space-5: 20px;
+  --md-space-6: 24px;
+  --md-space-8: 32px;
+  --md-space-10: 40px;
+  --md-space-12: 48px;
+  --md-space-16: 64px;
+  --md-space-20: 80px;
+  --md-space-24: 96px;
+
+  /* Gutters by window class (compact default; larger sizes below) */
+  --md-layout-gutter: 16px;
+  --md-layout-section-gap: 48px;
+  --md-layout-max-reading: 760px;
+  --md-layout-max-form: 720px;
+  --md-layout-max-content: 1200px;
+  --md-layout-max-workspace: 1600px;
+
+  /* ---------- Target sizes ---------- */
+  --md-target-min: 44px;   /* WCAG 2.2 / blueprint minimum for primary & icon controls */
+  --md-target-comfortable: 48px;
+
+  /* ---------- Elevation (shadows reserved for transient surfaces) ---------- */
+  --md-sys-elevation-level0: none;
+  --md-sys-elevation-level1: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+  --md-sys-elevation-level2: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+  --md-sys-elevation-level3: 0 1px 3px rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
+  --md-sys-elevation-level4: 0 2px 3px rgb(0 0 0 / 0.3), 0 6px 10px 4px rgb(0 0 0 / 0.15);
+  --md-sys-elevation-level5: 0 4px 4px rgb(0 0 0 / 0.3), 0 8px 12px 6px rgb(0 0 0 / 0.15);
+
+  /* ---------- Motion ---------- */
+  --md-sys-motion-duration-short: 100ms;
+  --md-sys-motion-duration-medium: 200ms;
+  --md-sys-motion-duration-long: 300ms;
+  --md-sys-motion-duration-emphasized: 450ms;
+  --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --md-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+  /* ---------- State layers ---------- */
+  --md-sys-state-hover-opacity: 0.08;
+  --md-sys-state-focus-opacity: 0.12;
+  --md-sys-state-pressed-opacity: 0.12;
+  --md-sys-state-dragged-opacity: 0.16;
+  --md-sys-state-disabled-content-opacity: 0.38;
+  --md-sys-state-disabled-container-opacity: 0.12;
+
+  /* ---------- Focus ring (>= 3:1 against adjacent colours) ---------- */
+  --md-focus-ring-width: 3px;
+  --md-focus-ring-offset: 2px;
+  --md-focus-ring-color: var(--md-sys-color-primary);
+
+  /* ---------- Scrim ---------- */
+  --md-sys-scrim-opacity: 0.36;
+}
+
+/* Adaptive gutters / section rhythm (M3 window-size classes) */
+@media (min-width: 600px) {
+  :root { --md-layout-gutter: 24px; --md-layout-section-gap: 64px; }
+}
+@media (min-width: 840px) {
+  :root { --md-layout-gutter: 32px; --md-layout-section-gap: 80px; }
+}
+@media (min-width: 1200px) {
+  :root { --md-layout-gutter: 48px; --md-layout-section-gap: 96px; }
+}
+
+/* Reduced motion: collapse durations so future components inherit it automatically */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --md-sys-motion-duration-short: 0.01ms;
+    --md-sys-motion-duration-medium: 0.01ms;
+    --md-sys-motion-duration-long: 0.01ms;
+    --md-sys-motion-duration-emphasized: 0.01ms;
+  }
+}

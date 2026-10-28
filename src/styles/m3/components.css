@@ -1,0 +1,472 @@
+/*
+ * Sinoog 2027 — Material 3 shared components (Button, IconButton, Card, Chip)
+ * Task P1-004. Every class is prefixed "m3-" so nothing here touches legacy styles.
+ * Colours/shape/motion come exclusively from the --md-* tokens.
+ */
+
+/* ---------- State layer (hover / focus / pressed) ---------- */
+.m3-state-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.m3-button:hover:not(:disabled) > .m3-state-layer,
+.m3-icon-button:hover:not(:disabled) > .m3-state-layer,
+.m3-chip:hover:not(:disabled) > .m3-state-layer {
+  opacity: var(--md-sys-state-hover-opacity);
+}
+.m3-button:focus-visible > .m3-state-layer,
+.m3-icon-button:focus-visible > .m3-state-layer,
+.m3-chip:focus-visible > .m3-state-layer {
+  opacity: var(--md-sys-state-focus-opacity);
+}
+.m3-button:active:not(:disabled) > .m3-state-layer,
+.m3-icon-button:active:not(:disabled) > .m3-state-layer,
+.m3-chip:active:not(:disabled) > .m3-state-layer {
+  opacity: var(--md-sys-state-pressed-opacity);
+}
+
+/* ---------- Shared focus ring ---------- */
+.m3-button:focus-visible,
+.m3-icon-button:focus-visible,
+.m3-chip:focus-visible {
+  outline: var(--md-focus-ring-width) solid var(--md-focus-ring-color);
+  outline-offset: var(--md-focus-ring-offset);
+}
+
+/* ---------- Button ---------- */
+.m3-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--md-space-2);
+  min-height: var(--md-target-comfortable);
+  min-width: var(--md-target-comfortable);
+  padding: var(--md-space-2) var(--md-space-6);
+  border: 1px solid transparent;
+  border-radius: var(--md-sys-shape-corner-full);
+  overflow: hidden;
+  font-family: var(--md-ref-typeface-plain);
+  font-size: var(--md-sys-typescale-label-large-size);
+  line-height: var(--md-sys-typescale-label-large-line);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  text-decoration: none;
+  text-align: center;
+  white-space: normal; /* long labels wrap instead of overflowing small screens */
+  max-width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    box-shadow var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard),
+    background-color var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+}
+.m3-button--small { min-height: var(--md-target-min); padding: var(--md-space-2) var(--md-space-4); }
+.m3-button__icon { display: inline-flex; width: 18px; height: 18px; }
+.m3-button__icon > svg { width: 18px; height: 18px; }
+.m3-button__label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--md-space-2);
+}
+
+.m3-button--filled {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+.m3-button--filled:hover:not(:disabled) { box-shadow: var(--md-sys-elevation-level1); }
+.m3-button--tonal {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+.m3-button--tonal:hover:not(:disabled) { box-shadow: var(--md-sys-elevation-level1); }
+.m3-button--outlined {
+  background: transparent;
+  color: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-outline);
+}
+.m3-button--text {
+  background: transparent;
+  color: var(--md-sys-color-primary);
+  padding: var(--md-space-2) var(--md-space-3);
+}
+.m3-button--danger {
+  background: var(--md-sys-color-error);
+  color: var(--md-sys-color-on-error);
+}
+
+/* Disabled: colour change + cursor + dashed outline, never opacity alone */
+.m3-button:disabled {
+  cursor: not-allowed;
+  box-shadow: none;
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) calc(var(--md-sys-state-disabled-container-opacity) * 100%), transparent);
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) calc(var(--md-sys-state-disabled-content-opacity) * 100%), transparent);
+  border-color: transparent;
+}
+.m3-button--outlined:disabled,
+.m3-button--text:disabled { background: transparent; }
+.m3-button--outlined:disabled { border-style: dashed; border-color: currentColor; }
+/* Loading keeps the normal colours so the label stays legible */
+.m3-button.is-loading:disabled { cursor: progress; }
+.m3-button--filled.is-loading:disabled { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+.m3-button--tonal.is-loading:disabled { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+.m3-button--danger.is-loading:disabled { background: var(--md-sys-color-error); color: var(--md-sys-color-on-error); }
+.m3-button--outlined.is-loading:disabled,
+.m3-button--text.is-loading:disabled { background: transparent; color: var(--md-sys-color-primary); border-style: solid; }
+
+/* ---------- Spinner ---------- */
+.m3-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: m3-spin 800ms linear infinite;
+}
+@keyframes m3-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .m3-spinner { animation-duration: 2400ms; }
+}
+
+/* ---------- Icon button ---------- */
+.m3-icon-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--md-target-comfortable);
+  height: var(--md-target-comfortable);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--md-sys-shape-corner-full);
+  overflow: hidden;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.m3-icon-button__icon { display: inline-flex; width: 24px; height: 24px; }
+.m3-icon-button__icon > svg { width: 24px; height: 24px; }
+.m3-icon-button--standard.is-selected { color: var(--md-sys-color-primary); }
+.m3-icon-button--filled { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+.m3-icon-button--tonal { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+.m3-icon-button--outlined { border-color: var(--md-sys-color-outline); }
+.m3-icon-button--outlined.is-selected { background: var(--md-sys-color-inverse-surface); color: var(--md-sys-color-inverse-on-surface); border-color: transparent; }
+.m3-icon-button:disabled {
+  cursor: not-allowed;
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) calc(var(--md-sys-state-disabled-content-opacity) * 100%), transparent);
+}
+.m3-icon-button--filled:disabled,
+.m3-icon-button--tonal:disabled {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) calc(var(--md-sys-state-disabled-container-opacity) * 100%), transparent);
+}
+
+/* ---------- Card ---------- */
+.m3-card {
+  display: block;
+  box-sizing: border-box;
+  padding: var(--md-space-4);
+  border-radius: var(--md-sys-shape-corner-medium);
+  color: var(--md-sys-color-on-surface);
+}
+@media (min-width: 840px) { .m3-card { padding: var(--md-space-6); } }
+.m3-card--filled { background: var(--md-sys-color-surface-container-highest); }
+.m3-card--elevated {
+  background: var(--md-sys-color-surface-container-low);
+  box-shadow: var(--md-sys-elevation-level1);
+}
+.m3-card--outlined {
+  background: var(--md-sys-color-surface);
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+/* ---------- Chip ---------- */
+.m3-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--md-space-2);
+  min-height: var(--md-target-min);
+  padding: 0 var(--md-space-4);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-small);
+  overflow: hidden;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  font-family: var(--md-ref-typeface-plain);
+  font-size: var(--md-sys-typescale-label-large-size);
+  line-height: var(--md-sys-typescale-label-large-line);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.m3-chip__icon { display: inline-flex; width: 18px; height: 18px; }
+.m3-chip__icon > svg { width: 18px; height: 18px; }
+.m3-chip__label { position: relative; }
+.m3-chip--assist { color: var(--md-sys-color-on-surface); }
+/* Selection is shown by colour AND a check mark, never colour alone */
+.m3-chip--filter.is-selected {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  border-color: transparent;
+}
+.m3-chip--filter.is-selected::before {
+  content: "\2713";
+  position: relative;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+.m3-chip:disabled {
+  cursor: not-allowed;
+  border-style: dashed;
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) calc(var(--md-sys-state-disabled-content-opacity) * 100%), transparent);
+}
+
+/* ---------- Forced-colors (Windows high contrast) ---------- */
+@media (forced-colors: active) {
+  .m3-button, .m3-icon-button, .m3-chip { border-color: ButtonText; }
+  .m3-chip--filter.is-selected { border-color: Highlight; }
+}
+
+
+/* ==========================================================================
+   P1-006 additions: Dialog, Progress indicator, Snackbar / Toast M3 upgrades
+   ========================================================================== */
+
+/* ---------- Native <dialog> reset + scrim ---------- */
+.m3-dialog {
+  /* Reset UA styles */
+  margin: auto;
+  padding: 0;
+  border: none;
+  border-radius: var(--md-sys-shape-corner-extra-large); /* 28 px */
+  background: transparent;
+  color: var(--md-sys-color-on-surface);
+  max-width: calc(100vw - var(--md-space-8));
+  max-height: calc(100dvh - var(--md-space-8));
+  overflow: visible;
+}
+/* Native backdrop (scrim) */
+.m3-dialog::backdrop {
+  background: var(--md-sys-color-scrim);
+  opacity: 0.32;
+}
+
+/* ---------- Dialog card ---------- */
+.m3-dialog__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 280px;
+  max-width: 560px;
+  max-height: calc(100dvh - var(--md-space-12));
+  background: var(--md-sys-color-surface-container-highest);
+  border-radius: inherit;
+  box-shadow: var(--md-sys-elevation-level3);
+  overflow: hidden;
+}
+
+/* Full-screen variant: no radius on compact, full dialog height */
+@media (max-width: 599px) {
+  .m3-dialog__card--fullscreen {
+    min-width: 100vw;
+    max-width: 100vw;
+    max-height: 100dvh;
+    border-radius: 0;
+    margin: 0;
+  }
+  .m3-dialog--fullscreen {
+    margin: 0;
+    max-width: 100vw;
+    max-height: 100dvh;
+  }
+}
+
+/* ---------- Dialog sections ---------- */
+.m3-dialog__title {
+  padding: var(--md-space-6) var(--md-space-6) var(--md-space-4);
+  font-size: var(--md-sys-typescale-headline-small-size);
+  line-height: var(--md-sys-typescale-headline-small-line);
+  font-weight: var(--md-sys-typescale-headline-small-weight);
+  color: var(--md-sys-color-on-surface);
+  margin: 0;
+}
+
+.m3-dialog__content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 0 var(--md-space-6) var(--md-space-2);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  line-height: var(--md-sys-typescale-body-medium-line);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.m3-dialog__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--md-space-2);
+  flex-wrap: wrap;
+  padding: var(--md-space-4) var(--md-space-4) var(--md-space-6);
+}
+
+/* ---------- Circular progress indicator ---------- */
+.m3-progress-circular {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--md-sys-color-surface-container-high);
+  border-top-color: var(--md-sys-color-primary);
+  border-radius: 50%;
+  animation: m3-spin 800ms linear infinite;
+  flex-shrink: 0;
+}
+.m3-progress-circular--small { width: 24px; height: 24px; border-width: 2.5px; }
+.m3-progress-circular--large { width: 56px; height: 56px; border-width: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  .m3-progress-circular { animation-duration: 2400ms; }
+}
+
+/* Linear progress indicator */
+.m3-progress-linear {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  background: var(--md-sys-color-surface-container-high);
+  border-radius: var(--md-sys-shape-corner-full);
+  overflow: hidden;
+}
+.m3-progress-linear::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: var(--md-sys-color-primary);
+  border-radius: inherit;
+  animation: m3-linear-progress 1.5s ease-in-out infinite;
+}
+@keyframes m3-linear-progress {
+  0%   { left: -60%; }
+  50%  { left: 40%; }
+  100% { left: 110%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .m3-progress-linear::after { animation: none; left: 0; width: 100%; opacity: 0.4; }
+}
+
+/* ---------- M3 Snackbar (replaces toast visuals) ---------- */
+.m3-snackbar-region {
+  position: fixed;
+  bottom: max(var(--md-space-4), env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--md-space-2);
+  pointer-events: none;
+  width: min(100vw - var(--md-space-8), 560px);
+}
+
+.m3-snackbar {
+  display: flex;
+  align-items: center;
+  gap: var(--md-space-3);
+  min-height: 48px;
+  padding: var(--md-space-3) var(--md-space-4);
+  border-radius: var(--md-sys-shape-corner-extra-small); /* 4 px */
+  background: var(--md-sys-color-inverse-surface);
+  color: var(--md-sys-color-inverse-on-surface);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  line-height: var(--md-sys-typescale-body-medium-line);
+  box-shadow: var(--md-sys-elevation-level3);
+  pointer-events: all;
+  animation: m3-snackbar-in var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-decelerate) both;
+  max-width: 100%;
+  word-break: break-word;
+}
+
+@keyframes m3-snackbar-in {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .m3-snackbar { animation: none; }
+}
+
+.m3-snackbar__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: inherit;
+}
+.m3-snackbar__icon > svg { width: 20px; height: 20px; }
+
+/* Tone overrides: use a tinted left border for accessibility beyond colour alone */
+.m3-snackbar--success { border-left: 4px solid var(--md-ext-color-success); }
+.m3-snackbar--error   { border-left: 4px solid var(--md-sys-color-error-container); }
+.m3-snackbar--info    { border-left: 4px solid var(--md-ext-color-info); }
+
+.m3-snackbar__message { flex: 1; }
+
+.m3-snackbar__dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: transparent;
+  color: var(--md-sys-color-inverse-on-surface);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.m3-snackbar__dismiss:hover { background: color-mix(in srgb, currentColor var(--md-sys-state-hover-opacity-pct, 8%), transparent); }
+.m3-snackbar__dismiss:focus-visible {
+  outline: var(--md-focus-ring-width) solid var(--md-sys-color-inverse-on-surface);
+  outline-offset: var(--md-focus-ring-offset);
+}
+
+/* ---------- M3 State-box / EmptyState / LoadingState / ErrorState ---------- */
+.m3-state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--md-space-3);
+  padding: var(--md-space-10) var(--md-space-6);
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
+}
+.m3-state-box__icon { color: var(--md-sys-color-outline); }
+.m3-state-box__title {
+  font-size: var(--md-sys-typescale-title-large-size);
+  line-height: var(--md-sys-typescale-title-large-line);
+  font-weight: var(--md-sys-typescale-title-large-weight);
+  color: var(--md-sys-color-on-surface);
+  margin: 0;
+}
+.m3-state-box__desc {
+  font-size: var(--md-sys-typescale-body-medium-size);
+  line-height: var(--md-sys-typescale-body-medium-line);
+  max-width: 40ch;
+  margin: 0;
+}
+.m3-state-box--error .m3-state-box__icon { color: var(--md-sys-color-error); }
+.m3-state-box--error .m3-state-box__title { color: var(--md-sys-color-on-error-container); }

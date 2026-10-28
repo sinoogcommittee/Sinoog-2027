@@ -93,7 +93,7 @@ export function AdminDashboardPage() {
             <StatusBadge tone="success">Ready</StatusBadge>
             <span>
               <strong>Run categories, distances, and race kits</strong>
-              <small>3K Fun Run (₱350), 5K Community (₱450), 10K Challenge (₱600) configured.</small>
+              <small>3K Fun Run (₱500), 5K Community Stride (₱800), 10K Fiesta Loop (₱1000) configured.</small>
             </span>
           </div>
 

@@ -1,0 +1,12 @@
+/*
+ * Sinoog 2027 — Material 3 design tokens (entry point)
+ * Order matters: non-colour tokens, light roles, then dark overrides.
+ * Imported from src/main.tsx BEFORE global.css so legacy rules still win ties.
+ */
+@import "./tokens.css";
+@import "./light-theme.css";
+@import "./dark-theme.css";
+@import "./compatibility.css";
+@import "./components.css";
+
+@import "./fields.css";

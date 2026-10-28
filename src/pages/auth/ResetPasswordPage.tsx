@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
+import { TextField } from '../../components/m3/TextField';
 import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 
 export function ResetPasswordPage() {
@@ -53,28 +54,24 @@ export function ResetPasswordPage() {
         <p>Open this page from the email link, then set a new password for your account.</p>
 
         <form onSubmit={(e) => void submit(e)}>
-          <label>
-            New password
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
-          </label>
-          <label>
-            Confirm new password
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
-          </label>
+          <TextField
+            label="New password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
+            autoComplete="new-password"
+          />
+          <TextField
+            label="Confirm new password"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            minLength={8}
+            autoComplete="new-password"
+          />
           {message && <p className="form-message">{message}</p>}
           <Button type="submit" disabled={loading || !isSupabaseConfigured}>
             {loading ? 'Saving…' : 'Update password'}

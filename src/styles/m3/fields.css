@@ -1,0 +1,264 @@
+/*
+ * Sinoog 2027 — Material 3 form controls
+ * Task P1-005: TextField, SelectField, SearchBar, Checkbox, Switch.
+ * Selectors use two classes (e.g. ".m3-field .m3-field__input") so they beat the
+ * legacy element rules ".auth-card label / input" regardless of stylesheet order.
+ * 16 px text prevents iOS zoom-on-focus. Colours/shape/motion come from --md-* tokens.
+ */
+
+/* ---------- Text / select field (outlined, persistent label) ---------- */
+.m3-field { display: block; min-width: 0; }
+.m3-field .m3-field__label {
+  display: block;
+  margin: 0 0 var(--md-space-1);
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-label-large-size);
+  line-height: var(--md-sys-typescale-label-large-line);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+}
+.m3-field__control { position: relative; display: flex; align-items: center; }
+.m3-field .m3-field__input {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  min-height: 56px;
+  margin: 0;
+  padding: 0 var(--md-space-4);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-small);
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface);
+  font-family: var(--md-ref-typeface-plain);
+  font-size: 1rem; /* 16 px: no mobile zoom */
+  line-height: 1.5rem;
+  transition:
+    border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+    box-shadow var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.m3-field .m3-field__input::placeholder {
+  color: var(--md-sys-color-on-surface-variant);
+  opacity: 1;
+}
+.m3-field .m3-field__input:hover:not(:disabled) { border-color: var(--md-sys-color-on-surface); }
+/* 2 px focus border drawn with an inset shadow so the layout never shifts */
+.m3-field .m3-field__input:focus,
+.m3-field .m3-field__input:focus-visible {
+  outline: none;
+  border-color: var(--md-sys-color-primary);
+  box-shadow: 0 0 0 1px var(--md-sys-color-primary);
+}
+.m3-field__control.has-icon .m3-field__input { padding-inline-start: 48px; }
+.m3-field__icon {
+  position: absolute;
+  inset-inline-start: var(--md-space-3);
+  display: inline-flex;
+  color: var(--md-sys-color-on-surface-variant);
+  pointer-events: none;
+}
+.m3-field__icon > svg { width: 24px; height: 24px; }
+
+/* Select */
+.m3-field .m3-field__select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-inline-end: 48px;
+  cursor: pointer;
+}
+.m3-field__chevron {
+  position: absolute;
+  inset-inline-end: var(--md-space-3);
+  color: var(--md-sys-color-on-surface-variant);
+  pointer-events: none;
+}
+
+/* Helper / error text (stable space; role="alert" set in markup for errors) */
+.m3-field .m3-field__support {
+  margin: var(--md-space-1) var(--md-space-4) 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-small-size);
+  line-height: var(--md-sys-typescale-body-small-line);
+  letter-spacing: var(--md-sys-typescale-body-small-tracking);
+}
+.m3-field.is-error .m3-field__input { border-color: var(--md-sys-color-error); }
+.m3-field.is-error .m3-field__input:focus,
+.m3-field.is-error .m3-field__input:focus-visible {
+  border-color: var(--md-sys-color-error);
+  box-shadow: 0 0 0 1px var(--md-sys-color-error);
+}
+.m3-field.is-error .m3-field__label,
+.m3-field.is-error .m3-field__support { color: var(--md-sys-color-error); }
+.m3-field.is-error .m3-field__support::before { content: "\26A0\FE0E\00a0"; } /* icon cue, not colour alone */
+
+.m3-field .m3-field__input:disabled {
+  cursor: not-allowed;
+  border-style: dashed;
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) calc(var(--md-sys-state-disabled-container-opacity) * 100%), transparent);
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) calc(var(--md-sys-state-disabled-content-opacity) * 100%), transparent);
+}
+
+/* ---------- Search bar ---------- */
+.m3-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface-variant);
+}
+.m3-search:focus-within {
+  box-shadow: 0 0 0 2px var(--md-sys-color-primary);
+}
+.m3-search__icon { position: absolute; inset-inline-start: var(--md-space-4); pointer-events: none; }
+.m3-search .m3-search__input {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 56px;
+  padding: 0 56px 0 52px;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: var(--md-sys-color-on-surface);
+  font-family: var(--md-ref-typeface-plain);
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+.m3-search .m3-search__input:focus,
+.m3-search .m3-search__input:focus-visible { outline: none; }
+.m3-search .m3-search__input::placeholder { color: var(--md-sys-color-on-surface-variant); opacity: 1; }
+.m3-search .m3-search__input::-webkit-search-cancel-button,
+.m3-search .m3-search__input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
+.m3-search .m3-search__clear { position: absolute; inset-inline-end: var(--md-space-1); }
+
+/* ---------- Checkbox + Switch (native input kept; custom visuals are siblings) ---------- */
+.m3-check,
+.m3-switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--md-space-3);
+  min-height: var(--md-target-min);
+  color: var(--md-sys-color-on-surface);
+  font-size: var(--md-sys-typescale-body-large-size);
+  line-height: var(--md-sys-typescale-body-large-line);
+  cursor: pointer;
+}
+.m3-check .m3-check__input,
+.m3-switch .m3-switch__input {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 50%;
+  margin: 0;
+  opacity: 0;
+  transform: translateY(-50%);
+  cursor: inherit;
+}
+.m3-check .m3-check__input { width: 24px; height: 24px; }
+.m3-switch .m3-switch__input { width: 52px; height: 32px; }
+
+/* Checkbox box */
+.m3-check__box {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--md-sys-color-on-surface-variant);
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  background: transparent;
+  transition: background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.m3-check__input:checked + .m3-check__box {
+  background: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-primary);
+}
+.m3-check__input:checked + .m3-check__box::after {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 11px;
+  margin: 2px 0 0 7px;
+  border: solid var(--md-sys-color-on-primary);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.m3-check.is-error .m3-check__box { border-color: var(--md-sys-color-error); }
+.m3-check__input:focus-visible + .m3-check__box,
+.m3-switch__input:focus-visible + .m3-switch__track {
+  outline: var(--md-focus-ring-width) solid var(--md-focus-ring-color);
+  outline-offset: var(--md-focus-ring-offset);
+}
+
+/* Switch */
+.m3-switch__track {
+  position: relative;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 32px;
+  border: 2px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-surface-container-highest);
+  transition: background-color var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+}
+.m3-switch__thumb {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-outline);
+  transform: translateY(-50%);
+  transition:
+    inset-inline-start var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized-decelerate),
+    width var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard),
+    height var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard),
+    background-color var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+}
+.m3-switch__input:checked + .m3-switch__track {
+  background: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-primary);
+}
+.m3-switch__input:checked + .m3-switch__track .m3-switch__thumb {
+  inset-inline-start: 24px;
+  width: 24px;
+  height: 24px;
+  background: var(--md-sys-color-on-primary);
+}
+/* "On" is also shown by a check mark in the thumb, not by colour alone */
+.m3-switch__input:checked + .m3-switch__track .m3-switch__thumb::after {
+  content: "";
+  display: block;
+  width: 5px;
+  height: 10px;
+  margin-top: -2px;
+  border: solid var(--md-sys-color-primary);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Disabled (colour change + cursor, never opacity alone) */
+.m3-check.is-disabled,
+.m3-switch.is-disabled {
+  cursor: not-allowed;
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) calc(var(--md-sys-state-disabled-content-opacity) * 100%), transparent);
+}
+.m3-check.is-disabled .m3-check__box,
+.m3-switch.is-disabled .m3-switch__track { border-style: dashed; }
+
+@media (forced-colors: active) {
+  .m3-check__input:checked + .m3-check__box { background: Highlight; }
+  .m3-switch__input:checked + .m3-switch__track { background: Highlight; }
+}
+
+/* Textarea */
+.m3-field .m3-field__textarea {
+  min-height: 84px;
+  padding: var(--md-space-3) var(--md-space-4);
+  resize: vertical;
+}

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/Button';
+import { TextField } from '../../components/m3/TextField';
 import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 import { describeAuthError } from '../../lib/authErrors';
 
@@ -55,16 +56,14 @@ export function ForgotPasswordPage() {
           </div>
         ) : (
           <form onSubmit={(e) => void submit(e)}>
-            <label>
-              Email address
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
-            </label>
+            <TextField
+              label="Email address"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
             {message && <p className="form-message">{message}</p>}
             <Button type="submit" disabled={loading || !isSupabaseConfigured}>
               {loading ? 'Sending…' : 'Send reset link'}

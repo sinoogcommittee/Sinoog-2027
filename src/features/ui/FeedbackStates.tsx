@@ -1,13 +1,28 @@
-import React from 'react';
+/**
+ * Sinoog 2027 — Shared feedback / state UI components
+ * Upgraded to M3 tokens and the shared Dialog primitive (P1-006).
+ *
+ * Exports: LoadingState, EmptyState, ErrorState, ConfirmDialog
+ * Existing callers use the same props; no breaking API changes.
+ */
 
-export function LoadingState({ message = 'Loading details…' }: { message?: string }) {
+import type { ReactNode } from 'react';
+import { AlertCircle, CheckCircle, Info } from 'lucide-react';
+import { Dialog } from '../../components/m3/Dialog';
+import { Button } from '../../components/Button';
+
+/* ---------- LoadingState ---------- */
+
+export function LoadingState({ message = 'Loading…' }: { message?: string }) {
   return (
-    <div className="state-box state-box--loading" role="status" aria-live="polite">
-      <div className="state-spinner" aria-hidden="true" />
-      <p>{message}</p>
+    <div className="m3-state-box" role="status" aria-live="polite">
+      <span className="m3-progress-circular" aria-hidden="true" />
+      <p className="m3-state-box__desc">{message}</p>
     </div>
   );
 }
+
+/* ---------- EmptyState ---------- */
 
 export function EmptyState({
   title = 'No records found',
@@ -16,16 +31,18 @@ export function EmptyState({
 }: {
   title?: string;
   message?: string;
-  action?: React.ReactNode;
+  action?: ReactNode;
 }) {
   return (
-    <div className="state-box state-box--empty">
-      <h3 className="state-box__title">{title}</h3>
-      <p className="state-box__desc">{message}</p>
-      {action && <div className="state-box__action">{action}</div>}
+    <div className="m3-state-box">
+      <p className="m3-state-box__title">{title}</p>
+      <p className="m3-state-box__desc">{message}</p>
+      {action && <div style={{ marginTop: 8 }}>{action}</div>}
     </div>
   );
 }
+
+/* ---------- ErrorState ---------- */
 
 export function ErrorState({
   title = 'Unable to load content',
@@ -37,17 +54,22 @@ export function ErrorState({
   onRetry?: () => void;
 }) {
   return (
-    <div className="state-box state-box--error" role="alert">
-      <h3 className="state-box__title">{title}</h3>
-      <p className="state-box__desc">{message}</p>
+    <div className="m3-state-box m3-state-box--error" role="alert">
+      <span className="m3-state-box__icon" aria-hidden="true">
+        <AlertCircle size={32} />
+      </span>
+      <p className="m3-state-box__title">{title}</p>
+      <p className="m3-state-box__desc">{message}</p>
       {onRetry && (
-        <button type="button" className="button button--secondary button--sm" onClick={onRetry}>
+        <Button type="button" variant="outlined" size="small" onClick={onRetry}>
           Try again
-        </button>
+        </Button>
       )}
     </div>
   );
 }
+
+/* ---------- ConfirmDialog ---------- */
 
 export function ConfirmDialog({
   isOpen,
@@ -68,27 +90,73 @@ export function ConfirmDialog({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
-  if (!isOpen) return null;
-
   return (
-    <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
-      <div className="modal-card">
-        <h3 id="dialog-title">{title}</h3>
-        <p>{message}</p>
-        <div className="modal-actions">
-          <button type="button" className="button button--ghost" onClick={onCancel}>
+    <Dialog
+      open={isOpen}
+      title={title}
+      onClose={onCancel}
+      actions={
+        <>
+          <Button type="button" variant="text" onClick={onCancel}>
             {cancelLabel}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className={`button ${tone === 'danger' ? 'button--danger' : 'button--primary'}`}
+            variant={tone === 'danger' ? 'danger' : 'filled'}
             onClick={onConfirm}
           >
             {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </>
+      }
+    >
+      <p>{message}</p>
+    </Dialog>
   );
 }
 
+/* ---------- InlineMessage (new helper for inline success/info/error notices) ---------- */
+
+export type MessageTone = 'success' | 'error' | 'info';
+
+export function InlineMessage({
+  tone = 'info',
+  children,
+}: {
+  tone?: MessageTone;
+  children: ReactNode;
+}) {
+  const Icon =
+    tone === 'success' ? CheckCircle : tone === 'error' ? AlertCircle : Info;
+  return (
+    <p
+      role={tone === 'error' ? 'alert' : 'status'}
+      aria-live={tone === 'error' ? 'assertive' : 'polite'}
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 8,
+        padding: '10px 14px',
+        borderRadius: 'var(--md-sys-shape-corner-extra-small)',
+        background:
+          tone === 'success'
+            ? 'var(--md-ext-color-success-container)'
+            : tone === 'error'
+              ? 'var(--md-sys-color-error-container)'
+              : 'var(--md-ext-color-info-container)',
+        color:
+          tone === 'success'
+            ? 'var(--md-ext-color-on-success-container)'
+            : tone === 'error'
+              ? 'var(--md-sys-color-on-error-container)'
+              : 'var(--md-ext-color-on-info-container)',
+        fontSize: 'var(--md-sys-typescale-body-medium-size)',
+        lineHeight: 'var(--md-sys-typescale-body-medium-line)',
+        margin: 0,
+      }}
+    >
+      <Icon size={18} style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
+      <span>{children}</span>
+    </p>
+  );
+}

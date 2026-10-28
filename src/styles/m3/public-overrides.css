@@ -1,0 +1,317 @@
+/*
+ * Sinoog 2027 — public-page overrides for the Material 3 Button
+ * Loaded AFTER global.css (see src/main.tsx) so it wins specificity ties.
+ * Scope: only buttons rendered by src/components/Button.tsx (class "m3-button").
+ * Admin pages use raw className="button ..." and are NOT affected.
+ */
+
+/* ---------- Dark wine surfaces ----------
+   Remap the roles locally so the same variants stay legible on wine:
+   filled = gold with dark text (keeps the celebratory CTA), outlined/text = white.
+   Contrast: white on wine 10.7:1, gold-fill text 7.6:1. */
+.home-hero,
+.page-hero,
+.run-cta-band,
+.sponsors-partner-cta {
+  --md-sys-color-primary: #e2c36c;
+  --md-sys-color-on-primary: #3d2f00;
+  --md-sys-color-outline: rgb(255 255 255 / 0.6);
+  --md-focus-ring-color: #ffe8a6;
+}
+.home-hero .m3-button--outlined,
+.home-hero .m3-button--text,
+.page-hero .m3-button--outlined,
+.page-hero .m3-button--text,
+.run-cta-band .m3-button--outlined,
+.run-cta-band .m3-button--text,
+.sponsors-partner-cta .m3-button--outlined,
+.sponsors-partner-cta .m3-button--text {
+  color: #fff;
+}
+
+/* ---------- Layout ported from the old .button rules ---------- */
+
+/* Sign-in / account cards: full-width actions (was .auth-card .button) */
+.auth-card .m3-button { width: 100%; }
+
+/* Home hero: the old row was forced to a single line with 36-38 px buttons.
+   Allow wrapping so 44-48 px buttons never overflow narrow phones. */
+.home-hero .hero-actions {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+@media (max-width: 479px) {
+  .home-hero .hero-actions { flex-wrap: wrap; gap: 8px; }
+  .home-hero .m3-button,
+  .page-hero .m3-button { padding-inline: 16px; }
+  /* Run hero stacked full-width on phones (was .run-hero-actions .button) */
+  .run-hero-actions .m3-button { width: 100%; }
+}
+
+/* Festival CTA stack: centred labels (was .festival-cta-stack .button) */
+.festival-cta-stack .m3-button { justify-content: center; }
+
+/* Keep a router-link button from inheriting link underline on hover */
+a.m3-button:hover { text-decoration: none; }
+
+
+/* ==========================================================================
+   P1-007: Public top app bar + modal navigation drawer
+   ========================================================================== */
+
+/* ── Top app bar ── */
+.pub-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: var(--md-sys-color-surface-container);
+  box-shadow: var(--md-sys-elevation-level2);
+}
+
+.pub-topbar__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--md-space-2);
+  max-width: var(--md-layout-max-content);
+  margin: 0 auto;
+  padding: 0 var(--md-layout-gutter);
+  height: 64px;
+}
+
+/* Brand */
+.pub-topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--md-space-3);
+  flex-shrink: 0;
+  text-decoration: none;
+  color: var(--md-sys-color-on-surface);
+}
+.pub-topbar__brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.pub-topbar__brand-text strong {
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  color: var(--md-sys-color-on-surface);
+}
+.pub-topbar__brand-text small {
+  font-size: var(--md-sys-typescale-label-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Spacer pushes inline nav to the right */
+.pub-topbar__nav {
+  display: none; /* hidden on compact/medium; shown on expanded */
+  margin-left: auto;
+  align-items: center;
+  gap: var(--md-space-1);
+  flex-wrap: wrap;
+}
+@media (min-width: 840px) {
+  .pub-topbar__nav { display: flex; }
+}
+
+.pub-topbar__navlink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--md-target-min);
+  padding: 0 var(--md-space-3);
+  border-radius: var(--md-sys-shape-corner-full);
+  text-decoration: none;
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  color: var(--md-sys-color-on-surface-variant);
+  transition: background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+              color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.pub-topbar__navlink:hover {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+  color: var(--md-sys-color-on-surface);
+  text-decoration: none;
+}
+.pub-topbar__navlink:focus-visible {
+  outline: var(--md-focus-ring-width) solid var(--md-focus-ring-color);
+  outline-offset: var(--md-focus-ring-offset);
+}
+.pub-topbar__navlink.active {
+  color: var(--md-sys-color-primary);
+  font-weight: 700;
+  background: var(--md-sys-color-primary-container);
+}
+
+/* Sign-in CTA in inline nav */
+.pub-topbar__signin {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--md-target-min);
+  padding: 0 var(--md-space-4);
+  margin-left: var(--md-space-2);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-full);
+  text-decoration: none;
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  color: var(--md-sys-color-primary);
+  transition: background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.pub-topbar__signin:hover {
+  background: var(--md-sys-color-primary-container);
+  text-decoration: none;
+}
+.pub-topbar__signin:focus-visible {
+  outline: var(--md-focus-ring-width) solid var(--md-focus-ring-color);
+  outline-offset: var(--md-focus-ring-offset);
+}
+
+/* Hamburger button */
+.pub-topbar__menu-btn {
+  display: flex; /* visible on compact + medium */
+  align-items: center;
+  justify-content: center;
+  width: var(--md-target-comfortable);
+  height: var(--md-target-comfortable);
+  margin-left: auto;
+  padding: 0;
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.pub-topbar__menu-btn:hover {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+}
+.pub-topbar__menu-btn:focus-visible {
+  outline: var(--md-focus-ring-width) solid var(--md-focus-ring-color);
+  outline-offset: var(--md-focus-ring-offset);
+}
+@media (min-width: 840px) {
+  .pub-topbar__menu-btn { display: none; }
+}
+
+/* ── Navigation drawer (compact + medium) ── */
+.pub-drawer-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 299;
+  background: var(--md-sys-color-scrim);
+  opacity: 0.32;
+  animation: m3-scrim-in var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard) both;
+}
+@keyframes m3-scrim-in {
+  from { opacity: 0; }
+  to   { opacity: 0.32; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pub-drawer-scrim { animation: none; }
+}
+
+.pub-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 300;
+  width: min(320px, 100vw - 56px);
+  display: flex;
+  flex-direction: column;
+  background: var(--md-sys-color-surface-container-low);
+  box-shadow: var(--md-sys-elevation-level4);
+  transform: translateX(-100%);
+  transition: transform var(--md-sys-motion-duration-long) var(--md-sys-motion-easing-emphasized-decelerate);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.pub-drawer--open {
+  transform: translateX(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pub-drawer { transition: none; }
+}
+@media (min-width: 840px) {
+  .pub-drawer,
+  .pub-drawer-scrim { display: none !important; } /* never show on expanded */
+}
+
+.pub-drawer__header {
+  display: flex;
+  align-items: center;
+  gap: var(--md-space-3);
+  padding: var(--md-space-4) var(--md-space-4) var(--md-space-4) var(--md-space-5);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+.pub-drawer__brand {
+  flex: 1;
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  color: var(--md-sys-color-on-surface);
+}
+.pub-drawer__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--md-target-comfortable);
+  height: var(--md-target-comfortable);
+  padding: 0;
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.pub-drawer__close:focus-visible {
+  outline: var(--md-focus-ring-width) solid var(--md-focus-ring-color);
+  outline-offset: var(--md-focus-ring-offset);
+}
+
+.pub-drawer__nav {
+  display: flex;
+  flex-direction: column;
+  padding: var(--md-space-2) var(--md-space-3);
+  flex: 1;
+}
+.pub-drawer__footer {
+  display: flex;
+  flex-direction: column;
+  padding: var(--md-space-2) var(--md-space-3) max(var(--md-space-4), env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.pub-drawer__link {
+  display: flex;
+  align-items: center;
+  min-height: var(--md-target-comfortable);
+  padding: 0 var(--md-space-4);
+  border-radius: var(--md-sys-shape-corner-large);
+  text-decoration: none;
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  color: var(--md-sys-color-on-surface-variant);
+  transition: background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+              color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.pub-drawer__link:hover,
+.pub-drawer__link.active {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  text-decoration: none;
+}
+.pub-drawer__link.active {
+  color: var(--md-sys-color-on-secondary-container);
+  font-weight: 700;
+}
+.pub-drawer__link--accent {
+  color: var(--md-sys-color-primary);
+  font-weight: 700;
+}
+.pub-drawer__link:focus-visible {
+  outline: var(--md-focus-ring-width) solid var(--md-focus-ring-color);
+  outline-offset: var(--md-focus-ring-offset);
+}

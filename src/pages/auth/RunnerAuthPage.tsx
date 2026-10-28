@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../../components/Button';
+import { TextField } from '../../components/m3/TextField';
 import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 import { useAuth } from '../../features/auth/useAuth';
 import { GoogleSignInButton } from '../../features/auth/GoogleSignInButton';
@@ -245,20 +246,22 @@ export function RunnerAuthPage() {
           </div>
         ) : mode === 'signin' ? (
           <form onSubmit={(e) => void handleSignIn(e)}>
-            <label>
-              Email address
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
-            </label>
-            <label>
-              Password
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="current-password"
-              />
-            </label>
+            <TextField
+              label="Email address"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
+            <TextField
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
             {message && <p className="form-message">{message}</p>}
             {noAccountHint && (
               <p>
@@ -292,58 +295,58 @@ export function RunnerAuthPage() {
           </form>
         ) : (
           <form onSubmit={(e) => void handleSignUp(e)}>
-            <label>
-              Full name
-              <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required autoComplete="name" />
-            </label>
-            <label>
-              Email address
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
-            </label>
-            <label>
-              Mobile number
-              <input
-                type="tel"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                required
-                autoComplete="tel"
-                placeholder="09XXXXXXXXX"
-              />
-            </label>
-            <label>
-              Address
-              <input
-                type="text"
-                value={locality}
-                onChange={(e) => setLocality(e.target.value)}
-                required
-                autoComplete="street-address"
-                placeholder="House/Street, Barangay, Municipality, Province"
-              />
-            </label>
-            <label>
-              Password
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-                autoComplete="new-password"
-              />
-            </label>
-            <label>
-              Confirm password
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                minLength={8}
-                autoComplete="new-password"
-              />
-            </label>
+            <TextField
+              label="Full name"
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+              autoComplete="name"
+            />
+            <TextField
+              label="Email address"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
+            <TextField
+              label="Mobile number"
+              type="tel"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+              required
+              autoComplete="tel"
+              placeholder="09XXXXXXXXX"
+            />
+            <TextField
+              label="Address"
+              type="text"
+              value={locality}
+              onChange={(e) => setLocality(e.target.value)}
+              required
+              autoComplete="street-address"
+              placeholder="House/Street, Barangay, Municipality, Province"
+            />
+            <TextField
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+              autoComplete="new-password"
+            />
+            <TextField
+              label="Confirm password"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              minLength={8}
+              autoComplete="new-password"
+            />
             {message && <p className="form-message">{message}</p>}
             <Button type="submit" disabled={loading || !isSupabaseConfigured}>
               {loading ? 'Creating account…' : 'Create runner account'}

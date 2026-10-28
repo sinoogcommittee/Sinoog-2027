@@ -1,0 +1,61 @@
+/*
+ * Sinoog 2027 — Material 3 colour roles (DARK)
+ * Task P1-001. Applies ONLY when <html data-theme="dark"> is set.
+ * Nothing sets that attribute yet (theme switching is task P1-002),
+ * so this file has no effect on the live site.
+ */
+[data-theme="dark"] {
+  --md-sys-color-primary: #ffb2bc;
+  --md-sys-color-on-primary: #4b0010;
+  --md-sys-color-primary-container: #621a27;
+  --md-sys-color-on-primary-container: #ffd9dd;
+
+  --md-sys-color-secondary: #e2c36c;
+  --md-sys-color-on-secondary: #3d2f00;
+  --md-sys-color-secondary-container: #574500;
+  --md-sys-color-on-secondary-container: #ffe8a6;
+
+  --md-sys-color-tertiary: #b5cfa9;
+  --md-sys-color-on-tertiary: #21371d;
+  --md-sys-color-tertiary-container: #374d31;
+  --md-sys-color-on-tertiary-container: #d0ebc4;
+
+  --md-sys-color-error: #ffb4ab;
+  --md-sys-color-on-error: #690005;
+  --md-sys-color-error-container: #93000a;
+  --md-sys-color-on-error-container: #ffdad6;
+
+  --md-sys-color-surface: #191113;
+  --md-sys-color-on-surface: #eee0e1;
+  --md-sys-color-surface-bright: #423739;
+  --md-sys-color-surface-dim: #191113;
+  --md-sys-color-surface-container-lowest: #140c0e;
+  --md-sys-color-surface-container-low: #21191b;
+  --md-sys-color-surface-container: #261d1f;
+  --md-sys-color-surface-container-high: #31282a;
+  --md-sys-color-surface-container-highest: #3d3234;
+  --md-sys-color-on-surface-variant: #d7c1c3;
+  --md-sys-color-outline: #a18c8f;
+  --md-sys-color-outline-variant: #524345;
+
+  --md-sys-color-inverse-surface: #eee0e1;
+  --md-sys-color-inverse-on-surface: #372f30;
+  --md-sys-color-inverse-primary: #7b2936;
+  --md-sys-color-surface-tint: #ffb2bc;
+  --md-sys-color-scrim: #000000;
+
+  --md-ext-color-success: #8ed6b6;
+  --md-ext-color-on-success: #00382a;
+  --md-ext-color-success-container: #054f3a;
+  --md-ext-color-on-success-container: #bdefd8;
+
+  --md-ext-color-warning: #f0c14b;
+  --md-ext-color-on-warning: #402d00;
+  --md-ext-color-warning-container: #5d4200;
+  --md-ext-color-on-warning-container: #ffdfa0;
+
+  --md-ext-color-info: #a0c9fa;
+  --md-ext-color-on-info: #00315a;
+  --md-ext-color-info-container: #164a74;
+  --md-ext-color-on-info-container: #d2e4ff;
+}
