@@ -529,23 +529,6 @@ p {
 .skip-link:focus {
   top: 16px;
 }
-.utility-bar {
-  background: var(--wine-dark);
-  color: #f8e8cf;
-  font-size: 0.76rem;
-  letter-spacing: 0.03em;
-}
-.utility-bar__inner {
-  height: 34px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.utility-bar span {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
 .site-header {
   position: sticky;
   top: 0;
@@ -634,6 +617,11 @@ p {
   border: 2px solid rgba(116, 31, 41, 0.38);
   font-weight: 700;
   transition: 0.2s ease;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .button:hover {
   transform: translateY(-1px);
@@ -656,9 +644,15 @@ button:focus-visible {
   background: #fff;
 }
 .button--ghost {
-  padding-inline: 0;
+  padding: 10px 16px;
   color: var(--wine);
   background: transparent;
+}
+/* Text-only ghost links (no border) can still sit tight in prose rows */
+.button-row .button--ghost:not([class*="border"]),
+.heading-row .button--ghost {
+  padding-inline: 4px;
+  border-color: transparent;
 }
 .button:disabled {
   opacity: 0.55;
@@ -704,7 +698,7 @@ button:focus-visible {
   align-items: center;
   gap: 70px;
   position: relative;
-  padding-block: 75px 95px;
+  padding-block: 90px 95px;
 }
 .hero-kicker,
 .eyebrow {
@@ -1309,9 +1303,9 @@ button:focus-visible {
   min-width: 0;
   min-height: 42px;
   padding: 8px 13px;
-  border: 1px solid var(--wine);
+  border: 2px solid rgba(116, 31, 41, 0.42);
   border-radius: 7px;
-  background: transparent;
+  background: #fff;
   color: var(--wine-dark);
   font-size: 0.78rem;
   font-weight: 700;
@@ -1375,6 +1369,25 @@ button:focus-visible {
     margin-bottom: 26px;
     padding: 7px;
     border-radius: 8px;
+  }
+  .hero-lead {
+    font-size: 0.8rem;
+    max-width: 660px;
+    color: #f7e8e2;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .hero-kicker,
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-weight: 700;
+    font-size: 0.74rem;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
   }
   .public-filter-tabs--activities,
   .public-filter-tabs--news {
@@ -2084,7 +2097,7 @@ button:focus-visible {
   .main-nav {
     display: none;
     position: absolute;
-    top: 112px;
+    top: 78px;
     left: 0;
     right: 0;
     background: #fff;
@@ -2166,14 +2179,11 @@ button:focus-visible {
   .narrow {
     width: min(100% - 28px, 1140px);
   }
-  .utility-bar__inner span:last-child {
-    display: none;
-  }
   .nav-wrap {
     height: 68px;
   }
   .main-nav {
-    top: 102px;
+    top: 68px;
   }
   .section {
     padding: 65px 0;
@@ -4218,8 +4228,10 @@ button:focus-visible {
   }
 }
 .button--sm {
-  padding: 7px 12px;
-  font-size: 0.82rem;
+  padding: 8px 14px;
+  font-size: 0.875rem;
+  gap: 6px;
+  border-width: 1.5px;
 }
 
 @media print {
@@ -6076,7 +6088,7 @@ button:focus-visible {
   .home-hero__inner {
     grid-template-columns: minmax(0, 1fr);
     gap: 24px;
-    padding-bottom: 72px;
+    padding-bottom: 90px;
   }
   .hero-emblem {
     display: grid;
@@ -6744,27 +6756,125 @@ button:focus-visible {
 }
 
 .parish-emblem-band {
-  background: #fff;
-  padding: 36px 0 28px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--wine-dark);
+  padding: 42px 0 38px;
   text-align: center;
-  border-bottom: 1px solid var(--line);
+  color: #fff;
+  border-top: 3px solid var(--gold);
+  border-bottom: 3px solid var(--gold);
+}
+.parish-emblem-band::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  inset: -45% -20%;
+  background: repeating-radial-gradient(
+    circle at 50% 46%,
+    transparent 0 37px,
+    rgba(255, 255, 255, 0.055) 38px 40px
+  );
+}
+.parish-emblem-band::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 260px;
+  height: 260px;
+  left: 50%;
+  top: 22px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(245, 223, 171, 0.26);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 20px rgba(214, 157, 46, 0.04),
+    0 0 70px rgba(214, 157, 46, 0.16);
+}
+.parish-emblem-band__inner {
+  position: relative;
+}
+.parish-emblem-band__inner::before,
+.parish-emblem-band__inner::after {
+  content: "✦";
+  position: absolute;
+  top: 44%;
+  color: var(--gold-light);
+  font-size: 0.9rem;
+  opacity: 0.72;
+}
+.parish-emblem-band__inner::before {
+  left: 8%;
+}
+.parish-emblem-band__inner::after {
+  right: 8%;
+}
+.parish-emblem-band .hero-emblem {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  width: 100%;
+  margin: 0;
 }
 .parish-emblem-band .hero-artwork img {
-  width: min(180px, 42vw);
+  width: min(192px, 48vw);
   height: auto;
   margin: 0 auto;
   display: block;
+  filter: drop-shadow(0 18px 30px rgba(20, 0, 4, 0.48));
+  animation: parish-emblem-float 6s ease-in-out infinite;
 }
-.parish-emblem-band .hero-emblem > p {
-  margin-top: 18px;
-  font-size: 1.35rem;
-  letter-spacing: 0.12em;
+.parish-emblem-band__identity {
+  display: grid;
+  justify-items: center;
+  margin-top: 10px;
 }
-.parish-emblem-band .hero-emblem > small {
-  display: block;
-  margin-top: 4px;
-  color: var(--wine);
+.parish-emblem-band__parish {
+  margin: 0;
+  font-family: Fraunces, serif;
+  font-size: clamp(1.5rem, 7vw, 2rem);
+  font-weight: 700;
+  letter-spacing: 0.055em;
+  line-height: 1.05;
+  text-shadow: 0 2px 12px rgba(20, 0, 4, 0.42);
+}
+.parish-emblem-band__divider {
+  width: 56px;
+  height: 2px;
+  margin: 13px 0 11px;
+  background: var(--gold);
+  box-shadow: 0 0 15px rgba(214, 157, 46, 0.55);
+}
+.parish-emblem-band__festival {
+  margin: 0;
+  color: var(--gold-light);
+  font-family: Fraunces, serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.parish-emblem-band__acclamation {
+  margin: 5px 0 0;
+  color: #f7e7dd;
+  font-family: Fraunces, serif;
+  font-size: 0.92rem;
   font-style: italic;
+  letter-spacing: 0.045em;
+}
+@keyframes parish-emblem-float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(0.4deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .parish-emblem-band .hero-artwork img {
+    animation: none;
+  }
 }
 /* On larger screens the desktop emblem in the hero is enough; hide the band */
 @media (min-width: 900px) {
@@ -6928,10 +7038,6 @@ button:focus-visible {
 @media (max-width: 767px) {
   .mobile-quick-dock {
     display: flex;
-  }
-  /* Leave room so content is not hidden behind the dock */
-  .site-shell {
-    padding-bottom: 72px;
   }
 }
 
@@ -7578,7 +7684,7 @@ button:focus-visible {
   font-size: 0.94rem;
   line-height: 1.5;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -7744,6 +7850,18 @@ button:focus-visible {
   justify-content: center;
   margin-bottom: 14px;
 }
+
+.sponsors-partner-cta__actions .button {
+  padding: 11px 18px;
+  font-size: 0.9rem;
+  min-height: 44px;
+  white-space: normal;
+}
+.sponsors-partner-cta .button--ghost {
+  padding: 11px 18px;
+  border-width: 1.5px;
+}
+
 .sponsors-partner-cta .button--secondary {
   background: var(--gold-light, #f5dfab);
   border-color: transparent;
@@ -7775,6 +7893,38 @@ button:focus-visible {
   }
 }
 
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 22px;
+}
+.hero-actions .button,
+.hero-actions__primary {
+  padding: 9px 16px;
+  font-size: 0.9rem;
+  gap: 6px;
+}
+.home-hero .hero-actions .button--primary,
+.home-hero .hero-actions__primary {
+  box-shadow: 0 6px 16px rgba(177, 121, 18, 0.18);
+}
+
+
+.page-hero .button,
+.home-hero .button {
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  min-height: 42px;
+}
+.page-hero .button--ghost,
+.page-hero .button--secondary {
+  padding: 10px 16px;
+  border-width: 1.5px;
+}
+
 /* ========== Sinoog Run page + registration wizard polish ========== */
 
 .run-hero-actions {
@@ -7784,12 +7934,77 @@ button:focus-visible {
   margin-top: 24px;
   align-items: center;
 }
+
+.run-hero-actions .button {
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  min-height: 42px;
+}
+.run-hero-actions .button--ghost {
+  padding: 10px 16px;
+  border-width: 1.5px;
+}
+
 .run-hero-actions .button--ghost {
   border-color: rgba(255, 255, 255, 0.35);
   color: #fff;
 }
 .run-hero-actions .button--ghost:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+/* Compact public hero actions: keep labels safely inside their controls. */
+.home-hero .hero-actions {
+  flex-wrap: nowrap;
+  gap: 9px;
+}
+.home-hero .hero-actions .button {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 38px;
+  padding: 8px 13px;
+  font-size: 0.82rem;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.hero-action-label--mobile {
+  display: none;
+}
+.run-hero-actions .button {
+  flex: 0 0 auto;
+  padding-inline: 18px;
+  white-space: nowrap;
+}
+
+@media (max-width: 479px) {
+  .home-hero .hero-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 7px;
+  }
+  .home-hero .hero-actions .button {
+    width: auto;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 36px;
+    padding: 10px 10px;
+    font-size: 0.76rem;
+    gap: 5px;
+    margin-bottom: 30px;
+  }
+  .hero-action-label--desktop {
+    display: none;
+  }
+  .hero-action-label--mobile {
+    display: inline;
+  }
+  .run-hero-actions {
+    align-items: stretch;
+  }
+  .run-hero-actions .button {
+    width: 100%;
+  }
 }
 
 .run-category-grid {

@@ -89,7 +89,7 @@ export function HomePage() {
             <p className="hero-kicker">
               <Sparkles size={16} /> Faith · Culture · Community
             </p>
-            <h1>
+            <h1 className="hero-title">
               One faith.
               <br />
               <em>One celebration.</em>
@@ -100,10 +100,13 @@ export function HomePage() {
             </p>
             <div className="hero-actions">
               <Button to={registerHref}>
-                Register for the run <ArrowRight size={17} />
+                <span className="hero-action-label hero-action-label--desktop">Register for the run</span>
+                <span className="hero-action-label hero-action-label--mobile">Register run</span>
+                <ArrowRight size={17} />
               </Button>
               <Button to="/activities" variant="secondary">
-                View celebration schedule
+                <span className="hero-action-label hero-action-label--desktop">View celebration schedule</span>
+                <span className="hero-action-label hero-action-label--mobile">View schedule</span>
               </Button>
             </div>
           </div>
@@ -143,8 +146,12 @@ export function HomePage() {
                 decoding="async"
               />
             </picture>
-            <p>Sto. Niño Parish</p>
-            <small>SINOOG 2027 · Viva Pit Señor!</small>
+            <div className="parish-emblem-band__identity">
+              <p className="parish-emblem-band__parish">Sto. Niño Parish</p>
+              <span className="parish-emblem-band__divider" aria-hidden />
+              <p className="parish-emblem-band__festival">Sinoog 2027</p>
+              <p className="parish-emblem-band__acclamation">Viva Pit Señor!</p>
+            </div>
           </div>
         </div>
       </section>
@@ -383,21 +390,6 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Floating Mobile Quick Dock */}
-      <nav className="mobile-quick-dock" aria-label="Quick actions">
-        <Link to={registerHref} className="mobile-quick-dock__item">
-          <span className="mobile-quick-dock__icon" aria-hidden>
-            🏃
-          </span>
-          <span>Register for Run</span>
-        </Link>
-        <Link to="/activities" className="mobile-quick-dock__item">
-          <span className="mobile-quick-dock__icon" aria-hidden>
-            📅
-          </span>
-          <span>Schedule</span>
-        </Link>
-      </nav>
     </>
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
-import { CalendarDays, Facebook, MapPin, Menu, X } from 'lucide-react';
+import { Facebook, Menu, X } from 'lucide-react';
 import { LogoMark } from '../components/LogoMark';
 import { useAuth } from '../features/auth/useAuth';
 
@@ -24,16 +24,6 @@ export function PublicLayout() {
         Skip to content
       </a>
       <header className="site-header">
-        <div className="utility-bar">
-          <div className="container utility-bar__inner">
-            <span>
-              <MapPin size={14} /> Guinacot, Guindulman, Bohol
-            </span>
-            <span>
-              <CalendarDays size={14} /> January 6–15, 2027
-            </span>
-          </div>
-        </div>
         <div className="container nav-wrap">
           <Link className="brand" to="/" onClick={() => setOpen(false)}>
             <LogoMark type="parish" />
