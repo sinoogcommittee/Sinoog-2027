@@ -1,41 +1,97 @@
-import { useEffect, useState } from 'react';
-import { ArrowRight, Search, Newspaper } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowRight, Pin, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHero } from '../../components/PageHero';
 import { getPublishedPosts } from '../../features/content/postQueries';
-import { ErrorState, LoadingState } from '../../features/ui/FeedbackStates';
+import { EmptyState, ErrorState, LoadingState } from '../../features/ui/FeedbackStates';
 import type { NewsPost } from '../../types';
+
+const CATEGORIES = ['All', 'Announcement', 'Sinoog Run', 'Festival'] as const;
+
+function dateBadge(publishedAt: string): { day: string; month: string } {
+  // Expects formats like "October 26, 2026" from the API layer
+  const parsed = new Date(publishedAt);
+  if (!Number.isNaN(parsed.getTime())) {
+    return {
+      day: String(parsed.getDate()).padStart(2, '0'),
+      month: parsed.toLocaleString('en-US', { month: 'short' }).toUpperCase(),
+    };
+  }
+  const parts = publishedAt.split(' ');
+  return {
+    day: (parts[1] ?? '—').replace(',', ''),
+    month: (parts[0] ?? 'OCT').slice(0, 3).toUpperCase(),
+  };
+}
+
+function PostCard({ post, featured = false }: { post: NewsPost; featured?: boolean }) {
+  const badge = dateBadge(post.publishedAt);
+
+  return (
+    <article className={`news-feed-card${featured ? ' news-feed-card--featured' : ''}`}>
+      <div className="news-feed-card__date" aria-hidden>
+        <strong>{badge.day}</strong>
+        <span>{badge.month}</span>
+      </div>
+      <div className="news-feed-card__body">
+        <div className="news-feed-card__tags">
+          <span className="activity-type">{post.category}</span>
+          {post.pinned && (
+            <span className="news-pinned-tag">
+              <Pin size={12} aria-hidden /> Pinned
+            </span>
+          )}
+        </div>
+        <h2 className="news-feed-card__title">
+          <Link to={`/news/${post.slug}`}>{post.title}</Link>
+        </h2>
+        {post.excerpt && <p className="news-feed-card__excerpt">{post.excerpt}</p>}
+        <Link to={`/news/${post.slug}`} className="news-feed-card__read">
+          Read story <ArrowRight size={15} aria-hidden />
+        </Link>
+      </div>
+    </article>
+  );
+}
 
 export function NewsPage() {
   const [posts, setPosts] = useState<NewsPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [loadError, setLoadError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
 
-  const categories = ['All', 'Announcement', 'Sinoog Run', 'Festival'];
-
   useEffect(() => {
     let active = true;
-
-    const timer = setTimeout(() => {
+    const timer = window.setTimeout(() => {
       setLoadError(null);
-      void getPublishedPosts(selectedCategory, searchTerm).then((list) => {
-        if (!active) return;
-        setPosts(list);
-      }).catch((error: unknown) => {
-        if (active) setLoadError(error instanceof Error ? error.message : 'Unable to load published news.');
-      }).finally(() => {
-        if (active) setLoading(false);
-      });
+      void getPublishedPosts(selectedCategory, searchTerm)
+        .then((list) => {
+          if (!active) return;
+          setPosts(list);
+        })
+        .catch((error: unknown) => {
+          if (active) {
+            setLoadError(error instanceof Error ? error.message : 'Unable to load published news.');
+          }
+        })
+        .finally(() => {
+          if (active) setLoading(false);
+        });
     }, 250);
 
     return () => {
       active = false;
-      clearTimeout(timer);
+      window.clearTimeout(timer);
     };
   }, [searchTerm, selectedCategory, reloadKey]);
+
+  const { featured, rest } = useMemo(() => {
+    const pinned = posts.find((p) => p.pinned);
+    if (!pinned) return { featured: null as NewsPost | null, rest: posts };
+    return { featured: pinned, rest: posts.filter((p) => p.id !== pinned.id) };
+  }, [posts]);
 
   return (
     <>
@@ -49,11 +105,11 @@ export function NewsPage() {
         <div className="container">
           <div className="public-filter-bar public-filter-bar--news">
             <label className="search-field modern-search public-filter-search" htmlFor="news-search-input">
-              <Search size={18} aria-hidden="true" />
+              <Search size={18} aria-hidden />
               <input
                 id="news-search-input"
                 type="search"
-                aria-label="Search news"
+                aria-label="Search announcements"
                 placeholder="Search announcements…"
                 value={searchTerm}
                 onChange={(e) => {
@@ -65,8 +121,8 @@ export function NewsPage() {
               />
             </label>
 
-            <div className="public-filter-tabs public-filter-tabs--news" role="group" aria-label="Filter announcements by category">
-              {categories.map((cat) => (
+            <div className="public-filter-tabs public-filter-tabs--news" role="group" aria-label="Filter by category">
+              {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   type="button"
@@ -88,35 +144,35 @@ export function NewsPage() {
               <LoadingState message="Loading articles and notices…" />
             </div>
           ) : loadError ? (
-            <ErrorState message={loadError} onRetry={() => { setLoading(true); setReloadKey((value) => value + 1); }} />
+            <ErrorState
+              message={loadError}
+              onRetry={() => {
+                setLoading(true);
+                setReloadKey((value) => value + 1);
+              }}
+            />
           ) : posts.length > 0 ? (
-            <div className="article-list">
-              {posts.map((post) => {
-                const parts = post.publishedAt.split(' ');
-                const day = parts[1]?.replace(',', '') || '26';
-                const month = parts[0]?.slice(0, 3).toUpperCase() || 'OCT';
-                return (
-                  <Link to={`/news/${post.slug}`} key={post.id}>
-                    <div className="article-list__date">
-                      <strong>{day}</strong>
-                      <span>{month}</span>
-                    </div>
-                    <div>
-                      <span className="activity-type">{post.category}</span>
-                      <h2>{post.title}</h2>
-                      <p>{post.excerpt}</p>
-                    </div>
-                    <ArrowRight size={20} />
-                  </Link>
-                );
-              })}
+            <div className="news-feed">
+              {featured && (
+                <div className="news-feed__featured" aria-label="Pinned announcement">
+                  <PostCard post={featured} featured />
+                </div>
+              )}
+              <div className="news-feed__list">
+                {rest.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
             </div>
           ) : (
-            <div className="empty-state">
-              <Newspaper size={42} />
-              <h3>No announcements found</h3>
-              <p>No articles matched your search query. Try searching with different keywords.</p>
-            </div>
+            <EmptyState
+              title="No announcements found"
+              message={
+                searchTerm || selectedCategory !== 'All'
+                  ? 'No articles matched your search or filter. Try different keywords or choose All.'
+                  : 'Official announcements will appear here once the committee publishes them.'
+              }
+            />
           )}
         </div>
       </section>
