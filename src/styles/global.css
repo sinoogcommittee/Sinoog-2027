@@ -749,7 +749,7 @@ button:focus-visible {
 .home-hero .button--secondary,
 .page-hero .button--secondary {
   border-color: rgba(255, 255, 255, 0.55);
-  color: #fff;
+  color: #35200b;
 }
 .hero-location {
   display: flex;
