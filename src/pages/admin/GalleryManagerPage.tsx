@@ -267,53 +267,25 @@ export function GalleryManagerPage() {
 
       <div className="gallery-admin-toolbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--md-space-3)', marginBottom: 'var(--md-space-6)' }}>
         <div
-          className="gallery-switcher"
+          className="gallery-switcher admin-segmented-control"
+          role="tablist"
           aria-label="Gallery management type"
-          style={{
-            display: 'flex',
-            gap: 'var(--md-space-2)',
-            padding: '4px',
-            background: 'var(--md-sys-color-surface-container-high)',
-            borderRadius: 'var(--md-sys-shape-corner-full)',
-          }}
         >
           <button
             type="button"
+            role="tab"
+            aria-selected={mediaType === 'photo'}
             className={mediaType === 'photo' ? 'active' : ''}
             onClick={() => setMediaType('photo')}
-            style={{
-              padding: '8px 16px',
-              borderRadius: 'var(--md-sys-shape-corner-full)',
-              border: 'none',
-              background: mediaType === 'photo' ? 'var(--md-sys-color-primary)' : 'transparent',
-              color: mediaType === 'photo' ? 'var(--md-sys-color-on-primary)' : 'var(--md-sys-color-on-surface-variant)',
-              fontWeight: 600,
-              fontSize: '0.875rem',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
           >
             <Images size={17} /> Photos
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={mediaType === 'video'}
             className={mediaType === 'video' ? 'active' : ''}
             onClick={() => setMediaType('video')}
-            style={{
-              padding: '8px 16px',
-              borderRadius: 'var(--md-sys-shape-corner-full)',
-              border: 'none',
-              background: mediaType === 'video' ? 'var(--md-sys-color-primary)' : 'transparent',
-              color: mediaType === 'video' ? 'var(--md-sys-color-on-primary)' : 'var(--md-sys-color-on-surface-variant)',
-              fontWeight: 600,
-              fontSize: '0.875rem',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
           >
             <Video size={17} /> Videos
           </button>

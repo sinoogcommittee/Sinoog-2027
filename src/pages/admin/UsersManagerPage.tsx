@@ -294,8 +294,8 @@ export function UsersManagerPage() {
       </div>
 
       <Card variant="outlined" className="users-admin-panel" style={{ padding: 'var(--md-space-4)' }}>
-        <div className="table-tools users-toolbar" style={{ display: 'flex', gap: 'var(--md-space-3)', alignItems: 'center', flexWrap: 'wrap', marginBottom: 'var(--md-space-4)' }}>
-          <div style={{ flex: '1 1 280px', minWidth: '220px' }}>
+        <div className="table-tools admin-toolbar users-toolbar">
+          <div className="users-toolbar__search-wrap">
             <SearchBar
               label="Search accounts"
               placeholder="Search by name, mobile, or address…"
@@ -303,7 +303,7 @@ export function UsersManagerPage() {
               onValueChange={setSearchQuery}
             />
           </div>
-          <div style={{ width: '220px' }}>
+          <div className="users-toolbar__filter-wrap">
             <SelectField
               label="Filter by role"
               value={roleFilter}

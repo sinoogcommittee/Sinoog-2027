@@ -201,8 +201,8 @@ export function SponsorsManagerPage() {
       </div>
 
       <Card variant="outlined" style={{ padding: 'var(--md-space-4)' }}>
-        <div className="table-tools" style={{ display: 'flex', gap: 'var(--md-space-3)', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: 'var(--md-space-4)' }}>
-          <div style={{ flex: '1 1 280px', minWidth: '220px' }}>
+        <div className="table-tools admin-toolbar" style={{ display: 'flex', gap: 'var(--md-space-3)', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: 'var(--md-space-4)' }}>
+          <div className="admin-toolbar__search-wrap">
             <SearchBar
               label="Search sponsors"
               placeholder="Search name, tier, or website…"
@@ -210,7 +210,7 @@ export function SponsorsManagerPage() {
               onValueChange={setFilter}
             />
           </div>
-          <span style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+          <span className="admin-toolbar__count" style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
             {rows.filter((r) => r.published).length} published · {rows.length} total
           </span>
         </div>
@@ -233,37 +233,23 @@ export function SponsorsManagerPage() {
             <div className="admin-table__head sponsors-admin-table__grid">
               <span>Sponsor</span>
               <span>Tier</span>
-              <span>Order</span>
-              <span>Status</span>
+              <span style={{ textAlign: 'center' }}>Order</span>
+              <span style={{ textAlign: 'center' }}>Status</span>
               <span style={{ textAlign: 'right' }}>Actions</span>
             </div>
             {filtered.map((row) => {
               const logo = getSponsorLogoUrl(row.sponsor.logo_path);
               return (
                 <div key={row.sponsor_id} className="admin-table__row sponsors-admin-table__grid">
-                  <div className="sponsors-admin-identity" style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-3)' }}>
-                    <div
-                      className="sponsors-admin-logo"
-                      style={{
-                        width: '42px',
-                        height: '42px',
-                        borderRadius: 'var(--md-sys-shape-corner-medium)',
-                        border: '1px solid var(--md-sys-color-outline-variant)',
-                        overflow: 'hidden',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: 'var(--md-sys-color-surface-container-highest)',
-                        flexShrink: 0,
-                      }}
-                    >
+                  <div className="sponsors-admin-identity">
+                    <div className="sponsors-admin-logo">
                       {logo ? (
                         <img src={logo} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
                       ) : (
                         <HeartHandshake size={20} aria-hidden style={{ color: 'var(--md-sys-color-on-surface-variant)' }} />
                       )}
                     </div>
-                    <div>
+                    <div className="sponsors-admin-info">
                       <strong>{row.sponsor.name}</strong>
                       {row.sponsor.website_url ? (
                         <small style={{ display: 'block' }}>
@@ -276,42 +262,35 @@ export function SponsorsManagerPage() {
                       )}
                     </div>
                   </div>
-                  <div>
-                    <span className="status" style={{ padding: '3px 8px', borderRadius: 'var(--md-sys-shape-corner-full)', background: 'var(--md-sys-color-surface-container-high)', fontSize: '0.8rem', fontWeight: 600 }}>
+                  <div className="sponsors-admin-tier">
+                    <span className="sponsor-tier-badge">
                       {row.tier}
                     </span>
                   </div>
-                  <div>{row.sort_order}</div>
-                  <div>
+                  <div className="sponsors-admin-order">
+                    <span className="sponsors-admin-order-label">Order </span>
+                    <span>{row.sort_order}</span>
+                  </div>
+                  <div className="sponsors-admin-status">
                     <button
                       type="button"
                       className={`status ${row.published ? 'status--success' : 'status--warning'}`}
                       onClick={() => void handleTogglePublished(row)}
                       title={row.published ? 'Click to unpublish' : 'Click to publish'}
-                      style={{
-                        minHeight: '36px',
-                        padding: '4px 12px',
-                        borderRadius: 'var(--md-sys-shape-corner-full)',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                        fontSize: '0.8rem',
-                        background: row.published ? 'var(--md-sys-color-tertiary-container)' : 'var(--md-sys-color-secondary-container)',
-                        color: row.published ? 'var(--md-sys-color-on-tertiary-container)' : 'var(--md-sys-color-on-secondary-container)',
-                      }}
                     >
                       {row.published ? 'Published' : 'Draft'}
                     </button>
                   </div>
-                  <div className="sponsors-admin-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
-                    <Button
-                      variant="text"
-                      size="small"
-                      leadingIcon={<Pencil size={15} />}
+                  <div className="sponsors-admin-actions">
+                    <button
+                      type="button"
+                      className="button button--ghost button--sm"
                       onClick={() => openEdit(row)}
+                      aria-label={`Edit ${row.sponsor.name}`}
+                      title="Edit"
                     >
-                      Edit
-                    </Button>
+                      <Pencil size={15} />
+                    </button>
                     {row.sponsor.website_url && (
                       <a
                         className="button button--ghost button--sm"
@@ -319,7 +298,7 @@ export function SponsorsManagerPage() {
                         target="_blank"
                         rel="noreferrer"
                         aria-label={`Open website for ${row.sponsor.name}`}
-                        style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                        title="Open website"
                       >
                         <ExternalLink size={15} />
                       </a>
@@ -329,7 +308,7 @@ export function SponsorsManagerPage() {
                       className="button button--ghost button--sm"
                       onClick={() => void handleDelete(row)}
                       aria-label={`Remove ${row.sponsor.name}`}
-                      style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                      title="Remove sponsor"
                     >
                       <Trash2 size={15} />
                     </button>

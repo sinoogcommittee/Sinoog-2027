@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { TextField } from '../../components/m3/TextField';
+import { Card } from '../../components/m3/Card';
 import { LoadingState } from '../../features/ui/FeedbackStates';
 import { useAuth } from '../../features/auth/useAuth';
 import { useToast } from '../../features/ui/useToast';
@@ -93,7 +94,7 @@ export function AccountPage() {
   }
 
   return (
-    <section className="section">
+    <main className="m3-account-page section">
       <div className="container narrow">
         <p className="eyebrow">Sinoog Run account</p>
         <h1 style={{ fontFamily: 'Fraunces, serif', marginBottom: '0.5rem' }}>My runner profile</h1>
@@ -101,7 +102,7 @@ export function AccountPage() {
           {user?.email || (isDemoAdmin ? 'Demo session' : '')}
         </p>
 
-        <div className="admin-panel" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
+        <Card as="div" variant="outlined" className="account-card account-card--profile">
           <form onSubmit={(e) => void handleSave(e)} style={{ display: 'grid', gap: '1rem' }}>
             <TextField
               label="Full name"
@@ -139,7 +140,7 @@ export function AccountPage() {
               )}
             </div>
           </form>
-        </div>
+        </Card>
 
         {registrationState.registration && (() => {
           const registration = registrationState.registration;
@@ -148,7 +149,7 @@ export function AccountPage() {
           const privacyConsent = registrationState.consents.find((item) => item.consent_type === 'privacy');
           const guardianConsent = registrationState.consents.find((item) => item.consent_type === 'guardian');
           return (
-            <section className="runner-account-registration" aria-labelledby="runner-registration-details">
+            <Card as="section" variant="outlined" className="account-card runner-account-registration" aria-labelledby="runner-registration-details">
               <div className="runner-account-registration__heading">
                 <div>
                   <p className="eyebrow">Sinoog Run 2027</p>
@@ -190,7 +191,7 @@ export function AccountPage() {
                   {guardianConsent && <li><strong>Parent / guardian consent:</strong> {guardianConsent.accepted ? `Accepted · ${guardianConsent.version} · ${new Date(guardianConsent.accepted_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}` : 'No acceptance recorded'}</li>}
                 </ul>
               </div>
-            </section>
+            </Card>
           );
         })()}
 
@@ -201,6 +202,6 @@ export function AccountPage() {
           </button>
         </div>
       </div>
-    </section>
+    </main>
   );
 }

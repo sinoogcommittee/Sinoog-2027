@@ -313,17 +313,9 @@ export function FinancePage() {
       </div>
 
       <nav
-        className="finance-scope-tabs"
+        className="finance-scope-tabs admin-segmented-control"
         aria-label="Financial report allocation"
-        style={{
-          display: "flex",
-          gap: "var(--md-space-2)",
-          marginBottom: "var(--md-space-6)",
-          padding: "4px",
-          background: "var(--md-sys-color-surface-container-high)",
-          borderRadius: "var(--md-sys-shape-corner-full)",
-          width: "fit-content",
-        }}
+        style={{ marginBottom: "var(--md-space-6)" }}
       >
         {(["overall", "festival", "run", "general"] as ScopeFilter[]).map((scope) => (
           <button
@@ -331,17 +323,6 @@ export function FinancePage() {
             type="button"
             className={scopeFilter === scope ? "is-active" : ""}
             onClick={() => setScopeFilter(scope)}
-            style={{
-              padding: "8px 16px",
-              borderRadius: "var(--md-sys-shape-corner-full)",
-              border: "none",
-              background: scopeFilter === scope ? "var(--md-sys-color-primary)" : "transparent",
-              color: scopeFilter === scope ? "var(--md-sys-color-on-primary)" : "var(--md-sys-color-on-surface-variant)",
-              fontWeight: 600,
-              fontSize: "0.875rem",
-              cursor: "pointer",
-              transition: "all var(--md-sys-motion-duration-short4) ease",
-            }}
           >
             {scope === "overall" ? "Overall" : scopeLabel(scope)}
           </button>
@@ -468,7 +449,7 @@ export function FinancePage() {
         <LoadingState message="Loading financial records…" />
       ) : (
         <>
-          <div className="stat-grid" style={{ marginBottom: "var(--md-space-6)" }}>
+          <div className="stat-grid finance-stat-grid" style={{ marginBottom: "var(--md-space-6)" }}>
             <Card variant="outlined" className="stat-card">
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--md-space-2)" }}>
                 <span className="stat-label">Cash inflows</span>
@@ -518,8 +499,8 @@ export function FinancePage() {
               </div>
             </div>
 
-            <div style={{ display: "flex", gap: "var(--md-space-3)", alignItems: "center", flexWrap: "wrap", marginBottom: "var(--md-space-4)" }}>
-              <div style={{ flex: "1 1 260px", minWidth: "200px" }}>
+            <div className="table-tools admin-toolbar finance-toolbar">
+              <div className="admin-toolbar__search-wrap finance-toolbar__search">
                 <SearchBar
                   label="Search financial records"
                   placeholder="Category, person, purpose, ref…"
@@ -527,182 +508,158 @@ export function FinancePage() {
                   onValueChange={setSearch}
                 />
               </div>
-              <div style={{ width: "160px" }}>
-                <SelectField
-                  label="Entry type"
-                  value={ledgerType}
-                  onChange={(e) => setLedgerType(e.target.value as LedgerTypeFilter)}
-                >
-                  <option value="all">All types</option>
-                  <option value="income">Cash inflows</option>
-                  <option value="expense">Expenses</option>
-                </SelectField>
-              </div>
-              <div style={{ width: "150px" }}>
-                <SelectField
-                  label="Payment method"
-                  value={ledgerMethod}
-                  onChange={(e) => setLedgerMethod(e.target.value)}
-                >
-                  <option value="all">All methods</option>
-                  <option value="cash">Cash</option>
-                  <option value="gcash">GCash</option>
-                  <option value="bank">Bank</option>
-                </SelectField>
-              </div>
-              <div style={{ width: "150px" }}>
-                <SelectField
-                  label="Record status"
-                  value={ledgerStatus}
-                  onChange={(e) => setLedgerStatus(e.target.value as LedgerStatusFilter)}
-                >
-                  <option value="active">Active records</option>
-                  <option value="voided">Voided records</option>
-                  <option value="all">All records</option>
-                </SelectField>
-              </div>
-              <div style={{ width: "150px" }}>
-                <TextField
-                  label="From"
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                />
-              </div>
-              <div style={{ width: "150px" }}>
-                <TextField
-                  label="To"
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                />
+              <div className="finance-toolbar__filters">
+                <div className="finance-filter-field">
+                  <SelectField
+                    label="Entry type"
+                    value={ledgerType}
+                    onChange={(e) => setLedgerType(e.target.value as LedgerTypeFilter)}
+                  >
+                    <option value="all">All types</option>
+                    <option value="income">Cash inflows</option>
+                    <option value="expense">Expenses</option>
+                  </SelectField>
+                </div>
+                <div className="finance-filter-field">
+                  <SelectField
+                    label="Payment method"
+                    value={ledgerMethod}
+                    onChange={(e) => setLedgerMethod(e.target.value)}
+                  >
+                    <option value="all">All methods</option>
+                    <option value="cash">Cash</option>
+                    <option value="gcash">GCash</option>
+                    <option value="bank">Bank</option>
+                  </SelectField>
+                </div>
+                <div className="finance-filter-field">
+                  <SelectField
+                    label="Record status"
+                    value={ledgerStatus}
+                    onChange={(e) => setLedgerStatus(e.target.value as LedgerStatusFilter)}
+                  >
+                    <option value="active">Active records</option>
+                    <option value="voided">Voided records</option>
+                    <option value="all">All records</option>
+                  </SelectField>
+                </div>
+                <div className="finance-filter-field finance-filter-field--date">
+                  <TextField
+                    label="From"
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                  />
+                </div>
+                <div className="finance-filter-field finance-filter-field--date">
+                  <TextField
+                    label="To"
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
 
             {filteredLedger.length ? (
-              <div className="finance-ledger-list">
-                {filteredLedger.map((row) => (
-                  <article
-                    className={`finance-ledger-row ${row.voidedAt ? "is-voided" : ""}`}
-                    key={row.id}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-                      gap: "var(--md-space-3)",
-                      alignItems: "center",
-                      padding: "var(--md-space-4)",
-                      borderBottom: "1px solid var(--md-sys-color-outline-variant)",
-                      opacity: row.voidedAt ? 0.6 : 1,
-                    }}
-                  >
-                    <div className="finance-ledger-row__primary" style={{ display: "flex", alignItems: "center", gap: "var(--md-space-3)" }}>
-                      <span
-                        className={`finance-flow-icon ${row.transactionType === "income" ? "is-income" : "is-expense"}`}
-                        style={{
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "var(--md-sys-shape-corner-full)",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontWeight: 700,
-                          fontSize: "1.1rem",
-                          background: row.transactionType === "income" ? "var(--md-sys-color-tertiary-container)" : "var(--md-sys-color-error-container)",
-                          color: row.transactionType === "income" ? "var(--md-sys-color-on-tertiary-container)" : "var(--md-sys-color-on-error-container)",
-                        }}
-                      >
-                        {row.transactionType === "income" ? "+" : "−"}
-                      </span>
-                      <div>
-                        <strong>{row.category}</strong>
-                        <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
-                          {row.transactionDate} · {scopeLabel(row.scope)} · {methodLabel(row.method)}
-                        </small>
-                      </div>
-                    </div>
-
-                    <div>
-                      <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
-                        {row.transactionType === "income" ? "Received from" : "Paid to"}
-                      </small>
-                      <strong>{row.counterparty}</strong>
-                      {row.receivedBy && (
-                        <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
-                          Received by: {row.receivedBy}
-                        </small>
-                      )}
-                    </div>
-
-                    <div>
-                      <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
-                        Particulars / Purpose
-                      </small>
-                      <strong>{row.description}</strong>
-                      {row.reference && (
-                        <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
-                          Ref: {row.reference}
-                        </small>
-                      )}
-                    </div>
-
-                    <div className="finance-ledger-row__amount">
-                      <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
-                        Amount
-                      </small>
-                      <strong
-                        style={{
-                          fontSize: "1.05rem",
-                          color: row.transactionType === "income" ? "var(--md-sys-color-tertiary)" : "var(--md-sys-color-error)",
-                        }}
-                      >
-                        {row.transactionType === "income" ? "+" : "−"}{peso(row.amountCentavos)}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
-                        Recorded by
-                      </small>
-                      <strong>{row.recorder}</strong>
-                      <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)", fontSize: "0.75rem" }}>
-                        {new Date(row.recordedAt).toLocaleString("en-PH", { timeZone: "Asia/Manila" })}
-                      </small>
-                    </div>
-
-                    <div className="finance-ledger-row__actions" style={{ display: "flex", justifyContent: "flex-end" }}>
-                      {row.voidedAt ? (
-                        <StatusBadge tone="danger">Voided</StatusBadge>
-                      ) : row.source === "manual" ? (
-                        <button
-                          type="button"
-                          className="button button--ghost button--sm"
-                          aria-label={`Void ${row.description}`}
-                          title="Void entry"
-                          onClick={() => void removeEntry(row.id, row.description)}
-                          style={{ minWidth: "44px", minHeight: "44px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
+              <div className="finance-ledger-table">
+                <div className="finance-ledger-head">
+                  <span className="finance-ledger-head__col finance-ledger-head__col--primary">Transaction</span>
+                  <span className="finance-ledger-head__col">Counterparty</span>
+                  <span className="finance-ledger-head__col">Particulars</span>
+                  <span className="finance-ledger-head__col">Recorded by</span>
+                  <span className="finance-ledger-head__col finance-ledger-head__col--amount">Amount</span>
+                  <span className="finance-ledger-head__col finance-ledger-head__col--status">Status</span>
+                </div>
+                <div className="finance-ledger-list">
+                  {filteredLedger.map((row) => (
+                    <article
+                      className={`finance-ledger-row ${row.voidedAt ? "is-voided" : ""}`}
+                      key={row.id}
+                    >
+                      <div className="finance-ledger-col finance-ledger-col--primary">
+                        <span
+                          className={`finance-flow-icon ${row.transactionType === "income" ? "is-income" : "is-expense"}`}
+                          aria-hidden="true"
                         >
-                          <Trash2 size={16} />
-                        </button>
-                      ) : (
-                        <StatusBadge tone="success">Verified</StatusBadge>
-                      )}
-                    </div>
+                          {row.transactionType === "income" ? "+" : "−"}
+                        </span>
+                        <div className="finance-ledger-col__primary-text">
+                          <strong className="finance-ledger-category">{row.category}</strong>
+                          <small className="finance-ledger-meta">
+                            {row.transactionDate} · {scopeLabel(row.scope)} · {methodLabel(row.method)}
+                          </small>
+                        </div>
+                      </div>
 
-                    {row.voidedAt && (
-                      <p
-                        className="finance-ledger-row__void-note"
-                        style={{
-                          gridColumn: "1 / -1",
-                          color: "var(--md-sys-color-error)",
-                          fontSize: "0.8rem",
-                          margin: 0,
-                        }}
-                      >
-                        Voided by {row.voidedBy || "administrator"} on {new Date(row.voidedAt).toLocaleString("en-PH", { timeZone: "Asia/Manila" })}
-                      </p>
-                    )}
-                  </article>
-                ))}
+                      <div className="finance-ledger-col finance-ledger-col--counterparty">
+                        <small className="finance-col-label">
+                          {row.transactionType === "income" ? "Received from" : "Paid to"}
+                        </small>
+                        <strong className="finance-counterparty-name">{row.counterparty}</strong>
+                        {row.receivedBy && (
+                          <small className="finance-received-by">
+                            Received by: {row.receivedBy}
+                          </small>
+                        )}
+                      </div>
+
+                      <div className="finance-ledger-col finance-ledger-col--particulars">
+                        <small className="finance-col-label">Particulars / Purpose</small>
+                        <strong className="finance-particulars-desc">{row.description}</strong>
+                        {row.reference && (
+                          <small className="finance-ref-badge">
+                            Ref: {row.reference}
+                          </small>
+                        )}
+                      </div>
+
+                      <div className="finance-ledger-row__footer">
+                        <div className="finance-ledger-col finance-ledger-col--recorder">
+                          <small className="finance-col-label">Recorded by</small>
+                          <strong className="finance-recorder-name">{row.recorder}</strong>
+                          <small className="finance-recorded-date">
+                            {new Date(row.recordedAt).toLocaleString("en-PH", { timeZone: "Asia/Manila" })}
+                          </small>
+                        </div>
+
+                        <div className="finance-ledger-col finance-ledger-col--amount">
+                          <small className="finance-col-label">Amount</small>
+                          <strong
+                            className={`finance-amount-val ${row.transactionType === "income" ? "is-income" : "is-expense"}`}
+                          >
+                            {row.transactionType === "income" ? "+" : "−"}{peso(row.amountCentavos)}
+                          </strong>
+                        </div>
+                      </div>
+
+                      <div className="finance-ledger-col finance-ledger-col--actions">
+                        {row.voidedAt ? (
+                          <StatusBadge tone="danger">Voided</StatusBadge>
+                        ) : row.source === "manual" ? (
+                          <button
+                            type="button"
+                            className="button button--ghost button--sm finance-void-btn"
+                            aria-label={`Void ${row.description}`}
+                            title="Void entry"
+                            onClick={() => void removeEntry(row.id, row.description)}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        ) : (
+                          <StatusBadge tone="success">Verified</StatusBadge>
+                        )}
+                      </div>
+
+                      {row.voidedAt && (
+                        <p className="finance-ledger-row__void-note">
+                          Voided by {row.voidedBy || "administrator"} on {new Date(row.voidedAt).toLocaleString("en-PH", { timeZone: "Asia/Manila" })}
+                        </p>
+                      )}
+                    </article>
+                  ))}
+                </div>
               </div>
             ) : (
               <EmptyState title="No matching financial records" message="Change the report filters or add a financial entry." />
@@ -736,7 +693,7 @@ export function FinancePage() {
               )}
             </Card>
 
-            <Card variant="outlined" style={{ padding: "var(--md-space-6)" }}>
+            <Card variant="outlined" className="finance-audit-card" style={{ padding: "var(--md-space-6)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "var(--md-space-2)", marginBottom: "var(--md-space-4)" }}>
                 <div>
                   <p className="eyebrow">Registration payment audit</p>
@@ -747,7 +704,7 @@ export function FinancePage() {
                 </Button>
               </div>
 
-              <div style={{ display: "flex", gap: "var(--md-space-2)", marginBottom: "var(--md-space-4)" }}>
+              <div className="finance-audit-filters" style={{ display: "flex", gap: "var(--md-space-2)", marginBottom: "var(--md-space-4)" }}>
                 <div style={{ flex: 1 }}>
                   <SelectField
                     label="Method"
@@ -780,24 +737,20 @@ export function FinancePage() {
                   filteredPayments.map((payment) => (
                     <article
                       key={payment.id}
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "var(--md-space-3) 0",
-                        borderBottom: "1px solid var(--md-sys-color-outline-variant)",
-                      }}
+                      className="finance-payment-audit-item"
                     >
-                      <div>
-                        <strong>{payment.participant_name}</strong>
-                        <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
+                      <div className="finance-payment-audit-item__info">
+                        <strong className="finance-payment-audit-name">{payment.participant_name}</strong>
+                        <small className="finance-payment-audit-meta">
                           {payment.registration_reference} · {payment.category_name}
                         </small>
                       </div>
-                      <div style={{ textAlign: "right" }}>
-                        <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
-                          {payment.method} · {peso(payment.amount_centavos)}
-                        </small>
+                      <div className="finance-payment-audit-item__status-wrap">
+                        <div className="finance-payment-audit-item__amount-line">
+                          <span className="finance-payment-audit-method">{payment.method}</span>
+                          <span className="finance-payment-audit-sep">·</span>
+                          <strong className="finance-payment-audit-amount">{peso(payment.amount_centavos)}</strong>
+                        </div>
                         <StatusBadge tone={payment.status === "verified" ? "success" : payment.status === "rejected" || payment.status === "refunded" ? "danger" : "warning"}>
                           {payment.status}
                         </StatusBadge>

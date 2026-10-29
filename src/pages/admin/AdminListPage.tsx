@@ -62,8 +62,8 @@ export function AdminListPage({ type }: { type: keyof typeof config }) {
       </div>
 
       <Card variant="outlined" style={{ padding: "var(--md-space-4)" }}>
-        <div className="table-tools" style={{ display: "flex", gap: "var(--md-space-3)", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", marginBottom: "var(--md-space-4)" }}>
-          <div style={{ flex: "1 1 280px", minWidth: "220px" }}>
+        <div className="table-tools admin-toolbar" style={{ display: "flex", gap: "var(--md-space-3)", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", marginBottom: "var(--md-space-4)" }}>
+          <div className="admin-toolbar__search-wrap">
             <SearchBar
               label="Search records"
               placeholder="Search records…"
@@ -71,9 +71,11 @@ export function AdminListPage({ type }: { type: keyof typeof config }) {
               onValueChange={setSearch}
             />
           </div>
-          <Button variant="outlined" size="small" leadingIcon={<SlidersHorizontal size={16} />}>
-            Filter
-          </Button>
+          <div className="admin-toolbar__action-wrap">
+            <Button variant="outlined" size="small" leadingIcon={<SlidersHorizontal size={16} />}>
+              Filter
+            </Button>
+          </div>
         </div>
 
         <div className="admin-table">

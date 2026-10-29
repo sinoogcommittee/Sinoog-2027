@@ -79,24 +79,65 @@
 }
 
 .m3-button--filled {
-  background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+  background: #741f29;
+  border: 1px solid #5a141d;
+  color: #ffffff;
+  border-radius: var(--md-sys-shape-corner-full);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 6px rgba(116, 31, 41, 0.28), 0 1px 2px rgba(0, 0, 0, 0.1);
+  transform: translateY(0);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
-.m3-button--filled:hover:not(:disabled) { box-shadow: var(--md-sys-elevation-level1); }
+.m3-button--filled:hover:not(:disabled) {
+  background: #5a141d;
+  border-color: #4a0f16;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(116, 31, 41, 0.35), 0 1px 3px rgba(0, 0, 0, 0.12);
+  color: #ffffff;
+}
+.m3-button--filled:active:not(:disabled) {
+  background: #4a0f16;
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(116, 31, 41, 0.2);
+}
+.m3-button--filled:disabled {
+  opacity: 0.55;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.m3-button--filled .m3-button__icon {
+  color: #ffffff;
+  margin-inline-end: 6px;
+}
 .m3-button--tonal {
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
 }
 .m3-button--tonal:hover:not(:disabled) { box-shadow: var(--md-sys-elevation-level1); }
 .m3-button--outlined {
-  background: transparent;
-  color: var(--md-sys-color-primary);
+  background: #ffffff;
+  color: #741f29;
   border-color: var(--md-sys-color-outline);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+.m3-button--outlined:hover:not(:disabled) {
+  background: var(--md-sys-color-surface-container-low, #fff9f5);
+  box-shadow: var(--md-sys-elevation-level1);
 }
 .m3-button--text {
-  background: transparent;
-  color: var(--md-sys-color-primary);
+  background: var(--md-sys-color-surface-container-low, #fff8f5);
+  border: 1px solid var(--md-sys-color-outline-variant, rgba(0, 0, 0, 0.08));
+  color: #741f29;
   padding: var(--md-space-2) var(--md-space-3);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.m3-button--text:hover:not(:disabled) {
+  background: var(--md-sys-color-surface-container, #f5edd7);
 }
 .m3-button--danger {
   background: var(--md-sys-color-error);
@@ -170,22 +211,34 @@
 }
 
 /* ---------- Card ---------- */
+/* Sinoog pop-shadow system: layered burgundy/wine/gold lifts matching Division ExeCon pattern */
 .m3-card {
   display: block;
   box-sizing: border-box;
   padding: var(--md-space-4);
-  border-radius: var(--md-sys-shape-corner-medium);
+  border-radius: var(--md-sys-shape-corner-large);
   color: var(--md-sys-color-on-surface);
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 90%, transparent);
+  border: var(--sinoog-border-card, 1px solid #e8d5d8);
+  box-shadow: var(--sinoog-shadow-card);
+  -webkit-backdrop-filter: blur(10px) saturate(112%);
+  backdrop-filter: blur(10px) saturate(112%);
+  transition:
+    transform 180ms var(--sinoog-ease-card, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow 180ms var(--sinoog-ease-card, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color 180ms ease;
 }
 @media (min-width: 840px) { .m3-card { padding: var(--md-space-6); } }
-.m3-card--filled { background: var(--md-sys-color-surface-container-highest); }
+
+.m3-card--filled {
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-highest) 88%, transparent);
+}
 .m3-card--elevated {
-  background: var(--md-sys-color-surface-container-low);
-  box-shadow: var(--md-sys-elevation-level1);
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-low) 90%, transparent);
+  box-shadow: var(--sinoog-shadow-card-raised);
 }
 .m3-card--outlined {
-  background: var(--md-sys-color-surface);
-  border: 1px solid var(--md-sys-color-outline-variant);
+  background: color-mix(in srgb, var(--md-sys-color-surface) 94%, transparent);
 }
 
 /* ---------- Chip ---------- */
@@ -199,7 +252,8 @@
   border: 1px solid var(--md-sys-color-outline);
   border-radius: var(--md-sys-shape-corner-small);
   overflow: hidden;
-  background: transparent;
+  background: var(--md-sys-color-surface-container-lowest, #ffffff);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   color: var(--md-sys-color-on-surface-variant);
   font-family: var(--md-ref-typeface-plain);
   font-size: var(--md-sys-typescale-label-large-size);
@@ -213,17 +267,33 @@
 .m3-chip__icon > svg { width: 18px; height: 18px; }
 .m3-chip__label { position: relative; }
 .m3-chip--assist { color: var(--md-sys-color-on-surface); }
-/* Selection is shown by colour AND a check mark, never colour alone */
+/* Filter chip matching Activities segmented switcher style */
+.m3-chip--filter {
+  background: transparent;
+  border: 0;
+  border-radius: var(--md-sys-shape-corner-full);
+  color: var(--md-sys-color-on-surface-variant);
+  font-weight: 600;
+  box-shadow: none;
+  transition:
+    background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+    color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+    box-shadow var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.m3-chip--filter:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+  color: var(--md-sys-color-on-surface);
+}
 .m3-chip--filter.is-selected {
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
-  border-color: transparent;
+  border: 0;
+  font-weight: 700;
+  box-shadow: var(--md-sys-elevation-level1);
 }
 .m3-chip--filter.is-selected::before {
-  content: "\2713";
-  position: relative;
-  font-size: 0.95rem;
-  line-height: 1;
+  display: none;
+  content: none;
 }
 .m3-chip:disabled {
   cursor: not-allowed;
@@ -470,3 +540,81 @@
 }
 .m3-state-box--error .m3-state-box__icon { color: var(--md-sys-color-error); }
 .m3-state-box--error .m3-state-box__title { color: var(--md-sys-color-on-error-container); }
+
+/* Universal Segmented Switcher / Filter Control */
+.m3-segmented-control,
+.admin-segmented-control,
+.filter-tabs,
+.segmented-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-surface-container);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  box-sizing: border-box;
+}
+.m3-segmented-control button,
+.admin-segmented-control button,
+.filter-tabs button,
+.segmented-control button,
+.m3-segmented-control a,
+.admin-segmented-control a,
+.filter-tabs a,
+.segmented-control a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 var(--md-space-4);
+  border: 0;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: #ffffff;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface-variant);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-family: var(--md-ref-typeface-plain);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+    color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+    box-shadow var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.m3-segmented-control button:hover,
+.admin-segmented-control button:hover,
+.filter-tabs button:hover,
+.segmented-control button:hover,
+.m3-segmented-control a:hover,
+.admin-segmented-control a:hover,
+.filter-tabs a:hover,
+.segmented-control a:hover {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+  color: var(--md-sys-color-on-surface);
+}
+.m3-segmented-control button.is-active,
+.admin-segmented-control button.is-active,
+.filter-tabs button.is-active,
+.segmented-control button.is-active,
+.m3-segmented-control button.active,
+.admin-segmented-control button.active,
+.filter-tabs button.active,
+.segmented-control button.active,
+.m3-segmented-control button[aria-selected="true"],
+.admin-segmented-control button[aria-selected="true"],
+.filter-tabs button[aria-selected="true"],
+.segmented-control button[aria-selected="true"],
+.m3-segmented-control a.is-active,
+.admin-segmented-control a.is-active,
+.filter-tabs a.is-active,
+.segmented-control a.is-active {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  font-weight: 700;
+  box-shadow: var(--md-sys-elevation-level1);
+  border: 0;
+}

@@ -248,31 +248,29 @@ export function RunPage({ section }: { section?: 'routes' }) {
               </div>
 
               <div className="feature-cards run-highlights">
-                <Card as="article" variant="filled">
-                  <Route />
+                <Card as="article" variant="outlined" className="run-highlight-card">
+                  <div className="run-highlight-card__icon-badge">
+                    <Route size={24} />
+                  </div>
                   <h3>Scenic Route</h3>
                   <p>Official course details will be published after committee and safety approval.</p>
-                  <strong>Route confirmation pending</strong>
+                  <strong className="run-highlight-card__footer">Route confirmation pending</strong>
                 </Card>
-                <Card as="article" variant="filled">
-                  <PackageOpen />
+                <Card as="article" variant="outlined" className="run-highlight-card">
+                  <div className="run-highlight-card__icon-badge">
+                    <PackageOpen size={24} />
+                  </div>
                   <h3>Official Race Kit</h3>
                   <p>Event singlet, bib, and finisher items as announced for each category.</p>
-                  <strong>Exclusive Edition</strong>
+                  <strong className="run-highlight-card__footer">Exclusive Edition</strong>
                 </Card>
-                <Card as="article" variant="filled">
-                  <Clock />
+                <Card as="article" variant="outlined" className="run-highlight-card">
+                  <div className="run-highlight-card__icon-badge">
+                    <Clock size={24} />
+                  </div>
                   <h3>Race-Day Guide</h3>
-                  <p>
-                    {runEvent?.race_starts_at
-                      ? `Race starts at ${new Date(runEvent.race_starts_at).toLocaleTimeString('en-PH', {
-                          hour: 'numeric',
-                          minute: '2-digit',
-                          timeZone: 'Asia/Manila',
-                        })}.`
-                      : 'Race start time will be announced soon.'}
-                  </p>
-                  <strong>January 9, 2027</strong>
+                  <p>Race starts at 4:00 AM.</p>
+                  <strong className="run-highlight-card__footer">January 9, 2027</strong>
                 </Card>
               </div>
 
@@ -285,19 +283,28 @@ export function RunPage({ section }: { section?: 'routes' }) {
                   </span>
                 </div>
               )}
-              <div className="notice m3-run-notice">
-                <Clock size={20} />
-                <span>
-                  <strong>Registration deadline:</strong>{' '}
-                  {runEvent?.registration_closes_at
-                    ? new Date(runEvent.registration_closes_at).toLocaleString('en-PH', {
-                        dateStyle: 'long',
-                        timeStyle: 'short',
-                        timeZone: 'Asia/Manila',
-                      })
-                    : 'To be announced soon'}
-                </span>
-              </div>
+
+              {/* High-emphasis Red Deadline Card */}
+              <Card as="section" variant="filled" className="run-deadline-card" aria-label="Registration deadline">
+                <div className="run-deadline-card__inner">
+                  <div className="run-deadline-card__icon-wrap">
+                    <Clock size={28} aria-hidden />
+                  </div>
+                  <div className="run-deadline-card__content">
+                    <span className="run-deadline-card__tag">CRITICAL DEADLINE</span>
+                    <h3 className="run-deadline-card__title">Registration deadline:</h3>
+                    <p className="run-deadline-card__date">
+                      {runEvent?.registration_closes_at
+                        ? new Date(runEvent.registration_closes_at).toLocaleString('en-PH', {
+                            dateStyle: 'long',
+                            timeStyle: 'short',
+                            timeZone: 'Asia/Manila',
+                          })
+                        : 'January 2, 2027 at 11:59 PM'}
+                    </p>
+                  </div>
+                </div>
+              </Card>
             </>
           )}
         </div>

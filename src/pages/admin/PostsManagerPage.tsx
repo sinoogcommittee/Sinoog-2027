@@ -436,25 +436,27 @@ export function PostsManagerPage() {
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--md-sys-color-outline-variant)', paddingBottom: '0.75rem', marginBottom: '1.25rem' }}>
-          <Button
-            type="button"
-            variant={activeTab === 'edit' ? 'filled' : 'outlined'}
-            size="small"
-            leadingIcon={<Edit2 size={14} aria-hidden />}
-            onClick={() => setActiveTab('edit')}
-          >
-            Article Editor
-          </Button>
-          <Button
-            type="button"
-            variant={activeTab === 'preview' ? 'filled' : 'outlined'}
-            size="small"
-            leadingIcon={<Eye size={14} aria-hidden />}
-            onClick={() => setActiveTab('preview')}
-          >
-            Live Preview
-          </Button>
+        <div style={{ marginBottom: '1.25rem' }}>
+          <div className="admin-segmented-control" role="tablist" aria-label="Editor view mode">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'edit'}
+              className={activeTab === 'edit' ? 'active is-active' : ''}
+              onClick={() => setActiveTab('edit')}
+            >
+              <Edit2 size={14} aria-hidden /> Article Editor
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'preview'}
+              className={activeTab === 'preview' ? 'active is-active' : ''}
+              onClick={() => setActiveTab('preview')}
+            >
+              <Eye size={14} aria-hidden /> Live Preview
+            </button>
+          </div>
         </div>
 
         {activeTab === 'preview' ? (

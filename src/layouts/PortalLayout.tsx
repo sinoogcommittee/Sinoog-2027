@@ -1,34 +1,35 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import {
-  Calendar,
-  ClipboardCheck,
-  ExternalLink,
-  Flag,
-  Home,
-  LogOut,
-  Newspaper,
-  Settings,
-  ShieldCheck,
-  UserCog,
-  CircleDollarSign,
-  Handshake,
-  Images,
-} from 'lucide-react';
 import { LogoMark } from '../components/LogoMark';
 import { useAuth } from '../features/auth/useAuth';
+import { AdminFloatingNav } from '../components/AdminFloatingNav';
+import {
+  AdminOverviewIcon,
+  AdminActivitiesIcon,
+  AdminNewsIcon,
+  AdminRegistrationsIcon,
+  AdminTimingIcon,
+  AdminDelegationsIcon,
+  AdminUsersIcon,
+  AdminFinanceIcon,
+  AdminSponsorsIcon,
+  AdminGalleryIcon,
+  AdminSettingsIcon,
+  AdminPublicSiteIcon,
+  AdminSignOutIcon,
+} from '../components/AdminNavIcons';
 
 const items = [
-  ['Overview', '/admin', Home, 'admin'],
-  ['Activities & Schedule', '/admin/activities', Calendar, 'admin'],
-  ['News posts', '/admin/posts', Newspaper, 'news'],
-  ['Registrations', '/admin/registrations', ClipboardCheck, 'admin'],
-  ['Race timing', '/admin/run-timing', Flag, 'admin'],
-  ['Delegations', '/admin/delegations', ShieldCheck, 'delegation'],
-  ['Users & Staff', '/admin/users', UserCog, 'admin'],
-  ['Financial records', '/admin/finance', CircleDollarSign, 'admin'],
-  ['Sponsors', '/admin/sponsors', Handshake, 'admin'],
-  ['Gallery', '/admin/gallery', Images, 'admin'],
-  ['Website settings', '/admin/settings', Settings, 'admin'],
+  ['Overview', '/admin', AdminOverviewIcon, 'admin'],
+  ['Activities & Schedule', '/admin/activities', AdminActivitiesIcon, 'admin'],
+  ['News posts', '/admin/posts', AdminNewsIcon, 'news'],
+  ['Registrations', '/admin/registrations', AdminRegistrationsIcon, 'admin'],
+  ['Race timing', '/admin/run-timing', AdminTimingIcon, 'admin'],
+  ['Delegations', '/admin/delegations', AdminDelegationsIcon, 'delegation'],
+  ['Users & Staff', '/admin/users', AdminUsersIcon, 'admin'],
+  ['Financial records', '/admin/finance', AdminFinanceIcon, 'admin'],
+  ['Sponsors', '/admin/sponsors', AdminSponsorsIcon, 'admin'],
+  ['Gallery', '/admin/gallery', AdminGalleryIcon, 'admin'],
+  ['Website settings', '/admin/settings', AdminSettingsIcon, 'admin'],
 ] as const;
 
 export function PortalLayout() {
@@ -75,18 +76,24 @@ export function PortalLayout() {
                 end={path === '/admin'}
                 title={label}
               >
-                <Icon size={19} aria-hidden="true" />
+                <span className="portal-nav-icon">
+                  <Icon />
+                </span>
                 <span>{label}</span>
               </NavLink>
             ))}
           </nav>
           <div className="portal-sidebar-actions">
             <Link className="portal-public-site" to="/" title="View public website">
-              <ExternalLink size={19} aria-hidden="true" />
+              <span className="portal-nav-icon">
+                <AdminPublicSiteIcon />
+              </span>
               <span>Public site</span>
             </Link>
             <button type="button" className="portal-exit" onClick={() => void handleSignOut()} title="Sign out">
-              <LogOut size={19} aria-hidden="true" />
+              <span className="portal-nav-icon">
+                <AdminSignOutIcon />
+              </span>
               <span>Sign out</span>
             </button>
           </div>
@@ -111,6 +118,9 @@ export function PortalLayout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Floating Bottom Navigation for Mobile & Tablet Admin */}
+      <AdminFloatingNav />
     </div>
   );
 }

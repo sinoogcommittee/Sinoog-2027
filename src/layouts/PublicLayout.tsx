@@ -18,6 +18,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { LogoMark } from '../components/LogoMark';
+import { FloatingNav } from '../components/FloatingNav';
 import { useAuth } from '../features/auth/useAuth';
 
 const NAV_LINKS = [
@@ -265,6 +266,9 @@ export function PublicLayout() {
           <span>© 2027 Sinoog Committee</span>
         </div>
       </footer>
+
+      {/* Floating bottom navigation bar on mobile (Division ExeCon pattern) */}
+      <FloatingNav />
     </div>
   );
 }

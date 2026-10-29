@@ -82,8 +82,19 @@ export function HomePage() {
 
   return (
     <main className="m3-home-page">
-      {/* 01. HERO TO COUNTDOWN */}
-      <section className="home-hero">
+      {/* 01. DESKTOP HERO (>= 900px): Copy on left + Emblem on right + Countdown Timer flush at bottom */}
+      <section className="home-hero home-hero--desktop">
+        {/* Parish cover photo background: transparent, under all hero elements just above color background */}
+        <div className="home-hero__cover-wrap" aria-hidden="true">
+          <img
+            src="/images/parishcover_photo.webp"
+            alt=""
+            className="home-hero__cover-photo"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+          />
+        </div>
         <div className="home-hero__pattern" />
         <div className="home-hero__bamboo home-hero__bamboo--left" aria-hidden="true">
           <span className="bamboo-stalk bamboo-stalk--one" />
@@ -102,6 +113,93 @@ export function HomePage() {
           <span className="bamboo-leaf bamboo-leaf--two" />
           <span className="bamboo-leaf bamboo-leaf--three" />
           <span className="bamboo-leaf bamboo-leaf--four" />
+        </div>
+        {/* Hanging bamboo leaves at top center beneath header */}
+        <div className="home-hero__bamboo-top" aria-hidden="true">
+          <svg
+            className="home-hero__bamboo-top-svg"
+            viewBox="0 0 420 86"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {/* Gentle curved bamboo branch running horizontally across the top */}
+            <path
+              d="M 20 6 Q 210 18 400 5"
+              stroke="rgba(245, 223, 171, 0.45)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+            {/* Bamboo nodes / segments on the branch */}
+            <circle cx="110" cy="11" r="2.5" fill="rgba(245, 223, 171, 0.6)" />
+            <circle cx="210" cy="14" r="2.5" fill="rgba(245, 223, 171, 0.6)" />
+            <circle cx="310" cy="11" r="2.5" fill="rgba(245, 223, 171, 0.6)" />
+
+            {/* Left cluster of hanging bamboo leaves */}
+            <g className="bamboo-hanging-cluster bamboo-hanging-cluster--left">
+              <path
+                d="M 85 10 C 72 26 62 48 68 62 C 76 48 84 30 87 11 Z"
+                fill="rgba(245, 223, 171, 0.35)"
+                stroke="rgba(245, 223, 171, 0.55)"
+                strokeWidth="1"
+              />
+              <path
+                d="M 110 11 C 102 32 98 56 108 72 C 114 54 118 34 113 12 Z"
+                fill="rgba(245, 223, 171, 0.45)"
+                stroke="rgba(245, 223, 171, 0.65)"
+                strokeWidth="1"
+              />
+              <path
+                d="M 125 12 C 122 28 126 44 138 56 C 136 40 132 26 128 12 Z"
+                fill="rgba(245, 223, 171, 0.3)"
+                stroke="rgba(245, 223, 171, 0.5)"
+                strokeWidth="1"
+              />
+            </g>
+
+            {/* Center cluster of hanging bamboo leaves */}
+            <g className="bamboo-hanging-cluster bamboo-hanging-cluster--center">
+              <path
+                d="M 195 13 C 182 34 176 58 184 76 C 192 58 198 36 198 14 Z"
+                fill="rgba(245, 223, 171, 0.4)"
+                stroke="rgba(245, 223, 171, 0.6)"
+                strokeWidth="1"
+              />
+              <path
+                d="M 210 14 C 206 38 205 64 210 82 C 215 64 216 38 213 14 Z"
+                fill="rgba(245, 223, 171, 0.5)"
+                stroke="rgba(245, 223, 171, 0.7)"
+                strokeWidth="1.2"
+              />
+              <path
+                d="M 225 14 C 228 34 236 56 248 74 C 242 54 234 34 227 14 Z"
+                fill="rgba(245, 223, 171, 0.4)"
+                stroke="rgba(245, 223, 171, 0.6)"
+                strokeWidth="1"
+              />
+            </g>
+
+            {/* Right cluster of hanging bamboo leaves */}
+            <g className="bamboo-hanging-cluster bamboo-hanging-cluster--right">
+              <path
+                d="M 295 11 C 290 28 288 46 282 58 C 292 46 298 30 297 12 Z"
+                fill="rgba(245, 223, 171, 0.3)"
+                stroke="rgba(245, 223, 171, 0.5)"
+                strokeWidth="1"
+              />
+              <path
+                d="M 310 11 C 314 32 322 56 335 70 C 330 52 322 32 313 11 Z"
+                fill="rgba(245, 223, 171, 0.45)"
+                stroke="rgba(245, 223, 171, 0.65)"
+                strokeWidth="1"
+              />
+              <path
+                d="M 330 10 C 338 26 350 48 362 60 C 352 46 342 28 333 10 Z"
+                fill="rgba(245, 223, 171, 0.35)"
+                stroke="rgba(245, 223, 171, 0.55)"
+                strokeWidth="1"
+              />
+            </g>
+          </svg>
         </div>
         <div className="container home-hero__inner">
           <div className="home-hero__copy">
@@ -150,9 +248,92 @@ export function HomePage() {
         <CountdownTimer />
       </section>
 
-      {/* Parish Emblem & Devotional Highlight (mobile / transitional) */}
-      <section className="parish-emblem-band" aria-label="Sto. Niño Parish">
-        <div className="parish-emblem-band__bamboo parish-emblem-band__bamboo--left" aria-hidden="true">
+      {/* ==============================================================
+          02. MOBILE VIEW 1 (< 900px): Artwork + Countdown in ONE screen view
+          ============================================================== */}
+      <section className="home-hero-mobile-view" aria-label="Sto. Niño Parish Celebration">
+        {/* Hanging bamboo leaves at top beneath header */}
+        <div className="home-hero__bamboo-top" aria-hidden="true">
+          <svg
+            className="home-hero__bamboo-top-svg"
+            viewBox="0 0 420 86"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M 20 6 Q 210 18 400 5"
+              stroke="rgba(245, 223, 171, 0.45)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+            <circle cx="110" cy="11" r="2.5" fill="rgba(245, 223, 171, 0.6)" />
+            <circle cx="210" cy="14" r="2.5" fill="rgba(245, 223, 171, 0.6)" />
+            <circle cx="310" cy="11" r="2.5" fill="rgba(245, 223, 171, 0.6)" />
+            <g className="bamboo-hanging-cluster bamboo-hanging-cluster--left">
+              <path
+                d="M 85 10 C 72 26 62 48 68 62 C 76 48 84 30 87 11 Z"
+                fill="rgba(245, 223, 171, 0.35)"
+                stroke="rgba(245, 223, 171, 0.55)"
+                strokeWidth="1"
+              />
+              <path
+                d="M 110 11 C 102 32 98 56 108 72 C 114 54 118 34 113 12 Z"
+                fill="rgba(245, 223, 171, 0.45)"
+                stroke="rgba(245, 223, 171, 0.65)"
+                strokeWidth="1"
+              />
+              <path
+                d="M 125 12 C 122 28 126 44 138 56 C 136 40 132 26 128 12 Z"
+                fill="rgba(245, 223, 171, 0.3)"
+                stroke="rgba(245, 223, 171, 0.5)"
+                strokeWidth="1"
+              />
+            </g>
+            <g className="bamboo-hanging-cluster bamboo-hanging-cluster--center">
+              <path
+                d="M 195 13 C 182 34 176 58 184 76 C 192 58 198 36 198 14 Z"
+                fill="rgba(245, 223, 171, 0.4)"
+                stroke="rgba(245, 223, 171, 0.6)"
+                strokeWidth="1"
+              />
+              <path
+                d="M 210 14 C 206 38 205 64 210 82 C 215 64 216 38 213 14 Z"
+                fill="rgba(245, 223, 171, 0.5)"
+                stroke="rgba(245, 223, 171, 0.7)"
+                strokeWidth="1.2"
+              />
+              <path
+                d="M 225 14 C 228 34 236 56 248 74 C 242 54 234 34 227 14 Z"
+                fill="rgba(245, 223, 171, 0.4)"
+                stroke="rgba(245, 223, 171, 0.6)"
+                strokeWidth="1"
+              />
+            </g>
+            <g className="bamboo-hanging-cluster bamboo-hanging-cluster--right">
+              <path
+                d="M 295 11 C 290 28 288 46 282 58 C 292 46 298 30 297 12 Z"
+                fill="rgba(245, 223, 171, 0.3)"
+                stroke="rgba(245, 223, 171, 0.5)"
+                strokeWidth="1"
+              />
+              <path
+                d="M 310 11 C 314 32 322 56 335 70 C 330 52 322 32 313 11 Z"
+                fill="rgba(245, 223, 171, 0.45)"
+                stroke="rgba(245, 223, 171, 0.65)"
+                strokeWidth="1"
+              />
+              <path
+                d="M 330 10 C 338 26 350 48 362 60 C 352 46 342 28 333 10 Z"
+                fill="rgba(245, 223, 171, 0.35)"
+                stroke="rgba(245, 223, 171, 0.55)"
+                strokeWidth="1"
+              />
+            </g>
+          </svg>
+        </div>
+
+        {/* Ambient bamboo stalks on mobile */}
+        <div className="home-hero__bamboo home-hero__bamboo--left" aria-hidden="true">
           <span className="bamboo-stalk bamboo-stalk--one" />
           <span className="bamboo-stalk bamboo-stalk--two" />
           <span className="bamboo-stalk bamboo-stalk--three" />
@@ -161,7 +342,7 @@ export function HomePage() {
           <span className="bamboo-leaf bamboo-leaf--three" />
           <span className="bamboo-leaf bamboo-leaf--four" />
         </div>
-        <div className="parish-emblem-band__bamboo parish-emblem-band__bamboo--right" aria-hidden="true">
+        <div className="home-hero__bamboo home-hero__bamboo--right" aria-hidden="true">
           <span className="bamboo-stalk bamboo-stalk--one" />
           <span className="bamboo-stalk bamboo-stalk--two" />
           <span className="bamboo-stalk bamboo-stalk--three" />
@@ -170,8 +351,10 @@ export function HomePage() {
           <span className="bamboo-leaf bamboo-leaf--three" />
           <span className="bamboo-leaf bamboo-leaf--four" />
         </div>
-        <div className="container parish-emblem-band__inner">
-          <div className="hero-emblem">
+
+        {/* Artwork Emblem & Dynamic Identity */}
+        <div className="home-hero-mobile-view__content">
+          <div className="home-hero-mobile-view__emblem">
             <picture className="hero-artwork">
               <source srcSet="/images/hero_section_art.webp" type="image/webp" />
               <img
@@ -179,16 +362,50 @@ export function HomePage() {
                 alt="Sto. Niño Parish seal"
                 width="400"
                 height="400"
-                loading="lazy"
+                fetchPriority="high"
                 decoding="async"
               />
             </picture>
-            <div className="parish-emblem-band__identity">
-              <p className="parish-emblem-band__parish">Sto. Niño Parish</p>
-              <span className="parish-emblem-band__divider" aria-hidden />
-              <p className="parish-emblem-band__festival">Sinoog 2027</p>
-              <p className="parish-emblem-band__acclamation">Viva Pit Señor!</p>
+            <div className="home-hero-mobile-view__identity">
+              <p className="home-hero-mobile-view__parish">Sto. Niño Parish</p>
+              <span className="home-hero-mobile-view__divider" aria-hidden="true" />
+              <p className="home-hero-mobile-view__festival">SINOOG 2027</p>
+              <p className="home-hero-mobile-view__acclamation">Viva Pit Señor!</p>
             </div>
+          </div>
+        </div>
+
+        {/* Live Countdown Bar at bottom of mobile view 1 */}
+        <div className="home-hero-mobile-view__timer">
+          <CountdownTimer />
+        </div>
+      </section>
+
+      {/* ==============================================================
+          03. MOBILE VIEW 2 (< 900px): Hero Copy ("One faith. One celebration.")
+          ============================================================== */}
+      <section className="home-hero-mobile-copy" aria-label="About the celebration">
+        <div className="container home-hero-mobile-copy__inner">
+          <p className="hero-kicker">
+            <Sparkles size={16} /> Faith · Culture · Community
+          </p>
+          <h1>
+            One faith.
+            <br />
+            <em>One celebration.</em>
+          </h1>
+          <p className="hero-lead">
+            Come home to Guinacot as we honor the Holy Child through prayer, movement, music, and a community
+            celebration rooted in tradition.
+          </p>
+          <div className="hero-actions">
+            <Button to={registerHref}>
+              <span className="hero-action-label hero-action-label--mobile">Register run</span>
+              <ArrowRight size={17} />
+            </Button>
+            <Button to="/activities" variant="secondary">
+              <span className="hero-action-label hero-action-label--mobile">View schedule</span>
+            </Button>
           </div>
         </div>
       </section>
