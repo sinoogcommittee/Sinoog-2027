@@ -84,16 +84,19 @@ export function HomePage() {
     <main className="m3-home-page">
       {/* 01. DESKTOP HERO (>= 900px): Copy on left + Emblem on right + Countdown Timer flush at bottom */}
       <section className="home-hero home-hero--desktop">
-        {/* Parish cover photo background: transparent, under all hero elements just above color background */}
+        {/* Parish cover video background: transparent, looping video under all hero elements */}
         <div className="home-hero__cover-wrap" aria-hidden="true">
-          <img
-            src="/images/parishcover_photo.webp"
-            alt=""
-            className="home-hero__cover-photo"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-          />
+          <video
+            className="home-hero__cover-video home-hero__cover-photo"
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster="/images/parishcover_photo.webp"
+          >
+            <source src="/video/parishcover_video.webm" type="video/webm" />
+            <source src="/video/parishcover_video.mp4" type="video/mp4" />
+          </video>
         </div>
         <div className="home-hero__pattern" />
         <div className="home-hero__bamboo home-hero__bamboo--left" aria-hidden="true">

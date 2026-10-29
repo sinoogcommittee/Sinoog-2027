@@ -560,6 +560,7 @@ a.m3-button:hover { text-decoration: none; }
 }
 
 .m3-home-page .date-band {
+  margin-top: 0 !important;
   padding-block: var(--md-space-6);
   border: 0;
   background: var(--md-sys-color-surface-container-low);
@@ -2826,6 +2827,7 @@ a.m3-button:hover { text-decoration: none; }
   user-select: none !important;
 }
 
+.home-hero__cover-video,
 .home-hero__cover-photo {
   width: 100% !important;
   height: 100% !important;
@@ -2928,11 +2930,11 @@ a.m3-button:hover { text-decoration: none; }
    ========================================================================== */
 
 :root {
-  --site-header-height: 78px;
+  --site-header-height: 64px;
 }
-@media (max-width: 1024px) {
+@media (min-width: 840px) and (max-width: 1024px) {
   :root {
-    --site-header-height: 68px;
+    --site-header-height: 52px;
   }
 }
 
@@ -2941,8 +2943,8 @@ a.m3-button:hover { text-decoration: none; }
     display: flex !important;
     flex-direction: column !important;
     justify-content: space-between !important;
-    min-height: calc(100vh - var(--site-header-height, 68px)) !important;
-    min-height: calc(100dvh - var(--site-header-height, 68px)) !important;
+    min-height: calc(100vh - var(--site-header-height, 60px) + 4px) !important;
+    min-height: calc(100dvh - var(--site-header-height, 60px) + 4px) !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
     padding: 0 !important;
@@ -3123,6 +3125,7 @@ a.m3-button:hover { text-decoration: none; }
   .home-hero .countdown-bar {
     padding: clamp(10px, 1.4vh, 14px) 16px !important;
     flex-shrink: 0 !important;
+    margin-bottom: 0 !important;
   }
 
   .home-hero .countdown-unit__value {
@@ -3290,6 +3293,7 @@ a.m3-button:hover { text-decoration: none; }
     flex-direction: column !important;
     align-items: center !important;
     margin-top: clamp(42px, 5.8vh, 52px) !important;
+    transform: translateY(clamp(12px, 2vh, 18px)) !important;
   }
 
   /* Sto. Niño Parish: SMALLER */
