@@ -7,6 +7,7 @@ import { ToastProvider } from './features/ui/ToastContext';
 import './styles/m3/index.css';
 import './styles/global.css';
 import './styles/m3/public-overrides.css';
+import './styles/m3/admin-overrides.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

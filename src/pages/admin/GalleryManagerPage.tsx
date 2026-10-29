@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { Eye, Images, Pencil, Play, Plus, Trash2, Upload, Video, X } from 'lucide-react';
+import { Eye, Images, Pencil, Play, Plus, Trash2, Upload, Video } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { StatusBadge } from '../../components/StatusBadge';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
@@ -20,6 +20,12 @@ import {
 import { ConfirmDialog, EmptyState, LoadingState } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
 import type { ContentStatus } from '../../types';
+import { Button } from '../../components/Button';
+import { Card } from '../../components/m3/Card';
+import { Dialog } from '../../components/m3/Dialog';
+import { TextField } from '../../components/m3/TextField';
+import { SelectField } from '../../components/m3/SelectField';
+import { TextArea } from '../../components/m3/TextArea';
 
 interface AlbumFormState {
   title: string;
@@ -98,6 +104,7 @@ export function GalleryManagerPage() {
     if (saving) return;
     setAlbumModalOpen(false);
     setEditingAlbum(null);
+    setAlbumForm(emptyAlbumForm);
   };
 
   const handleSaveAlbum = async (event: FormEvent) => {
@@ -248,18 +255,70 @@ export function GalleryManagerPage() {
           <h1>Photo & video gallery</h1>
           <p>Create collections, add photos or YouTube videos, and choose the order they appear on the public gallery.</p>
         </div>
-        <div className="gallery-admin-heading__actions">
-          <Link to="/gallery" className="button button--ghost button--sm"><Eye size={15} /> Public gallery</Link>
-          <button type="button" className="button button--primary button--sm" onClick={openCreate}><Plus size={15} /> New collection</button>
+        <div className="gallery-admin-heading__actions" style={{ display: 'flex', gap: 'var(--md-space-2)', alignItems: 'center' }}>
+          <Link to="/gallery" className="button button--ghost button--sm" style={{ textDecoration: 'none', minHeight: '40px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <Eye size={15} /> Public gallery
+          </Link>
+          <Button variant="filled" size="small" leadingIcon={<Plus size={15} />} onClick={openCreate}>
+            New collection
+          </Button>
         </div>
       </div>
 
-      <div className="gallery-admin-toolbar">
-        <div className="gallery-switcher gallery-switcher--admin" aria-label="Gallery management type">
-          <button type="button" className={mediaType === 'photo' ? 'active' : ''} onClick={() => setMediaType('photo')}><Images size={17} /> Photos</button>
-          <button type="button" className={mediaType === 'video' ? 'active' : ''} onClick={() => setMediaType('video')}><Video size={17} /> Videos</button>
+      <div className="gallery-admin-toolbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--md-space-3)', marginBottom: 'var(--md-space-6)' }}>
+        <div
+          className="gallery-switcher"
+          aria-label="Gallery management type"
+          style={{
+            display: 'flex',
+            gap: 'var(--md-space-2)',
+            padding: '4px',
+            background: 'var(--md-sys-color-surface-container-high)',
+            borderRadius: 'var(--md-sys-shape-corner-full)',
+          }}
+        >
+          <button
+            type="button"
+            className={mediaType === 'photo' ? 'active' : ''}
+            onClick={() => setMediaType('photo')}
+            style={{
+              padding: '8px 16px',
+              borderRadius: 'var(--md-sys-shape-corner-full)',
+              border: 'none',
+              background: mediaType === 'photo' ? 'var(--md-sys-color-primary)' : 'transparent',
+              color: mediaType === 'photo' ? 'var(--md-sys-color-on-primary)' : 'var(--md-sys-color-on-surface-variant)',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            <Images size={17} /> Photos
+          </button>
+          <button
+            type="button"
+            className={mediaType === 'video' ? 'active' : ''}
+            onClick={() => setMediaType('video')}
+            style={{
+              padding: '8px 16px',
+              borderRadius: 'var(--md-sys-shape-corner-full)',
+              border: 'none',
+              background: mediaType === 'video' ? 'var(--md-sys-color-primary)' : 'transparent',
+              color: mediaType === 'video' ? 'var(--md-sys-color-on-primary)' : 'var(--md-sys-color-on-surface-variant)',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            <Video size={17} /> Videos
+          </button>
         </div>
-        <p className="gallery-admin-toolbar__hint">
+        <p className="gallery-admin-toolbar__hint" style={{ color: 'var(--md-sys-color-on-surface-variant)', margin: 0, fontSize: '0.875rem' }}>
           {albums.length > 0
             ? `${albums.length} collection${albums.length === 1 ? '' : 's'}. Change a Position number to reorder the public gallery.`
             : 'No collections yet.'}
@@ -267,15 +326,21 @@ export function GalleryManagerPage() {
       </div>
 
       {loading ? (
-        <section className="admin-panel"><LoadingState message="Loading gallery collections…" /></section>
+        <Card variant="outlined" style={{ padding: '3rem' }}>
+          <LoadingState message="Loading gallery collections…" />
+        </Card>
       ) : albums.length === 0 ? (
-        <section className="admin-panel">
+        <Card variant="outlined" style={{ padding: '3rem' }}>
           <EmptyState
             title={`No ${mediaType} collections yet`}
             message={`Create a ${mediaType} collection to start building the gallery.`}
-            action={<button type="button" className="button button--primary button--sm" onClick={openCreate}><Plus size={15} /> New collection</button>}
+            action={
+              <Button variant="filled" size="small" leadingIcon={<Plus size={15} />} onClick={openCreate}>
+                New collection
+              </Button>
+            }
           />
-        </section>
+        </Card>
       ) : (
         <div className="gallery-admin-grid">
           {albums.map((album, index) => {
@@ -283,7 +348,7 @@ export function GalleryManagerPage() {
             const previewSource = preview?.kind === 'video' ? getYouTubeThumbnail(preview.object_path) : preview?.publicUrl;
             const position = index + 1;
             return (
-              <article className="gallery-admin-card" key={album.id}>
+              <Card variant="outlined" className="gallery-admin-card" key={album.id}>
                 <div className="gallery-admin-card__preview">
                   {previewSource ? <img src={previewSource} alt="" loading="lazy" /> : album.media_type === 'photo' ? <Images /> : <Video />}
                   {album.media_type === 'video' && previewSource && <span className="gallery-play-mark"><Play size={18} fill="currentColor" /></span>}
@@ -317,74 +382,195 @@ export function GalleryManagerPage() {
                       />
                       <span>of {albums.length}</span>
                     </label>
-                    <div className="gallery-admin-card__actions">
-                      <button type="button" className="button button--primary button--sm" onClick={() => setManageAlbumId(album.id)}><Upload size={14} /> Manage media</button>
-                      <button type="button" className="button button--secondary button--sm" onClick={() => void handleTogglePublished(album)}>{album.status === 'published' ? 'Unpublish' : 'Publish'}</button>
-                      <button type="button" className="button button--ghost button--sm gallery-admin-icon" onClick={() => openEdit(album)} aria-label={`Edit ${album.title}`} title="Edit collection"><Pencil size={15} /></button>
-                      <button type="button" className="button button--ghost button--sm gallery-admin-icon" onClick={() => setDeleteTarget({ type: 'album', album })} aria-label={`Delete ${album.title}`} title="Delete collection"><Trash2 size={15} /></button>
+                    <div className="gallery-admin-card__actions" style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <Button variant="tonal" size="small" leadingIcon={<Upload size={14} />} onClick={() => setManageAlbumId(album.id)}>
+                        Manage media
+                      </Button>
+                      <Button variant="outlined" size="small" onClick={() => void handleTogglePublished(album)}>
+                        {album.status === 'published' ? 'Unpublish' : 'Publish'}
+                      </Button>
+                      <button
+                        type="button"
+                        className="button button--ghost button--sm gallery-admin-icon"
+                        onClick={() => openEdit(album)}
+                        aria-label={`Edit ${album.title}`}
+                        title="Edit collection"
+                        style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                      >
+                        <Pencil size={15} />
+                      </button>
+                      <button
+                        type="button"
+                        className="button button--ghost button--sm gallery-admin-icon"
+                        onClick={() => setDeleteTarget({ type: 'album', album })}
+                        aria-label={`Delete ${album.title}`}
+                        title="Delete collection"
+                        style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                      >
+                        <Trash2 size={15} />
+                      </button>
                     </div>
                   </div>
                 </div>
-              </article>
+              </Card>
             );
           })}
         </div>
       )}
 
-      {albumModalOpen && (
-        <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="gallery-album-form-title">
-          <form className="modal-card gallery-admin-modal" onSubmit={(event) => void handleSaveAlbum(event)}>
-            <div className="modal-title-row">
-              <div><p className="eyebrow">{mediaType} collection</p><h2 id="gallery-album-form-title">{editingAlbum ? 'Edit collection' : 'Create collection'}</h2></div>
-              <button type="button" className="icon-button" onClick={closeAlbumModal} aria-label="Close"><X /></button>
-            </div>
-            <label>Collection title<input value={albumForm.title} onChange={(event) => setAlbumForm((current) => ({ ...current, title: event.target.value }))} required maxLength={140} /></label>
-            <label>Publication status<select value={albumForm.status} onChange={(event) => setAlbumForm((current) => ({ ...current, status: event.target.value as ContentStatus }))}><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
-            <label>Description<textarea rows={3} value={albumForm.description} onChange={(event) => setAlbumForm((current) => ({ ...current, description: event.target.value }))} placeholder="Describe this collection…" /></label>
-            <p className="form-help">Published collections appear in the public Gallery. Draft and archived collections stay hidden. New collections are added at the end; change their Position on the list to move them.</p>
-            <div className="modal-actions"><button type="button" className="button button--ghost" onClick={closeAlbumModal}>Cancel</button><button type="submit" className="button button--primary" disabled={saving}>{saving ? 'Saving…' : 'Save collection'}</button></div>
-          </form>
-        </div>
-      )}
+      {/* Album create/edit dialog */}
+      <Dialog
+        open={albumModalOpen}
+        onClose={closeAlbumModal}
+        title={editingAlbum ? 'Edit collection' : 'Create collection'}
+      >
+        <p style={{ margin: '0 0 var(--md-space-4) 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+          {`Manage details and visibility for this ${mediaType} collection.`}
+        </p>
+        <form onSubmit={(event) => void handleSaveAlbum(event)} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-4)' }}>
+          <TextField
+            label="Collection title"
+            required
+            maxLength={140}
+            value={albumForm.title}
+            onChange={(event) => setAlbumForm((current) => ({ ...current, title: event.target.value }))}
+          />
+          <SelectField
+            label="Publication status"
+            value={albumForm.status}
+            onChange={(event) => setAlbumForm((current) => ({ ...current, status: event.target.value as ContentStatus }))}
+          >
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+            <option value="archived">Archived</option>
+          </SelectField>
+          <TextArea
+            label="Description"
+            rows={3}
+            placeholder="Describe this collection…"
+            value={albumForm.description}
+            onChange={(event) => setAlbumForm((current) => ({ ...current, description: event.target.value }))}
+            helperText="Published collections appear in the public Gallery. Draft and archived stay hidden."
+          />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--md-space-2)', marginTop: 'var(--md-space-2)' }}>
+            <Button variant="text" onClick={closeAlbumModal}>
+              Cancel
+            </Button>
+            <Button variant="filled" type="submit" loading={saving}>
+              Save collection
+            </Button>
+          </div>
+        </form>
+      </Dialog>
 
-      {managedAlbum && (
-        <div className="modal-overlay gallery-media-overlay" role="dialog" aria-modal="true" aria-labelledby="gallery-media-title">
-          <div className="modal-card gallery-media-modal">
-            <div className="modal-title-row">
-              <div><p className="eyebrow">{managedAlbum.media_type === 'photo' ? 'Photo' : 'Video'} collection · {managedAlbum.status}</p><h2 id="gallery-media-title">{managedAlbum.title}</h2></div>
-              <button type="button" className="icon-button" onClick={() => setManageAlbumId(null)} aria-label="Close media manager"><X /></button>
-            </div>
-
+      {/* Media manager dialog */}
+      <Dialog
+        open={Boolean(managedAlbum)}
+        onClose={() => setManageAlbumId(null)}
+        title={managedAlbum?.title || 'Manage collection media'}
+      >
+        <p style={{ margin: '0 0 var(--md-space-4) 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+          {`${managedAlbum?.media_type === 'photo' ? 'Photo' : 'Video'} collection · ${managedAlbum?.status}`}
+        </p>
+        {managedAlbum && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-5)' }}>
             {managedAlbum.media_type === 'photo' ? (
-              <section className="gallery-upload-box">
-                <h3>Upload photos</h3>
-                <p>Select as many JPG, PNG, or WebP photos as needed. Each image is compressed to WebP before it is stored.</p>
-                <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => setPhotoFiles(Array.from(event.target.files || []))} />
-                {photoFiles.length > 0 && <span>{photoFiles.length} photo{photoFiles.length === 1 ? '' : 's'} selected</span>}
-                <button type="button" className="button button--primary" disabled={saving || photoFiles.length === 0} onClick={() => void handlePhotoUpload()}><Upload size={16} /> {saving ? 'Uploading…' : 'Compress & upload'}</button>
-              </section>
+              <Card variant="filled" style={{ padding: 'var(--md-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--md-space-2)' }}>
+                <h3 style={{ margin: 0, fontSize: '1rem' }}>Upload photos</h3>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--md-sys-color-on-surface-variant)' }}>
+                  Select as many JPG, PNG, or WebP photos as needed. Each image is compressed to WebP before it is stored.
+                </p>
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  onChange={(event) => setPhotoFiles(Array.from(event.target.files || []))}
+                  style={{ marginTop: 'var(--md-space-2)' }}
+                />
+                {photoFiles.length > 0 && (
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--md-sys-color-primary)' }}>
+                    {photoFiles.length} photo{photoFiles.length === 1 ? '' : 's'} selected
+                  </span>
+                )}
+                <div style={{ marginTop: 'var(--md-space-2)' }}>
+                  <Button
+                    variant="filled"
+                    disabled={saving || photoFiles.length === 0}
+                    loading={saving}
+                    leadingIcon={<Upload size={16} />}
+                    onClick={() => void handlePhotoUpload()}
+                  >
+                    Compress & upload
+                  </Button>
+                </div>
+              </Card>
             ) : (
-              <form className="gallery-upload-box" onSubmit={(event) => void handleAddVideo(event)}>
-                <h3>Add a YouTube video</h3>
-                <p>Paste a YouTube link or iframe embed code. The website keeps only the validated privacy-enhanced video URL.</p>
-                <label>Video title<input value={videoTitle} onChange={(event) => setVideoTitle(event.target.value)} placeholder="Example: Sinoog Festival highlights" required /></label>
-                <label>YouTube link or embed code<textarea rows={4} value={videoEmbed} onChange={(event) => setVideoEmbed(event.target.value)} placeholder={'<iframe src="https://www.youtube.com/embed/…"></iframe>'} required /></label>
-                <label>Description<textarea rows={3} value={videoDescription} onChange={(event) => setVideoDescription(event.target.value)} placeholder="Optional video description" /></label>
-                <button type="submit" className="button button--primary" disabled={saving || !videoEmbed.trim()}><Plus size={16} /> {saving ? 'Adding…' : 'Add video'}</button>
+              <form onSubmit={(event) => void handleAddVideo(event)} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-3)' }}>
+                <h3 style={{ margin: 0, fontSize: '1rem' }}>Add a YouTube video</h3>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--md-sys-color-on-surface-variant)' }}>
+                  Paste a YouTube link or iframe embed code. The website keeps only the validated privacy-enhanced video URL.
+                </p>
+                <TextField
+                  label="Video title"
+                  required
+                  placeholder="Example: Sinoog Festival highlights"
+                  value={videoTitle}
+                  onChange={(event) => setVideoTitle(event.target.value)}
+                />
+                <TextArea
+                  label="YouTube link or embed code"
+                  required
+                  rows={3}
+                  placeholder={'https://www.youtube.com/watch?v=... or <iframe src="..."></iframe>'}
+                  value={videoEmbed}
+                  onChange={(event) => setVideoEmbed(event.target.value)}
+                />
+                <TextArea
+                  label="Description"
+                  rows={2}
+                  placeholder="Optional video description"
+                  value={videoDescription}
+                  onChange={(event) => setVideoDescription(event.target.value)}
+                />
+                <div>
+                  <Button variant="filled" type="submit" loading={saving} disabled={saving || !videoEmbed.trim()} leadingIcon={<Plus size={16} />}>
+                    Add video
+                  </Button>
+                </div>
               </form>
             )}
 
             <section className="gallery-media-list">
-              <div className="gallery-media-list__heading"><h3>Collection media</h3><span>{managedAlbum.items.length} total</span></div>
-              {managedAlbum.items.length === 0 ? <EmptyState title="No media yet" message={managedAlbum.media_type === 'photo' ? 'Upload the first photos for this collection.' : 'Add the first YouTube video for this collection.'} /> : (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--md-space-3)' }}>
+                <h3 style={{ margin: 0, fontSize: '1rem' }}>Collection media</h3>
+                <span style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.85rem' }}>{managedAlbum.items.length} total</span>
+              </div>
+              {managedAlbum.items.length === 0 ? (
+                <EmptyState
+                  title="No media yet"
+                  message={managedAlbum.media_type === 'photo' ? 'Upload the first photos for this collection.' : 'Add the first YouTube video for this collection.'}
+                />
+              ) : (
                 <div className="gallery-media-grid">
                   {managedAlbum.items.map((asset, index) => {
                     const source = asset.kind === 'video' ? getYouTubeThumbnail(asset.object_path) : asset.publicUrl;
                     return (
-                      <article key={asset.id}>
-                        <div>{source ? <img src={source} alt={asset.alt_text || ''} loading="lazy" /> : <Images />}{asset.kind === 'video' && <Play size={18} fill="currentColor" />}</div>
+                      <article key={asset.id} style={{ position: 'relative' }}>
+                        <div>
+                          {source ? <img src={source} alt={asset.alt_text || ''} loading="lazy" /> : <Images />}
+                          {asset.kind === 'video' && <Play size={18} fill="currentColor" />}
+                        </div>
                         <span>{index + 1}. {asset.title || (asset.kind === 'image' ? 'Photo' : 'Video')}</span>
-                        <button type="button" onClick={() => setDeleteTarget({ type: 'item', albumId: managedAlbum.id, asset })} aria-label={`Delete ${asset.title || 'gallery item'}`} title="Delete item"><Trash2 size={15} /></button>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget({ type: 'item', albumId: managedAlbum.id, asset })}
+                          aria-label={`Delete ${asset.title || 'gallery item'}`}
+                          title="Delete item"
+                          style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                          <Trash2 size={15} />
+                        </button>
                       </article>
                     );
                   })}
@@ -392,8 +578,8 @@ export function GalleryManagerPage() {
               )}
             </section>
           </div>
-        </div>
-      )}
+        )}
+      </Dialog>
 
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}

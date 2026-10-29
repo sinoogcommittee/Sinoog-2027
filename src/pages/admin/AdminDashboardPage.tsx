@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Calendar, CircleDollarSign, Newspaper, Users, Plus, ArrowRight } from 'lucide-react';
+import { Button } from '../../components/Button';
+import { Card } from '../../components/m3/Card';
 import { StatusBadge } from '../../components/StatusBadge';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import { getAllActivitiesForAdmin } from '../../features/activities/activityQueries';
@@ -39,53 +40,58 @@ export function AdminDashboardPage() {
   }, []);
 
   return (
-    <div className="admin-page">
+    <div className="m3-admin-dashboard admin-page">
       <div className="admin-heading">
         <div>
           <p className="eyebrow">Committee workspace</p>
           <h1>Overview</h1>
           <p>Real-time operational status for Sinoog 2027.</p>
         </div>
-        <Link to="/admin/posts" className="button button--primary">
-          <Plus size={16} /> Create announcement
-        </Link>
+        <Button to="/admin/posts" variant="filled" leadingIcon={<Plus size={16} aria-hidden />}>
+          Create announcement
+        </Button>
       </div>
 
       <div className="stat-grid">
-        <article>
-          <Users />
+        <Card as="article" variant="outlined">
+          <Users size={22} aria-hidden />
           <span>Run Registrations</span>
           <strong>{registrationsCount}</strong>
-        </article>
+        </Card>
 
-        <article>
-          <CircleDollarSign />
+        <Card as="article" variant="outlined">
+          <CircleDollarSign size={22} aria-hidden />
           <span>Payments to review</span>
           <strong>{registrationsCount > 0 ? registrationsCount : 0}</strong>
-        </article>
+        </Card>
 
-        <article>
-          <Calendar />
+        <Card as="article" variant="outlined">
+          <Calendar size={22} aria-hidden />
           <span>Scheduled activities</span>
           <strong>{activitiesCount}</strong>
-        </article>
+        </Card>
 
-        <article>
-          <Newspaper />
+        <Card as="article" variant="outlined">
+          <Newspaper size={22} aria-hidden />
           <span>News announcements</span>
           <strong>{postsCount}</strong>
-        </article>
+        </Card>
       </div>
 
-      <section className="admin-panel">
+      <Card as="section" variant="outlined" className="admin-panel">
         <div className="panel-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h2>Launch readiness</h2>
             <p>Verification checklist before opening registration to participants.</p>
           </div>
-          <Link to="/admin/settings" style={{ fontSize: '0.85rem', color: 'var(--wine)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-            Edit settings <ArrowRight size={14} />
-          </Link>
+          <Button
+            to="/admin/settings"
+            variant="text"
+            size="small"
+            leadingIcon={<ArrowRight size={14} aria-hidden />}
+          >
+            Edit settings
+          </Button>
         </div>
 
         <div className="readiness-list">
@@ -123,7 +129,7 @@ export function AdminDashboardPage() {
             </span>
           </div>
         </div>
-      </section>
+      </Card>
     </div>
   );
 }

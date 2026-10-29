@@ -1,5 +1,12 @@
 import { useEffect, useState, useMemo, useCallback, type FormEvent } from 'react';
-import { Plus, Search, Calendar, Edit2, Trash2, Globe, Clock, MapPin, User, AlertCircle, X, Check } from 'lucide-react';
+import { Plus, Calendar, Edit2, Trash2, Globe, Clock, MapPin, User, Check } from 'lucide-react';
+import { Button } from '../../components/Button';
+import { Card } from '../../components/m3/Card';
+import { Dialog } from '../../components/m3/Dialog';
+import { TextField } from '../../components/m3/TextField';
+import { SelectField } from '../../components/m3/SelectField';
+import { TextArea } from '../../components/m3/TextArea';
+import { SearchBar } from '../../components/m3/SearchBar';
 import {
   getAllActivitiesForAdmin,
   createActivity,
@@ -13,7 +20,7 @@ import {
 } from '../../features/activities/activityQueries';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import { StatusBadge } from '../../components/StatusBadge';
-import { LoadingState, EmptyState, ConfirmDialog } from '../../features/ui/FeedbackStates';
+import { LoadingState, EmptyState, ConfirmDialog, InlineMessage } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
 import type { DbActivity, ActivityType, ContentStatus } from '../../types';
 
@@ -235,32 +242,27 @@ export function ActivitiesManagerPage() {
   }, [activities, typeFilter, statusFilter, searchQuery]);
 
   return (
-    <div className="admin-page">
+    <div className="m3-activities-manager admin-page">
       <div className="admin-heading">
         <div>
           <p className="eyebrow">Sto. Niño Parish Guinacot</p>
           <h1>Activities & Schedule</h1>
           <p>Manage Holy Masses, novena dates, Sinoog Run, and nightly cultural programs.</p>
         </div>
-        <button type="button" className="button button--primary" onClick={openCreateModal}>
-          <Plus size={18} /> Add activity
-        </button>
+        <Button type="button" variant="filled" leadingIcon={<Plus size={18} aria-hidden />} onClick={openCreateModal}>
+          Add activity
+        </Button>
       </div>
 
-      <section className="admin-panel">
-        <div className="table-tools">
-          <label className="modern-search" htmlFor="activities-search-input">
-            <Search size={18} aria-hidden="true" />
-            <input
-              id="activities-search-input"
-              type="search"
-              placeholder="Search by title, venue, or celebrant…"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              autoComplete="off"
-              enterKeyHint="search"
-            />
-          </label>
+      <Card as="section" variant="outlined" className="admin-panel">
+        <div className="table-tools admin-toolbar">
+          <SearchBar
+            label="Search activities"
+            placeholder="Search by title, venue, or celebrant…"
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            fieldClassName="table-tools-search"
+          />
 
           <div className="table-tools-filters">
             <select
@@ -302,9 +304,9 @@ export function ActivitiesManagerPage() {
                 : 'Get started by creating the first event on the schedule.'
             }
             action={
-              <button type="button" className="button button--secondary" onClick={openCreateModal}>
-                <Plus size={16} /> Add new event
-              </button>
+              <Button type="button" variant="outlined" leadingIcon={<Plus size={16} aria-hidden />} onClick={openCreateModal}>
+                Add new event
+              </Button>
             }
           />
         ) : (
@@ -419,209 +421,139 @@ export function ActivitiesManagerPage() {
             })}
           </div>
         )}
-      </section>
+      </Card>
 
       {/* Activity Edit / Add Modal */}
-      {isModalOpen && (
-        <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="activity-modal-title">
-          <div className="modal-card activity-modal" style={{ maxWidth: '640px', width: '95%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h2 id="activity-modal-title" style={{ fontSize: '1.35rem', margin: 0 }}>
-                {editingActivity ? 'Edit Activity' : 'Create New Activity'}
-              </h2>
-              <button
-                type="button"
-                className="button button--ghost"
-                onClick={() => setIsModalOpen(false)}
-                aria-label="Close dialog"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {formError && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.75rem',
-                  background: '#fef2f2',
-                  border: '1px solid #fecaca',
-                  borderRadius: '6px',
-                  color: '#991b1b',
-                  marginBottom: '1rem',
-                  fontSize: '0.9rem',
-                }}
-              >
-                <AlertCircle size={18} />
-                <span>{formError}</span>
-              </div>
-            )}
-
-            <form onSubmit={(e) => void handleFormSubmit(e)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                  Activity Title <span style={{ color: '#c53030' }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Opening Novena Mass (Day 1)"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-              </div>
-
-              <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                    Type
-                  </label>
-                  <select
-                    value={type}
-                    onChange={(e) => setType(e.target.value as ActivityType)}
-                    style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                  >
-                    <option value="mass">Holy Mass / Novena</option>
-                    <option value="run">Sinoog Run</option>
-                    <option value="festival">Festival & Street Dance</option>
-                    <option value="nightly">Nightly Activity / Program</option>
-                    <option value="other">Other Event</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                    Publication Status
-                  </label>
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value as ContentStatus)}
-                    style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                  >
-                    <option value="published">Published (Visible to public)</option>
-                    <option value="draft">Draft (Private to committee)</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                    Start Date & Time (Asia/Manila)
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={startsAt}
-                    onChange={(e) => {
-                      const nextStart = e.target.value;
-                      const oldDate = getActivityDateKey(startsAt);
-                      const nextDate = getActivityDateKey(nextStart);
-                      setStartsAt(nextStart);
-                      if (oldDate !== nextDate) {
-                        setSortOrder(nextOrderForDate(nextStart, editingActivity?.id));
-                      }
-                    }}
-                    style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                    End Date & Time (Optional)
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={endsAt}
-                    onChange={(e) => setEndsAt(e.target.value)}
-                    style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                  />
-                </div>
-              </div>
-
-              <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                    Venue / Location
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Sto. Niño Parish Church, Guinacot"
-                    value={venue}
-                    onChange={(e) => setVenue(e.target.value)}
-                    style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                    Celebrant / Host (if applicable)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Rev. Fr. Parish Priest"
-                    value={celebrant}
-                    onChange={(e) => setCelebrant(e.target.value)}
-                    style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                  Description & Details
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Additional context, intentions, sponsors, or guidelines for this activity…"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                  Order for {startsAt ? new Date(`${startsAt.slice(0, 10)}T00:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'this date'}
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={activitiesOnSelectedDate.length + 1}
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(Math.max(1, Number(e.target.value)))}
-                  disabled={!startsAt}
-                  style={{ width: '100px', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-                <small style={{ display: 'block', color: '#6d6158', marginTop: '0.25rem' }}>
-                  New activities receive the next number automatically. Changing this number only reorders the {activitiesOnSelectedDate.length + 1} {activitiesOnSelectedDate.length === 0 ? 'activity' : 'activities'} on this date; activities on other dates are unchanged.
-                </small>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
-                <button
-                  type="button"
-                  className="button button--ghost"
-                  onClick={() => setIsModalOpen(false)}
-                  disabled={formSubmitting}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="button button--primary"
-                  disabled={formSubmitting}
-                >
-                  <Check size={16} /> {formSubmitting ? 'Saving…' : editingActivity ? 'Save changes' : 'Create activity'}
-                </button>
-              </div>
-            </form>
+      <Dialog
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingActivity ? 'Edit Activity' : 'Create New Activity'}
+      >
+        {formError && (
+          <div style={{ marginBottom: '1rem' }}>
+            <InlineMessage tone="error">
+              {formError}
+            </InlineMessage>
           </div>
-        </div>
-      )}
+        )}
+
+        <form onSubmit={(e) => void handleFormSubmit(e)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <TextField
+            label="Activity Title *"
+            required
+            placeholder="e.g. Opening Novena Mass (Day 1)"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+
+          <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <SelectField
+              label="Type"
+              value={type}
+              onChange={(e) => setType(e.target.value as ActivityType)}
+            >
+              <option value="mass">Holy Mass / Novena</option>
+              <option value="run">Sinoog Run</option>
+              <option value="festival">Festival & Street Dance</option>
+              <option value="nightly">Nightly Activity / Program</option>
+              <option value="other">Other Event</option>
+            </SelectField>
+
+            <SelectField
+              label="Publication Status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value as ContentStatus)}
+            >
+              <option value="published">Published (Visible to public)</option>
+              <option value="draft">Draft (Private to committee)</option>
+              <option value="archived">Archived</option>
+            </SelectField>
+          </div>
+
+          <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <TextField
+              label="Start Date & Time (Asia/Manila)"
+              type="datetime-local"
+              value={startsAt}
+              onChange={(e) => {
+                const nextStart = e.target.value;
+                const oldDate = getActivityDateKey(startsAt);
+                const nextDate = getActivityDateKey(nextStart);
+                setStartsAt(nextStart);
+                if (oldDate !== nextDate) {
+                  setSortOrder(nextOrderForDate(nextStart, editingActivity?.id));
+                }
+              }}
+            />
+
+            <TextField
+              label="End Date & Time (Optional)"
+              type="datetime-local"
+              value={endsAt}
+              onChange={(e) => setEndsAt(e.target.value)}
+            />
+          </div>
+
+          <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <TextField
+              label="Venue / Location"
+              type="text"
+              placeholder="e.g. Sto. Niño Parish Church, Guinacot"
+              value={venue}
+              onChange={(e) => setVenue(e.target.value)}
+            />
+
+            <TextField
+              label="Celebrant / Host (if applicable)"
+              type="text"
+              placeholder="e.g. Rev. Fr. Parish Priest"
+              value={celebrant}
+              onChange={(e) => setCelebrant(e.target.value)}
+            />
+          </div>
+
+          <TextArea
+            label="Description & Details"
+            rows={3}
+            placeholder="Additional context, intentions, sponsors, or guidelines for this activity…"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+
+          <div>
+            <TextField
+              label={`Order for ${startsAt ? new Date(`${startsAt.slice(0, 10)}T00:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'this date'}`}
+              type="number"
+              min={1}
+              max={activitiesOnSelectedDate.length + 1}
+              value={String(sortOrder)}
+              onChange={(e) => setSortOrder(Math.max(1, Number(e.target.value)))}
+              disabled={!startsAt}
+              helperText={`New activities receive the next number automatically. Changing this number only reorders the ${activitiesOnSelectedDate.length + 1} ${activitiesOnSelectedDate.length === 0 ? 'activity' : 'activities'} on this date.`}
+            />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+            <Button
+              type="button"
+              variant="text"
+              onClick={() => setIsModalOpen(false)}
+              disabled={formSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="filled"
+              disabled={formSubmitting}
+              loading={formSubmitting}
+              leadingIcon={<Check size={16} aria-hidden />}
+            >
+              {editingActivity ? 'Save changes' : 'Create activity'}
+            </Button>
+          </div>
+        </form>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog

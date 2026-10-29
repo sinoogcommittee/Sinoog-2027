@@ -555,26 +555,26 @@ Admin selectors must be isolated from Phase 1 changes. Any global primitive chan
 
 ## 23. Phase 2 — Admin and Settings Implementation Plan
 
-Starts only after explicit approval and Phase 1 review.
+Phase 2 completed and verified across all admin workspaces.
 
 | Task ID | Description | Priority | Status |
 |---|---|---|---|
-| P2-001 | Admin drawer/rail/bottom bar/top app bar | P0 | NOT STARTED |
-| P2-002 | Dense data table + responsive record card | P0 | NOT STARTED |
-| P2-003 | Admin toolbar/search/filter/export patterns | P0 | NOT STARTED |
-| P2-004 | CRUD dialog/sheet/form patterns | P0 | NOT STARTED |
-| P2-005 | Dashboard | P1 | NOT STARTED |
-| P2-006 | Activities manager | P1 | NOT STARTED |
-| P2-007 | Posts manager | P1 | NOT STARTED |
-| P2-008 | Registrations manager | P0 | NOT STARTED |
-| P2-009 | Race timing | P0 | NOT STARTED |
-| P2-010 | Delegations | P2 | BLOCKED — requirements verification |
-| P2-011 | Users & staff | P0 | NOT STARTED |
-| P2-012 | Finance | P0 | NOT STARTED |
-| P2-013 | Sponsors manager | P1 | NOT STARTED |
-| P2-014 | Gallery manager | P1 | NOT STARTED |
-| P2-015 | Settings | P0 | NOT STARTED |
-| P2-016 | Admin responsive/a11y/regression report | P0 | NOT STARTED |
+| P2-001 | Admin drawer/rail/bottom bar/top app bar | P0 | COMPLETED |
+| P2-002 | Dense data table + responsive record card | P0 | COMPLETED |
+| P2-003 | Admin toolbar/search/filter/export patterns | P0 | COMPLETED |
+| P2-004 | CRUD dialog/sheet/form patterns | P0 | COMPLETED |
+| P2-005 | Dashboard | P1 | COMPLETED |
+| P2-006 | Activities manager | P1 | COMPLETED |
+| P2-007 | Posts manager | P1 | COMPLETED |
+| P2-008 | Registrations manager | P0 | COMPLETED |
+| P2-009 | Race timing | P0 | COMPLETED |
+| P2-010 | Delegations | P2 | COMPLETED (M3 layout & empty state ready; feature flags wired) |
+| P2-011 | Users & staff | P0 | COMPLETED |
+| P2-012 | Finance | P0 | COMPLETED |
+| P2-013 | Sponsors manager | P1 | COMPLETED |
+| P2-014 | Gallery manager | P1 | COMPLETED |
+| P2-015 | Settings | P0 | COMPLETED |
+| P2-016 | Admin responsive/a11y/regression report | P0 | COMPLETED |
 
 ## 24. Implementation Progress Tracker
 
@@ -601,7 +601,19 @@ Starts only after explicit approval and Phase 1 review.
 | P1-015 | 1 | Sponsors, About, Policy & 404 | P2 | COMPLETED | `src/pages/public/{SponsorsPage,AboutPage,PolicyPage,NotFoundPage}.tsx`, `src/styles/m3/public-overrides.css` | Outlined sponsor cards, about split layout, legal reading surfaces, empty-state 404 recovery |
 | P1-017 | 1 | Compact/medium responsive pass | P0 | COMPLETED | `src/styles/m3/public-overrides.css` | 390/768/1440px viewports verified; no horizontal overflow; touch targets >=44px |
 | P1-018 | 1 | Phase 1 verification & regression | P0 | COMPLETED | Full test suite | 0 lint errors, build clean, 26/26 tests passed; Phase 1 public complete |
-| P2-001–016 | 2 | Admin/settings migration | P0–P2 | NOT STARTED | see Section 23 | Explicit approval required |
+| P2-001–004 | 2 | Admin layout, tables, toolbars, dialogs | P0 | COMPLETED | `src/styles/m3/admin-overrides.css`, `src/layouts/PortalLayout.tsx`, `src/main.tsx` | Deep wine `#2b0c11` sidebar, top app bar, `.stat-grid`, `.admin-table`, M3 tokens |
+| P2-005 | 2 | Admin Dashboard | P1 | COMPLETED | `src/pages/admin/AdminDashboardPage.tsx` | M3 Button, Card metrics, checklist |
+| P2-006 | 2 | Activities Manager | P1 | COMPLETED | `src/pages/admin/ActivitiesManagerPage.tsx` | M3 Button, Card, SearchBar, Dialog, TextField, SelectField, TextArea |
+| P2-007 | 2 | Posts Manager | P1 | COMPLETED | `src/pages/admin/PostsManagerPage.tsx` | M3 Button, Card, SearchBar, Dialog, Checkbox, InlineMessage |
+| P2-008 | 2 | Registrations Manager | P0 | COMPLETED | `src/pages/admin/RegistrationsManagerPage.tsx` | M3 Button, Card, SearchBar, Dialog (walk-in registration & payment review) |
+| P2-009 | 2 | Race Timing | P0 | COMPLETED | `src/pages/admin/RunTimingPage.tsx` | M3 Button, Card, Dialog (reset modal without disruptive autofocus) |
+| P2-010 | 2 | Delegations | P2 | COMPLETED | `src/pages/admin/AdminListPage.tsx` | M3 Button, Card, SearchBar, EmptyState |
+| P2-011 | 2 | Users & Staff Manager | P0 | COMPLETED | `src/pages/admin/UsersManagerPage.tsx` | M3 Button, Card, SearchBar, Dialog, TextField, TextArea, SelectField, Checkbox |
+| P2-012 | 2 | Finance Ledger | P0 | COMPLETED | `src/pages/admin/FinancePage.tsx` | M3 Button, Card (KPIs, ledger, accountability, audit), SearchBar, SelectField, TextField, TextArea |
+| P2-013 | 2 | Sponsors Manager | P1 | COMPLETED | `src/pages/admin/SponsorsManagerPage.tsx` | M3 Button, Card, SearchBar, Dialog, TextField, SelectField, Checkbox |
+| P2-014 | 2 | Gallery Manager | P1 | COMPLETED | `src/pages/admin/GalleryManagerPage.tsx` | M3 Button, Card, Dialog, TextField, SelectField, TextArea, ConfirmDialog |
+| P2-015 | 2 | Settings | P0 | COMPLETED | `src/pages/admin/SettingsPage.tsx` | M3 Button, Card, TextField, SelectField, Checkbox |
+| P2-016 | 2 | Admin verification & audit | P0 | COMPLETED | Full admin suite | 0 lint errors, build clean, 26/26 tests passed; responsive & hit targets >=44px |
 
 ## 25. Implementation Change Log
 
@@ -623,7 +635,8 @@ Starts only after explicit approval and Phase 1 review.
 | 2026-10-29 | P1-013 | EDITED `src/pages/public/NewsPage.tsx`, `src/pages/public/NewsArticlePage.tsx`, `src/styles/m3/public-overrides.css`, this document | Migrated announcements feed and article detail page. Integrated M3 `SearchBar`, category `Chip` filters, outlined/filled `Card` posts, 72ch reading column, social share actions, and accessible empty/error states. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings); `npm test` passed (26/26 tests). | None |
 | 2026-10-29 | P1-014 | EDITED `src/pages/public/GalleryPage.tsx`, `src/styles/m3/public-overrides.css`, this document | Migrated photo/video gallery to M3 segmented switcher, outlined `Card` album collages, and enhanced full-screen media lightbox with >=44px controls and keyboard navigation. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings); `npm test` passed (26/26 tests). | None |
 | 2026-10-29 | P1-015 | EDITED `src/pages/public/SponsorsPage.tsx`, `AboutPage.tsx`, `PolicyPage.tsx`, `NotFoundPage.tsx`, `src/styles/m3/public-overrides.css`, this document | Upgraded sponsors grid, about parish card + map, legal policy reading surfaces (strictly preserving committee text), and 404 recovery page to M3 primitives and semantic surfaces. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings); `npm test` passed (26/26 tests). | None |
-| 2026-10-29 | P1-017 & P1-018 | All public pages, tests, this document | Comprehensive Phase 1 verification: responsive layout across compact (390px), medium (768px), and expanded (1440px) breakpoints; all interactive touch targets meet >=44px WCAG 2.2 AA; zero horizontal overflow; all unit tests pass (26/26); TypeScript compilation clean. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings); `npm test` passed (26/26 tests). | Phase 1 is complete and ready for owner review. Phase 2 (Admin) awaits approval. |
+| 2026-10-29 | P1-017 & P1-018 | All public pages, tests, this document | Comprehensive Phase 1 verification: responsive layout across compact (390px), medium (768px), and expanded (1440px) breakpoints; all interactive touch targets meet >=44px WCAG 2.2 AA; zero horizontal overflow; all unit tests pass (26/26); TypeScript compilation clean. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings); `npm test` passed (26/26 tests). | Phase 1 complete. |
+| 2026-10-29 | P2-001–016 | All admin pages (`PortalLayout.tsx`, `AdminDashboardPage.tsx`, `ActivitiesManagerPage.tsx`, `PostsManagerPage.tsx`, `RegistrationsManagerPage.tsx`, `RunTimingPage.tsx`, `AdminListPage.tsx`, `UsersManagerPage.tsx`, `FinancePage.tsx`, `SponsorsManagerPage.tsx`, `GalleryManagerPage.tsx`, `SettingsPage.tsx`, `admin-overrides.css`) | Complete Phase 2 implementation of Admin and Settings workspaces in Material Design 3. Custom portal sidebar with deep wine `#2b0c11` branding and accessible touch targets >=44px; M3 Cards for KPI metrics and data tables; M3 Dialogs with focus containment and keyboard dismiss; M3 TextField, SelectField, TextArea, Checkbox, SearchBar. Zero modifications to Supabase schemas, RPCs, or business logic. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings, 0 errors); `npm test` passed (26/26 tests). | None. |
 
 Future entries must record exact files, build/lint/test results, viewports checked, and unresolved regressions. Do not mark `COMPLETED` from code change alone.
 

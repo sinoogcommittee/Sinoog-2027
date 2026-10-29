@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserQRCodeReader, type IScannerControls } from '@zxing/browser';
-import { AlertTriangle, CalendarDays, Camera, Clock3, Flag, Medal, PersonStanding, Play, RefreshCw, RotateCcw, ScanLine, Timer, Users, X } from 'lucide-react';
+import { AlertTriangle, CalendarDays, Camera, Clock3, Flag, Medal, PersonStanding, Play, RefreshCw, RotateCcw, ScanLine, Timer, Users } from 'lucide-react';
+import { Button } from '../../components/Button';
+import { Card } from '../../components/m3/Card';
+import { Dialog } from '../../components/m3/Dialog';
+import { TextField } from '../../components/m3/TextField';
+import { TextArea } from '../../components/m3/TextArea';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import {
   formatElapsed,
@@ -13,7 +18,7 @@ import {
   type RunEvent,
   type TimingDashboardRow,
 } from '../../features/run/runQueries';
-import { LoadingState, EmptyState } from '../../features/ui/FeedbackStates';
+import { LoadingState, EmptyState, InlineMessage } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
 import { useAuth } from '../../features/auth/useAuth';
 import { supabase } from '../../lib/supabase';
@@ -234,119 +239,248 @@ export function RunTimingPage() {
 
   if (loading) return <div className="admin-page"><LoadingState message="Loading race timing…" /></div>;
 
-  return <div className="admin-page">
-    <div className="admin-heading">
-      <div><p className="eyebrow">Race-day operations</p><h1>Official Timing & Finish Line</h1><p>Start the official clock, scan each approved QR once, and review category rankings.</p></div>
-      <button type="button" className="button button--secondary" disabled={refreshing} onClick={() => void handleRefresh()} title="Reload the latest start time and finish records from the database"><RefreshCw size={16} className={refreshing ? 'spin' : undefined} /> {refreshing ? 'Reloading…' : 'Reload timing data'}</button>
-    </div>
-
-    <section className="timing-control-panel">
-      <div className="timing-control-panel__start"><small>Official start</small><strong>{runEvent?.official_started_at ? new Date(runEvent.official_started_at).toLocaleString('en-PH', { dateStyle: 'long', timeStyle: 'medium', timeZone: 'Asia/Manila' }) : 'Not started'}</strong></div>
-      <div className="timing-live-clock" aria-live="polite"><small>Live elapsed time</small><strong>{liveElapsed}</strong></div>
-      <div className="timing-control-panel__actions">
-        <button type="button" className="button button--primary" disabled={starting || Boolean(runEvent?.official_started_at)} onClick={() => void handleOfficialStart()}><Play size={17} /> {starting ? 'Starting…' : runEvent?.official_started_at ? 'Official clock running' : 'Start official race time'}</button>
-        {runEvent?.official_started_at && isAdmin && <button type="button" className="button button--danger timing-reset-button" onClick={openResetConfirm}><RotateCcw size={17} /> Reset official start</button>}
-      </div>
-    </section>
-
-    <section className="admin-panel finish-scanner-panel">
-      <div className="panel-heading"><h2><ScanLine size={18} /> Finish-line QR scanner</h2><p>Camera scanning requires HTTPS. Manual token entry remains available as backup.</p></div>
-      <div className="finish-scanner-grid">
+  return (
+    <div className="m3-run-timing admin-page">
+      <div className="admin-heading">
         <div>
-          <video ref={videoRef} className="finish-scanner-video" muted playsInline />
-          <div className="button-row">
-            {!scannerActive ? <button type="button" className="button button--secondary" onClick={() => void startScanner()}><Camera size={17} /> Start camera</button>
-              : <button type="button" className="button button--secondary" onClick={stopScanner}>Stop camera</button>}
-          </div>
+          <p className="eyebrow">Race-day operations</p>
+          <h1>Official Timing & Finish Line</h1>
+          <p>Start the official clock, scan each approved QR once, and review category rankings.</p>
         </div>
-        <form onSubmit={(event) => { event.preventDefault(); void submitFinish(manualQr); }}>
-          <label htmlFor="manual-runner-qr">Manual QR token or full QR value</label>
-          <textarea id="manual-runner-qr" rows={4} value={manualQr} onChange={(event) => setManualQr(event.target.value)} placeholder="SINOOG-2027|…" />
-          <button type="submit" className="button button--primary" disabled={!manualQr.trim() || !runEvent?.official_started_at}><Flag size={17} /> Record official finish</button>
-        </form>
+        <Button
+          type="button"
+          variant="outlined"
+          disabled={refreshing}
+          onClick={() => void handleRefresh()}
+          title="Reload the latest start time and finish records from the database"
+          leadingIcon={<RefreshCw size={16} className={refreshing ? 'spin' : undefined} />}
+        >
+          {refreshing ? 'Reloading…' : 'Reload timing data'}
+        </Button>
       </div>
-    </section>
 
-    <section className="admin-panel">
-      <div className="table-tools timing-filters">
-        <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} aria-label="Filter category"><option value="all">All categories</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select>
-        <select value={divisionFilter} onChange={(event) => setDivisionFilter(event.target.value)} aria-label="Filter division"><option value="all">Male & Female</option><option value="male">Male</option><option value="female">Female</option></select>
-        <select value={ageFilter} onChange={(event) => setAgeFilter(event.target.value as AgeGroup)} aria-label="Filter age group"><option value="all">All ages</option><option value="under18">Under 18</option><option value="18-29">18–29</option><option value="30-39">30–39</option><option value="40-49">40–49</option><option value="50plus">50+</option></select>
-      </div>
-      {filteredRows.length === 0 ? <EmptyState title="No approved runners" message="Approved runner entries and official results will appear here." /> : <div className="timing-results-table">
-        <div className="timing-results-row timing-results-head"><span>Place</span><span>Bib / Runner</span><span>Category</span><span>Division</span><span>Age</span><span>Official Time</span></div>
-        {filteredRows.map((row) => (
-          <div className="timing-results-row timing-runner-card" key={row.id}>
-            <strong className="timing-runner-card__place">
-              <small>Place</small>
-              <span className="timing-runner-card__place-value">
-                <Medal className="timing-card-icon" size={24} aria-hidden="true" />
-                <span>{row.rank ? row.rank : '—'}</span>
-              </span>
-            </strong>
-            <span className="timing-runner-card__runner">
-              <small>Runner</small>
-              <b>#{row.bib_number}</b>
-              <span>{row.participant_name}</span>
-            </span>
-            <span className="timing-runner-card__category">
-              <span className="timing-card-stat__icon timing-card-stat__icon--category"><PersonStanding size={20} aria-hidden="true" /></span>
-              <span className="timing-card-stat__content">
-                <small>Category</small>
-                <strong>{categories.find((category) => category.id === row.category_id)?.name || 'Run'}</strong>
-              </span>
-            </span>
-            <span className="timing-runner-card__division">
-              <span className="timing-card-stat__icon timing-card-stat__icon--division"><Users size={20} aria-hidden="true" /></span>
-              <span className="timing-card-stat__content">
-                <small>Division</small>
-                <strong>{row.division === 'female' ? 'Female' : row.division === 'male' ? 'Male' : '—'}</strong>
-              </span>
-            </span>
-            <span className="timing-runner-card__age">
-              <span className="timing-card-stat__icon timing-card-stat__icon--age"><CalendarDays size={20} aria-hidden="true" /></span>
-              <span className="timing-card-stat__content">
-                <small>Age</small>
-                <strong>{ageOnRaceDay(row.birth_date) ?? '—'}</strong>
-              </span>
-            </span>
-            <span className={`timing-runner-card__time${row.finish ? ' is-finished' : ''}`}>
-              <span className="timing-card-stat__icon timing-card-stat__icon--time"><Timer size={20} aria-hidden="true" /></span>
-              <span className="timing-card-stat__content">
-                <small>Official time</small>
-                <strong>{row.finish ? <><Clock3 size={14} /> {formatElapsed(row.finish.elapsed_milliseconds)}</> : 'Not finished'}</strong>
-              </span>
-            </span>
-          </div>
-        ))}
-      </div>}
-    </section>
+      <Card as="section" variant="outlined" className="timing-control-panel">
+        <div className="timing-control-panel__start">
+          <small>Official start</small>
+          <strong>
+            {runEvent?.official_started_at
+              ? new Date(runEvent.official_started_at).toLocaleString('en-PH', {
+                  dateStyle: 'long',
+                  timeStyle: 'medium',
+                  timeZone: 'Asia/Manila',
+                })
+              : 'Not started'}
+          </strong>
+        </div>
+        <div className="timing-live-clock" aria-live="polite">
+          <small>Live elapsed time</small>
+          <strong>{liveElapsed}</strong>
+        </div>
+        <div className="timing-control-panel__actions">
+          <Button
+            type="button"
+            variant="filled"
+            disabled={starting || Boolean(runEvent?.official_started_at)}
+            onClick={() => void handleOfficialStart()}
+            leadingIcon={<Play size={17} />}
+          >
+            {starting
+              ? 'Starting…'
+              : runEvent?.official_started_at
+                ? 'Official clock running'
+                : 'Start official race time'}
+          </Button>
+          {runEvent?.official_started_at && isAdmin && (
+            <Button
+              type="button"
+              variant="danger"
+              className="timing-reset-button"
+              onClick={openResetConfirm}
+              leadingIcon={<RotateCcw size={17} />}
+            >
+              Reset official start
+            </Button>
+          )}
+        </div>
+      </Card>
 
-    {showResetConfirm && (
-      <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="reset-race-title" aria-describedby="reset-race-description">
-        <form className="modal-card timing-reset-modal" onSubmit={(event) => { event.preventDefault(); void handleReset(); }}>
-          <button type="button" className="button button--ghost timing-reset-modal__close" disabled={resetting} onClick={closeResetConfirm} aria-label="Close reset confirmation"><X size={18} /></button>
-          <AlertTriangle size={38} className="timing-reset-modal__warning" aria-hidden="true" />
-          <h2 id="reset-race-title">Reset the official start?</h2>
-          <p id="reset-race-description">This removes the official start time and every recorded finish. Runner registrations, bib numbers, and QR codes remain unchanged. Verify your administrator credentials to continue.</p>
-          <div className="timing-reset-credentials">
-            <label>
-              Administrator email
-              <input type="email" required value={resetEmail} onChange={(event) => setResetEmail(event.target.value)} autoComplete="username" disabled={resetting} />
-            </label>
-            <label>
-              Administrator password
-              <input type="password" required value={resetPassword} onChange={(event) => setResetPassword(event.target.value)} autoComplete="current-password" disabled={resetting} autoFocus />
-            </label>
+      <Card as="section" variant="outlined" className="admin-panel finish-scanner-panel">
+        <div className="panel-heading">
+          <h2><ScanLine size={18} /> Finish-line QR scanner</h2>
+          <p>Camera scanning requires HTTPS. Manual token entry remains available as backup.</p>
+        </div>
+        <div className="finish-scanner-grid">
+          <div>
+            <video ref={videoRef} className="finish-scanner-video" muted playsInline />
+            <div className="button-row">
+              {!scannerActive ? (
+                <Button type="button" variant="outlined" onClick={() => void startScanner()} leadingIcon={<Camera size={17} />}>
+                  Start camera
+                </Button>
+              ) : (
+                <Button type="button" variant="outlined" onClick={stopScanner}>
+                  Stop camera
+                </Button>
+              )}
+            </div>
           </div>
-          {resetError && <p className="form-message timing-reset-error" role="alert">{resetError}</p>}
-          <div className="button-row timing-reset-modal__actions">
-            <button type="button" className="button button--ghost" disabled={resetting} onClick={closeResetConfirm}>Cancel</button>
-            <button type="submit" className="button button--danger" disabled={resetting}><RotateCcw size={17} /> {resetting ? 'Verifying and resetting…' : 'Verify and reset timing'}</button>
+          <form onSubmit={(event) => { event.preventDefault(); void submitFinish(manualQr); }} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <TextArea
+              id="manual-runner-qr"
+              label="Manual QR token or full QR value"
+              rows={4}
+              value={manualQr}
+              onChange={(event) => setManualQr(event.target.value)}
+              placeholder="SINOOG-2027|…"
+            />
+            <Button
+              type="submit"
+              variant="filled"
+              disabled={!manualQr.trim() || !runEvent?.official_started_at}
+              leadingIcon={<Flag size={17} />}
+            >
+              Record official finish
+            </Button>
+          </form>
+        </div>
+      </Card>
+
+      <Card as="section" variant="outlined" className="admin-panel">
+        <div className="table-tools timing-filters">
+          <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} aria-label="Filter category">
+            <option value="all">All categories</option>
+            {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+          </select>
+          <select value={divisionFilter} onChange={(event) => setDivisionFilter(event.target.value)} aria-label="Filter division">
+            <option value="all">Male & Female</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+          <select value={ageFilter} onChange={(event) => setAgeFilter(event.target.value as AgeGroup)} aria-label="Filter age group">
+            <option value="all">All ages</option>
+            <option value="under18">Under 18</option>
+            <option value="18-29">18–29</option>
+            <option value="30-39">30–39</option>
+            <option value="40-49">40–49</option>
+            <option value="50plus">50+</option>
+          </select>
+        </div>
+        {filteredRows.length === 0 ? (
+          <EmptyState title="No approved runners" message="Approved runner entries and official results will appear here." />
+        ) : (
+          <div className="timing-results-table">
+            <div className="timing-results-row timing-results-head">
+              <span>Place</span>
+              <span>Bib / Runner</span>
+              <span>Category</span>
+              <span>Division</span>
+              <span>Age</span>
+              <span>Official Time</span>
+            </div>
+            {filteredRows.map((row) => (
+              <div className="timing-results-row timing-runner-card" key={row.id}>
+                <strong className="timing-runner-card__place">
+                  <small>Place</small>
+                  <span className="timing-runner-card__place-value">
+                    <Medal className="timing-card-icon" size={24} aria-hidden="true" />
+                    <span>{row.rank ? row.rank : '—'}</span>
+                  </span>
+                </strong>
+                <span className="timing-runner-card__runner">
+                  <small>Runner</small>
+                  <b>#{row.bib_number}</b>
+                  <span>{row.participant_name}</span>
+                </span>
+                <span className="timing-runner-card__category">
+                  <span className="timing-card-stat__icon timing-card-stat__icon--category"><PersonStanding size={20} aria-hidden="true" /></span>
+                  <span className="timing-card-stat__content">
+                    <small>Category</small>
+                    <strong>{categories.find((category) => category.id === row.category_id)?.name || 'Run'}</strong>
+                  </span>
+                </span>
+                <span className="timing-runner-card__division">
+                  <span className="timing-card-stat__icon timing-card-stat__icon--division"><Users size={20} aria-hidden="true" /></span>
+                  <span className="timing-card-stat__content">
+                    <small>Division</small>
+                    <strong>{row.division === 'female' ? 'Female' : row.division === 'male' ? 'Male' : '—'}</strong>
+                  </span>
+                </span>
+                <span className="timing-runner-card__age">
+                  <span className="timing-card-stat__icon timing-card-stat__icon--age"><CalendarDays size={20} aria-hidden="true" /></span>
+                  <span className="timing-card-stat__content">
+                    <small>Age</small>
+                    <strong>{ageOnRaceDay(row.birth_date) ?? '—'}</strong>
+                  </span>
+                </span>
+                <span className={`timing-runner-card__time${row.finish ? ' is-finished' : ''}`}>
+                  <span className="timing-card-stat__icon timing-card-stat__icon--time"><Timer size={20} aria-hidden="true" /></span>
+                  <span className="timing-card-stat__content">
+                    <small>Official time</small>
+                    <strong>{row.finish ? <><Clock3 size={14} /> {formatElapsed(row.finish.elapsed_milliseconds)}</> : 'Not finished'}</strong>
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      <Dialog
+        open={showResetConfirm}
+        onClose={closeResetConfirm}
+        title="Reset the official start?"
+      >
+        <form onSubmit={(event) => { event.preventDefault(); void handleReset(); }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--md-sys-color-error)' }}>
+            <AlertTriangle size={32} aria-hidden="true" />
+            <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--md-sys-color-on-surface-variant)' }}>
+              This removes the official start time and every recorded finish. Runner registrations, bib numbers, and QR codes remain unchanged. Verify your administrator credentials to continue.
+            </p>
+          </div>
+
+          <TextField
+            label="Administrator email"
+            type="email"
+            required
+            value={resetEmail}
+            onChange={(event) => setResetEmail(event.target.value)}
+            autoComplete="username"
+            disabled={resetting}
+          />
+
+          <TextField
+            label="Administrator password"
+            type="password"
+            required
+            value={resetPassword}
+            onChange={(event) => setResetPassword(event.target.value)}
+            autoComplete="current-password"
+            disabled={resetting}
+          />
+
+          {resetError && (
+            <InlineMessage tone="error">
+              {resetError}
+            </InlineMessage>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+            <Button type="button" variant="text" disabled={resetting} onClick={closeResetConfirm}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="danger"
+              disabled={resetting}
+              loading={resetting}
+              leadingIcon={<RotateCcw size={17} />}
+            >
+              Verify and reset timing
+            </Button>
           </div>
         </form>
-      </div>
-    )}
-  </div>;
+      </Dialog>
+    </div>
+  );
 }
 

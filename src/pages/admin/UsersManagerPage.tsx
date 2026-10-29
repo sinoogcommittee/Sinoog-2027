@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ClipboardCopy, KeyRound, Mail, MapPin, Pencil, Phone, Search, Shield, Trash2, Save, UserPlus, X } from 'lucide-react';
+import { ClipboardCopy, MapPin, Pencil, Phone, Trash2, Save, UserPlus } from 'lucide-react';
 import {
   createManagedStaffAccount,
   deleteManagedUserAsAdmin,
@@ -14,6 +14,14 @@ import { StatusBadge } from '../../components/StatusBadge';
 import { LoadingState, EmptyState } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
 import { useAuth } from '../../features/auth/useAuth';
+import { Button } from '../../components/Button';
+import { Card } from '../../components/m3/Card';
+import { Dialog } from '../../components/m3/Dialog';
+import { TextField } from '../../components/m3/TextField';
+import { TextArea } from '../../components/m3/TextArea';
+import { SelectField } from '../../components/m3/SelectField';
+import { Checkbox } from '../../components/m3/Checkbox';
+import { SearchBar } from '../../components/m3/SearchBar';
 
 const ROLE_LABELS: Record<StaffRole, string> = {
   admin: 'Administrator',
@@ -274,9 +282,9 @@ export function UsersManagerPage() {
             Create staff sign-in accounts, update profile details, and assign committee access roles.
           </p>
         </div>
-        <button type="button" className="button button--primary users-create-button" onClick={openCreateStaff}>
-          <UserPlus size={17} aria-hidden="true" /> Create staff account
-        </button>
+        <Button variant="filled" leadingIcon={<UserPlus size={17} />} onClick={openCreateStaff}>
+          Create staff account
+        </Button>
       </div>
 
       <div className="users-access-note">
@@ -285,31 +293,29 @@ export function UsersManagerPage() {
         credentials to the staff member. They then use <em>Staff login</em>.
       </div>
 
-      <section className="admin-panel users-admin-panel">
-        <div className="table-tools users-toolbar">
-          <label className="users-toolbar__search" htmlFor="users-search-input">
-            <Search size={18} aria-hidden="true" />
-            <input
-              id="users-search-input"
-              type="search"
+      <Card variant="outlined" className="users-admin-panel" style={{ padding: 'var(--md-space-4)' }}>
+        <div className="table-tools users-toolbar" style={{ display: 'flex', gap: 'var(--md-space-3)', alignItems: 'center', flexWrap: 'wrap', marginBottom: 'var(--md-space-4)' }}>
+          <div style={{ flex: '1 1 280px', minWidth: '220px' }}>
+            <SearchBar
+              label="Search accounts"
               placeholder="Search by name, mobile, or address…"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              autoComplete="off"
-              enterKeyHint="search"
+              onValueChange={setSearchQuery}
             />
-          </label>
-          <select
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value as typeof roleFilter)}
-            aria-label="Filter by role"
-          >
-            <option value="all">All accounts</option>
-            <option value="admin">Administrators</option>
-            <option value="news_in_charge">News in charge</option>
-            <option value="delegation_head">Delegation heads</option>
-            <option value="runner">Runners only (no staff role)</option>
-          </select>
+          </div>
+          <div style={{ width: '220px' }}>
+            <SelectField
+              label="Filter by role"
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value as typeof roleFilter)}
+            >
+              <option value="all">All accounts</option>
+              <option value="admin">Administrators</option>
+              <option value="news_in_charge">News in charge</option>
+              <option value="delegation_head">Delegation heads</option>
+              <option value="runner">Runners only (no staff role)</option>
+            </SelectField>
+          </div>
         </div>
 
         {loading ? (
@@ -327,9 +333,7 @@ export function UsersManagerPage() {
           />
         ) : (
           <div className="admin-table users-table">
-            <div
-              className="admin-table__head users-table__grid"
-            >
+            <div className="admin-table__head users-table__grid">
               <span>Name</span>
               <span>Contact</span>
               <span>Roles</span>
@@ -346,15 +350,21 @@ export function UsersManagerPage() {
                 >
                   <div className="users-table__identity">
                     <strong>{u.full_name || 'Unnamed account'}</strong>
-                    <small style={{ display: 'block', color: 'var(--muted)', fontSize: '0.75rem' }}>
+                    <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.75rem' }}>
                       {u.id.slice(0, 8)}…
                     </small>
                   </div>
                   <div className="users-table__contact">
-                    <div><Phone size={15} aria-hidden="true" /><span>{u.mobile || '—'}</span></div>
-                    <div><MapPin size={15} aria-hidden="true" /><small>{u.locality || '—'}</small></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Phone size={14} aria-hidden="true" />
+                      <span>{u.mobile || '—'}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <MapPin size={14} aria-hidden="true" />
+                      <small>{u.locality || '—'}</small>
+                    </div>
                   </div>
-                  <div className="users-table__roles">
+                  <div className="users-table__roles" style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                     {staffRoles.length === 0 ? (
                       <StatusBadge tone="warning">runner</StatusBadge>
                     ) : (
@@ -370,13 +380,14 @@ export function UsersManagerPage() {
                       {u.suspended_at ? 'Suspended' : 'Active'}
                     </StatusBadge>
                   </div>
-                  <div className="users-table__actions">
+                  <div className="users-table__actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
                     <button
                       type="button"
                       className="button button--ghost button--sm users-table__icon-button"
                       onClick={() => void openEditor(u)}
                       title={`Edit ${u.full_name || 'user'}`}
                       aria-label={`Edit ${u.full_name || 'user'}`}
+                      style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                       <Pencil size={16} aria-hidden="true" />
                     </button>
@@ -387,6 +398,7 @@ export function UsersManagerPage() {
                       disabled={deletingId === u.id || u.id === user?.id}
                       title={u.id === user?.id ? 'You cannot delete your own account' : 'Delete user account'}
                       aria-label={`Delete ${u.full_name || 'user'}`}
+                      style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                       <Trash2 size={16} aria-hidden="true" />
                     </button>
@@ -396,173 +408,242 @@ export function UsersManagerPage() {
             })}
           </div>
         )}
-      </section>
+      </Card>
 
-      {createOpen && (
-        <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="staff-create-title">
-          <form className="modal-card users-edit-modal" onSubmit={(event) => { event.preventDefault(); void handleCreateStaff(); }}>
-            <div className="users-edit-modal__heading">
-              <div>
-                <p className="eyebrow">Committee access</p>
-                <h2 id="staff-create-title">Create staff account</h2>
-                <p>Create the login, profile, temporary password, and assigned roles together.</p>
-              </div>
-              <button type="button" className="button button--ghost" disabled={creating} onClick={closeCreateStaff} aria-label="Close">
-                <X size={18} aria-hidden="true" />
-              </button>
+      {/* Create staff modal */}
+      <Dialog
+        open={createOpen}
+        onClose={closeCreateStaff}
+        title="Create staff account"
+      >
+        <p style={{ margin: '0 0 var(--md-space-4) 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+          Create the login, profile, temporary password, and assigned roles together.
+        </p>
+        {createdCredentials ? (
+          <div className="users-create-success" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-3)' }}>
+            <StatusBadge tone="success">Account created</StatusBadge>
+            <h3>Give these details to {createdCredentials.name}</h3>
+            <p style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.9rem' }}>
+              The temporary password is shown only here. Send it through a secure channel.
+            </p>
+            <Card variant="filled" style={{ padding: 'var(--md-space-4)', display: 'grid', gridTemplateColumns: '120px 1fr', gap: 'var(--md-space-2)', alignItems: 'center' }}>
+              <span style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.85rem' }}>Email address</span>
+              <strong>{createdCredentials.email}</strong>
+              <span style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.85rem' }}>Temporary password</span>
+              <strong>{createdCredentials.password}</strong>
+            </Card>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--md-space-2)', marginTop: 'var(--md-space-3)' }}>
+              <Button variant="outlined" leadingIcon={<ClipboardCopy size={16} />} onClick={() => void copyCreatedCredentials()}>
+                Copy details
+              </Button>
+              <Button variant="filled" onClick={closeCreateStaff}>
+                Done
+              </Button>
             </div>
-
-            {createdCredentials ? (
-              <div className="users-create-success">
-                <StatusBadge tone="success">Account created</StatusBadge>
-                <h3>Give these details to {createdCredentials.name}</h3>
-                <p>The temporary password is shown only here. Send it through a secure channel.</p>
-                <div className="users-edit-modal__identity">
-                  <span>Email address</span>
-                  <strong>{createdCredentials.email}</strong>
-                  <span>Temporary password</span>
-                  <strong>{createdCredentials.password}</strong>
-                </div>
-                <div className="users-edit-modal__actions">
-                  <button type="button" className="button button--secondary" onClick={() => void copyCreatedCredentials()}>
-                    <ClipboardCopy size={16} aria-hidden="true" /> Copy details
-                  </button>
-                  <button type="button" className="button button--primary" onClick={closeCreateStaff}>Done</button>
-                </div>
+          </div>
+        ) : (
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              void handleCreateStaff();
+            }}
+            style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-4)' }}
+          >
+            <fieldset style={{ border: '1px solid var(--md-sys-color-outline-variant)', borderRadius: 'var(--md-sys-shape-corner-medium)', padding: 'var(--md-space-4)', margin: 0 }}>
+              <legend style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--md-sys-color-on-surface)', padding: '0 var(--md-space-2)' }}>Staff account details</legend>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-3)', marginTop: 'var(--md-space-2)' }}>
+                <TextField
+                  label="Email address"
+                  type="email"
+                  required
+                  value={createEmail}
+                  onChange={(e) => setCreateEmail(e.target.value)}
+                  autoComplete="off"
+                />
+                <TextField
+                  label="Full name"
+                  type="text"
+                  required
+                  value={createName}
+                  onChange={(e) => setCreateName(e.target.value)}
+                  autoComplete="off"
+                />
+                <TextField
+                  label="Mobile number"
+                  type="tel"
+                  value={createMobile}
+                  onChange={(e) => setCreateMobile(e.target.value)}
+                  autoComplete="off"
+                />
+                <TextArea
+                  label="Full address"
+                  rows={2}
+                  value={createLocality}
+                  onChange={(e) => setCreateLocality(e.target.value)}
+                />
+                <TextField
+                  label="Temporary password"
+                  type="password"
+                  required
+                  minLength={8}
+                  value={createPassword}
+                  onChange={(e) => setCreatePassword(e.target.value)}
+                  autoComplete="new-password"
+                  helperText="At least 8 characters. Give this to the staff member securely."
+                />
               </div>
-            ) : (
-              <>
-                <fieldset>
-                  <legend>Staff account details</legend>
-                  <div className="users-edit-modal__grid">
-                    <label className="users-edit-modal__wide">
-                      <span><Mail size={15} aria-hidden="true" /> Email address</span>
-                      <input type="email" required value={createEmail} onChange={(event) => setCreateEmail(event.target.value)} autoComplete="off" />
-                    </label>
-                    <label>
-                      Full name
-                      <input type="text" required value={createName} onChange={(event) => setCreateName(event.target.value)} autoComplete="off" />
-                    </label>
-                    <label>
-                      Mobile number
-                      <input type="tel" value={createMobile} onChange={(event) => setCreateMobile(event.target.value)} autoComplete="off" />
-                    </label>
-                    <label className="users-edit-modal__wide">
-                      Full address
-                      <textarea rows={2} value={createLocality} onChange={(event) => setCreateLocality(event.target.value)} />
-                    </label>
-                    <label className="users-edit-modal__wide users-edit-modal__password">
-                      <span><KeyRound size={16} aria-hidden="true" /> Temporary password</span>
-                      <input type="password" required minLength={8} value={createPassword} onChange={(event) => setCreatePassword(event.target.value)} autoComplete="new-password" placeholder="At least 8 characters" />
-                    </label>
-                  </div>
-                </fieldset>
+            </fieldset>
 
-                <fieldset>
-                  <legend>Staff roles</legend>
-                  <div className="users-edit-modal__roles">
-                    {(Object.keys(ROLE_LABELS) as StaffRole[]).map((role) => (
-                      <label key={role}>
-                        <input type="checkbox" checked={createRoles.includes(role)} onChange={() => toggleCreateRole(role)} />
-                        <span><Shield size={16} aria-hidden="true" /> {ROLE_LABELS[role]}</span>
-                      </label>
-                    ))}
-                  </div>
-                  <p className="users-edit-modal__note">Assign at least one role. Staff accounts cannot be created as runner-only accounts here.</p>
-                </fieldset>
-
-                <div className="users-edit-modal__actions">
-                  <button type="button" className="button button--ghost" disabled={creating} onClick={closeCreateStaff}>Cancel</button>
-                  <button type="submit" className="button button--primary" disabled={creating || !createEmail.trim() || !createName.trim() || createPassword.length < 8 || createRoles.length === 0}>
-                    <UserPlus size={16} aria-hidden="true" /> {creating ? 'Creating…' : 'Create staff account'}
-                  </button>
-                </div>
-              </>
-            )}
-          </form>
-        </div>
-      )}
-
-      {selected && (
-        <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="user-edit-title">
-          <form className="modal-card users-edit-modal" onSubmit={(event) => { event.preventDefault(); void handleSave(); }}>
-            <div className="users-edit-modal__heading">
-              <div>
-                <p className="eyebrow">Account administration</p>
-                <h2 id="user-edit-title">Edit user</h2>
-                <p>Update profile information, access, roles, and login credentials.</p>
+            <fieldset style={{ border: '1px solid var(--md-sys-color-outline-variant)', borderRadius: 'var(--md-sys-shape-corner-medium)', padding: 'var(--md-space-4)', margin: 0 }}>
+              <legend style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--md-sys-color-on-surface)', padding: '0 var(--md-space-2)' }}>Staff roles</legend>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-2)', marginTop: 'var(--md-space-2)' }}>
+                {(Object.keys(ROLE_LABELS) as StaffRole[]).map((role) => (
+                  <Checkbox
+                    key={role}
+                    checked={createRoles.includes(role)}
+                    onChange={() => toggleCreateRole(role)}
+                    label={ROLE_LABELS[role]}
+                  />
+                ))}
               </div>
-              <button type="button" className="button button--ghost" disabled={saving} onClick={() => setSelected(null)} aria-label="Close">
-                <X size={18} />
-              </button>
+              <p style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.8rem', margin: 'var(--md-space-2) 0 0 0' }}>
+                Assign at least one role. Staff accounts cannot be created as runner-only accounts here.
+              </p>
+            </fieldset>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--md-space-2)', marginTop: 'var(--md-space-2)' }}>
+              <Button variant="text" disabled={creating} onClick={closeCreateStaff}>
+                Cancel
+              </Button>
+              <Button
+                variant="filled"
+                type="submit"
+                loading={creating}
+                disabled={creating || !createEmail.trim() || !createName.trim() || createPassword.length < 8 || createRoles.length === 0}
+                leadingIcon={<UserPlus size={16} />}
+              >
+                Create staff account
+              </Button>
             </div>
-
-            {loadingDetails ? <LoadingState message="Loading complete user details…" /> : <>
-              <div className="users-edit-modal__identity">
-                <span>Account ID</span>
-                <strong>{selected.id}</strong>
-                <span>Created</span>
-                <strong>{new Date(selected.created_at).toLocaleString('en-PH')}</strong>
-              </div>
-
-              <fieldset>
-                <legend>Account details</legend>
-                <div className="users-edit-modal__grid">
-                  <label className="users-edit-modal__wide">
-                    <span><Mail size={15} /> Email address</span>
-                    <input type="email" required value={editEmail} onChange={(event) => setEditEmail(event.target.value)} autoComplete="off" />
-                  </label>
-                  <label>
-                    Full name
-                    <input type="text" required value={editName} onChange={(event) => setEditName(event.target.value)} />
-                  </label>
-                  <label>
-                    Mobile number
-                    <input type="tel" value={editMobile} onChange={(event) => setEditMobile(event.target.value)} />
-                  </label>
-                  <label className="users-edit-modal__wide">
-                    Full address
-                    <textarea rows={2} value={editLocality} onChange={(event) => setEditLocality(event.target.value)} />
-                  </label>
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend>Access and staff roles</legend>
-                <div className="users-edit-modal__roles">
-                  {(Object.keys(ROLE_LABELS) as StaffRole[]).map((role) => (
-                    <label key={role}>
-                      <input type="checkbox" checked={editRoles.includes(role)} onChange={() => toggleRole(role)} />
-                      <span><Shield size={16} /> {ROLE_LABELS[role]}</span>
-                    </label>
-                  ))}
-                </div>
-                <label className="users-edit-modal__suspended">
-                  <input type="checkbox" checked={editSuspended} disabled={selected.id === user?.id} onChange={(event) => setEditSuspended(event.target.checked)} />
-                  <span><strong>Suspend this account</strong><small>Prevents the user from using protected website features. Your current account cannot suspend itself.</small></span>
-                </label>
-                <p className="users-edit-modal__note">Runner access is always retained. Clearing all staff roles leaves this as a runner-only account.</p>
-              </fieldset>
-
-              <fieldset>
-                <legend>Password reset</legend>
-                <label className="users-edit-modal__password">
-                  <span><KeyRound size={16} /> New password</span>
-                  <input type="password" minLength={8} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} autoComplete="new-password" placeholder="Leave blank to keep the current password" />
-                </label>
-                <p className="users-edit-modal__note">If entered, the new password takes effect immediately. Give it to the user through a secure channel.</p>
-              </fieldset>
-
-              <div className="users-edit-modal__actions">
-                <button type="button" className="button button--ghost" disabled={saving} onClick={() => setSelected(null)}>Cancel</button>
-                <button type="submit" className="button button--primary" disabled={saving || !editEmail.trim() || !editName.trim()}>
-                  <Save size={16} /> {saving ? 'Saving…' : 'Save changes'}
-                </button>
-              </div>
-            </>}
           </form>
-        </div>
-      )}
+        )}
+      </Dialog>
+
+      {/* Edit user modal */}
+      <Dialog
+        open={Boolean(selected)}
+        onClose={() => setSelected(null)}
+        title="Edit user"
+      >
+        <p style={{ margin: '0 0 var(--md-space-4) 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+          Update profile information, access, roles, and login credentials.
+        </p>
+        {loadingDetails ? (
+          <LoadingState message="Loading complete user details…" />
+        ) : selected ? (
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              void handleSave();
+            }}
+            style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-4)' }}
+          >
+            <Card variant="filled" style={{ padding: 'var(--md-space-3)', display: 'grid', gridTemplateColumns: '120px 1fr', gap: 'var(--md-space-1)', fontSize: '0.85rem' }}>
+              <span style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>Account ID</span>
+              <strong style={{ fontFamily: 'monospace' }}>{selected.id}</strong>
+              <span style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>Created</span>
+              <strong>{new Date(selected.created_at).toLocaleString('en-PH')}</strong>
+            </Card>
+
+            <fieldset style={{ border: '1px solid var(--md-sys-color-outline-variant)', borderRadius: 'var(--md-sys-shape-corner-medium)', padding: 'var(--md-space-4)', margin: 0 }}>
+              <legend style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--md-sys-color-on-surface)', padding: '0 var(--md-space-2)' }}>Account details</legend>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-3)', marginTop: 'var(--md-space-2)' }}>
+                <TextField
+                  label="Email address"
+                  type="email"
+                  required
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  autoComplete="off"
+                />
+                <TextField
+                  label="Full name"
+                  type="text"
+                  required
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                />
+                <TextField
+                  label="Mobile number"
+                  type="tel"
+                  value={editMobile}
+                  onChange={(e) => setEditMobile(e.target.value)}
+                />
+                <TextArea
+                  label="Full address"
+                  rows={2}
+                  value={editLocality}
+                  onChange={(e) => setEditLocality(e.target.value)}
+                />
+              </div>
+            </fieldset>
+
+            <fieldset style={{ border: '1px solid var(--md-sys-color-outline-variant)', borderRadius: 'var(--md-sys-shape-corner-medium)', padding: 'var(--md-space-4)', margin: 0 }}>
+              <legend style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--md-sys-color-on-surface)', padding: '0 var(--md-space-2)' }}>Access and staff roles</legend>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-2)', marginTop: 'var(--md-space-2)' }}>
+                {(Object.keys(ROLE_LABELS) as StaffRole[]).map((role) => (
+                  <Checkbox
+                    key={role}
+                    checked={editRoles.includes(role)}
+                    onChange={() => toggleRole(role)}
+                    label={ROLE_LABELS[role]}
+                  />
+                ))}
+              </div>
+              <div style={{ marginTop: 'var(--md-space-3)', paddingTop: 'var(--md-space-3)', borderTop: '1px solid var(--md-sys-color-outline-variant)' }}>
+                <Checkbox
+                  checked={editSuspended}
+                  disabled={selected.id === user?.id}
+                  onChange={(e) => setEditSuspended(e.target.checked)}
+                  label="Suspend this account (prevents login and participation)"
+                />
+              </div>
+              <p style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.8rem', margin: 'var(--md-space-2) 0 0 0' }}>
+                Runner access is always retained. Clearing all staff roles leaves this as a runner-only account.
+              </p>
+            </fieldset>
+
+            <fieldset style={{ border: '1px solid var(--md-sys-color-outline-variant)', borderRadius: 'var(--md-sys-shape-corner-medium)', padding: 'var(--md-space-4)', margin: 0 }}>
+              <legend style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--md-sys-color-on-surface)', padding: '0 var(--md-space-2)' }}>Password reset</legend>
+              <TextField
+                label="New password"
+                type="password"
+                minLength={8}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                autoComplete="new-password"
+                placeholder="Leave blank to keep current password"
+                helperText="If entered, the new password takes effect immediately. Give it securely."
+              />
+            </fieldset>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--md-space-2)', marginTop: 'var(--md-space-2)' }}>
+              <Button variant="text" disabled={saving} onClick={() => setSelected(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant="filled"
+                type="submit"
+                loading={saving}
+                disabled={saving || !editEmail.trim() || !editName.trim()}
+                leadingIcon={<Save size={16} />}
+              >
+                Save changes
+              </Button>
+            </div>
+          </form>
+        ) : null}
+      </Dialog>
     </div>
   );
 }

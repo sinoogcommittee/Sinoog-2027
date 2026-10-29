@@ -10,6 +10,11 @@ import { LoadingState } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
 import type { Edition } from '../../types/database';
 import { getRunEventAndCategories, updateRunEventSettings } from '../../features/run/runQueries';
+import { Button } from '../../components/Button';
+import { Card } from '../../components/m3/Card';
+import { TextField } from '../../components/m3/TextField';
+import { SelectField } from '../../components/m3/SelectField';
+import { Checkbox } from '../../components/m3/Checkbox';
 
 const toManilaInput = (value: string | null) => value
   ? new Date(value).toLocaleString('sv-SE', { timeZone: 'Asia/Manila' }).replace(' ', 'T').slice(0, 16)
@@ -244,372 +249,283 @@ export function SettingsPage() {
             <h1>Website Settings</h1>
             <p>Configure edition details, public schedules, feature switches, and emergency banners.</p>
           </div>
-          <button type="submit" className="button button--primary" disabled={saving}>
-            <Save size={18} /> {saving ? 'Saving changes…' : 'Save all settings'}
-          </button>
+          <Button variant="filled" type="submit" loading={saving} leadingIcon={<Save size={18} />}>
+            Save all settings
+          </Button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', maxWidth: '960px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'var(--md-space-6)', maxWidth: '960px' }}>
           {/* Section 1: Edition & Parish Identity */}
-          <section className="admin-panel">
-            <div className="panel-heading">
-              <div>
-                <h2>
-                  <Calendar size={18} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: '-2px' }} />
-                  Edition & Parish Identity
-                </h2>
-                <p>Official event title, parish name, and geographical location.</p>
-              </div>
+          <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
+            <div style={{ marginBottom: 'var(--md-space-4)' }}>
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
+                <Calendar size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
+                Edition & Parish Identity
+              </h2>
+              <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+                Official event title, parish name, and geographical location.
+              </p>
             </div>
 
-            <div className="settings-responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', padding: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
-                  Edition Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
-                  Parish Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={parishName}
-                  onChange={(e) => setParishName(e.target.value)}
-                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
-                  Official Location
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
-                  Official Timezone
-                </label>
-                <input
-                  type="text"
-                  disabled
-                  value={timezone}
-                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #e0d8d0', background: '#f5efe6' }}
-                />
-                <small style={{ color: '#6d6158' }}>All event schedules are authoritatively stored in Asia/Manila.</small>
-              </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 'var(--md-space-3)' }}>
+              <TextField
+                label="Edition Name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <TextField
+                label="Parish Name"
+                required
+                value={parishName}
+                onChange={(e) => setParishName(e.target.value)}
+              />
+              <TextField
+                label="Official Location"
+                required
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+              <TextField
+                label="Official Timezone"
+                disabled
+                value={timezone}
+                helperText="All event schedules are authoritatively stored in Asia/Manila."
+              />
             </div>
-          </section>
+          </Card>
 
-          {/* Sinoog Run operational settings */}
-          <section className="admin-panel">
-            <div className="panel-heading">
-              <div>
-                <h2>
-                  <CreditCard size={18} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: '-2px' }} />
-                  Sinoog Run Registration & GCash
-                </h2>
-                <p>Editable payment destination, registration deadline, and race start time.</p>
-              </div>
-            </div>
-            <div className="settings-responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', padding: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>GCash Number</label>
-                <input type="tel" inputMode="numeric" value={gcashNumber} onChange={(e) => setGcashNumber(e.target.value.replace(/[^0-9+]/g, ''))} placeholder="09260265423" style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }} />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>GCash Account Name</label>
-                <input type="text" value={gcashAccountName} onChange={(e) => setGcashAccountName(e.target.value)} placeholder="Add when confirmed" style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }} />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>Registration Opens</label>
-                <input type="datetime-local" value={registrationOpensAt} onChange={(e) => setRegistrationOpensAt(e.target.value)} style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }} />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>Registration Deadline</label>
-                <input type="datetime-local" value={registrationClosesAt} onChange={(e) => setRegistrationClosesAt(e.target.value)} style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }} />
-                <small style={{ color: '#6d6158' }}>Leave blank while the deadline is still to be announced.</small>
-              </div>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>Race Start Date & Time</label>
-                <input type="datetime-local" value={raceStartsAt} onChange={(e) => setRaceStartsAt(e.target.value)} style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }} />
-                <small style={{ color: '#6d6158' }}>Leave blank until the official start time is confirmed.</small>
-              </div>
-            </div>
-          </section>
-
-          {/* Section 2: Key Event Dates */}
-          <section className="admin-panel">
-            <div className="panel-heading">
-              <div>
-                <h2>
-                  <Calendar size={18} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: '-2px' }} />
-                  Key Celebration Dates
-                </h2>
-                <p>Governs countdowns and key event labels across the website.</p>
-              </div>
+          {/* Section 2: Sinoog Run operational settings */}
+          <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
+            <div style={{ marginBottom: 'var(--md-space-4)' }}>
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
+                <CreditCard size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
+                Sinoog Run Registration & GCash
+              </h2>
+              <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+                Editable payment destination, registration deadline, and race start time.
+              </p>
             </div>
 
-            <div className="settings-responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', padding: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
-                  Sinoog Run Date
-                </label>
-                <input
-                  type="date"
-                  value={runDate}
-                  onChange={(e) => setRunDate(e.target.value)}
-                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
-                  Novena Start Date
-                </label>
-                <input
-                  type="date"
-                  value={novenaStartDate}
-                  onChange={(e) => setNovenaStartDate(e.target.value)}
-                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
-                  Fiesta & Festival Day
-                </label>
-                <input
-                  type="date"
-                  value={fiestaDate}
-                  onChange={(e) => setFiestaDate(e.target.value)}
-                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-              </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--md-space-3)' }}>
+              <TextField
+                label="GCash Number"
+                type="tel"
+                inputMode="numeric"
+                value={gcashNumber}
+                onChange={(e) => setGcashNumber(e.target.value.replace(/[^0-9+]/g, ''))}
+                placeholder="09260265423"
+              />
+              <TextField
+                label="GCash Account Name"
+                value={gcashAccountName}
+                onChange={(e) => setGcashAccountName(e.target.value)}
+                placeholder="Add when confirmed"
+              />
+              <TextField
+                label="Registration Opens"
+                type="datetime-local"
+                value={registrationOpensAt}
+                onChange={(e) => setRegistrationOpensAt(e.target.value)}
+              />
+              <TextField
+                label="Registration Deadline"
+                type="datetime-local"
+                value={registrationClosesAt}
+                onChange={(e) => setRegistrationClosesAt(e.target.value)}
+                helperText="Leave blank while the deadline is still to be announced."
+              />
+              <TextField
+                label="Race Start Date & Time"
+                type="datetime-local"
+                value={raceStartsAt}
+                onChange={(e) => setRaceStartsAt(e.target.value)}
+                helperText="Leave blank until official start time is confirmed."
+              />
             </div>
-          </section>
+          </Card>
 
-          {/* Section 3: Feature Switches */}
-          <section className="admin-panel">
-            <div className="panel-heading">
-              <div>
-                <h2>
-                  <Shield size={18} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: '-2px' }} />
-                  Feature Availability Switches
-                </h2>
-                <p>Enable or pause public portals and workflows.</p>
-              </div>
+          {/* Section 3: Key Event Dates */}
+          <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
+            <div style={{ marginBottom: 'var(--md-space-4)' }}>
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
+                <Calendar size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
+                Key Celebration Dates
+              </h2>
+              <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+                Governs countdowns and key event labels across the website.
+              </p>
             </div>
 
-            <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--md-space-3)' }}>
+              <TextField
+                label="Sinoog Run Date"
+                type="date"
+                value={runDate}
+                onChange={(e) => setRunDate(e.target.value)}
+              />
+              <TextField
+                label="Novena Start Date"
+                type="date"
+                value={novenaStartDate}
+                onChange={(e) => setNovenaStartDate(e.target.value)}
+              />
+              <TextField
+                label="Fiesta & Festival Day"
+                type="date"
+                value={fiestaDate}
+                onChange={(e) => setFiestaDate(e.target.value)}
+              />
+            </div>
+          </Card>
+
+          {/* Section 4: Feature Switches */}
+          <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
+            <div style={{ marginBottom: 'var(--md-space-4)' }}>
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
+                <Shield size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
+                Feature Availability Switches
+              </h2>
+              <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+                Enable or pause public portals and workflows.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-3)' }}>
+              <div>
+                <Checkbox
                   checked={registrationOpen}
                   onChange={(e) => setRegistrationOpen(e.target.checked)}
-                  style={{ width: '18px', height: '18px' }}
+                  label="Sinoog Run Registration Open"
                 />
-                <div>
-                  <strong>Sinoog Run Registration Open</strong>
-                  <div style={{ fontSize: '0.85rem', color: '#6d6158' }}>
-                    When enabled, eligible participants can submit registration forms and upload payment evidence.
-                  </div>
-                </div>
-              </label>
+                <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)', marginLeft: '32px' }}>
+                  When enabled, eligible participants can submit registration forms and upload payment evidence.
+                </small>
+              </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
+              <div>
+                <Checkbox
                   checked={delegationsEnabled}
                   onChange={(e) => setDelegationsEnabled(e.target.checked)}
-                  style={{ width: '18px', height: '18px' }}
+                  label="Delegation Submission Portal Open"
                 />
-                <div>
-                  <strong>Delegation Submission Portal Open</strong>
-                  <div style={{ fontSize: '0.85rem', color: '#6d6158' }}>
-                    Allows authorized delegation heads to submit participant rosters and musical pieces.
-                  </div>
-                </div>
-              </label>
+                <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)', marginLeft: '32px' }}>
+                  Allows authorized delegation heads to submit participant rosters and musical pieces.
+                </small>
+              </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
+              <div>
+                <Checkbox
                   checked={sponsorsEnabled}
                   onChange={(e) => setSponsorsEnabled(e.target.checked)}
-                  style={{ width: '18px', height: '18px' }}
+                  label="Display Sponsors Page & Footers"
                 />
-                <div>
-                  <strong>Display Sponsors Page & Footers</strong>
-                  <div style={{ fontSize: '0.85rem', color: '#6d6158' }}>
-                    Show verified corporate and community benefactors.
-                  </div>
-                </div>
-              </label>
+                <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)', marginLeft: '32px' }}>
+                  Show verified corporate and community benefactors.
+                </small>
+              </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
+              <div>
+                <Checkbox
                   checked={galleryEnabled}
                   onChange={(e) => setGalleryEnabled(e.target.checked)}
-                  style={{ width: '18px', height: '18px' }}
+                  label="Display Public Media Gallery"
                 />
-                <div>
-                  <strong>Display Public Media Gallery</strong>
-                  <div style={{ fontSize: '0.85rem', color: '#6d6158' }}>
-                    Enable photo albums and video recordings of previous and current celebrations.
-                  </div>
-                </div>
-              </label>
-            </div>
-          </section>
-
-          {/* Section 4: Urgent Public Announcement Banner */}
-          <section className="admin-panel">
-            <div className="panel-heading">
-              <div>
-                <h2>
-                  <Bell size={18} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: '-2px' }} />
-                  Public Announcement Banner
-                </h2>
-                <p>Broadcast high-visibility notifications or emergency advisories across all public pages.</p>
+                <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)', marginLeft: '32px' }}>
+                  Enable photo albums and video recordings of previous and current celebrations.
+                </small>
               </div>
             </div>
+          </Card>
 
-            <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={bannerEnabled}
-                  onChange={(e) => setBannerEnabled(e.target.checked)}
-                  style={{ width: '18px', height: '18px' }}
-                />
-                <div>
-                  <strong>Enable announcement banner on website</strong>
-                </div>
-              </label>
+          {/* Section 5: Urgent Public Announcement Banner */}
+          <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
+            <div style={{ marginBottom: 'var(--md-space-4)' }}>
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
+                <Bell size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
+                Public Announcement Banner
+              </h2>
+              <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+                Broadcast high-visibility notifications or emergency advisories across all public pages.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-4)' }}>
+              <Checkbox
+                checked={bannerEnabled}
+                onChange={(e) => setBannerEnabled(e.target.checked)}
+                label="Enable announcement banner on website"
+              />
 
               {bannerEnabled && (
-                <div className="settings-banner-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: '1rem' }}>
-                  <div>
-                    <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
-                      Banner Text / Advisory
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Weather Advisory: Holy Mass venue transferred to parish hall due to rain."
-                      value={bannerText}
-                      onChange={(e) => setBannerText(e.target.value)}
-                      style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
-                      Severity Tone
-                    </label>
-                    <select
-                      value={bannerSeverity}
-                      onChange={(e) => setBannerSeverity(e.target.value as 'info' | 'warning' | 'alert')}
-                      style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                    >
-                      <option value="info">Information (Blue)</option>
-                      <option value="warning">Notice / Caution (Gold)</option>
-                      <option value="alert">Urgent / Advisory (Wine Red)</option>
-                    </select>
-                  </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--md-space-3)' }}>
+                  <TextField
+                    label="Banner Text / Advisory"
+                    placeholder="e.g. Weather Advisory: Holy Mass venue transferred to parish hall due to rain."
+                    value={bannerText}
+                    onChange={(e) => setBannerText(e.target.value)}
+                  />
+                  <SelectField
+                    label="Severity Tone"
+                    value={bannerSeverity}
+                    onChange={(e) => setBannerSeverity(e.target.value as 'info' | 'warning' | 'alert')}
+                  >
+                    <option value="info">Information (Blue)</option>
+                    <option value="warning">Notice / Caution (Gold)</option>
+                    <option value="alert">Urgent / Advisory (Wine Red)</option>
+                  </SelectField>
                 </div>
               )}
             </div>
-          </section>
+          </Card>
 
-          {/* Section 5: Official Committee Contact & Socials */}
-          <section className="admin-panel">
-            <div className="panel-heading">
-              <div>
-                <h2>
-                  <Mail size={18} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: '-2px' }} />
-                  Official Contacts & Channels
-                </h2>
-                <p>Publicized in the footer and About page for participant inquiries.</p>
-              </div>
+          {/* Section 6: Official Committee Contact & Socials */}
+          <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
+            <div style={{ marginBottom: 'var(--md-space-4)' }}>
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
+                <Mail size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
+                Official Contacts & Channels
+              </h2>
+              <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+                Publicized in the footer and About page for participant inquiries.
+              </p>
             </div>
 
-            <div className="settings-responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', padding: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
-                  Support Email
-                </label>
-                <input
-                  type="email"
-                  placeholder="e.g. sto.nino.guinacot@gmail.com"
-                  value={contactEmail}
-                  onChange={(e) => setContactEmail(e.target.value)}
-                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
-                  Mobile / Telephone
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. +63 912 345 6789"
-                  value={contactPhone}
-                  onChange={(e) => setContactPhone(e.target.value)}
-                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
-                  Office Hours
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Monday - Saturday, 8:00 AM - 5:00 PM"
-                  value={officeHours}
-                  onChange={(e) => setOfficeHours(e.target.value)}
-                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem', fontSize: '0.9rem' }}>
-                  Facebook Page URL
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. https://facebook.com/stoninoguinacot"
-                  value={socialFb}
-                  onChange={(e) => setSocialFb(e.target.value)}
-                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                />
-              </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--md-space-3)' }}>
+              <TextField
+                label="Support Email"
+                type="email"
+                placeholder="e.g. sto.nino.guinacot@gmail.com"
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+              />
+              <TextField
+                label="Mobile / Telephone"
+                type="tel"
+                placeholder="e.g. +63 912 345 6789"
+                value={contactPhone}
+                onChange={(e) => setContactPhone(e.target.value)}
+              />
+              <TextField
+                label="Office Hours"
+                placeholder="e.g. Monday - Saturday, 8:00 AM - 5:00 PM"
+                value={officeHours}
+                onChange={(e) => setOfficeHours(e.target.value)}
+              />
+              <TextField
+                label="Facebook Page URL"
+                type="url"
+                placeholder="e.g. https://facebook.com/stoninoguinacot"
+                value={socialFb}
+                onChange={(e) => setSocialFb(e.target.value)}
+              />
             </div>
-          </section>
+          </Card>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem', marginBottom: '2rem' }}>
-            <button type="submit" className="button button--primary" disabled={saving}>
-              <Save size={18} /> {saving ? 'Saving changes…' : 'Save all settings'}
-            </button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--md-space-2)', marginBottom: 'var(--md-space-6)' }}>
+            <Button variant="filled" type="submit" loading={saving} leadingIcon={<Save size={18} />}>
+              Save all settings
+            </Button>
           </div>
         </div>
       </form>

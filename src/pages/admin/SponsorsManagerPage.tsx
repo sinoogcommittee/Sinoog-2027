@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Search, ExternalLink, HeartHandshake, Pencil, Plus, Trash2, Upload, X } from 'lucide-react';
+import { ExternalLink, HeartHandshake, Pencil, Plus, Trash2, Upload } from 'lucide-react';
 import { LoadingState, EmptyState } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
@@ -14,6 +14,13 @@ import {
   uploadSponsorLogo,
   type EditionSponsorRow,
 } from '../../features/sponsors/sponsorQueries';
+import { Button } from '../../components/Button';
+import { Card } from '../../components/m3/Card';
+import { Dialog } from '../../components/m3/Dialog';
+import { TextField } from '../../components/m3/TextField';
+import { SelectField } from '../../components/m3/SelectField';
+import { Checkbox } from '../../components/m3/Checkbox';
+import { SearchBar } from '../../components/m3/SearchBar';
 
 const emptyForm = {
   name: '',
@@ -188,27 +195,22 @@ export function SponsorsManagerPage() {
           <h1>Sponsors</h1>
           <p>Manage partner names, tiers, logos, and what appears on the public sponsors page.</p>
         </div>
-        <button type="button" className="button button--primary" onClick={openCreate}>
-          <Plus size={16} /> Add sponsor
-        </button>
+        <Button variant="filled" leadingIcon={<Plus size={16} />} onClick={openCreate}>
+          Add sponsor
+        </Button>
       </div>
 
-      <section className="admin-panel">
-        <div className="table-tools">
-          <label className="modern-search" htmlFor="sponsors-search-input">
-            <Search size={18} aria-hidden="true" />
-            <input
-              id="sponsors-search-input"
-              type="search"
+      <Card variant="outlined" style={{ padding: 'var(--md-space-4)' }}>
+        <div className="table-tools" style={{ display: 'flex', gap: 'var(--md-space-3)', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: 'var(--md-space-4)' }}>
+          <div style={{ flex: '1 1 280px', minWidth: '220px' }}>
+            <SearchBar
+              label="Search sponsors"
               placeholder="Search name, tier, or website…"
               value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              aria-label="Search sponsors"
-              autoComplete="off"
-              enterKeyHint="search"
+              onValueChange={setFilter}
             />
-          </label>
-          <span style={{ color: 'var(--muted)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+          </div>
+          <span style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
             {rows.filter((r) => r.published).length} published · {rows.length} total
           </span>
         </div>
@@ -239,29 +241,45 @@ export function SponsorsManagerPage() {
               const logo = getSponsorLogoUrl(row.sponsor.logo_path);
               return (
                 <div key={row.sponsor_id} className="admin-table__row sponsors-admin-table__grid">
-                  <div className="sponsors-admin-identity">
-                    <div className="sponsors-admin-logo">
+                  <div className="sponsors-admin-identity" style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-3)' }}>
+                    <div
+                      className="sponsors-admin-logo"
+                      style={{
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: 'var(--md-sys-shape-corner-medium)',
+                        border: '1px solid var(--md-sys-color-outline-variant)',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'var(--md-sys-color-surface-container-highest)',
+                        flexShrink: 0,
+                      }}
+                    >
                       {logo ? (
-                        <img src={logo} alt="" />
+                        <img src={logo} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
                       ) : (
-                        <HeartHandshake size={20} aria-hidden />
+                        <HeartHandshake size={20} aria-hidden style={{ color: 'var(--md-sys-color-on-surface-variant)' }} />
                       )}
                     </div>
                     <div>
                       <strong>{row.sponsor.name}</strong>
                       {row.sponsor.website_url ? (
-                        <small>
-                          <a href={row.sponsor.website_url} target="_blank" rel="noreferrer">
+                        <small style={{ display: 'block' }}>
+                          <a href={row.sponsor.website_url} target="_blank" rel="noreferrer" style={{ color: 'var(--md-sys-color-primary)' }}>
                             {row.sponsor.website_url.replace(/^https?:\/\//, '')}
                           </a>
                         </small>
                       ) : (
-                        <small style={{ color: 'var(--muted)' }}>No website</small>
+                        <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)' }}>No website</small>
                       )}
                     </div>
                   </div>
                   <div>
-                    <span className="status">{row.tier}</span>
+                    <span className="status" style={{ padding: '3px 8px', borderRadius: 'var(--md-sys-shape-corner-full)', background: 'var(--md-sys-color-surface-container-high)', fontSize: '0.8rem', fontWeight: 600 }}>
+                      {row.tier}
+                    </span>
                   </div>
                   <div>{row.sort_order}</div>
                   <div>
@@ -270,14 +288,30 @@ export function SponsorsManagerPage() {
                       className={`status ${row.published ? 'status--success' : 'status--warning'}`}
                       onClick={() => void handleTogglePublished(row)}
                       title={row.published ? 'Click to unpublish' : 'Click to publish'}
+                      style={{
+                        minHeight: '36px',
+                        padding: '4px 12px',
+                        borderRadius: 'var(--md-sys-shape-corner-full)',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '0.8rem',
+                        background: row.published ? 'var(--md-sys-color-tertiary-container)' : 'var(--md-sys-color-secondary-container)',
+                        color: row.published ? 'var(--md-sys-color-on-tertiary-container)' : 'var(--md-sys-color-on-secondary-container)',
+                      }}
                     >
                       {row.published ? 'Published' : 'Draft'}
                     </button>
                   </div>
-                  <div className="sponsors-admin-actions">
-                    <button type="button" className="button button--ghost button--sm" onClick={() => openEdit(row)}>
-                      <Pencil size={15} /> Edit
-                    </button>
+                  <div className="sponsors-admin-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
+                    <Button
+                      variant="text"
+                      size="small"
+                      leadingIcon={<Pencil size={15} />}
+                      onClick={() => openEdit(row)}
+                    >
+                      Edit
+                    </Button>
                     {row.sponsor.website_url && (
                       <a
                         className="button button--ghost button--sm"
@@ -285,6 +319,7 @@ export function SponsorsManagerPage() {
                         target="_blank"
                         rel="noreferrer"
                         aria-label={`Open website for ${row.sponsor.name}`}
+                        style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                       >
                         <ExternalLink size={15} />
                       </a>
@@ -294,6 +329,7 @@ export function SponsorsManagerPage() {
                       className="button button--ghost button--sm"
                       onClick={() => void handleDelete(row)}
                       aria-label={`Remove ${row.sponsor.name}`}
+                      style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                       <Trash2 size={15} />
                     </button>
@@ -303,158 +339,161 @@ export function SponsorsManagerPage() {
             })}
           </div>
         )}
-      </section>
+      </Card>
 
-      {modalOpen && (
-        <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="sponsor-modal-title">
-          <div className="modal-card sponsor-modal">
-            <div className="sponsor-modal__header">
-              <div>
-                <p className="eyebrow">Sinoog 2027</p>
-                <h2 id="sponsor-modal-title">{editingId ? 'Edit sponsor' : 'Add sponsor'}</h2>
-                <p className="sponsor-modal__lede">
-                  {editingId
-                    ? 'Update recognition details for this partner.'
-                    : 'Add a partner name, optional logo, and publish when ready.'}
-                </p>
-              </div>
-              <button type="button" className="sponsor-modal__close" onClick={closeModal} aria-label="Close">
-                <X size={18} />
-              </button>
-            </div>
+      <Dialog
+        open={modalOpen}
+        onClose={closeModal}
+        title={editingId ? 'Edit sponsor' : 'Add sponsor'}
+      >
+        <p style={{ margin: '0 0 var(--md-space-4) 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+          {editingId ? 'Update recognition details for this partner.' : 'Add a partner name, optional logo, and publish when ready.'}
+        </p>
+        <form onSubmit={(e) => void handleSave(e)} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-4)' }}>
+          <TextField
+            label="Organization name"
+            required
+            placeholder="e.g. Sto. Niño Parish Pastoral Council"
+            value={form.name}
+            onChange={(e) => setForm((c) => ({ ...c, name: e.target.value }))}
+            autoComplete="organization"
+          />
 
-            <form className="sponsor-form" onSubmit={(e) => void handleSave(e)}>
-              <div className="sponsor-form__field">
-                <label htmlFor="sponsor-name">Organization name</label>
-                <input
-                  id="sponsor-name"
-                  type="text"
-                  required
-                  placeholder="e.g. Sto. Niño Parish Pastoral Council"
-                  value={form.name}
-                  onChange={(e) => setForm((c) => ({ ...c, name: e.target.value }))}
-                  autoComplete="organization"
-                />
-              </div>
+          <TextField
+            label="Website URL"
+            type="url"
+            placeholder="https://example.com"
+            value={form.website_url}
+            onChange={(e) => setForm((c) => ({ ...c, website_url: e.target.value }))}
+          />
 
-              <div className="sponsor-form__field">
-                <label htmlFor="sponsor-url">Website URL</label>
-                <input
-                  id="sponsor-url"
-                  type="url"
-                  placeholder="https://example.com"
-                  value={form.website_url}
-                  onChange={(e) => setForm((c) => ({ ...c, website_url: e.target.value }))}
-                />
-              </div>
+          <TextField
+            label="Facebook page"
+            type="url"
+            placeholder="https://facebook.com/yourpage"
+            value={form.facebook_url}
+            onChange={(e) => setForm((c) => ({ ...c, facebook_url: e.target.value }))}
+            helperText="Optional. Shown next to website link when set."
+          />
 
-              <div className="sponsor-form__field">
-                <label htmlFor="sponsor-facebook">Facebook page</label>
-                <input
-                  id="sponsor-facebook"
-                  type="url"
-                  placeholder="https://facebook.com/yourpage"
-                  value={form.facebook_url}
-                  onChange={(e) => setForm((c) => ({ ...c, facebook_url: e.target.value }))}
-                />
-                <p className="sponsor-form__hint">Optional. Shown next to the website link when set.</p>
-              </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--md-space-3)' }}>
+            <SelectField
+              label="Tier"
+              value={form.tier}
+              onChange={(e) => setForm((c) => ({ ...c, tier: e.target.value }))}
+            >
+              {SPONSOR_TIERS.map((tier) => (
+                <option key={tier} value={tier}>
+                  {tier}
+                </option>
+              ))}
+              {!(SPONSOR_TIERS as readonly string[]).includes(form.tier) && form.tier ? (
+                <option value={form.tier}>{form.tier} (current)</option>
+              ) : null}
+            </SelectField>
 
-              <div className="sponsor-form__row">
-                <div className="sponsor-form__field">
-                  <label htmlFor="sponsor-tier">Tier</label>
-                  <select
-                    id="sponsor-tier"
-                    value={form.tier}
-                    onChange={(e) => setForm((c) => ({ ...c, tier: e.target.value }))}
-                  >
-                    {SPONSOR_TIERS.map((tier) => (
-                      <option key={tier} value={tier}>
-                        {tier}
-                      </option>
-                    ))}
-                    {!(SPONSOR_TIERS as readonly string[]).includes(form.tier) && form.tier ? (
-                      <option value={form.tier}>{form.tier} (current)</option>
-                    ) : null}
-                  </select>
-                </div>
-                <div className="sponsor-form__field">
-                  <label htmlFor="sponsor-order">Sort order</label>
-                  <input
-                    id="sponsor-order"
-                    type="number"
-                    inputMode="numeric"
-                    value={form.sort_order}
-                    onChange={(e) => setForm((c) => ({ ...c, sort_order: Number(e.target.value) }))}
-                  />
-                </div>
-              </div>
-
-              <div className="sponsor-form__field">
-                <span className="sponsor-form__label" id="sponsor-logo-label">
-                  Logo
-                </span>
-                <div className="sponsor-form__logo" aria-labelledby="sponsor-logo-label">
-                  <div className={`sponsor-form__logo-preview${form.logo_path ? ' has-image' : ''}`}>
-                    {form.logo_path ? (
-                      <img src={getSponsorLogoUrl(form.logo_path)} alt="" />
-                    ) : (
-                      <HeartHandshake size={26} aria-hidden />
-                    )}
-                  </div>
-                  <div className="sponsor-form__logo-actions">
-                    <label className="button button--secondary button--sm sponsor-form__upload">
-                      <Upload size={14} /> {uploading ? 'Uploading…' : 'Upload logo'}
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        hidden
-                        disabled={uploading}
-                        onChange={(e) => {
-                          const file = e.target.files?.[0] || null;
-                          e.target.value = '';
-                          void handleLogoUpload(file);
-                        }}
-                      />
-                    </label>
-                    {form.logo_path && (
-                      <button
-                        type="button"
-                        className="button button--ghost button--sm"
-                        onClick={() => setForm((c) => ({ ...c, logo_path: '' }))}
-                      >
-                        Remove
-                      </button>
-                    )}
-                    <p className="sponsor-form__hint">JPEG, PNG, or WebP · up to 10 MB</p>
-                  </div>
-                </div>
-              </div>
-
-              <label className="sponsor-form__switch">
-                <input
-                  type="checkbox"
-                  checked={form.published}
-                  onChange={(e) => setForm((c) => ({ ...c, published: e.target.checked }))}
-                />
-                <span>
-                  <strong>Publish on the public sponsors page</strong>
-                  <small>Unpublished partners stay visible only in this workspace.</small>
-                </span>
-              </label>
-
-              <div className="sponsor-form__actions">
-                <button type="button" className="button button--ghost" onClick={closeModal}>
-                  Cancel
-                </button>
-                <button type="submit" className="button button--primary" disabled={saving || uploading}>
-                  {saving ? 'Saving…' : editingId ? 'Save changes' : 'Add sponsor'}
-                </button>
-              </div>
-            </form>
+            <TextField
+              label="Sort order"
+              type="number"
+              inputMode="numeric"
+              value={String(form.sort_order)}
+              onChange={(e) => setForm((c) => ({ ...c, sort_order: Number(e.target.value) }))}
+            />
           </div>
-        </div>
-      )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-2)' }}>
+            <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--md-sys-color-on-surface)' }}>
+              Partner Logo
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-4)' }}>
+              <div
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: 'var(--md-sys-shape-corner-medium)',
+                  border: '1px solid var(--md-sys-color-outline-variant)',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'var(--md-sys-color-surface-container-highest)',
+                  flexShrink: 0,
+                }}
+              >
+                {form.logo_path ? (
+                  <img src={getSponsorLogoUrl(form.logo_path)} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                ) : (
+                  <HeartHandshake size={28} aria-hidden style={{ color: 'var(--md-sys-color-on-surface-variant)' }} />
+                )}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-1)' }}>
+                <div style={{ display: 'flex', gap: 'var(--md-space-2)' }}>
+                  <label
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 'var(--md-space-1)',
+                      padding: '8px 16px',
+                      borderRadius: 'var(--md-sys-shape-corner-full)',
+                      border: '1px solid var(--md-sys-color-outline)',
+                      background: 'transparent',
+                      color: 'var(--md-sys-color-primary)',
+                      fontWeight: 600,
+                      fontSize: '0.85rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Upload size={14} /> {uploading ? 'Uploading…' : 'Upload logo'}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      hidden
+                      disabled={uploading}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        e.target.value = '';
+                        void handleLogoUpload(file);
+                      }}
+                    />
+                  </label>
+                  {form.logo_path && (
+                    <Button
+                      variant="text"
+                      size="small"
+                      onClick={() => setForm((c) => ({ ...c, logo_path: '' }))}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+                <small style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.75rem' }}>
+                  JPEG, PNG, or WebP · up to 10 MB
+                </small>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ paddingTop: 'var(--md-space-2)' }}>
+            <Checkbox
+              checked={form.published}
+              onChange={(e) => setForm((c) => ({ ...c, published: e.target.checked }))}
+              label="Publish on the public sponsors page"
+            />
+            <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)', marginLeft: '32px', fontSize: '0.8rem' }}>
+              Unpublished partners stay visible only in this workspace.
+            </small>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--md-space-2)', marginTop: 'var(--md-space-2)' }}>
+            <Button variant="text" onClick={closeModal}>
+              Cancel
+            </Button>
+            <Button variant="filled" type="submit" loading={saving || uploading} disabled={saving || uploading}>
+              {editingId ? 'Save changes' : 'Add sponsor'}
+            </Button>
+          </div>
+        </form>
+      </Dialog>
     </div>
   );
 }

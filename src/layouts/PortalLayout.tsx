@@ -56,7 +56,7 @@ export function PortalLayout() {
   }
 
   return (
-    <div className="portal">
+    <div className="m3-portal portal">
       <aside className="portal-sidebar">
         <Link className="brand brand--light" to="/">
           <LogoMark type="committee" />

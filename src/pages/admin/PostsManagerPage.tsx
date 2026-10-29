@@ -1,5 +1,13 @@
 import { useEffect, useState, useMemo, useCallback, type FormEvent, type ChangeEvent } from 'react';
-import { Plus, Search, Edit2, Trash2, Globe, Pin, Upload, AlertCircle, X, Check, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, Globe, Pin, Upload, Check, Eye } from 'lucide-react';
+import { Button } from '../../components/Button';
+import { Card } from '../../components/m3/Card';
+import { Dialog } from '../../components/m3/Dialog';
+import { TextField } from '../../components/m3/TextField';
+import { SelectField } from '../../components/m3/SelectField';
+import { TextArea } from '../../components/m3/TextArea';
+import { Checkbox } from '../../components/m3/Checkbox';
+import { SearchBar } from '../../components/m3/SearchBar';
 import {
   getAllPostsForAdmin,
   createPost,
@@ -11,7 +19,7 @@ import {
 import { uploadPublicImage, getPublicMediaUrl } from '../../features/media/mediaQueries';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import { StatusBadge } from '../../components/StatusBadge';
-import { LoadingState, EmptyState, ConfirmDialog } from '../../features/ui/FeedbackStates';
+import { LoadingState, EmptyState, ConfirmDialog, InlineMessage } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
 import type { DbPost, ContentStatus } from '../../types';
 import { sanitizeArticleHtml } from '../../features/content/sanitizeArticleHtml';
@@ -246,32 +254,27 @@ export function PostsManagerPage() {
   }, [posts, searchQuery, statusFilter, categoryFilter]);
 
   return (
-    <div className="admin-page">
+    <div className="m3-posts-manager admin-page">
       <div className="admin-heading">
         <div>
           <p className="eyebrow">News & Announcements CMS</p>
           <h1>Articles & Notices</h1>
           <p>Draft, publish, and manage official bulletins for Sinoog 2027.</p>
         </div>
-        <button type="button" className="button button--primary" onClick={openCreateModal}>
-          <Plus size={18} /> Create announcement
-        </button>
+        <Button type="button" variant="filled" leadingIcon={<Plus size={18} aria-hidden />} onClick={openCreateModal}>
+          Create announcement
+        </Button>
       </div>
 
-      <section className="admin-panel">
-        <div className="table-tools">
-          <label className="modern-search" htmlFor="posts-search-input">
-            <Search size={18} aria-hidden="true" />
-            <input
-              id="posts-search-input"
-              type="search"
-              placeholder="Search announcements…"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              autoComplete="off"
-              enterKeyHint="search"
-            />
-          </label>
+      <Card as="section" variant="outlined" className="admin-panel">
+        <div className="table-tools admin-toolbar">
+          <SearchBar
+            label="Search announcements"
+            placeholder="Search announcements…"
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            fieldClassName="table-tools-search"
+          />
 
           <div className="table-tools-filters">
             <select
@@ -313,9 +316,9 @@ export function PostsManagerPage() {
                 : 'Get started by publishing the first official notice.'
             }
             action={
-              <button type="button" className="button button--secondary" onClick={openCreateModal}>
-                <Plus size={16} /> Create announcement
-              </button>
+              <Button type="button" variant="outlined" leadingIcon={<Plus size={16} aria-hidden />} onClick={openCreateModal}>
+                Create announcement
+              </Button>
             }
           />
         ) : (
@@ -417,257 +420,197 @@ export function PostsManagerPage() {
             ))}
           </div>
         )}
-      </section>
+      </Card>
 
       {/* Editor Modal */}
-      {isModalOpen && (
-        <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="post-modal-title">
-          <div className="modal-card" style={{ maxWidth: '820px', width: '95%', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <div>
-                <h2 id="post-modal-title" style={{ fontSize: '1.4rem', margin: 0 }}>
-                  {editingPost ? 'Edit Announcement' : 'Create New Announcement'}
-                </h2>
-                <small style={{ color: '#888' }}>
-                  Authorized News & Parish Communication CMS
-                </small>
-              </div>
-              <button
-                type="button"
-                className="button button--ghost"
-                onClick={() => setIsModalOpen(false)}
-                aria-label="Close dialog"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {formError && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.75rem',
-                  background: '#fef2f2',
-                  border: '1px solid #fecaca',
-                  borderRadius: '6px',
-                  color: '#991b1b',
-                  marginBottom: '1rem',
-                  fontSize: '0.9rem',
-                }}
-              >
-                <AlertCircle size={18} />
-                <span>{formError}</span>
-              </div>
-            )}
-
-            <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid #eee', marginBottom: '1rem' }}>
-              <button
-                type="button"
-                className={`button button--sm ${activeTab === 'edit' ? 'button--primary' : 'button--ghost'}`}
-                onClick={() => setActiveTab('edit')}
-              >
-                <Edit2 size={14} /> Article Editor
-              </button>
-              <button
-                type="button"
-                className={`button button--sm ${activeTab === 'preview' ? 'button--primary' : 'button--ghost'}`}
-                onClick={() => setActiveTab('preview')}
-              >
-                <Eye size={14} /> Live Preview
-              </button>
-            </div>
-
-            {activeTab === 'preview' ? (
-              <div style={{ padding: '1rem', border: '1px solid #eee', borderRadius: '6px', backgroundColor: '#faf8f5', marginBottom: '1.5rem' }}>
-                <span className="activity-type" style={{ marginBottom: '0.5rem' }}>{category}</span>
-                <h1 style={{ fontSize: '2rem', fontFamily: 'Fraunces, serif', margin: '0.5rem 0' }}>
-                  {title || 'Untitled Article'}
-                </h1>
-                {excerpt && <p style={{ fontSize: '1.1rem', color: '#555', fontStyle: 'italic', marginBottom: '1.5rem' }}>{excerpt}</p>}
-                {featuredImagePath && (
-                  <div style={{ marginBottom: '1.5rem', borderRadius: '6px', overflow: 'hidden' }}>
-                    <img
-                      src={getPublicMediaUrl(featuredImagePath)}
-                      alt="Featured visual"
-                      style={{ width: '100%', maxHeight: '350px', objectFit: 'cover' }}
-                    />
-                  </div>
-                )}
-                <div className="prose" dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(bodyHtml || '<p>No content written yet.</p>') }} />
-              </div>
-            ) : (
-              <form onSubmit={(e) => void handleFormSubmit(e)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                    Article Title <span style={{ color: '#c53030' }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Schedule of Novena Masses Announced"
-                    value={title}
-                    onChange={(e) => handleTitleChange(e.target.value)}
-                    style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                  />
-                </div>
-
-                <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                  <div>
-                    <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                      URL Slug <span style={{ color: '#c53030' }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="schedule-of-novena-masses"
-                      value={slug}
-                      onChange={(e) => {
-                        setSlug(e.target.value);
-                        setIsSlugAuto(false);
-                      }}
-                      style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                    />
-                    <small style={{ color: '#888', fontSize: '0.78rem' }}>Public URL: /news/{slug || '...'}</small>
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                      Category
-                    </label>
-                    <select
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                    >
-                      <option value="Announcement">Announcement</option>
-                      <option value="Sinoog Run">Sinoog Run</option>
-                      <option value="Festival">Festival</option>
-                      <option value="Parish">Parish</option>
-                      <option value="Advisory">Advisory</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                    Summary / Excerpt
-                  </label>
-                  <textarea
-                    rows={2}
-                    placeholder="Brief 1-2 sentence lead appearing in news cards and search results…"
-                    value={excerpt}
-                    onChange={(e) => setExcerpt(e.target.value)}
-                    style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                    Featured Image (Cover)
-                  </label>
-                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <label className="button button--secondary button--sm" style={{ cursor: 'pointer' }}>
-                      <Upload size={14} /> {imageUploading ? 'Uploading image…' : 'Upload image (JPEG/PNG/WebP)'}
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        style={{ display: 'none' }}
-                        onChange={(e) => void handleImageFileChange(e)}
-                        disabled={imageUploading}
-                      />
-                    </label>
-                    {featuredImagePath && (
-                      <span style={{ fontSize: '0.85rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <Check size={14} /> Image selected
-                      </span>
-                    )}
-                  </div>
-                  {featuredImagePath && (
-                    <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <img
-                        src={getPublicMediaUrl(featuredImagePath)}
-                        alt="Cover thumbnail"
-                        style={{ width: '80px', height: '50px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #ccc' }}
-                      />
-                      <button
-                        type="button"
-                        className="button button--ghost button--sm"
-                        style={{ color: '#c53030' }}
-                        onClick={() => setFeaturedImagePath('')}
-                      >
-                        Remove image
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                    Article Body (HTML / Prose)
-                  </label>
-                  <textarea
-                    rows={8}
-                    required
-                    placeholder="<p>Full article body with paragraphs and formatting…</p>"
-                    value={bodyHtml}
-                    onChange={(e) => setBodyHtml(e.target.value)}
-                    style={{ width: '100%', fontFamily: 'monospace', fontSize: '0.88rem', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                  />
-                </div>
-
-                <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'center', background: '#faf8f4', padding: '0.75rem', borderRadius: '6px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                      Publication Status
-                    </label>
-                    <select
-                      value={status}
-                      onChange={(e) => setStatus(e.target.value as ContentStatus)}
-                      style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #d4c5b9' }}
-                    >
-                      <option value="published">Published (Live to public)</option>
-                      <option value="draft">Draft (Visible only to news staff)</option>
-                      <option value="archived">Archived</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1.25rem', cursor: 'pointer' }}>
-                      <input
-                        type="checkbox"
-                        checked={pinned}
-                        onChange={(e) => setPinned(e.target.checked)}
-                        style={{ width: '18px', height: '18px' }}
-                      />
-                      <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Pin to top of news list</span>
-                    </label>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
-                  <button
-                    type="button"
-                    className="button button--ghost"
-                    onClick={() => setIsModalOpen(false)}
-                    disabled={formSubmitting}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="button button--primary"
-                    disabled={formSubmitting}
-                  >
-                    <Check size={16} /> {formSubmitting ? 'Saving…' : editingPost ? 'Save changes' : 'Publish announcement'}
-                  </button>
-                </div>
-              </form>
-            )}
+      <Dialog
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingPost ? 'Edit Announcement' : 'Create New Announcement'}
+      >
+        {formError && (
+          <div style={{ marginBottom: '1rem' }}>
+            <InlineMessage tone="error">
+              {formError}
+            </InlineMessage>
           </div>
+        )}
+
+        <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--md-sys-color-outline-variant)', paddingBottom: '0.75rem', marginBottom: '1.25rem' }}>
+          <Button
+            type="button"
+            variant={activeTab === 'edit' ? 'filled' : 'outlined'}
+            size="small"
+            leadingIcon={<Edit2 size={14} aria-hidden />}
+            onClick={() => setActiveTab('edit')}
+          >
+            Article Editor
+          </Button>
+          <Button
+            type="button"
+            variant={activeTab === 'preview' ? 'filled' : 'outlined'}
+            size="small"
+            leadingIcon={<Eye size={14} aria-hidden />}
+            onClick={() => setActiveTab('preview')}
+          >
+            Live Preview
+          </Button>
         </div>
-      )}
+
+        {activeTab === 'preview' ? (
+          <div style={{ padding: '1.25rem', border: '1px solid var(--md-sys-color-outline-variant)', borderRadius: 'var(--md-sys-shape-corner-medium)', backgroundColor: 'var(--md-sys-color-surface-container-low)', marginBottom: '1.5rem' }}>
+            <span className="activity-type" style={{ marginBottom: '0.5rem' }}>{category}</span>
+            <h1 style={{ fontSize: '2rem', fontFamily: 'var(--md-ref-typeface-brand)', margin: '0.5rem 0' }}>
+              {title || 'Untitled Article'}
+            </h1>
+            {excerpt && <p style={{ fontSize: '1.1rem', color: 'var(--md-sys-color-on-surface-variant)', fontStyle: 'italic', marginBottom: '1.5rem' }}>{excerpt}</p>}
+            {featuredImagePath && (
+              <div style={{ marginBottom: '1.5rem', borderRadius: 'var(--md-sys-shape-corner-medium)', overflow: 'hidden' }}>
+                <img
+                  src={getPublicMediaUrl(featuredImagePath)}
+                  alt="Featured visual"
+                  style={{ width: '100%', maxHeight: '350px', objectFit: 'cover' }}
+                />
+              </div>
+            )}
+            <div className="prose" dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(bodyHtml || '<p>No content written yet.</p>') }} />
+          </div>
+        ) : (
+          <form onSubmit={(e) => void handleFormSubmit(e)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <TextField
+              label="Article Title *"
+              required
+              placeholder="e.g. Schedule of Novena Masses Announced"
+              value={title}
+              onChange={(e) => handleTitleChange(e.target.value)}
+            />
+
+            <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <TextField
+                label="URL Slug *"
+                required
+                placeholder="schedule-of-novena-masses"
+                value={slug}
+                onChange={(e) => {
+                  setSlug(e.target.value);
+                  setIsSlugAuto(false);
+                }}
+                helperText={`Public URL: /news/${slug || '...'}`}
+              />
+
+              <SelectField
+                label="Category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                <option value="Announcement">Announcement</option>
+                <option value="Sinoog Run">Sinoog Run</option>
+                <option value="Festival">Festival</option>
+                <option value="Parish">Parish</option>
+                <option value="Advisory">Advisory</option>
+              </SelectField>
+            </div>
+
+            <TextArea
+              label="Summary / Excerpt"
+              rows={2}
+              placeholder="Brief 1-2 sentence lead appearing in news cards and search results…"
+              value={excerpt}
+              onChange={(e) => setExcerpt(e.target.value)}
+            />
+
+            <div>
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem', fontSize: 'var(--md-sys-typescale-label-large-size)' }}>
+                Featured Image (Cover)
+              </label>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <label className="m3-button m3-button--outlined m3-button--small" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Upload size={14} aria-hidden /> {imageUploading ? 'Uploading image…' : 'Upload image (JPEG/PNG/WebP)'}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    style={{ display: 'none' }}
+                    onChange={(e) => void handleImageFileChange(e)}
+                    disabled={imageUploading}
+                  />
+                </label>
+                {featuredImagePath && (
+                  <span style={{ fontSize: '0.85rem', color: 'var(--md-ext-color-success)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <Check size={14} /> Image selected
+                  </span>
+                )}
+              </div>
+              {featuredImagePath && (
+                <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <img
+                    src={getPublicMediaUrl(featuredImagePath)}
+                    alt="Cover thumbnail"
+                    style={{ width: '80px', height: '50px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--md-sys-color-outline-variant)' }}
+                  />
+                  <Button
+                    type="button"
+                    variant="text"
+                    size="small"
+                    onClick={() => setFeaturedImagePath('')}
+                  >
+                    Remove image
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <TextArea
+              label="Article Body (HTML / Prose) *"
+              rows={8}
+              required
+              placeholder="<p>Full article body with paragraphs and formatting…</p>"
+              value={bodyHtml}
+              onChange={(e) => setBodyHtml(e.target.value)}
+              className="article-body-editor"
+            />
+
+            <div className="responsive-two-column" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'center', background: 'var(--md-sys-color-surface-container-low)', padding: '0.75rem', borderRadius: 'var(--md-sys-shape-corner-medium)' }}>
+              <SelectField
+                label="Publication Status"
+                value={status}
+                onChange={(e) => setStatus(e.target.value as ContentStatus)}
+              >
+                <option value="published">Published (Live to public)</option>
+                <option value="draft">Draft (Visible only to news staff)</option>
+                <option value="archived">Archived</option>
+              </SelectField>
+
+              <div style={{ paddingTop: '1.25rem' }}>
+                <Checkbox
+                  label="Pin to top of news list"
+                  checked={pinned}
+                  onChange={(e) => setPinned(e.target.checked)}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+              <Button
+                type="button"
+                variant="text"
+                onClick={() => setIsModalOpen(false)}
+                disabled={formSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="filled"
+                disabled={formSubmitting}
+                loading={formSubmitting}
+                leadingIcon={<Check size={16} aria-hidden />}
+              >
+                {editingPost ? 'Save changes' : 'Publish announcement'}
+              </Button>
+            </div>
+          </form>
+        )}
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog

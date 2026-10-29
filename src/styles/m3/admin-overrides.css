@@ -1,0 +1,399 @@
+/*
+ * Sinoog 2027 — Material Design 3 Admin Overrides (Phase 2)
+ * Scoped to .portal, .admin-page, and admin components.
+ */
+
+/* ==========================================================================
+   1. Portal Shell & Adaptive Navigation (P2-001)
+   ========================================================================== */
+
+.portal {
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  min-height: 100vh;
+}
+
+/* Sidebar on Desktop / Expanded */
+.portal-sidebar {
+  background: #2b0c11; /* Parish deep wine header surface */
+  color: #fff;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--md-sys-elevation-level1);
+}
+
+.portal-sidebar .brand {
+  padding-bottom: var(--md-space-3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.portal-sidebar nav {
+  gap: var(--md-space-1);
+}
+
+.portal-sidebar .portal-nav-item,
+.portal-sidebar .portal-public-site,
+.portal-sidebar button.portal-exit {
+  min-height: var(--md-target-min);
+  padding: 0 var(--md-space-3);
+  border-radius: var(--md-sys-shape-corner-full);
+  color: #e5cfcc;
+  font-family: var(--md-ref-typeface-plain);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+    color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  position: relative;
+  overflow: hidden;
+}
+
+.portal-sidebar .portal-nav-item:hover,
+.portal-sidebar .portal-public-site:hover,
+.portal-sidebar button.portal-exit:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.portal-sidebar .portal-nav-item:focus-visible,
+.portal-sidebar .portal-public-site:focus-visible,
+.portal-sidebar button.portal-exit:focus-visible {
+  outline: var(--md-focus-ring-width) solid var(--md-sys-color-secondary);
+  outline-offset: 2px;
+}
+
+.portal-sidebar .portal-nav-item.active {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  font-weight: 700;
+  box-shadow: var(--md-sys-elevation-level1);
+}
+
+.portal-sidebar .portal-nav-item.active svg {
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+/* Sidebar Actions (Bottom) */
+.portal-sidebar-actions {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: var(--md-space-3);
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--md-space-1);
+}
+
+/* Top App Bar */
+.portal-topbar {
+  background: var(--md-sys-color-surface-container);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
+  height: 64px;
+  padding: 0 var(--md-space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.portal-topbar-user {
+  display: flex;
+  align-items: center;
+  gap: var(--md-space-2);
+  background: var(--md-sys-color-surface-container-high);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-full);
+  padding: 4px var(--md-space-3);
+}
+
+.portal-topbar-user-name {
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+.portal-topbar-user-role {
+  display: inline-block;
+  padding: 2px var(--md-space-2);
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.portal-topbar-user-email {
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Mobile & Tablet Bottom Navigation Strip */
+@media (max-width: 640px) {
+  .portal-sidebar {
+    background: #2b0c11;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  .portal-sidebar .portal-nav-item,
+  .portal-sidebar .portal-public-site,
+  .portal-sidebar button.portal-exit {
+    min-height: 52px;
+    padding: 6px var(--md-space-3);
+    border-radius: var(--md-sys-shape-corner-medium);
+  }
+
+  .portal-sidebar .portal-nav-item.active {
+    background: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+  }
+
+  .portal-topbar {
+    padding: 0 var(--md-space-3);
+    height: 56px;
+  }
+}
+
+/* ==========================================================================
+   2. Admin Page Layout & Headings
+   ========================================================================== */
+
+.admin-page {
+  padding: var(--md-space-6);
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.admin-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--md-space-4);
+  margin-bottom: var(--md-space-6);
+  padding-bottom: var(--md-space-4);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.admin-heading h1 {
+  font-family: var(--md-ref-typeface-brand);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  line-height: 1.25;
+  margin: 0;
+}
+
+.admin-heading p {
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  margin: var(--md-space-1) 0 0;
+}
+
+/* ==========================================================================
+   3. KPI & Stat Metrics Grid (P2-005)
+   ========================================================================== */
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--md-space-4);
+  margin-bottom: var(--md-space-6);
+}
+
+.stat-grid article {
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-large);
+  padding: var(--md-space-4) var(--md-space-5);
+  display: flex;
+  flex-direction: column;
+  transition:
+    box-shadow var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+    border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+
+.stat-grid article:hover {
+  border-color: var(--md-sys-color-secondary);
+  box-shadow: var(--md-sys-elevation-level1);
+}
+
+.stat-grid article svg {
+  color: var(--md-sys-color-primary);
+  margin-bottom: var(--md-space-2);
+}
+
+.stat-grid article > span {
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-grid article > strong {
+  font-family: var(--md-ref-typeface-brand);
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 700;
+  color: var(--md-sys-color-primary);
+  line-height: 1.1;
+  margin-top: var(--md-space-1);
+}
+
+/* ==========================================================================
+   4. Dense Data Table & Records (P2-002)
+   ========================================================================== */
+
+.admin-table-container,
+.admin-table {
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-large);
+  overflow-x: auto;
+  box-shadow: var(--md-sys-elevation-level0);
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-table table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-table th,
+.admin-table__head {
+  background: var(--md-sys-color-surface-container-low);
+  color: var(--md-sys-color-on-surface-variant);
+  font-family: var(--md-ref-typeface-plain);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: var(--md-space-3) var(--md-space-4);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.admin-table td,
+.admin-table__row {
+  padding: var(--md-space-3) var(--md-space-4);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  color: var(--md-sys-color-on-surface);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  vertical-align: middle;
+  min-height: 52px;
+  transition: background var(--md-sys-motion-duration-short);
+}
+
+.admin-table tbody tr:hover,
+.admin-table tr:hover td {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 4%, transparent);
+}
+
+/* ==========================================================================
+   5. Admin Toolbar & Filter Controls (P2-003)
+   ========================================================================== */
+
+.table-tools,
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--md-space-3);
+  margin-bottom: var(--md-space-4);
+}
+
+.table-tools .search-field,
+.admin-toolbar .search-field {
+  flex: 1 1 280px;
+  min-width: 220px;
+}
+
+.table-tools__actions,
+.admin-toolbar__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--md-space-2);
+}
+
+/* ==========================================================================
+   6. Status Badges & Chips (P2-004)
+   ========================================================================== */
+
+.status-badge,
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--md-space-1);
+  padding: 3px var(--md-space-3);
+  border-radius: var(--md-sys-shape-corner-full);
+  font-family: var(--md-ref-typeface-plain);
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Success / Approved / Active / Paid */
+.status-badge--success,
+.status-badge--approved,
+.status-badge--verified,
+.status-badge--paid {
+  background: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+}
+
+/* Warning / Pending / Cash / Walk-in */
+.status-badge--warning,
+.status-badge--pending,
+.status-badge--cash {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+/* Error / Rejected / Suspended / Void */
+.status-badge--error,
+.status-badge--rejected,
+.status-badge--danger,
+.status-badge--suspended,
+.status-badge--void {
+  background: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+}
+
+/* Neutral / Draft / Archived */
+.status-badge--neutral,
+.status-badge--draft,
+.status-badge--archived {
+  background: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ==========================================================================
+   7. Form and Dialog Panels (P2-004)
+   ========================================================================== */
+
+.admin-card {
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-large);
+  padding: var(--md-space-6);
+  margin-bottom: var(--md-space-6);
+  box-shadow: var(--md-sys-elevation-level0);
+}
+
+.admin-form-group {
+  margin-bottom: var(--md-space-5);
+}
+
+.admin-form-group > label {
+  display: block;
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: var(--md-space-2);
+}

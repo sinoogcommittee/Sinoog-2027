@@ -1,11 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import {
-  Search,
   Download,
   Check,
   XCircle,
   FileText,
-  X,
   AlertCircle,
   Printer,
   ExternalLink,
@@ -14,6 +12,10 @@ import {
   Copy,
   Trash2,
 } from "lucide-react";
+import { Button } from "../../components/Button";
+import { Card } from "../../components/m3/Card";
+import { Dialog } from "../../components/m3/Dialog";
+import { SearchBar } from "../../components/m3/SearchBar";
 import {
   getAllRegistrationsForAdmin,
   updateRegistrationReview,
@@ -356,7 +358,7 @@ export function RegistrationsManagerPage() {
   }
 
   return (
-    <div className="admin-page">
+    <div className="m3-registrations-manager admin-page">
       <div className="admin-heading">
         <div>
           <p className="eyebrow">Sinoog Run Operations</p>
@@ -367,32 +369,35 @@ export function RegistrationsManagerPage() {
           </p>
         </div>
         <div className="registration-heading-actions">
-          <button
+          <Button
             type="button"
-            className="button button--primary"
+            variant="filled"
+            leadingIcon={<UserPlus size={16} aria-hidden />}
             onClick={openWalkInRegistration}
           >
-            <UserPlus size={16} /> Register walk-in runner
-          </button>
-          <button
+            Register walk-in runner
+          </Button>
+          <Button
             type="button"
-            className="button button--secondary"
+            variant="outlined"
+            leadingIcon={<Printer size={16} aria-hidden />}
             onClick={() => window.print()}
           >
-            <Printer size={16} /> Print approved runners
-          </button>
-          <button
+            Print approved runners
+          </Button>
+          <Button
             type="button"
-            className="button button--secondary"
+            variant="outlined"
+            leadingIcon={<Download size={16} aria-hidden />}
             onClick={handleExportCSV}
           >
-            <Download size={16} /> Export CSV
-          </button>
+            Export CSV
+          </Button>
         </div>
       </div>
 
       {/* Shirt Sizing Summary Strip */}
-      <div className="registration-size-summary">
+      <Card as="div" variant="outlined" className="registration-size-summary">
         <strong className="registration-size-summary__title">
           Shirt Kit Counts
         </strong>
@@ -404,25 +409,17 @@ export function RegistrationsManagerPage() {
         <div className="registration-size-summary__total">
           Total registered: <strong>{registrations.length}</strong>
         </div>
-      </div>
+      </Card>
 
-      <section className="admin-panel">
-        <div className="registrations-toolbar">
-          <label
-            className="registrations-search"
-            htmlFor="registrations-search-input"
-          >
-            <Search size={18} aria-hidden="true" />
-            <input
-              id="registrations-search-input"
-              type="search"
-              placeholder="Search name, email, reference, or mobile…"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              autoComplete="off"
-              enterKeyHint="search"
-            />
-          </label>
+      <Card as="section" variant="outlined" className="admin-panel">
+        <div className="registrations-toolbar admin-toolbar">
+          <SearchBar
+            label="Search registrations"
+            placeholder="Search name, email, reference, or mobile…"
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            fieldClassName="registrations-search"
+          />
 
           <div className="registrations-filters">
             <select
@@ -613,36 +610,19 @@ export function RegistrationsManagerPage() {
             })}
           </div>
         )}
-      </section>
+      </Card>
 
-      {showWalkIn && (
-        <div
-          className="modal-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="walk-in-title"
-        >
-          <div className="modal-card activity-modal walk-in-modal">
-            <div className="walk-in-modal__heading">
-              <div>
-                <p className="eyebrow">Cash registration</p>
-                <h2 id="walk-in-title">Register a walk-in runner</h2>
-                <p>
-                  Create the runner login, record cash payment, and issue the
-                  bib and QR immediately.
-                </p>
-              </div>
-              <button
-                type="button"
-                className="button button--ghost"
-                onClick={closeWalkIn}
-                aria-label="Close dialog"
-              >
-                <X size={18} />
-              </button>
-            </div>
+      <Dialog
+        open={showWalkIn}
+        onClose={closeWalkIn}
+        title="Register a walk-in runner"
+      >
+        <div className="walk-in-modal-content">
+          <p style={{ color: "var(--md-sys-color-on-surface-variant)", marginBottom: "1rem" }}>
+            Create the runner login, record cash payment, and issue the bib and QR immediately.
+          </p>
 
-            {createdCredentials ? (
+          {createdCredentials ? (
               <div className="walk-in-success">
                 <Check size={28} />
                 <h3>Runner registered and approved</h3>
@@ -933,85 +913,48 @@ export function RegistrationsManagerPage() {
                     signed the printed waiver and privacy notice.
                   </span>
                 </label>
-                <div className="walk-in-actions">
-                  <button
+                <div className="walk-in-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+                  <Button
                     type="button"
-                    className="button button--ghost"
+                    variant="text"
                     onClick={closeWalkIn}
                   >
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="submit"
-                    className="button button--primary"
+                    variant="filled"
                     disabled={walkInSaving}
+                    loading={walkInSaving}
                   >
-                    {walkInSaving
-                      ? "Creating runner…"
-                      : "Receive cash & register"}
-                  </button>
+                    Receive cash & register
+                  </Button>
                 </div>
               </form>
             )}
-          </div>
         </div>
-      )}
+      </Dialog>
 
       {/* Review Modal */}
-      {selectedReg && (
-        <div
-          className="modal-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="review-modal-title"
-        >
-          <div
-            className="modal-card activity-modal"
-            style={{ maxWidth: "720px", width: "95%" }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "1.25rem",
-              }}
-            >
-              <div>
-                <h2
-                  id="review-modal-title"
-                  style={{ fontSize: "1.35rem", margin: 0 }}
-                >
-                  Review Registration
-                </h2>
-                <small
-                  style={{ fontFamily: "monospace", color: "var(--wine)" }}
-                >
-                  {selectedReg.reference}
-                </small>
-              </div>
-              <button
-                type="button"
-                className="button button--ghost"
-                onClick={() => {
-                  setSelectedReg(null);
-                  setPaymentDetails(null);
-                }}
-                aria-label="Close dialog"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
+      <Dialog
+        open={Boolean(selectedReg)}
+        onClose={() => {
+          setSelectedReg(null);
+          setPaymentDetails(null);
+        }}
+        title={`Review Registration: ${selectedReg?.reference || ''}`}
+      >
+        {selectedReg && (
+          <div className="review-modal-content">
             <div
               className="responsive-two-column"
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
                 gap: "0.75rem",
-                background: "#faf8f4",
+                background: "var(--md-sys-color-surface-container-low)",
                 padding: "1rem",
-                borderRadius: "6px",
+                borderRadius: "var(--md-sys-shape-corner-medium)",
                 marginBottom: "1rem",
                 fontSize: "0.9rem",
               }}
@@ -1192,38 +1135,43 @@ export function RegistrationsManagerPage() {
               }}
             >
               <div style={{ display: "flex", gap: "0.5rem" }}>
-                <button
+                <Button
                   type="button"
-                  className="button button--danger button--sm"
+                  variant="danger"
+                  size="small"
                   disabled={reviewing}
+                  leadingIcon={<XCircle size={14} aria-hidden />}
                   onClick={() => void handleUpdateStatus("rejected")}
                 >
-                  <XCircle size={14} /> Reject
-                </button>
-                <button
+                  Reject
+                </Button>
+                <Button
                   type="button"
-                  className="button button--secondary button--sm"
+                  variant="outlined"
+                  size="small"
                   disabled={reviewing}
                   onClick={() => void handleUpdateStatus("needs_changes")}
                 >
                   Request Changes
-                </button>
+                </Button>
               </div>
 
               <div style={{ display: "flex", gap: "0.5rem" }}>
-                <button
+                <Button
                   type="button"
-                  className="button button--ghost button--sm"
+                  variant="text"
+                  size="small"
                   onClick={() => {
                     setSelectedReg(null);
                     setPaymentDetails(null);
                   }}
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  className="button button--primary button--sm"
+                  variant="filled"
+                  size="small"
                   disabled={
                     reviewing ||
                     paymentLoading ||
@@ -1234,15 +1182,17 @@ export function RegistrationsManagerPage() {
                     (paymentDetails.method.toLowerCase() !== "cash" &&
                       paymentDetails.evidence.length === 0)
                   }
+                  loading={reviewing}
+                  leadingIcon={<Check size={14} aria-hidden />}
                   onClick={() => void handleUpdateStatus("approved")}
                 >
-                  <Check size={14} /> Approve Entry
-                </button>
+                  Approve Entry
+                </Button>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Dialog>
 
       <section className="runner-print-sheet" aria-hidden="true">
         <h1>Sinoog Run 2027 — Approved Runners</h1>

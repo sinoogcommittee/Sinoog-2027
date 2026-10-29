@@ -7,7 +7,6 @@ import {
   Plus,
   Printer,
   ReceiptText,
-  Search,
   Trash2,
   TrendingDown,
   TrendingUp,
@@ -25,6 +24,12 @@ import {
   type FinanceSnapshot,
   type FinancialTransactionInput,
 } from "../../features/finance/financeQueries";
+import { Button } from "../../components/Button";
+import { Card } from "../../components/m3/Card";
+import { TextField } from "../../components/m3/TextField";
+import { SelectField } from "../../components/m3/SelectField";
+import { TextArea } from "../../components/m3/TextArea";
+import { SearchBar } from "../../components/m3/SearchBar";
 
 const CASH_INFLOW_CATEGORIES = ["Sponsorships", "PFC Budget", "Donations", "Others"] as const;
 const EXPENSE_CATEGORIES = [
@@ -267,9 +272,9 @@ export function FinancePage() {
       rows.push(["Scope total", scope.label, "Cash Inflows", "All", String(inflows / 100)]);
       rows.push(["Scope total", scope.label, "Expenses", "All", String(expenses / 100)]);
       rows.push(["Scope total", scope.label, "Balance", "All", String((inflows - expenses) / 100)]);
-      const categories = new Map<string, number>();
-      values.forEach((row) => categories.set(`${row.transactionType}|${row.category}`, (categories.get(`${row.transactionType}|${row.category}`) || 0) + row.amountCentavos));
-      [...categories.entries()].sort(([a], [b]) => a.localeCompare(b)).forEach(([key, amount]) => {
+      const categoriesMap = new Map<string, number>();
+      values.forEach((row) => categoriesMap.set(`${row.transactionType}|${row.category}`, (categoriesMap.get(`${row.transactionType}|${row.category}`) || 0) + row.amountCentavos));
+      [...categoriesMap.entries()].sort(([a], [b]) => a.localeCompare(b)).forEach(([key, amount]) => {
         const [type, category] = key.split("|");
         rows.push(["Category total", scope.label, type === "income" ? "Cash Inflows" : "Expenses", category, String(amount / 100)]);
       });
@@ -289,93 +294,524 @@ export function FinancePage() {
 
   const categories = form.transaction_type === "income" ? CASH_INFLOW_CATEGORIES : EXPENSE_CATEGORIES;
 
-  return <section className="admin-page finance-page">
-    <div className="admin-heading finance-heading">
-      <div>
-        <p className="eyebrow">Administrator finance</p>
-        <h1>Financial records</h1>
-        <p>Track cash inflows, expenses, balances, payment methods, allocations, and the administrator responsible for every record.</p>
-      </div>
-      <div className="finance-heading__actions">
-        <button className="button button--secondary" type="button" onClick={() => window.print()}><Printer size={16}/> Print report</button>
-        <button className="button button--primary" type="button" onClick={() => setShowEntryForm((open) => !open)}>
-          <Plus size={17}/> {showEntryForm ? "Close entry form" : "Add financial entry"}
-        </button>
-      </div>
-    </div>
-
-    <nav className="finance-scope-tabs" aria-label="Financial report allocation">
-      {(["overall", "festival", "run", "general"] as ScopeFilter[]).map((scope) => <button
-        key={scope} type="button" className={scopeFilter === scope ? "is-active" : ""} onClick={() => setScopeFilter(scope)}
-      >{scope === "overall" ? "Overall" : scopeLabel(scope)}</button>)}
-    </nav>
-
-    {showEntryForm && <form className="finance-entry-form" onSubmit={(event) => void submitEntry(event)}>
-      <div className="finance-entry-form__heading"><ReceiptText size={20}/><div><strong>New financial entry</strong><small>The signed-in administrator is recorded automatically.</small></div></div>
-      <div className="finance-entry-form__grid">
-        <label>Type<select value={form.transaction_type} onChange={(event) => {
-          const type = event.target.value as "income" | "expense";
-          setForm({ ...form, transaction_type: type, category: type === "income" ? CASH_INFLOW_CATEGORIES[0] : EXPENSE_CATEGORIES[0], received_by_name: "" });
-        }}><option value="income">Cash Inflow</option><option value="expense">Expense</option></select></label>
-        <label>Date<input required type="date" value={form.transaction_date} onChange={(event) => setForm({ ...form, transaction_date: event.target.value })}/></label>
-        <label>For<select value={form.event_scope} onChange={(event) => setForm({ ...form, event_scope: event.target.value as FinanceScope })}>
-          <option value="general">General</option><option value="festival">Sinoog Festival</option><option value="run">Sinoog Run</option>
-        </select></label>
-        <label>{form.transaction_type === "income" ? "Cash Inflow Category" : "Expense Category"}<select required value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })}>
-          {categories.map((category) => <option key={category}>{category}</option>)}
-        </select></label>
-        <label>{form.transaction_type === "income" ? "Received From" : "Paid To"}<input required value={form.counterparty_name} onChange={(event) => setForm({ ...form, counterparty_name: event.target.value })}/></label>
-        {form.transaction_type === "expense" && <label>Received By<input required value={form.received_by_name || ""} onChange={(event) => setForm({ ...form, received_by_name: event.target.value })}/></label>}
-        <label>Payment Method<select required value={form.method || "cash"} onChange={(event) => setForm({ ...form, method: event.target.value as FinanceMethod })}>
-          <option value="cash">Cash</option><option value="gcash">GCash</option><option value="bank">Bank</option>
-        </select></label>
-        <label>Amount<input required min="0.01" step="0.01" type="number" value={form.amount_centavos ? form.amount_centavos / 100 : ""} onChange={(event) => setForm({ ...form, amount_centavos: Math.round(Number(event.target.value) * 100) })}/></label>
-        <label>Reference / Document No.<input value={form.reference || ""} placeholder="Optional receipt, voucher, or transfer no." onChange={(event) => setForm({ ...form, reference: event.target.value })}/></label>
-        <label className="finance-entry-form__wide">Particulars / Purpose<textarea required rows={3} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })}/></label>
-      </div>
-      <div className="finance-entry-form__actions"><button type="button" className="button button--ghost" onClick={() => setShowEntryForm(false)}>Cancel</button><button type="submit" className="button button--primary" disabled={saving}>{saving ? "Saving…" : "Record entry"}</button></div>
-    </form>}
-
-    {loading ? <LoadingState message="Loading financial records…"/> : <>
-      <div className="finance-summary-grid">
-        <article><TrendingUp/><span>Cash inflows</span><strong>{peso(totals.inflows)}</strong></article>
-        <article><TrendingDown/><span>Expenses</span><strong>{peso(totals.expenses)}</strong></article>
-        <article><HandCoins/><span>Registration payments awaiting review</span><strong>{peso(totals.pending)}</strong></article>
-        <article className="finance-summary-grid__net"><Banknote/><span>Recorded balance</span><strong>{peso(totals.balance)}</strong></article>
-      </div>
-
-      <section className="finance-panel finance-ledger-panel">
-        <div className="finance-panel__heading finance-report-heading"><div><p className="eyebrow">Reporting ledger</p><h2>{scopeFilter === "overall" ? "Overall" : scopeLabel(scopeFilter)} cashbook</h2></div>
-          <div className="finance-report-actions"><button className="button button--secondary" type="button" onClick={exportSummary}><FileSpreadsheet size={16}/> Summary CSV</button><button className="button button--secondary" type="button" onClick={exportDetailedLedger}><Download size={16}/> Detailed CSV</button></div>
+  return (
+    <section className="admin-page finance-page">
+      <div className="admin-heading finance-heading">
+        <div>
+          <p className="eyebrow">Administrator finance</p>
+          <h1>Financial records</h1>
+          <p>Track cash inflows, expenses, balances, payment methods, allocations, and the administrator responsible for every record.</p>
         </div>
-        <div className="finance-ledger-filters">
-          <label className="finance-search"><Search size={17}/><input type="search" aria-label="Search financial records" placeholder="Search category, person, purpose, reference, or recorder…" value={search} onChange={(event) => setSearch(event.target.value)}/></label>
-          <select aria-label="Entry type" value={ledgerType} onChange={(event) => setLedgerType(event.target.value as LedgerTypeFilter)}><option value="all">All types</option><option value="income">Cash inflows</option><option value="expense">Expenses</option></select>
-          <select aria-label="Payment method" value={ledgerMethod} onChange={(event) => setLedgerMethod(event.target.value)}><option value="all">All methods</option><option value="cash">Cash</option><option value="gcash">GCash</option><option value="bank">Bank</option></select>
-          <select aria-label="Record status" value={ledgerStatus} onChange={(event) => setLedgerStatus(event.target.value as LedgerStatusFilter)}><option value="active">Active records</option><option value="voided">Voided records</option><option value="all">All records</option></select>
-          <label>From<input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)}/></label>
-          <label>To<input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)}/></label>
+        <div className="finance-heading__actions" style={{ display: "flex", gap: "var(--md-space-2)", alignItems: "center", flexWrap: "wrap" }}>
+          <Button variant="outlined" leadingIcon={<Printer size={16} />} onClick={() => window.print()}>
+            Print report
+          </Button>
+          <Button variant="filled" leadingIcon={<Plus size={17} />} onClick={() => setShowEntryForm((open) => !open)}>
+            {showEntryForm ? "Close entry form" : "Add financial entry"}
+          </Button>
         </div>
-        {filteredLedger.length ? <div className="finance-ledger-list">{filteredLedger.map((row) => <article className={`finance-ledger-row ${row.voidedAt ? "is-voided" : ""}`} key={row.id}>
-          <div className="finance-ledger-row__primary"><span className={`finance-flow-icon ${row.transactionType === "income" ? "is-income" : "is-expense"}`}>{row.transactionType === "income" ? "+" : "−"}</span><div><strong>{row.category}</strong><small>{row.transactionDate} · {scopeLabel(row.scope)} · {methodLabel(row.method)}</small></div></div>
-          <div><small>{row.transactionType === "income" ? "Received from" : "Paid to"}</small><strong>{row.counterparty}</strong>{row.receivedBy && <small>Received by: {row.receivedBy}</small>}</div>
-          <div><small>Particulars / Purpose</small><strong>{row.description}</strong>{row.reference && <small>Ref: {row.reference}</small>}</div>
-          <div className="finance-ledger-row__amount"><small>Amount</small><strong className={row.transactionType === "income" ? "is-income" : "is-expense"}>{row.transactionType === "income" ? "+" : "−"}{peso(row.amountCentavos)}</strong></div>
-          <div><small>Recorded by</small><strong>{row.recorder}</strong><small>{new Date(row.recordedAt).toLocaleString("en-PH", { timeZone: "Asia/Manila" })}</small></div>
-          <div className="finance-ledger-row__actions">{row.voidedAt ? <StatusBadge tone="danger">Voided</StatusBadge> : row.source === "manual" ? <button type="button" className="icon-button" aria-label={`Void ${row.description}`} title="Void entry" onClick={() => void removeEntry(row.id, row.description)}><Trash2 size={16}/></button> : <StatusBadge tone="success">Verified</StatusBadge>}</div>
-          {row.voidedAt && <p className="finance-ledger-row__void-note">Voided by {row.voidedBy || "administrator"} on {new Date(row.voidedAt).toLocaleString("en-PH", { timeZone: "Asia/Manila" })}</p>}
-        </article>)}</div> : <EmptyState title="No matching financial records" message="Change the report filters or add a financial entry."/>}
-      </section>
-
-      <div className="finance-layout">
-        <section className="finance-panel"><div className="finance-panel__heading"><div><p className="eyebrow">Cash accountability</p><h2>Registration cash collected by</h2></div></div>
-          {receiverTotals.length ? receiverTotals.map(([name, total]) => <div className="finance-receiver-row" key={name}><span>{name}</span><strong>{peso(total)}</strong></div>) : <EmptyState title="No cash collections" message="Cash registration payments will appear here once submitted."/>}
-        </section>
-        <section className="finance-panel"><div className="finance-panel__heading finance-payments-heading"><div><p className="eyebrow">Registration payment audit</p><h2>Payment records</h2></div><button className="button button--secondary" type="button" onClick={exportPayments}><Download size={16}/> Payment CSV</button></div>
-          <div className="finance-payment-filters"><select aria-label="Payment method" value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)}><option value="all">All methods</option><option value="gcash">GCash</option><option value="cash">Cash</option></select><select aria-label="Payment status" value={paymentStatus} onChange={(event) => setPaymentStatus(event.target.value)}><option value="all">All statuses</option><option value="unpaid">Unpaid</option><option value="submitted">Submitted</option><option value="verified">Verified</option><option value="rejected">Rejected</option><option value="refunded">Refunded</option></select></div>
-          <div className="finance-payment-audit-list">{filteredPayments.length ? filteredPayments.map((payment) => <article key={payment.id}><div><strong>{payment.participant_name}</strong><small>{payment.registration_reference} · {payment.category_name}</small></div><div><small>{payment.method} · {peso(payment.amount_centavos)}</small><StatusBadge tone={payment.status === "verified" ? "success" : payment.status === "rejected" || payment.status === "refunded" ? "danger" : "warning"}>{payment.status}</StatusBadge></div></article>) : <EmptyState title="No matching payments" message="Change the payment filters."/>}</div>
-        </section>
       </div>
-    </>}
-  </section>;
+
+      <nav
+        className="finance-scope-tabs"
+        aria-label="Financial report allocation"
+        style={{
+          display: "flex",
+          gap: "var(--md-space-2)",
+          marginBottom: "var(--md-space-6)",
+          padding: "4px",
+          background: "var(--md-sys-color-surface-container-high)",
+          borderRadius: "var(--md-sys-shape-corner-full)",
+          width: "fit-content",
+        }}
+      >
+        {(["overall", "festival", "run", "general"] as ScopeFilter[]).map((scope) => (
+          <button
+            key={scope}
+            type="button"
+            className={scopeFilter === scope ? "is-active" : ""}
+            onClick={() => setScopeFilter(scope)}
+            style={{
+              padding: "8px 16px",
+              borderRadius: "var(--md-sys-shape-corner-full)",
+              border: "none",
+              background: scopeFilter === scope ? "var(--md-sys-color-primary)" : "transparent",
+              color: scopeFilter === scope ? "var(--md-sys-color-on-primary)" : "var(--md-sys-color-on-surface-variant)",
+              fontWeight: 600,
+              fontSize: "0.875rem",
+              cursor: "pointer",
+              transition: "all var(--md-sys-motion-duration-short4) ease",
+            }}
+          >
+            {scope === "overall" ? "Overall" : scopeLabel(scope)}
+          </button>
+        ))}
+      </nav>
+
+      {showEntryForm && (
+        <Card variant="outlined" style={{ padding: "var(--md-space-6)", marginBottom: "var(--md-space-6)" }}>
+          <form onSubmit={(event) => void submitEntry(event)} style={{ display: "flex", flexDirection: "column", gap: "var(--md-space-4)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--md-space-3)" }}>
+              <ReceiptText size={22} style={{ color: "var(--md-sys-color-primary)" }} />
+              <div>
+                <strong style={{ fontSize: "1.1rem", display: "block" }}>New financial entry</strong>
+                <small style={{ color: "var(--md-sys-color-on-surface-variant)" }}>The signed-in administrator is recorded automatically.</small>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "var(--md-space-3)" }}>
+              <SelectField
+                label="Transaction type"
+                value={form.transaction_type}
+                onChange={(event) => {
+                  const type = event.target.value as "income" | "expense";
+                  setForm({ ...form, transaction_type: type, category: type === "income" ? CASH_INFLOW_CATEGORIES[0] : EXPENSE_CATEGORIES[0], received_by_name: "" });
+                }}
+              >
+                <option value="income">Cash Inflow</option>
+                <option value="expense">Expense</option>
+              </SelectField>
+
+              <TextField
+                label="Date"
+                type="date"
+                required
+                value={form.transaction_date}
+                onChange={(event) => setForm({ ...form, transaction_date: event.target.value })}
+              />
+
+              <SelectField
+                label="Allocation"
+                value={form.event_scope}
+                onChange={(event) => setForm({ ...form, event_scope: event.target.value as FinanceScope })}
+              >
+                <option value="general">General</option>
+                <option value="festival">Sinoog Festival</option>
+                <option value="run">Sinoog Run</option>
+              </SelectField>
+
+              <SelectField
+                label={form.transaction_type === "income" ? "Cash Inflow Category" : "Expense Category"}
+                value={form.category}
+                onChange={(event) => setForm({ ...form, category: event.target.value })}
+              >
+                {categories.map((category) => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </SelectField>
+
+              <TextField
+                label={form.transaction_type === "income" ? "Received From" : "Paid To"}
+                required
+                value={form.counterparty_name}
+                onChange={(event) => setForm({ ...form, counterparty_name: event.target.value })}
+              />
+
+              {form.transaction_type === "expense" && (
+                <TextField
+                  label="Received By (Staff / Vendor)"
+                  required
+                  value={form.received_by_name || ""}
+                  onChange={(event) => setForm({ ...form, received_by_name: event.target.value })}
+                />
+              )}
+
+              <SelectField
+                label="Payment Method"
+                value={form.method || "cash"}
+                onChange={(event) => setForm({ ...form, method: event.target.value as FinanceMethod })}
+              >
+                <option value="cash">Cash</option>
+                <option value="gcash">GCash</option>
+                <option value="bank">Bank</option>
+              </SelectField>
+
+              <TextField
+                label="Amount (PHP)"
+                type="number"
+                min="0.01"
+                step="0.01"
+                required
+                value={form.amount_centavos ? String(form.amount_centavos / 100) : ""}
+                onChange={(event) => setForm({ ...form, amount_centavos: Math.round(Number(event.target.value) * 100) })}
+              />
+
+              <TextField
+                label="Reference / Document No."
+                placeholder="Optional receipt, voucher, or transfer no."
+                value={form.reference || ""}
+                onChange={(event) => setForm({ ...form, reference: event.target.value })}
+              />
+            </div>
+
+            <TextArea
+              label="Particulars / Purpose"
+              required
+              rows={3}
+              value={form.description}
+              onChange={(event) => setForm({ ...form, description: event.target.value })}
+            />
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "var(--md-space-2)", marginTop: "var(--md-space-2)" }}>
+              <Button variant="text" onClick={() => setShowEntryForm(false)}>
+                Cancel
+              </Button>
+              <Button variant="filled" type="submit" loading={saving}>
+                Record entry
+              </Button>
+            </div>
+          </form>
+        </Card>
+      )}
+
+      {loading ? (
+        <LoadingState message="Loading financial records…" />
+      ) : (
+        <>
+          <div className="stat-grid" style={{ marginBottom: "var(--md-space-6)" }}>
+            <Card variant="outlined" className="stat-card">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--md-space-2)" }}>
+                <span className="stat-label">Cash inflows</span>
+                <TrendingUp size={22} style={{ color: "var(--md-sys-color-tertiary)" }} />
+              </div>
+              <strong className="stat-value" style={{ color: "var(--md-sys-color-tertiary)" }}>{peso(totals.inflows)}</strong>
+            </Card>
+
+            <Card variant="outlined" className="stat-card">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--md-space-2)" }}>
+                <span className="stat-label">Expenses</span>
+                <TrendingDown size={22} style={{ color: "var(--md-sys-color-error)" }} />
+              </div>
+              <strong className="stat-value" style={{ color: "var(--md-sys-color-error)" }}>{peso(totals.expenses)}</strong>
+            </Card>
+
+            <Card variant="outlined" className="stat-card">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--md-space-2)" }}>
+                <span className="stat-label">Pending payment review</span>
+                <HandCoins size={22} style={{ color: "var(--md-sys-color-secondary)" }} />
+              </div>
+              <strong className="stat-value">{peso(totals.pending)}</strong>
+            </Card>
+
+            <Card variant="outlined" className="stat-card" style={{ borderColor: "var(--md-sys-color-primary)", background: "var(--md-sys-color-surface-container-high)" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--md-space-2)" }}>
+                <span className="stat-label" style={{ fontWeight: 600 }}>Recorded balance</span>
+                <Banknote size={22} style={{ color: "var(--md-sys-color-primary)" }} />
+              </div>
+              <strong className="stat-value" style={{ color: "var(--md-sys-color-primary)" }}>{peso(totals.balance)}</strong>
+            </Card>
+          </div>
+
+          <Card variant="outlined" className="finance-ledger-panel" style={{ padding: "var(--md-space-6)", marginBottom: "var(--md-space-6)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "var(--md-space-3)", marginBottom: "var(--md-space-4)" }}>
+              <div>
+                <p className="eyebrow">Reporting ledger</p>
+                <h2 style={{ margin: 0 }}>{scopeFilter === "overall" ? "Overall" : scopeLabel(scopeFilter)} cashbook</h2>
+              </div>
+              <div style={{ display: "flex", gap: "var(--md-space-2)", flexWrap: "wrap" }}>
+                <Button variant="outlined" leadingIcon={<FileSpreadsheet size={16} />} onClick={exportSummary}>
+                  Summary CSV
+                </Button>
+                <Button variant="outlined" leadingIcon={<Download size={16} />} onClick={exportDetailedLedger}>
+                  Detailed CSV
+                </Button>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: "var(--md-space-3)", alignItems: "center", flexWrap: "wrap", marginBottom: "var(--md-space-4)" }}>
+              <div style={{ flex: "1 1 260px", minWidth: "200px" }}>
+                <SearchBar
+                  label="Search financial records"
+                  placeholder="Category, person, purpose, ref…"
+                  value={search}
+                  onValueChange={setSearch}
+                />
+              </div>
+              <div style={{ width: "160px" }}>
+                <SelectField
+                  label="Entry type"
+                  value={ledgerType}
+                  onChange={(e) => setLedgerType(e.target.value as LedgerTypeFilter)}
+                >
+                  <option value="all">All types</option>
+                  <option value="income">Cash inflows</option>
+                  <option value="expense">Expenses</option>
+                </SelectField>
+              </div>
+              <div style={{ width: "150px" }}>
+                <SelectField
+                  label="Payment method"
+                  value={ledgerMethod}
+                  onChange={(e) => setLedgerMethod(e.target.value)}
+                >
+                  <option value="all">All methods</option>
+                  <option value="cash">Cash</option>
+                  <option value="gcash">GCash</option>
+                  <option value="bank">Bank</option>
+                </SelectField>
+              </div>
+              <div style={{ width: "150px" }}>
+                <SelectField
+                  label="Record status"
+                  value={ledgerStatus}
+                  onChange={(e) => setLedgerStatus(e.target.value as LedgerStatusFilter)}
+                >
+                  <option value="active">Active records</option>
+                  <option value="voided">Voided records</option>
+                  <option value="all">All records</option>
+                </SelectField>
+              </div>
+              <div style={{ width: "150px" }}>
+                <TextField
+                  label="From"
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                />
+              </div>
+              <div style={{ width: "150px" }}>
+                <TextField
+                  label="To"
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {filteredLedger.length ? (
+              <div className="finance-ledger-list">
+                {filteredLedger.map((row) => (
+                  <article
+                    className={`finance-ledger-row ${row.voidedAt ? "is-voided" : ""}`}
+                    key={row.id}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                      gap: "var(--md-space-3)",
+                      alignItems: "center",
+                      padding: "var(--md-space-4)",
+                      borderBottom: "1px solid var(--md-sys-color-outline-variant)",
+                      opacity: row.voidedAt ? 0.6 : 1,
+                    }}
+                  >
+                    <div className="finance-ledger-row__primary" style={{ display: "flex", alignItems: "center", gap: "var(--md-space-3)" }}>
+                      <span
+                        className={`finance-flow-icon ${row.transactionType === "income" ? "is-income" : "is-expense"}`}
+                        style={{
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "var(--md-sys-shape-corner-full)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: 700,
+                          fontSize: "1.1rem",
+                          background: row.transactionType === "income" ? "var(--md-sys-color-tertiary-container)" : "var(--md-sys-color-error-container)",
+                          color: row.transactionType === "income" ? "var(--md-sys-color-on-tertiary-container)" : "var(--md-sys-color-on-error-container)",
+                        }}
+                      >
+                        {row.transactionType === "income" ? "+" : "−"}
+                      </span>
+                      <div>
+                        <strong>{row.category}</strong>
+                        <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
+                          {row.transactionDate} · {scopeLabel(row.scope)} · {methodLabel(row.method)}
+                        </small>
+                      </div>
+                    </div>
+
+                    <div>
+                      <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
+                        {row.transactionType === "income" ? "Received from" : "Paid to"}
+                      </small>
+                      <strong>{row.counterparty}</strong>
+                      {row.receivedBy && (
+                        <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
+                          Received by: {row.receivedBy}
+                        </small>
+                      )}
+                    </div>
+
+                    <div>
+                      <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
+                        Particulars / Purpose
+                      </small>
+                      <strong>{row.description}</strong>
+                      {row.reference && (
+                        <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
+                          Ref: {row.reference}
+                        </small>
+                      )}
+                    </div>
+
+                    <div className="finance-ledger-row__amount">
+                      <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
+                        Amount
+                      </small>
+                      <strong
+                        style={{
+                          fontSize: "1.05rem",
+                          color: row.transactionType === "income" ? "var(--md-sys-color-tertiary)" : "var(--md-sys-color-error)",
+                        }}
+                      >
+                        {row.transactionType === "income" ? "+" : "−"}{peso(row.amountCentavos)}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
+                        Recorded by
+                      </small>
+                      <strong>{row.recorder}</strong>
+                      <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)", fontSize: "0.75rem" }}>
+                        {new Date(row.recordedAt).toLocaleString("en-PH", { timeZone: "Asia/Manila" })}
+                      </small>
+                    </div>
+
+                    <div className="finance-ledger-row__actions" style={{ display: "flex", justifyContent: "flex-end" }}>
+                      {row.voidedAt ? (
+                        <StatusBadge tone="danger">Voided</StatusBadge>
+                      ) : row.source === "manual" ? (
+                        <button
+                          type="button"
+                          className="button button--ghost button--sm"
+                          aria-label={`Void ${row.description}`}
+                          title="Void entry"
+                          onClick={() => void removeEntry(row.id, row.description)}
+                          style={{ minWidth: "44px", minHeight: "44px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      ) : (
+                        <StatusBadge tone="success">Verified</StatusBadge>
+                      )}
+                    </div>
+
+                    {row.voidedAt && (
+                      <p
+                        className="finance-ledger-row__void-note"
+                        style={{
+                          gridColumn: "1 / -1",
+                          color: "var(--md-sys-color-error)",
+                          fontSize: "0.8rem",
+                          margin: 0,
+                        }}
+                      >
+                        Voided by {row.voidedBy || "administrator"} on {new Date(row.voidedAt).toLocaleString("en-PH", { timeZone: "Asia/Manila" })}
+                      </p>
+                    )}
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <EmptyState title="No matching financial records" message="Change the report filters or add a financial entry." />
+            )}
+          </Card>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "var(--md-space-6)" }}>
+            <Card variant="outlined" style={{ padding: "var(--md-space-6)" }}>
+              <div style={{ marginBottom: "var(--md-space-4)" }}>
+                <p className="eyebrow">Cash accountability</p>
+                <h2 style={{ margin: 0 }}>Registration cash collected by</h2>
+              </div>
+              {receiverTotals.length ? (
+                receiverTotals.map(([name, total]) => (
+                  <div
+                    className="finance-receiver-row"
+                    key={name}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "var(--md-space-3) 0",
+                      borderBottom: "1px solid var(--md-sys-color-outline-variant)",
+                    }}
+                  >
+                    <span>{name}</span>
+                    <strong style={{ color: "var(--md-sys-color-primary)" }}>{peso(total)}</strong>
+                  </div>
+                ))
+              ) : (
+                <EmptyState title="No cash collections" message="Cash registration payments will appear here once submitted." />
+              )}
+            </Card>
+
+            <Card variant="outlined" style={{ padding: "var(--md-space-6)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "var(--md-space-2)", marginBottom: "var(--md-space-4)" }}>
+                <div>
+                  <p className="eyebrow">Registration payment audit</p>
+                  <h2 style={{ margin: 0 }}>Payment records</h2>
+                </div>
+                <Button variant="outlined" size="small" leadingIcon={<Download size={15} />} onClick={exportPayments}>
+                  Payment CSV
+                </Button>
+              </div>
+
+              <div style={{ display: "flex", gap: "var(--md-space-2)", marginBottom: "var(--md-space-4)" }}>
+                <div style={{ flex: 1 }}>
+                  <SelectField
+                    label="Method"
+                    value={paymentMethod}
+                    onChange={(event) => setPaymentMethod(event.target.value)}
+                  >
+                    <option value="all">All methods</option>
+                    <option value="gcash">GCash</option>
+                    <option value="cash">Cash</option>
+                  </SelectField>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <SelectField
+                    label="Status"
+                    value={paymentStatus}
+                    onChange={(event) => setPaymentStatus(event.target.value)}
+                  >
+                    <option value="all">All statuses</option>
+                    <option value="unpaid">Unpaid</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="verified">Verified</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="refunded">Refunded</option>
+                  </SelectField>
+                </div>
+              </div>
+
+              <div className="finance-payment-audit-list">
+                {filteredPayments.length ? (
+                  filteredPayments.map((payment) => (
+                    <article
+                      key={payment.id}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "var(--md-space-3) 0",
+                        borderBottom: "1px solid var(--md-sys-color-outline-variant)",
+                      }}
+                    >
+                      <div>
+                        <strong>{payment.participant_name}</strong>
+                        <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
+                          {payment.registration_reference} · {payment.category_name}
+                        </small>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <small style={{ display: "block", color: "var(--md-sys-color-on-surface-variant)" }}>
+                          {payment.method} · {peso(payment.amount_centavos)}
+                        </small>
+                        <StatusBadge tone={payment.status === "verified" ? "success" : payment.status === "rejected" || payment.status === "refunded" ? "danger" : "warning"}>
+                          {payment.status}
+                        </StatusBadge>
+                      </div>
+                    </article>
+                  ))
+                ) : (
+                  <EmptyState title="No matching payments" message="Change the payment filters." />
+                )}
+              </div>
+            </Card>
+          </div>
+        </>
+      )}
+    </section>
+  );
 }

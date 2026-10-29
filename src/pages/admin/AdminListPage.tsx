@@ -1,5 +1,10 @@
-import { Plus, Search, SlidersHorizontal } from "lucide-react";
-import { StatusBadge } from "../../components/StatusBadge";
+import { useState } from "react";
+import { Plus, SlidersHorizontal } from "lucide-react";
+import { Button } from "../../components/Button";
+import { Card } from "../../components/m3/Card";
+import { SearchBar } from "../../components/m3/SearchBar";
+import { EmptyState } from "../../features/ui/FeedbackStates";
+
 const config = {
   registrations: {
     title: "Run registrations",
@@ -38,8 +43,11 @@ const config = {
     columns: ["Setting", "Value", "Updated", "Owner", "Status"],
   },
 } as const;
+
 export function AdminListPage({ type }: { type: keyof typeof config }) {
+  const [search, setSearch] = useState("");
   const c = config[type];
+
   return (
     <div className="admin-page">
       <div className="admin-heading">
@@ -48,43 +56,38 @@ export function AdminListPage({ type }: { type: keyof typeof config }) {
           <h1>{c.title}</h1>
           <p>{c.description}</p>
         </div>
-        <button className="button button--primary">
-          <Plus size={17} />
+        <Button variant="filled" leadingIcon={<Plus size={17} />}>
           {c.action}
-        </button>
+        </Button>
       </div>
-      <section className="admin-panel">
-        <div className="table-tools">
-          <label className="modern-search" htmlFor="admin-list-search">
-            <Search size={18} aria-hidden="true" />
-            <input
-              id="admin-list-search"
-              type="search"
-              placeholder="Search records"
-              autoComplete="off"
-              enterKeyHint="search"
+
+      <Card variant="outlined" style={{ padding: "var(--md-space-4)" }}>
+        <div className="table-tools" style={{ display: "flex", gap: "var(--md-space-3)", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", marginBottom: "var(--md-space-4)" }}>
+          <div style={{ flex: "1 1 280px", minWidth: "220px" }}>
+            <SearchBar
+              label="Search records"
+              placeholder="Search records…"
+              value={search}
+              onValueChange={setSearch}
             />
-          </label>
-          <button type="button">
-            <SlidersHorizontal size={16} /> Filter
-          </button>
+          </div>
+          <Button variant="outlined" size="small" leadingIcon={<SlidersHorizontal size={16} />}>
+            Filter
+          </Button>
         </div>
+
         <div className="admin-table">
           <div className="admin-table__head">
             {c.columns.map((x) => (
               <span key={x}>{x}</span>
             ))}
           </div>
-          <div className="admin-table__empty">
-            <StatusBadge>Empty</StatusBadge>
-            <h3>No records yet</h3>
-            <p>
-              Records will appear here after Supabase is connected and the
-              feature is opened.
-            </p>
-          </div>
+          <EmptyState
+            title="No records yet"
+            message="Records will appear here after Supabase is connected and the feature is opened."
+          />
         </div>
-      </section>
+      </Card>
     </div>
   );
 }
