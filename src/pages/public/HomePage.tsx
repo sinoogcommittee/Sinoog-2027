@@ -99,6 +99,7 @@ export function HomePage() {
           </video>
         </div>
         <div className="home-hero__pattern" />
+        {/* Desktop bamboos temporarily commented out for review:
         <div className="home-hero__bamboo home-hero__bamboo--left" aria-hidden="true">
           <span className="bamboo-stalk bamboo-stalk--one" />
           <span className="bamboo-stalk bamboo-stalk--two" />
@@ -117,7 +118,6 @@ export function HomePage() {
           <span className="bamboo-leaf bamboo-leaf--three" />
           <span className="bamboo-leaf bamboo-leaf--four" />
         </div>
-        {/* Hanging bamboo leaves at top center beneath header */}
         <div className="home-hero__bamboo-top" aria-hidden="true">
           <svg
             className="home-hero__bamboo-top-svg"
@@ -125,19 +125,19 @@ export function HomePage() {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            {/* Gentle curved bamboo branch running horizontally across the top */}
+            -- Gentle curved bamboo branch running horizontally across the top --
             <path
               d="M 20 6 Q 210 18 400 5"
               stroke="rgba(245, 223, 171, 0.45)"
               strokeWidth="2.5"
               strokeLinecap="round"
             />
-            {/* Bamboo nodes / segments on the branch */}
+            -- Bamboo nodes / segments on the branch --
             <circle cx="110" cy="11" r="2.5" fill="rgba(245, 223, 171, 0.6)" />
             <circle cx="210" cy="14" r="2.5" fill="rgba(245, 223, 171, 0.6)" />
             <circle cx="310" cy="11" r="2.5" fill="rgba(245, 223, 171, 0.6)" />
 
-            {/* Left cluster of hanging bamboo leaves */}
+            -- Left cluster of hanging bamboo leaves --
             <g className="bamboo-hanging-cluster bamboo-hanging-cluster--left">
               <path
                 d="M 85 10 C 72 26 62 48 68 62 C 76 48 84 30 87 11 Z"
@@ -159,7 +159,7 @@ export function HomePage() {
               />
             </g>
 
-            {/* Center cluster of hanging bamboo leaves */}
+            -- Center cluster of hanging bamboo leaves --
             <g className="bamboo-hanging-cluster bamboo-hanging-cluster--center">
               <path
                 d="M 195 13 C 182 34 176 58 184 76 C 192 58 198 36 198 14 Z"
@@ -181,7 +181,7 @@ export function HomePage() {
               />
             </g>
 
-            {/* Right cluster of hanging bamboo leaves */}
+            -- Right cluster of hanging bamboo leaves --
             <g className="bamboo-hanging-cluster bamboo-hanging-cluster--right">
               <path
                 d="M 295 11 C 290 28 288 46 282 58 C 292 46 298 30 297 12 Z"
@@ -204,6 +204,7 @@ export function HomePage() {
             </g>
           </svg>
         </div>
+        */}
         <div className="container home-hero__inner">
           <div className="home-hero__copy">
             <p className="hero-kicker">

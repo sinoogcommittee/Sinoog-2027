@@ -3288,12 +3288,12 @@ a.m3-button:hover { text-decoration: none; }
     z-index: 1 !important;
   }
 
-  /* Details container lowered to sit cleanly below the circular emblem without overlapping */
+  /* Details container centered cleanly between the outer circle background of the logo and the top of the countdown timer */
   .home-hero-mobile-view__identity {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    margin-top: clamp(32px, 4.5vh, 44px) !important;
+    margin-top: clamp(58px, 8.5vh, 70px) !important;
   }
 
   /* Sto. Niño Parish: SMALLER */
