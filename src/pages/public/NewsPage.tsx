@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, Pin, Search } from 'lucide-react';
+import { ArrowRight, Pin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHero } from '../../components/PageHero';
+import { Card } from '../../components/m3/Card';
+import { Chip } from '../../components/m3/Chip';
+import { SearchBar } from '../../components/m3/SearchBar';
 import { getPublishedPosts } from '../../features/content/postQueries';
 import { EmptyState, ErrorState, LoadingState } from '../../features/ui/FeedbackStates';
 import type { NewsPost } from '../../types';
@@ -28,7 +31,11 @@ function PostCard({ post, featured = false }: { post: NewsPost; featured?: boole
   const badge = dateBadge(post.publishedAt);
 
   return (
-    <article className={`news-feed-card${featured ? ' news-feed-card--featured' : ''}`}>
+    <Card
+      as="article"
+      variant={featured ? 'filled' : 'outlined'}
+      className={`news-feed-card${featured ? ' news-feed-card--featured' : ''}`}
+    >
       <div className="news-feed-card__date" aria-hidden>
         <strong>{badge.day}</strong>
         <span>{badge.month}</span>
@@ -50,7 +57,7 @@ function PostCard({ post, featured = false }: { post: NewsPost; featured?: boole
           Read story <ArrowRight size={15} aria-hidden />
         </Link>
       </div>
-    </article>
+    </Card>
   );
 }
 
@@ -94,7 +101,7 @@ export function NewsPage() {
   }, [posts]);
 
   return (
-    <>
+    <main className="m3-news-page">
       <PageHero
         eyebrow="Official updates"
         title="News & announcements"
@@ -104,37 +111,30 @@ export function NewsPage() {
       <section className="section">
         <div className="container">
           <div className="public-filter-bar public-filter-bar--news">
-            <label className="search-field modern-search public-filter-search" htmlFor="news-search-input">
-              <Search size={18} aria-hidden />
-              <input
-                id="news-search-input"
-                type="search"
-                aria-label="Search announcements"
-                placeholder="Search announcements…"
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setLoading(true);
-                }}
-                autoComplete="off"
-                enterKeyHint="search"
-              />
-            </label>
+            <SearchBar
+              label="Search announcements"
+              placeholder="Search announcements…"
+              value={searchTerm}
+              onValueChange={(val) => {
+                setSearchTerm(val);
+                setLoading(true);
+              }}
+              fieldClassName="public-filter-search"
+            />
 
             <div className="public-filter-tabs public-filter-tabs--news" role="group" aria-label="Filter by category">
               {CATEGORIES.map((cat) => (
-                <button
+                <Chip
                   key={cat}
-                  type="button"
-                  className={selectedCategory === cat ? 'is-active' : ''}
-                  aria-pressed={selectedCategory === cat}
+                  variant="filter"
+                  selected={selectedCategory === cat}
                   onClick={() => {
                     setSelectedCategory(cat);
                     setLoading(true);
                   }}
                 >
                   {cat}
-                </button>
+                </Chip>
               ))}
             </div>
           </div>
@@ -176,6 +176,6 @@ export function NewsPage() {
           )}
         </div>
       </section>
-    </>
+    </main>
   );
 }

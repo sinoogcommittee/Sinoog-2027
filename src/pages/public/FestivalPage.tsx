@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState, useId, type ReactNode } from 'react';
 import {
   ArrowRight,
   ChevronDown,
@@ -59,18 +59,24 @@ function AccordionPanel({
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const panelId = useId();
   return (
     <div className={`festival-accordion ${open ? 'is-open' : ''}`}>
       <button
         type="button"
         className="festival-accordion__trigger"
         aria-expanded={open}
+        aria-controls={panelId}
         onClick={() => setOpen((v) => !v)}
       >
         <span>{title}</span>
         <ChevronDown size={18} aria-hidden />
       </button>
-      {open && <div className="festival-accordion__panel">{children}</div>}
+      {open && (
+        <div id={panelId} className="festival-accordion__panel" role="region" aria-label={title}>
+          {children}
+        </div>
+      )}
     </div>
   );
 }

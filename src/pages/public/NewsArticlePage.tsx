@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, CalendarDays, Facebook, Share2, AlertCircle } from 'lucide-react';
-import { Link, useParams } from 'react-router-dom';
+import { ArrowLeft, CalendarDays, Facebook, Share2 } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { Button } from '../../components/Button';
 import { getPostBySlug } from '../../features/content/postQueries';
 import { getPublicMediaUrl } from '../../features/media/mediaQueries';
-import { ErrorState, LoadingState } from '../../features/ui/FeedbackStates';
+import { EmptyState, ErrorState, LoadingState } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
 import type { NewsPost } from '../../types';
 import { sanitizeArticleHtml } from '../../features/content/sanitizeArticleHtml';
@@ -68,7 +69,7 @@ export function NewsArticlePage() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '60vh', display: 'grid', placeItems: 'center' }}>
+      <div className="m3-article-page m3-article-page--loading" style={{ minHeight: '60vh', display: 'grid', placeItems: 'center' }}>
         <LoadingState message="Loading article details…" />
       </div>
     );
@@ -77,7 +78,7 @@ export function NewsArticlePage() {
   if (!post) {
     if (loadError) {
       return (
-        <article className="article-page">
+        <main className="m3-article-page article-page">
           <div className="container narrow">
             <ErrorState
               message={loadError}
@@ -87,22 +88,23 @@ export function NewsArticlePage() {
               }}
             />
           </div>
-        </article>
+        </main>
       );
     }
     return (
-      <article className="article-page">
-        <div className="container narrow" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
-          <AlertCircle size={48} color="#781d22" style={{ margin: '0 auto 1rem' }} />
-          <h1>Article Not Found</h1>
-          <p style={{ color: '#666', marginBottom: '2rem' }}>
-            The requested article or announcement does not exist or has been removed.
-          </p>
-          <Link to="/news" className="button button--primary">
-            <ArrowLeft size={16} /> Return to news
-          </Link>
+      <main className="m3-article-page article-page">
+        <div className="container narrow" style={{ padding: '4rem 1rem' }}>
+          <EmptyState
+            title="Article Not Found"
+            message="The requested article or announcement does not exist or has been removed."
+            action={
+              <Button to="/news" variant="filled" leadingIcon={<ArrowLeft size={16} aria-hidden />}>
+                Return to news
+              </Button>
+            }
+          />
         </div>
-      </article>
+      </main>
     );
   }
 
@@ -110,33 +112,47 @@ export function NewsArticlePage() {
   const messengerShare = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(pageUrl)}&app_id=966242223397117&redirect_uri=${encodeURIComponent(pageUrl)}`;
 
   return (
-    <article className="article-page">
+    <main className="m3-article-page article-page">
       <div className="container narrow">
         <div className="article-page__toolbar">
-          <Link className="back-link" to="/news">
-            <ArrowLeft size={18} /> Back to news
-          </Link>
-          <button type="button" className="button button--ghost button--sm" onClick={handleNativeShare}>
-            <Share2 size={16} /> Share
-          </button>
+          <Button
+            to="/news"
+            variant="text"
+            size="small"
+            leadingIcon={<ArrowLeft size={18} aria-hidden />}
+            className="back-link"
+          >
+            Back to news
+          </Button>
+          <Button
+            type="button"
+            variant="outlined"
+            size="small"
+            leadingIcon={<Share2 size={16} aria-hidden />}
+            onClick={handleNativeShare}
+          >
+            Share
+          </Button>
         </div>
 
-        <span className="activity-type">{post.category}</span>
-        {post.pinned && <span className="news-pinned-tag" style={{ marginLeft: 8 }}>Pinned</span>}
-        <h1>{post.title}</h1>
+        <div className="article-page__meta-tags">
+          <span className="activity-type">{post.category}</span>
+          {post.pinned && <span className="news-pinned-tag" style={{ marginLeft: 8 }}>Pinned</span>}
+        </div>
+        <h1 className="article-page__title">{post.title}</h1>
         <p className="article-meta">
-          <CalendarDays size={16} /> {post.publishedAt} · Sto. Niño Parish Sinoog Committee
+          <CalendarDays size={16} aria-hidden /> {post.publishedAt} · Sto. Niño Parish Sinoog Committee
         </p>
 
         {post.featuredImagePath ? (
           <div className="article-page__cover">
-            <img src={getPublicMediaUrl(post.featuredImagePath)} alt="" />
+            <img src={getPublicMediaUrl(post.featuredImagePath)} alt={post.title} />
           </div>
         ) : (
           <div className="article-cover" />
         )}
 
-        <div className="prose">
+        <div className="prose article-page__prose">
           {post.excerpt && <p className="article-page__lede">{post.excerpt}</p>}
 
           {post.bodyHtml ? (
@@ -167,12 +183,19 @@ export function NewsArticlePage() {
             >
               Messenger
             </a>
-            <button type="button" className="article-share__btn" onClick={handleCopyLink}>
-              <Share2 size={16} aria-hidden /> Copy link
-            </button>
+            <Button
+              type="button"
+              variant="tonal"
+              size="small"
+              leadingIcon={<Share2 size={16} aria-hidden />}
+              onClick={handleCopyLink}
+              className="article-share__copy-btn"
+            >
+              Copy link
+            </Button>
           </div>
         </div>
       </div>
-    </article>
+    </main>
   );
 }

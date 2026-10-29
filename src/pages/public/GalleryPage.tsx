@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Camera, ChevronLeft, ChevronRight, Images, Play, Video, X } from 'lucide-react';
+import { Button } from '../../components/Button';
 import { PageHero } from '../../components/PageHero';
+import { Card } from '../../components/m3/Card';
 import {
   getPublishedGalleryAlbums,
   getYouTubeThumbnail,
@@ -57,7 +59,9 @@ function AlbumCard({ album, onOpen }: { album: GalleryAlbum; onOpen: () => void 
         : `${album.items.length} videos`;
 
   return (
-    <article
+    <Card
+      as="article"
+      variant="outlined"
       className={`gallery-collection-card${album.media_type === 'video' ? ' gallery-collection-card--video' : ''}`}
     >
       <button
@@ -79,7 +83,7 @@ function AlbumCard({ album, onOpen }: { album: GalleryAlbum; onOpen: () => void 
           ))
         ) : (
           <span className="gallery-collage__empty">
-            {isPhoto ? <Images size={34} /> : <Video size={34} />}
+            {isPhoto ? <Images size={34} aria-hidden /> : <Video size={34} aria-hidden />}
             Media coming soon
           </span>
         )}
@@ -92,16 +96,17 @@ function AlbumCard({ album, onOpen }: { album: GalleryAlbum; onOpen: () => void 
         {album.description && (
           <p className="gallery-collection-card__excerpt">{album.description}</p>
         )}
-        <button
+        <Button
           type="button"
-          className="button button--secondary button--sm"
+          variant="outlined"
+          size="small"
           onClick={onOpen}
           disabled={album.items.length === 0}
         >
           View {isPhoto ? 'photos' : 'videos'}
-        </button>
+        </Button>
       </div>
-    </article>
+    </Card>
   );
 }
 
@@ -160,7 +165,7 @@ export function GalleryPage() {
   const activeAsset = activeAlbum?.items[activeIndex] || null;
 
   return (
-    <>
+    <main className="m3-gallery-page">
       <PageHero
         eyebrow="Celebration archive"
         title="Photo & video gallery"
@@ -210,7 +215,7 @@ export function GalleryPage() {
         </div>
       </section>
 
-      {/* Full-screen lightbox / in-page video player — existing behaviour retained */}
+      {/* Full-screen lightbox / in-page video player */}
       {activeAlbum && activeAsset && (
         <div
           className="gallery-viewer"
@@ -235,7 +240,7 @@ export function GalleryPage() {
                 onClick={() => setActiveAlbum(null)}
                 aria-label="Close gallery viewer"
               >
-                <X />
+                <X size={20} />
               </button>
             </header>
 
@@ -267,7 +272,7 @@ export function GalleryPage() {
                     }
                     aria-label="Previous item"
                   >
-                    <ChevronLeft />
+                    <ChevronLeft size={24} />
                   </button>
                   <button
                     type="button"
@@ -277,7 +282,7 @@ export function GalleryPage() {
                     }
                     aria-label="Next item"
                   >
-                    <ChevronRight />
+                    <ChevronRight size={24} />
                   </button>
                 </>
               )}
@@ -317,6 +322,6 @@ export function GalleryPage() {
           </div>
         </div>
       )}
-    </>
+    </main>
   );
 }

@@ -8,7 +8,9 @@ import {
   Printer,
   UserRound,
 } from 'lucide-react';
+import { Button } from '../../components/Button';
 import { PageHero } from '../../components/PageHero';
+import { Card } from '../../components/m3/Card';
 import {
   formatActivityDateTime,
   getActivityDateKey,
@@ -210,7 +212,7 @@ export function ActivitiesPage({ filter: routeFilter }: { filter?: 'mass' | 'nig
   const grouped = useMemo(() => groupByDate(activities), [activities]);
 
   return (
-    <>
+    <main className="m3-activities-page">
       <PageHero
         eyebrow="Sto. Niño Parish — Guinacot"
         title={pageTitle}
@@ -248,22 +250,26 @@ export function ActivitiesPage({ filter: routeFilter }: { filter?: 'mass' | 'nig
             </nav>
 
             <div className="schedule-utility">
-              <button
+              <Button
                 type="button"
-                className="button button--secondary button--sm"
+                variant="outlined"
+                size="small"
+                leadingIcon={<Printer size={16} aria-hidden />}
                 onClick={() => window.print()}
               >
-                <Printer size={16} aria-hidden /> Print schedule
-              </button>
-              <button
+                Print schedule
+              </Button>
+              <Button
                 type="button"
-                className="button button--secondary button--sm"
+                variant="outlined"
+                size="small"
+                leadingIcon={<CalendarPlus size={16} aria-hidden />}
                 onClick={() => downloadAllIcs(activities)}
                 disabled={activities.length === 0}
                 title="Download all visible events as an .ics calendar file"
               >
-                <CalendarPlus size={16} aria-hidden /> Sync to Calendar
-              </button>
+                Sync to Calendar
+              </Button>
             </div>
           </div>
 
@@ -313,7 +319,7 @@ export function ActivitiesPage({ filter: routeFilter }: { filter?: 'mass' | 'nig
                         const typeLabel = TYPE_LABELS[a.type] ?? a.type;
 
                         return (
-                          <article key={a.id} className="schedule-card">
+                          <Card as="article" variant="outlined" key={a.id} className="schedule-card">
                             <div className="schedule-card__meta">
                               <span className={`activity-type activity-type--${a.type}`}>{typeLabel}</span>
                               {a.celebrant && (
@@ -362,7 +368,7 @@ export function ActivitiesPage({ filter: routeFilter }: { filter?: 'mass' | 'nig
                                 Add to Calendar (.ics)
                               </button>
                             </div>
-                          </article>
+                          </Card>
                         );
                       })}
                     </div>
@@ -378,6 +384,6 @@ export function ActivitiesPage({ filter: routeFilter }: { filter?: 'mass' | 'nig
           )}
         </div>
       </section>
-    </>
+    </main>
   );
 }

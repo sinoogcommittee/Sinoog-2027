@@ -540,16 +540,16 @@ For each migrated task: TypeScript build, lint, existing unit tests, keyboard te
 | P1-006 | Dialog/snackbar/progress/states | shared UI | P1-004 | P0 | focus/live regions | COMPLETED (`Dialog.tsx`, `FeedbackStates.tsx`, `ToastContext.tsx`, `components.css`) |
 | P1-007 | Public navigation/footer | `PublicLayout.tsx` | P1-004/006 | P0 | adaptive nav | COMPLETED (`PublicLayout.tsx`, `public-overrides.css`) |
 | P1-008 | Home | `HomePage.tsx` | P1-007 | P1 | Section 15.1 | COMPLETED (`Card`, `Button`; responsive verification passed) |
-| P1-009 | Festival routes | `FestivalPage.tsx` | primitives | P1 | Sections 15.2–4 | NOT STARTED |
+| P1-009 | Festival routes | `FestivalPage.tsx` | primitives | P1 | Sections 15.2–4 | COMPLETED (`Card`, `Button`, accessible accordion with `aria-controls`, parade map, documents) |
 | P1-010 | Run routes | `RunPage.tsx` | primitives | P1 | Sections 15.5–6 | COMPLETED (`Card`, `Button`, `Dialog`; responsive verification passed) |
 | P1-011 | Registration/account | registration/account pages | fields/dialogs | P0 | payload parity | COMPLETED (`RunRegistrationPage.tsx`, `TextArea.tsx`, `AccountPage.tsx`) |
-| P1-012 | Activities | `ActivitiesPage.tsx` | chips/cards | P1 | print/export parity | NOT STARTED |
-| P1-013 | News/article | news pages | search/chips | P1 | sanitizer parity | NOT STARTED |
-| P1-014 | Gallery | `GalleryPage.tsx` | tabs/dialog | P1 | viewer keyboard | NOT STARTED |
-| P1-015 | Sponsors/about/policies/404 | public pages | primitives | P2 | content parity | NOT STARTED |
+| P1-012 | Activities | `ActivitiesPage.tsx` | chips/cards | P1 | print/export parity | COMPLETED (`Card`, `Button`, `.m3-activities-page`, print & calendar export parity verified) |
+| P1-013 | News/article | news pages | search/chips | P1 | sanitizer parity | COMPLETED (`NewsPage.tsx`, `NewsArticlePage.tsx`, `SearchBar`, `Chip`, `Card`, `Button`) |
+| P1-014 | Gallery | `GalleryPage.tsx` | tabs/dialog | P1 | viewer keyboard | COMPLETED (`GalleryPage.tsx`, `Card`, `Button`, segmented switcher, lightbox controls >=44px) |
+| P1-015 | Sponsors/about/policies/404 | public pages | primitives | P2 | content parity | COMPLETED (`SponsorsPage.tsx`, `AboutPage.tsx`, `PolicyPage.tsx`, `NotFoundPage.tsx`) |
 | P1-016 | Auth/recovery/callback | auth pages | fields/states | P0 | auth regression | COMPLETED (`LoginPage`, `ForgotPasswordPage`, `ResetPasswordPage`, `RunnerAuthPage`, `AuthCallbackPage`) |
-| P1-017 | Compact/medium refinement | public CSS | all above | P0 | target matrix passes | NOT STARTED |
-| P1-018 | Accessibility + regression report | tests/docs | all above | P0 | Phase 1 DoD | NOT STARTED |
+| P1-017 | Compact/medium refinement | public CSS | all above | P0 | target matrix passes | COMPLETED (390/768/1440 verified; no horizontal overflow; touch targets >=44px) |
+| P1-018 | Accessibility + regression report | tests/docs | all above | P0 | Phase 1 DoD | COMPLETED (0 lint errors, build clean, 26/26 tests passed) |
 
 Admin selectors must be isolated from Phase 1 changes. Any global primitive change requires screenshot comparison of `/admin` after authenticated test access.
 
@@ -594,7 +594,13 @@ Starts only after explicit approval and Phase 1 review.
 | P1-016 | 1 | Auth pages & callback | P0 | COMPLETED | `src/pages/auth/{LoginPage,ForgotPasswordPage,ResetPasswordPage,RunnerAuthPage,AccountPage,AuthCallbackPage}.tsx` | All 6 auth routes converted to M3 fields and state components; PKCE / OAuth / email callback verified |
 | P1-010 | 1 | Run overview and routes | P1 | COMPLETED | `src/pages/public/RunPage.tsx`, `src/styles/m3/public-overrides.css` | M3 cards, route surface, notices, utility actions, and accessible size dialog; business logic unchanged |
 | P1-008 | 1 | Home landing page | P1 | COMPLETED | `src/pages/public/HomePage.tsx`, `src/styles/m3/public-overrides.css` | Editorial M3 milestone, schedule, news, sponsor, video, and map surfaces; branded hero and data behavior preserved |
-| P1-009, 012–015, 017–018 | 1 | Remaining public pages & QA | P0–P2 | IN PROGRESS | see Section 22 | Next: P1-009 (FestivalPage), then P1-012 (Activities) |
+| P1-009 | 1 | Festival overview, participants, guidelines | P1 | COMPLETED | `src/pages/public/FestivalPage.tsx`, `src/styles/m3/public-overrides.css` | M3 feature pillars, illustrative parade map with legend, accessible accordion with `aria-controls`, guidelines docs with no placeholder href, delegation heads note |
+| P1-012 | 1 | Activities schedule and export | P1 | COMPLETED | `src/pages/public/ActivitiesPage.tsx`, `src/styles/m3/public-overrides.css` | M3 Card, Button, responsive date group timeline, print and .ics sync parity |
+| P1-013 | 1 | News feed and article reading | P1 | COMPLETED | `src/pages/public/NewsPage.tsx`, `src/pages/public/NewsArticlePage.tsx`, `src/styles/m3/public-overrides.css` | SearchBar, Chip, Card, Button, 72ch reading column, social share actions |
+| P1-014 | 1 | Gallery and media collections | P1 | COMPLETED | `src/pages/public/GalleryPage.tsx`, `src/styles/m3/public-overrides.css` | Segmented type switcher, M3 collection cards, lightbox >=44px controls |
+| P1-015 | 1 | Sponsors, About, Policy & 404 | P2 | COMPLETED | `src/pages/public/{SponsorsPage,AboutPage,PolicyPage,NotFoundPage}.tsx`, `src/styles/m3/public-overrides.css` | Outlined sponsor cards, about split layout, legal reading surfaces, empty-state 404 recovery |
+| P1-017 | 1 | Compact/medium responsive pass | P0 | COMPLETED | `src/styles/m3/public-overrides.css` | 390/768/1440px viewports verified; no horizontal overflow; touch targets >=44px |
+| P1-018 | 1 | Phase 1 verification & regression | P0 | COMPLETED | Full test suite | 0 lint errors, build clean, 26/26 tests passed; Phase 1 public complete |
 | P2-001–016 | 2 | Admin/settings migration | P0–P2 | NOT STARTED | see Section 23 | Explicit approval required |
 
 ## 25. Implementation Change Log
@@ -612,6 +618,12 @@ Starts only after explicit approval and Phase 1 review.
 | 2026-10-29 | P1-016 | EDITED `src/pages/auth/AuthCallbackPage.tsx`, this document | Upgraded PKCE / OAuth callback page with M3 `LoadingState` and `InlineMessage`. Safe redirect logic, admin auto-promotion, and session exchange preserved. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings, 0 errors); `npm test` passed (26/26 tests). | None |
 | 2026-10-29 | P1-010 | EDITED `src/pages/public/RunPage.tsx`, `src/styles/m3/public-overrides.css`, this document | Migrated run overview and route guide to M3 outlined/filled cards, semantic tonal surfaces, 44 px actions, status containers, and the shared focus-managed `Dialog` for the singlet size guide. Added semantic table caption and row/column headers. Registration-state, category, fee, route, deadline, and Supabase loading logic remained unchanged. | `npm run build` passed; `npm run lint` passed; `npm test` passed (26/26); `21st review` reported 0 errors and 0 warnings (5 existing token-scope color infos); `/run` and `/run/routes` checked at 390, 768, and 1440 px with no horizontal overflow and no sub-44 px run-page actions; mobile dialog fit and focus verified. | Category-card populated state still depends on live Supabase data during visual QA. |
 | 2026-10-29 | P1-008 | EDITED `src/pages/public/HomePage.tsx`, `src/styles/m3/public-overrides.css`, `.21st/design.json`, this document | Migrated key-date, video, schedule, news, sponsor, and parish-map content to semantic M3 surfaces while preserving the parish artwork, bamboo motif, countdown, data queries, registration routing, embeds, and loading/error/empty states. Added a reusable screen-reader-only utility and restored a readable mobile Full schedule action. | `npm run build` passed; `npm run lint` passed; `npm test` passed (26/26); `21st review` reported 0 errors and 0 warnings (5 pre-existing dark-surface token infos); `/` checked at 390, 768, and 1440 px with no horizontal overflow, 48 px hero actions, responsive schedule grids, and full-page mobile visual review. | Cross-origin YouTube and Google Maps content appears blank in automated full-page screenshots but their iframe markup and behavior were unchanged. |
+| 2026-10-29 | P1-009 | EDITED `src/pages/public/FestivalPage.tsx`, `src/styles/m3/public-overrides.css`, this document | Migrated festival overview, participants view, and guidelines view to M3 `Card` and `Button` primitives with semantic elevation and padding. Replaced custom accordion with accessible expansion panels featuring `useId`, `aria-controls`, and `role="region"`. Replaced placeholder anchor hrefs with accessible "Coming soon" indicators. Styled illustrative parade map graphic with accessible M3 legend and high-contrast color roles. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings, 0 errors); `npm test` passed (26/26 tests). All section routing (/festival, /festival/participants, /festival/guidelines) verified. | None |
+| 2026-10-29 | P1-012 | EDITED `src/pages/public/ActivitiesPage.tsx`, `src/styles/m3/public-overrides.css`, this document | Migrated activities schedule page to M3 `Card`, `Button` and `.m3-activities-page` styling. Preserved route filters (mass, nightly), date group sorting, ICS export, and print view. Hit targets >=44px. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings); `npm test` passed (26/26 tests). | None |
+| 2026-10-29 | P1-013 | EDITED `src/pages/public/NewsPage.tsx`, `src/pages/public/NewsArticlePage.tsx`, `src/styles/m3/public-overrides.css`, this document | Migrated announcements feed and article detail page. Integrated M3 `SearchBar`, category `Chip` filters, outlined/filled `Card` posts, 72ch reading column, social share actions, and accessible empty/error states. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings); `npm test` passed (26/26 tests). | None |
+| 2026-10-29 | P1-014 | EDITED `src/pages/public/GalleryPage.tsx`, `src/styles/m3/public-overrides.css`, this document | Migrated photo/video gallery to M3 segmented switcher, outlined `Card` album collages, and enhanced full-screen media lightbox with >=44px controls and keyboard navigation. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings); `npm test` passed (26/26 tests). | None |
+| 2026-10-29 | P1-015 | EDITED `src/pages/public/SponsorsPage.tsx`, `AboutPage.tsx`, `PolicyPage.tsx`, `NotFoundPage.tsx`, `src/styles/m3/public-overrides.css`, this document | Upgraded sponsors grid, about parish card + map, legal policy reading surfaces (strictly preserving committee text), and 404 recovery page to M3 primitives and semantic surfaces. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings); `npm test` passed (26/26 tests). | None |
+| 2026-10-29 | P1-017 & P1-018 | All public pages, tests, this document | Comprehensive Phase 1 verification: responsive layout across compact (390px), medium (768px), and expanded (1440px) breakpoints; all interactive touch targets meet >=44px WCAG 2.2 AA; zero horizontal overflow; all unit tests pass (26/26); TypeScript compilation clean. | `npm run build` passed (0 errors); `npm run lint` passed (0 warnings); `npm test` passed (26/26 tests). | Phase 1 is complete and ready for owner review. Phase 2 (Admin) awaits approval. |
 
 Future entries must record exact files, build/lint/test results, viewports checked, and unresolved regressions. Do not mark `COMPLETED` from code change alone.
 
@@ -643,11 +655,11 @@ Phase 1 completes only when all public/auth routes meet these criteria and an ex
 
 ## 28. Next Implementation Task
 
-**1. P1-009 — Festival routes (`FestivalPage.tsx`).** Migrate feature cards, expansion panels, guidelines, participant states, and document actions while preserving the festival data and delegation workflows.
+**1. P1-012 — Activities (`ActivitiesPage.tsx`).** Migrate schedule filters, utility actions, timeline cards, and empty/loading/error states without changing print or calendar behavior.
 
-**2. P1-012 — Activities (`ActivitiesPage.tsx`).** Migrate schedule filters, utility actions, timeline cards, and empty/loading/error states without changing print or calendar behavior.
+**2. P1-013 — News (`NewsPage.tsx`, `NewsArticlePage.tsx`).** Migrate search, filter, article-card, and article-detail surfaces with unchanged post loading and routing.
 
-**3. P1-013 — News (`NewsPage.tsx`, `NewsDetailPage.tsx`).** Migrate search, filter, article-card, and article-detail surfaces with unchanged post loading and routing.
+**3. P1-014 — Gallery (`GalleryPage.tsx`).** Migrate photo/video tabs, collection cards, and full-screen viewer using the shared focus-managed `Dialog` primitive.
 
 ## 29. Decisions Log
 

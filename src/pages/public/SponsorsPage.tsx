@@ -3,6 +3,7 @@ import { Facebook, Globe, HeartHandshake, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { PageHero } from '../../components/PageHero';
+import { Card } from '../../components/m3/Card';
 import { toSafeHttpUrl } from '../../lib/safeUrl';
 import { EmptyState, LoadingState } from '../../features/ui/FeedbackStates';
 import {
@@ -43,7 +44,11 @@ function SponsorCard({ row, size }: { row: EditionSponsorRow; size: 'large' | 'm
   const key = tierKey(row.tier);
 
   return (
-    <article className={`sponsors-public__card sponsors-public__card--${size} sponsors-public__card--${key}`}>
+    <Card
+      as="article"
+      variant="outlined"
+      className={`sponsors-public__card sponsors-public__card--${size} sponsors-public__card--${key}`}
+    >
       <div className="sponsors-public__logo">
         {logo ? (
           <img src={logo} alt={`${row.sponsor.name} logo`} loading="lazy" />
@@ -80,7 +85,7 @@ function SponsorCard({ row, size }: { row: EditionSponsorRow; size: 'large' | 'm
           )}
         </div>
       )}
-    </article>
+    </Card>
   );
 }
 
@@ -120,7 +125,7 @@ export function SponsorsPage() {
   const groups = groupSponsorsByTier(rows);
 
   return (
-    <>
+    <main className="m3-sponsors-page">
       <PageHero
         eyebrow="With gratitude"
         title="Celebration sponsors"
@@ -134,11 +139,10 @@ export function SponsorsPage() {
           ) : error ? (
             <EmptyState title="Sponsors unavailable" message={error} />
           ) : groups.length === 0 ? (
-            <div className="empty-state">
-              <HeartHandshake />
-              <h3>Sponsor list coming soon</h3>
-              <p>Approved sponsor names, logos, and recognition tiers will appear here.</p>
-            </div>
+            <EmptyState
+              title="Sponsor list coming soon"
+              message="Approved sponsor names, logos, and recognition tiers will appear here."
+            />
           ) : (
             <div className="sponsors-public">
               {groups.map((group) => {
@@ -177,8 +181,8 @@ export function SponsorsPage() {
                 tiers are arranged through the Sinoog Committee.
               </p>
               <div className="sponsors-partner-cta__actions">
-                <Button to="/about" variant="secondary">
-                  <Mail size={16} aria-hidden /> Contact the committee
+                <Button to="/about" variant="outlined" leadingIcon={<Mail size={16} aria-hidden />}>
+                  Contact the committee
                 </Button>
                 <a
                   href="https://www.facebook.com/Sto.NinoParishGuinacot"
@@ -197,6 +201,6 @@ export function SponsorsPage() {
           </aside>
         </div>
       </section>
-    </>
+    </main>
   );
 }
