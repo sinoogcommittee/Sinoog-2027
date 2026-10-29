@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Download, MonitorDown, Share, Smartphone, X } from 'lucide-react';
+import { Button } from './Button';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -95,11 +96,18 @@ export function InstallAppPrompt() {
             )}
           </div>
         )}
-        <div className="install-app-prompt__actions">
-          <button type="button" className="button button--primary button--sm" onClick={() => showSteps && !installEvent ? dismiss() : void handleInstall()}>
-            <Download size={16} /> {installEvent ? 'Install app' : showSteps ? 'Got it' : 'How to install'}
-          </button>
-          <button type="button" className="button button--ghost button--sm" onClick={dismiss}>Not now</button>
+        <div className="install-app-prompt__actions" style={{ display: 'flex', gap: 'var(--md-space-2)', alignItems: 'center' }}>
+          <Button
+            variant="filled"
+            size="small"
+            leadingIcon={<Download size={16} />}
+            onClick={() => showSteps && !installEvent ? dismiss() : void handleInstall()}
+          >
+            {installEvent ? 'Install app' : showSteps ? 'Got it' : 'How to install'}
+          </Button>
+          <Button variant="text" size="small" onClick={dismiss}>
+            Not now
+          </Button>
         </div>
       </div>
     </aside>
