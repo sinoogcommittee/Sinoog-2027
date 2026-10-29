@@ -82,6 +82,7 @@ export function PublicLayout() {
           {/* Brand */}
           <Link className="pub-topbar__brand" to="/" aria-label="Sinoog 2027 — home">
             <LogoMark type="parish" />
+            <LogoMark type="committee" />
             <span className="pub-topbar__brand-text">
               <strong>Sinoog 2027</strong>
               <small>Sto. Niño Parish · Guinacot</small>

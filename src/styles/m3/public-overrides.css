@@ -964,10 +964,43 @@ a.m3-button:hover { text-decoration: none; }
 .pub-topbar__brand {
   display: flex;
   align-items: center;
-  gap: var(--md-space-3);
+  gap: clamp(8px, 1.2vw, 12px);
   flex-shrink: 0;
   text-decoration: none;
   color: var(--md-sys-color-on-surface);
+}
+
+.pub-topbar .logo-mark--parish,
+.pub-topbar .logo-mark--committee {
+  height: 44px !important;
+  max-height: 44px !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+.pub-topbar .logo-mark--parish {
+  width: 44px !important;
+  border-radius: 50% !important;
+}
+
+.pub-topbar .logo-mark--committee {
+  width: auto !important;
+}
+
+@media (max-width: 640px) {
+  .pub-topbar .logo-mark--parish,
+  .pub-topbar .logo-mark--committee {
+    height: 38px !important;
+    max-height: 38px !important;
+  }
+
+  .pub-topbar .logo-mark--parish {
+    width: 38px !important;
+  }
+
+  .pub-topbar .logo-mark--committee {
+    width: auto !important;
+  }
 }
 .pub-topbar__brand-text {
   display: flex;
@@ -3219,6 +3252,7 @@ a.m3-button:hover { text-decoration: none; }
     justify-content: center !important;
     width: 100% !important;
     text-align: center !important;
+    margin-top: clamp(12px, 4.5vh, 28px) !important;
   }
 
   /* Floating animation applied directly to hero-artwork so image and light circle animate together */
@@ -3293,7 +3327,7 @@ a.m3-button:hover { text-decoration: none; }
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    margin-top: clamp(58px, 8.5vh, 70px) !important;
+    margin-top: clamp(58px, 9.5vh, 70px) !important;
   }
 
   /* Sto. Niño Parish: SMALLER */
