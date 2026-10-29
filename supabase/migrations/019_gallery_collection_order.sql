@@ -1,6 +1,6 @@
 -- 019: gallery collections are shown in an order chosen by the committee (1 = first).
--- Photo collections and video collections are numbered separately. The celebration year
--- column is kept in the table but the website no longer uses it. Safe to run again.
+-- Photo collections and video collections are numbered separately.
+-- The display sequence is determined purely by sort_order. Safe to run again.
 begin;
 
 alter table public.albums add column if not exists sort_order integer;
@@ -9,7 +9,7 @@ alter table public.albums add column if not exists sort_order integer;
 update public.albums a
 set sort_order = r.pos
 from (
-  select id, row_number() over (partition by media_type order by year desc, created_at desc, id) as pos
+  select id, row_number() over (partition by media_type order by created_at desc, id) as pos
   from public.albums
 ) r
 where r.id = a.id and a.sort_order is null;

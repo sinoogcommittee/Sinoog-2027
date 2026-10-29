@@ -331,7 +331,7 @@ export interface Database {
           title: string;
           slug: string;
           description: string | null;
-          year: number;
+          year?: number | null;
           sort_order: number;
           media_type: 'photo' | 'video';
           status: ContentStatus;
@@ -345,7 +345,7 @@ export interface Database {
           title: string;
           slug: string;
           description?: string | null;
-          year?: number;
+          year?: number | null;
           sort_order?: number;
           media_type?: 'photo' | 'video';
           status?: ContentStatus;
@@ -359,7 +359,7 @@ export interface Database {
           title?: string;
           slug?: string;
           description?: string | null;
-          year?: number;
+          year?: number | null;
           sort_order?: number;
           media_type?: 'photo' | 'video';
           status?: ContentStatus;

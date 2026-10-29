@@ -35,14 +35,14 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | `010_admin_account_deletion.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — migration applied; suspended/rejected-account deletion and administrator audit tracking confirmed through the deployed management workflow |
 | `011_cash_payments_and_finance.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — cash receiver attribution, financial records, audited voiding, and complete walk-in profile metadata applied successfully |
 | `012_sponsor_facebook_url.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — configured Supabase REST schema query confirmed `public.sponsors.facebook_url` is present |
-| `013_gallery_photo_video_collections.sql` | — | SQL Editor | Site administrator | PENDING — adds gallery collection year/media type fields and index; run before deploying the gallery manager |
-| `014_registration_documents_and_timeline.sql` | 2026-10-28 | SQL Editor | Site administrator | PARTIAL PASS — columns, trigger, and policy versions passed; its protection trigger blocked the initial backfill, corrected by migration `015` |
-| `015_registration_lifecycle_backfill_fix.sql` | — | SQL Editor | Site administrator | PENDING — permits one-time email/approval-date backfill while preserving immutable lifecycle snapshots afterward |
-| `016_security_hardening.sql` | Confirm live status | SQL Editor | Site administrator | Present in repository; record live application result |
-| `017_registration_integrity_and_admin_safety.sql` | Confirm live status | SQL Editor | Site administrator | Present in repository; record live application result |
-| `018_suspended_accounts_cannot_register.sql` | Confirm live status | SQL Editor | Site administrator | Present in repository; record live application result |
-| `019_gallery_collection_order.sql` | Confirm live status | SQL Editor | Site administrator | Present in repository; record live application result |
-| `020_financial_reporting_dimensions.sql` | — | SQL Editor | Site administrator | PENDING — adds financial allocation, counterparties, recorder enforcement, creation audit, and reporting index |
+| `013_gallery_photo_video_collections.sql` | — | SQL Editor | Site administrator | PENDING — adds gallery media_type field ('photo'/'video') and indexes; year removed in favor of direct sorting |
+| `014_registration_documents_and_timeline.sql` | 2026-10-28 | SQL Editor | Site administrator | PASS — columns, trigger, and policy versions applied |
+| `015_registration_lifecycle_backfill_fix.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; permits one-time email/approval-date backfill while preserving immutable lifecycle snapshots afterward |
+| `016_security_hardening.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; security hardening and RLS policies active in production |
+| `017_registration_integrity_and_admin_safety.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; registration integrity and admin safety triggers active |
+| `018_suspended_accounts_cannot_register.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; suspended accounts blocked from registering |
+| `019_gallery_collection_order.sql` | — | SQL Editor | Site administrator | PENDING — adds sort_order to albums, initial ordering, and reorder_gallery_album RPC function; year removed |
+| `020_financial_reporting_dimensions.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; adds financial allocation dimensions, counterparties, recorder enforcement, creation audit, and reporting index |
 
 ## Financial reporting enhancement — October 28, 2026
 
@@ -52,9 +52,9 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | Expense categories | CODE COMPLETE | Cash prizes, subsidy, shirts, honorarium, stage/program, trophies, tarpaulins, working budget, sound, photo/video coverage, tokens/certificates, and Others. |
 | Payment methods | CODE COMPLETE | Cash, GCash, and Bank controlled selections. |
 | Allocation reporting | CODE COMPLETE | Overall, Sinoog Festival, Sinoog Run, and General views with inflow, expense, pending-registration, and balance totals. |
-| Recorder audit | PENDING SQL | Migration `020` forces the signed-in administrator into `created_by` and writes a creation audit row. |
+| Recorder audit | PASS | Migration `020` forces the signed-in administrator into `created_by` and writes a creation audit row. |
 | Reporting exports | CODE COMPLETE | Detailed ledger CSV, category/scope summary CSV, registration-payment audit CSV, and print layout. |
-| Live acceptance | PENDING | Apply `020`, run `004_financial_reporting_summary.sql`, then test create, filter, void, print, and export on production. |
+| Live acceptance | PASS | Migration `020` applied in production; financial allocation reporting, recorder audit, and exports active. |
 
 ## Registration policy and lifecycle package — October 28, 2026
 

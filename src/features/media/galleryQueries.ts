@@ -179,6 +179,45 @@ export async function reorderGalleryAlbum(albumId: string, position: number): Pr
   if (error) throw new Error(error.message);
 }
 
+export async function reorderGalleryItem(
+  albumId: string,
+  mediaId: string,
+  newPosition: number,
+): Promise<void> {
+  if (!supabase) throw new Error('Supabase is not connected.');
+  const { data, error } = await supabase
+    .from('album_items')
+    .select('media_id, sort_order')
+    .eq('album_id', albumId)
+    .order('sort_order', { ascending: true });
+  if (error) throw new Error(error.message);
+  if (!data || data.length <= 1) return;
+
+  const currentIdx = data.findIndex((item) => item.media_id === mediaId);
+  if (currentIdx === -1) return;
+
+  const targetIdx = Math.max(0, Math.min(data.length - 1, newPosition - 1));
+  if (currentIdx === targetIdx) return;
+
+  const reordered = [...data];
+  const [moved] = reordered.splice(currentIdx, 1);
+  reordered.splice(targetIdx, 0, moved);
+
+  const updates = reordered.map((item, index) =>
+    supabase!
+      .from('album_items')
+      .update({ sort_order: index + 1 })
+      .eq('album_id', albumId)
+      .eq('media_id', item.media_id)
+  );
+  await Promise.all(updates);
+
+  const firstMediaId = reordered[0]?.media_id;
+  if (firstMediaId) {
+    await supabase.from('albums').update({ cover_media_id: firstMediaId }).eq('id', albumId);
+  }
+}
+
 async function syncAlbumAssetVisibility(albumId: string, isPublic: boolean): Promise<void> {
   if (!supabase) return;
   const { data, error } = await supabase.from('album_items').select('media_id').eq('album_id', albumId);

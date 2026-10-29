@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { Eye, Images, Pencil, Play, Plus, Trash2, Upload, Video } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, Images, Pencil, Play, Plus, Trash2, Upload, Video } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { StatusBadge } from '../../components/StatusBadge';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
@@ -11,6 +11,7 @@ import {
   getGalleryAlbumsForAdmin,
   getYouTubeThumbnail,
   reorderGalleryAlbum,
+  reorderGalleryItem,
   updateGalleryAlbum,
   uploadGalleryPhotos,
   type GalleryAlbum,
@@ -180,6 +181,19 @@ export function GalleryManagerPage() {
     } catch (err: unknown) {
       clearDraft();
       toast(err instanceof Error ? err.message : 'Unable to change the order.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleMoveItem = async (mediaId: string, newPosition: number) => {
+    if (!managedAlbum || saving) return;
+    setSaving(true);
+    try {
+      await reorderGalleryItem(managedAlbum.id, mediaId, newPosition);
+      await load();
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : 'Unable to reorder gallery item.', 'error');
     } finally {
       setSaving(false);
     }
@@ -533,16 +547,75 @@ export function GalleryManagerPage() {
                           {source ? <img src={source} alt={asset.alt_text || ''} loading="lazy" /> : <Images />}
                           {asset.kind === 'video' && <Play size={18} fill="currentColor" />}
                         </div>
-                        <span>{index + 1}. {asset.title || (asset.kind === 'image' ? 'Photo' : 'Video')}</span>
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget({ type: 'item', albumId: managedAlbum.id, asset })}
-                          aria-label={`Delete ${asset.title || 'gallery item'}`}
-                          title="Delete item"
-                          style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                        >
-                          <Trash2 size={15} />
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px', gap: '4px' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={asset.title || ''}>
+                            #{index + 1}
+                          </span>
+                          <div style={{ display: 'inline-flex', gap: '3px', alignItems: 'center' }}>
+                            <button
+                              type="button"
+                              disabled={saving || index === 0}
+                              onClick={() => void handleMoveItem(asset.id, index)}
+                              title="Move earlier"
+                              aria-label={`Move ${asset.title || 'item'} earlier`}
+                              style={{
+                                width: '28px',
+                                height: '28px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                border: '1px solid var(--md-sys-color-outline-variant, #e0d0b8)',
+                                borderRadius: '4px',
+                                background: 'transparent',
+                                cursor: index === 0 || saving ? 'not-allowed' : 'pointer',
+                                opacity: index === 0 ? 0.35 : 1,
+                              }}
+                            >
+                              <ChevronLeft size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={saving || index === managedAlbum.items.length - 1}
+                              onClick={() => void handleMoveItem(asset.id, index + 2)}
+                              title="Move later"
+                              aria-label={`Move ${asset.title || 'item'} later`}
+                              style={{
+                                width: '28px',
+                                height: '28px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                border: '1px solid var(--md-sys-color-outline-variant, #e0d0b8)',
+                                borderRadius: '4px',
+                                background: 'transparent',
+                                cursor: index === managedAlbum.items.length - 1 || saving ? 'not-allowed' : 'pointer',
+                                opacity: index === managedAlbum.items.length - 1 ? 0.35 : 1,
+                              }}
+                            >
+                              <ChevronRight size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDeleteTarget({ type: 'item', albumId: managedAlbum.id, asset })}
+                              aria-label={`Delete ${asset.title || 'gallery item'}`}
+                              title="Delete item"
+                              style={{
+                                width: '28px',
+                                height: '28px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                border: '0',
+                                borderRadius: '4px',
+                                background: '#fff1f0',
+                                color: '#b42318',
+                                cursor: saving ? 'not-allowed' : 'pointer',
+                              }}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
                       </article>
                     );
                   })}
