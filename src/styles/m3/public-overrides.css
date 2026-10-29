@@ -3732,6 +3732,32 @@ a.m3-button:hover { text-decoration: none; }
   transform: translateY(-4px) !important;
 }
 
+.m3-sponsors-page .sponsors-public__card--presenter {
+  box-shadow: var(--sinoog-shadow-card-raised) !important;
+  border: 1.5px solid color-mix(in srgb, #a8202d 40%, #c9aa52 60%) !important;
+}
+
+.m3-sponsors-page .sponsors-public__card--presenter:hover {
+  box-shadow:
+    0 2px 4px rgba(76, 18, 27, 0.14),
+    0 20px 44px -8px rgba(123, 41, 54, 0.4),
+    0 36px 68px -24px rgba(115, 91, 36, 0.55),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95) !important;
+}
+
+.m3-sponsors-page .sponsors-public__card--co-presenter {
+  box-shadow: var(--sinoog-shadow-card-raised) !important;
+  border: 1px solid color-mix(in srgb, #a8202d 30%, #c9aa52 40%) !important;
+}
+
+.m3-sponsors-page .sponsors-public__card--co-presenter:hover {
+  box-shadow:
+    0 2px 4px rgba(76, 18, 27, 0.12),
+    0 16px 36px -8px rgba(123, 41, 54, 0.32),
+    0 30px 56px -20px rgba(115, 91, 36, 0.45),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95) !important;
+}
+
 .m3-sponsors-page .sponsors-public__card--diamond {
   box-shadow: var(--sinoog-shadow-card-raised) !important;
   border: 1px solid color-mix(in srgb, #c9aa52 45%, #e8d5d8) !important;
@@ -3743,6 +3769,14 @@ a.m3-button:hover { text-decoration: none; }
     0 18px 40px -8px rgba(123, 41, 54, 0.36),
     0 34px 64px -24px rgba(115, 91, 36, 0.52),
     inset 0 1.5px 0 rgba(255, 255, 255, 0.95) !important;
+}
+
+.m3-sponsors-page .sponsors-public__card--media-partner {
+  border: 1px solid color-mix(in srgb, #20587d 35%, #e8d5d8) !important;
+}
+
+.m3-sponsors-page .sponsors-public__card--media-partner:hover {
+  border: 1px solid #20587d !important;
 }
 
 /* Become a Partner CTA card */

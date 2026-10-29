@@ -27,7 +27,7 @@ const emptyForm = {
   website_url: '',
   facebook_url: '',
   logo_path: '',
-  tier: 'Bronze Sponsor',
+  tier: SPONSOR_TIERS[0] as string,
   sort_order: 0,
   published: false,
 };

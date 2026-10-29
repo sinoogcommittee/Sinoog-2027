@@ -5,10 +5,13 @@ import { getPublicMediaUrl, uploadPublicImage } from '../media/mediaQueries';
 import type { DbSponsor } from '../../types';
 
 export const SPONSOR_TIERS = [
+  'Presenter',
+  'Co-presenter',
   'Diamond Sponsor',
   'Gold Sponsor',
   'Silver Sponsor',
   'Bronze Sponsor',
+  'Media Partner',
 ] as const;
 
 export type SponsorTier = (typeof SPONSOR_TIERS)[number] | string;
@@ -256,6 +259,10 @@ export function groupSponsorsByTier(rows: EditionSponsorRow[]): { tier: string; 
     // allow short labels like "Gold" to sort with "Gold Sponsor"
     const short = t.replace(/\s+sponsor$/i, '').toLowerCase();
     orderHint.set(short, i);
+    const dehyphenated = t.toLowerCase().replace(/-/g, ' ');
+    orderHint.set(dehyphenated, i);
+    const hyphenated = t.toLowerCase().replace(/\s+/g, '-');
+    orderHint.set(hyphenated, i);
   });
   const groups = new Map<string, EditionSponsorRow[]>();
 
@@ -266,10 +273,21 @@ export function groupSponsorsByTier(rows: EditionSponsorRow[]): { tier: string; 
     groups.set(tier, list);
   }
 
+  const getRank = (tierName: string): number => {
+    const lower = tierName.toLowerCase();
+    return (
+      orderHint.get(lower) ??
+      orderHint.get(lower.replace(/-/g, ' ')) ??
+      orderHint.get(lower.replace(/\s+/g, '-')) ??
+      orderHint.get(lower.replace(/\s+sponsor$/i, '')) ??
+      100
+    );
+  };
+
   return [...groups.entries()]
     .sort((a, b) => {
-      const ai = orderHint.get(a[0].toLowerCase()) ?? orderHint.get(a[0].replace(/\s+sponsor$/i, '').toLowerCase()) ?? 100;
-      const bi = orderHint.get(b[0].toLowerCase()) ?? orderHint.get(b[0].replace(/\s+sponsor$/i, '').toLowerCase()) ?? 100;
+      const ai = getRank(a[0]);
+      const bi = getRank(b[0]);
       if (ai !== bi) return ai - bi;
       return a[0].localeCompare(b[0]);
     })

@@ -13,8 +13,13 @@ import {
   type EditionSponsorRow,
 } from '../../features/sponsors/sponsorQueries';
 
-function tierKey(tier: string): 'diamond' | 'gold' | 'silver' | 'bronze' | 'other' {
+function tierKey(
+  tier: string
+): 'presenter' | 'co-presenter' | 'diamond' | 'gold' | 'silver' | 'bronze' | 'media-partner' | 'other' {
   const t = tier.toLowerCase();
+  if (t.includes('co-presenter') || t.includes('co presenter')) return 'co-presenter';
+  if (t.includes('presenter')) return 'presenter';
+  if (t.includes('media')) return 'media-partner';
   if (t.includes('diamond')) return 'diamond';
   if (t.includes('gold')) return 'gold';
   if (t.includes('silver')) return 'silver';
@@ -24,6 +29,10 @@ function tierKey(tier: string): 'diamond' | 'gold' | 'silver' | 'bronze' | 'othe
 
 function tierBadge(tier: string): string {
   switch (tierKey(tier)) {
+    case 'presenter':
+      return '👑';
+    case 'co-presenter':
+      return '⭐';
     case 'diamond':
       return '💎';
     case 'gold':
@@ -32,6 +41,8 @@ function tierBadge(tier: string): string {
       return '🥈';
     case 'bronze':
       return '🥉';
+    case 'media-partner':
+      return '🎙️';
     default:
       return '🤝';
   }
@@ -91,8 +102,8 @@ function SponsorCard({ row, size }: { row: EditionSponsorRow; size: 'large' | 'm
 
 function cardSizeForTier(tier: string): 'large' | 'medium' | 'compact' {
   const key = tierKey(tier);
-  if (key === 'diamond') return 'large';
-  if (key === 'gold' || key === 'silver') return 'medium';
+  if (key === 'presenter' || key === 'diamond') return 'large';
+  if (key === 'co-presenter' || key === 'gold' || key === 'silver') return 'medium';
   return 'compact';
 }
 

@@ -7938,6 +7938,16 @@ button:focus-visible {
   font-size: 0.9rem;
 }
 
+.sponsors-public__card--presenter {
+  border-color: rgba(168, 32, 45, 0.55);
+  background: linear-gradient(180deg, #fff9f5 0%, #ffffff 60%);
+  box-shadow: 0 14px 36px rgba(100, 20, 28, 0.12);
+}
+.sponsors-public__card--co-presenter {
+  border-color: rgba(180, 40, 50, 0.38);
+  background: linear-gradient(180deg, #fffaf6 0%, #ffffff 60%);
+  box-shadow: 0 8px 24px rgba(100, 20, 28, 0.07);
+}
 .sponsors-public__card--diamond {
   border-color: rgba(185, 242, 255, 0.9);
   background: linear-gradient(180deg, #f7fcff 0%, #fff 55%);
@@ -7953,6 +7963,10 @@ button:focus-visible {
 }
 .sponsors-public__card--bronze {
   border-color: rgba(180, 130, 70, 0.35);
+}
+.sponsors-public__card--media-partner {
+  border-color: rgba(30, 90, 140, 0.3);
+  background: linear-gradient(180deg, #f4f8fb 0%, #ffffff 60%);
 }
 
 .sponsors-public__links {
