@@ -2931,6 +2931,7 @@ a.m3-button:hover { text-decoration: none; }
 
 :root {
   --site-header-height: 64px;
+  --mobile-bottom-nav-height: calc(4.6rem + env(safe-area-inset-bottom, 0px));
 }
 @media (min-width: 840px) and (max-width: 1024px) {
   :root {
@@ -3166,9 +3167,9 @@ a.m3-button:hover { text-decoration: none; }
     flex-direction: column !important;
     justify-content: space-between !important;
     align-items: center !important;
-    height: calc(100dvh - var(--site-header-height, 64px)) !important;
-    min-height: calc(100dvh - var(--site-header-height, 64px)) !important;
-    max-height: calc(100dvh - var(--site-header-height, 64px)) !important;
+    height: calc(100dvh - var(--site-header-height, 64px) - var(--mobile-bottom-nav-height)) !important;
+    min-height: calc(100dvh - var(--site-header-height, 64px) - var(--mobile-bottom-nav-height)) !important;
+    max-height: calc(100dvh - var(--site-header-height, 64px) - var(--mobile-bottom-nav-height)) !important;
     background: var(--wine-dark, #4c121b) !important;
     color: #fff !important;
     overflow: hidden !important;
@@ -3292,8 +3293,7 @@ a.m3-button:hover { text-decoration: none; }
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    margin-top: clamp(42px, 5.8vh, 52px) !important;
-    transform: translateY(clamp(12px, 2vh, 18px)) !important;
+    margin-top: clamp(32px, 4.5vh, 44px) !important;
   }
 
   /* Sto. Niño Parish: SMALLER */
@@ -3347,7 +3347,7 @@ a.m3-button:hover { text-decoration: none; }
     display: block !important;
     position: absolute !important;
     right: -15px !important;
-    bottom: calc(4.6rem + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: 0 !important;
     width: 90px !important;
     height: 280px !important;
     opacity: 0.20 !important;
@@ -3361,7 +3361,7 @@ a.m3-button:hover { text-decoration: none; }
     display: block !important;
     position: absolute !important;
     left: -15px !important;
-    bottom: calc(4.6rem + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: 0 !important;
     width: 90px !important;
     height: 280px !important;
     opacity: 0.20 !important;
@@ -3383,13 +3383,14 @@ a.m3-button:hover { text-decoration: none; }
     pointer-events: none !important;
   }
 
-  /* Timer at bottom of Mobile View 1 with padding clearance for the floating nav bar */
+  /* Timer at bottom of Mobile View 1 cleanly resting directly above the floating nav bar */
   .home-hero-mobile-view__timer {
     width: 100% !important;
     flex-shrink: 0 !important;
     position: relative !important;
     z-index: 2 !important;
-    padding-bottom: calc(4.6rem + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
   }
 
   .home-hero-mobile-view__timer .countdown-bar {
