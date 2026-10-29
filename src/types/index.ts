@@ -14,6 +14,7 @@ import type {
   DbSponsor,
   DbDelegation,
   DbRunRegistration,
+  DbKitClaim,
 } from './database';
 
 export type {
@@ -32,6 +33,7 @@ export type {
   DbSponsor,
   DbDelegation,
   DbRunRegistration,
+  DbKitClaim,
 };
 
 export type Role = AppRole;

@@ -9,6 +9,7 @@ import {
   ExternalLink,
   CreditCard,
   UserPlus,
+  PackageCheck,
   Copy,
   Trash2,
 } from "lucide-react";
@@ -369,6 +370,13 @@ export function RegistrationsManagerPage() {
           </p>
         </div>
         <div className="registration-heading-actions">
+          <Button
+            to="/admin/kit-claims"
+            variant="tonal"
+            leadingIcon={<PackageCheck size={16} aria-hidden />}
+          >
+            Race kit claiming
+          </Button>
           <Button
             type="button"
             variant="filled"

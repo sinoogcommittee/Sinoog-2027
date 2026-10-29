@@ -156,7 +156,16 @@ export function AccountPage() {
                   <h2 id="runner-registration-details">My registration details</h2>
                   <p>{registration.reference}</p>
                 </div>
-                <StatusBadge tone={registration.status === 'approved' ? 'success' : registration.status === 'rejected' ? 'danger' : 'warning'}>{registration.status}</StatusBadge>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <StatusBadge tone={registration.status === 'approved' ? 'success' : registration.status === 'rejected' ? 'danger' : 'warning'}>
+                    Entry: {registration.status}
+                  </StatusBadge>
+                  {registration.status === 'approved' && (
+                    <StatusBadge tone={registrationState.kitClaim ? 'success' : 'warning'}>
+                      Kit: {registrationState.kitClaim ? 'Claimed' : 'Ready for pick-up'}
+                    </StatusBadge>
+                  )}
+                </div>
               </div>
 
               <dl className="runner-account-details">
@@ -175,6 +184,20 @@ export function AccountPage() {
                 <div><dt>Emergency mobile</dt><dd>{registration.emergency_mobile}</dd></div>
                 <div className="runner-account-details__wide"><dt>Medical / assistance notes</dt><dd>{registration.accessibility_notes || 'None'}</dd></div>
                 <div><dt>Bib number</dt><dd>{registration.bib_number ? `#${registration.bib_number}` : 'Assigned after approval'}</dd></div>
+                <div>
+                  <dt>Race kit</dt>
+                  <dd>
+                    {registrationState.kitClaim ? (
+                      <span style={{ color: '#099268', fontWeight: 600 }}>
+                        Claimed · {new Date(registrationState.kitClaim.claimed_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    ) : registration.approved_at ? (
+                      'Ready for pick-up — present your QR code at the kit claiming desk'
+                    ) : (
+                      'Issued after registration approval'
+                    )}
+                  </dd>
+                </div>
                 <div><dt>Registration submitted</dt><dd>{registration.submitted_at ? new Date(registration.submitted_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : 'Not submitted'}</dd></div>
                 <div><dt>Registration approved</dt><dd>{registration.approved_at ? new Date(registration.approved_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : 'Pending approval'}</dd></div>
                 <div><dt>Payment</dt><dd>{registrationState.payment ? `${registrationState.payment.method} · ${registrationState.payment.status}` : 'No payment record'}</dd></div>

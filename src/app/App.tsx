@@ -38,6 +38,7 @@ import { RequireRole } from '../features/auth/RequireRole';
 import { useAuth } from '../features/auth/useAuth';
 
 const RunTimingPage = lazy(() => import('../pages/admin/RunTimingPage').then((module) => ({ default: module.RunTimingPage })));
+const KitClaimsManagerPage = lazy(() => import('../pages/admin/KitClaimsManagerPage').then((module) => ({ default: module.KitClaimsManagerPage })));
 
 function CommitteeWorkspaceIndex() {
   const { isAdmin, isNewsInCharge, isDelegationHead } = useAuth();
@@ -97,6 +98,7 @@ export default function App() {
             <Route path="activities" element={<ActivitiesManagerPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="registrations" element={<RegistrationsManagerPage />} />
+            <Route path="kit-claims" element={<Suspense fallback={<div className="admin-page">Loading kit claims…</div>}><KitClaimsManagerPage /></Suspense>} />
             <Route path="run-timing" element={<Suspense fallback={<div className="admin-page">Loading race timing…</div>}><RunTimingPage /></Suspense>} />
             <Route path="users" element={<UsersManagerPage />} />
             <Route path="finance" element={<FinancePage />} />

@@ -455,7 +455,7 @@ export function RunRegistrationPage() {
                     </button>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                   <StatusBadge
                     tone={
                       reg.status === 'approved'
@@ -478,6 +478,13 @@ export function RunRegistrationPage() {
                       }
                     >
                       Payment: {userState.payment.status}
+                    </StatusBadge>
+                  )}
+                  {reg.status === 'approved' && (
+                    <StatusBadge
+                      tone={userState.kitClaim ? 'success' : 'warning'}
+                    >
+                      Kit: {userState.kitClaim ? 'Claimed' : 'Ready for pick-up'}
                     </StatusBadge>
                   )}
                 </div>
@@ -536,6 +543,41 @@ export function RunRegistrationPage() {
                       Present this runner number and QR code during race-kit claiming and event
                       recording.
                     </p>
+                    {userState.kitClaim ? (
+                      <div
+                        style={{
+                          marginTop: '0.75rem',
+                          padding: '0.5rem 0.75rem',
+                          background: '#e6fcf5',
+                          border: '1px solid #96f2d7',
+                          borderRadius: '6px',
+                          color: '#087f5b',
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                        }}
+                      >
+                        ✓ Race kit claimed on{' '}
+                        {new Date(userState.kitClaim.claimed_at).toLocaleDateString('en-PH', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          marginTop: '0.75rem',
+                          padding: '0.5rem 0.75rem',
+                          background: '#fff9db',
+                          border: '1px solid #ffe066',
+                          borderRadius: '6px',
+                          color: '#8f5b00',
+                          fontSize: '0.85rem',
+                        }}
+                      >
+                        📦 <strong>Race kit ready for pick-up:</strong> Show this QR code at the kit claiming desk to receive your singlet and bib.
+                      </div>
+                    )}
                   </div>
                   {qrValue ? (
                     <div

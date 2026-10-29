@@ -54,10 +54,10 @@ Audit basis: source tree, routes, feature modules, admin screens, and GitHub `ma
 - [x] **Auth separation:** staff sign-in only in main nav (`/login`); runner sign-in/sign-up on the Sinoog Run page (`/signin` tabs); Google OAuth for runners; forgot/reset/callback routes.
 - [x] **Sinoog Run end-to-end:** online registration, GCash or cash proof, walk-in cash, admin review, unique bib/QR, race timing, CSV/print; **live rehearsal completed** (sign-up → submit → payment → approve → bib/QR).
 - [x] **Runner edit-before-approve:** runners may change registration details only while status is not approved.
-- [~] Administrator financial workspace now tracks cash inflows and expenses by Overall/Festival/Run/General allocation, controlled categories and payment modes, counterparties, purpose, responsible recorder, void history, registration collections, printable reports, and detailed/summary/payment CSV exports. Apply and verify migration `020`.
-- [x] Sponsor administration creates and edits partners, uploads logos, assigns Diamond/Gold/Silver/Bronze tiers, controls ordering/publication, and supports website/Facebook links. Published sponsors appear on `/sponsors` and the home page; migration `012` is applied.
+- [x] Administrator financial workspace tracks cash inflows and expenses by Overall/Festival/Run/General allocation, controlled categories and payment modes, counterparties, purpose, responsible recorder, void history, registration collections, printable reports, and detailed/summary/payment CSV exports. Migration `020` applied in production.
+- [x] Sponsor administration creates and edits partners, uploads logos, assigns Presenter/Co-presenter/Diamond/Gold/Silver/Bronze/Media Partner tiers, controls ordering/publication, and supports website/Facebook links. Published sponsors appear on `/sponsors` and the home page; migration `012` is applied.
 - [x] Administrator user management: profiles, staff roles, suspension/reactivation, last-admin checks, create staff; edge functions `admin-create-runner` and `admin-manage-user`.
-- [~] Migrations through **`013_gallery_photo_video_collections.sql`** exist in repo; production includes `011` and `012`, while `013` awaits manual SQL Editor application.
+- [x] Migrations `001` through `020` are applied in production Supabase, including lifecycle backfill (`015`), security hardening (`016`), registration integrity (`017`), suspension checks (`018`), gallery sorting (`013` & `019`), and financial reporting dimensions (`020`).
 - [x] GitHub `main` at `2f24eab` (*footer mobile view in two columns, activities auto day*).
 - [x] Committee-approved GCash text, privacy notice, terms/waiver content, and Mass schedule content on the live site.
 - [x] Responsive audit for public, auth, and admin routes; mobile registrations search toolbar; portal topbar matched to sidebar color.
@@ -67,16 +67,16 @@ Audit basis: source tree, routes, feature modules, admin screens, and GitHub `ma
 - [~] Activities, News, Settings, Registrations, Users, and Finance CRUD exist; continue periodic RLS and multi-role smoke tests after deploys.
 - [~] Payment verification vs registration approval can be refined further (workflow is operational).
 - [~] Public feature switches and announcement banner are editable; not every switch is fully consumed on every public surface.
-- [~] Gallery photo/video management and public viewing are implemented locally and await migration `013` plus deployment. Festival participants/guidelines and **delegations** remain placeholder or shell screens.
+- [x] Gallery photo/video management and public viewing are active; migrations `013` and `019` applied in production with sorting sequence. Festival participants/guidelines and **delegations** remain placeholder or shell screens.
 - [~] Google consent screen may still show `….supabase.co` (accepted without paid custom domain; optional brand verification only).
 - [~] Email confirmation enforcement before final registration and production redirect allowlist should be re-checked after each environment change.
 
 ### Not yet implemented (deferred or later)
 
 - [ ] Full payment-refund automation and complete payment audit trail productization beyond current finance records.
-- [ ] Authenticated kit lookup and kit claiming beyond bib/QR display.
+- [x] Authenticated kit lookup and kit claiming beyond bib/QR display (`/admin/kit-claims` with camera QR scanner, roster search, single-claim enforcement, staff attribution, paper print roster, and CSV export).
 - [ ] **Delegation-head workspace** (assignment, roster, private music, revisions, approval) — **deferred until Run ops remain stable**.
-- [~] **Gallery administration** is connected to the existing album/media foundation in code; run migration `013`, deploy, and complete live CRUD/upload smoke tests. Sponsor administration is complete.
+- [x] **Gallery administration** is active; migrations `013` and `019` applied in production with sorting sequence. Sponsor administration is complete.
 - [ ] Transactional email provider and retryable notifications.
 - [ ] Application-wide audit-event creation for every sensitive action.
 - [ ] Full automated integration/e2e/RLS test suite (unit/build/lint exist; deeper suite open).
@@ -439,11 +439,11 @@ Priority: **P1**
 - [~] Results filter by category, Male/Female division, and age group; runner accounts show official time and division/category/overall placement.
 - [~] Administrators can register walk-in runners paid by cash, create a confirmed email/password account, issue the bib/QR immediately, and record the responsible administrator. Apply migration `007`, deploy `admin-create-runner`, and permission-test with separate staff accounts.
 - [~] Walk-in credentials are displayed once for handoff; define and document the runner's first-login password-change process before production use.
-- [ ] Build authenticated QR lookup and kit-claim screens.
-- [ ] Enforce one successful kit claim per registration.
-- [ ] Record the staff account and time of claim.
-- [ ] Create an approved offline event-day export if venue connectivity is unreliable.
-- [ ] Document how offline claims are reconciled back into the database.
+- [x] Build authenticated QR lookup and kit-claim screens (`/admin/kit-claims`).
+- [x] Enforce one successful kit claim per registration (`public.kit_claims` primary key constraint & client-side duplicate protection).
+- [x] Record the staff account and time of claim (`claimed_by`, `claimed_at`, staff name, optional handover notes).
+- [x] Create an approved offline event-day export if venue connectivity is unreliable (Printable A4 roster with checkboxes and offline CSV export).
+- [x] Document how offline claims are reconciled back into the database.
 
 Kit state:
 

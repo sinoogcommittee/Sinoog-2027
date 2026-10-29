@@ -204,6 +204,13 @@ export interface UserRegistrationState {
     category_rank: number;
     overall_rank: number;
   } | null;
+  kitClaim?: {
+    registration_id: string;
+    bib_number: string | null;
+    claimed_at: string;
+    claimed_by: string | null;
+    notes: string | null;
+  } | null;
 }
 
 export async function getUserRegistration(
@@ -269,13 +276,20 @@ export async function getUserRegistration(
         })),
       };
     }
-    const [{ data: resultData }, { data: consentData, error: consentError }] = await Promise.all([
+    const [{ data: resultData }, { data: consentData, error: consentError }, { data: kitData }] = await Promise.all([
       supabase.rpc('get_my_run_result', { p_registration_id: registration.id }),
       supabase.from('registration_consents').select('id,consent_type,version,accepted,accepted_at')
         .eq('registration_id', registration.id).order('accepted_at', { ascending: true }),
+      supabase.from('kit_claims').select('*').eq('registration_id', registration.id).maybeSingle(),
     ]);
     if (consentError) throw new Error(consentError.message);
-    return { registration, payment: paymentObj, consents: consentData ?? [], result: resultData?.[0] ?? null };
+    return {
+      registration,
+      payment: paymentObj,
+      consents: consentData ?? [],
+      result: resultData?.[0] ?? null,
+      kitClaim: kitData ?? null,
+    };
   } catch (err) {
     console.warn('Error fetching user registration:', err);
     return { registration: null, payment: null, consents: [] };
@@ -598,5 +612,109 @@ export function formatElapsed(milliseconds: number): string {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   return [hours, minutes, seconds].map((part) => String(part).padStart(2, '0')).join(':');
+}
+
+export interface KitClaimRow extends DbRunRegistration {
+  category_name: string;
+  kit_claim: {
+    registration_id: string;
+    bib_number: string | null;
+    claimed_at: string;
+    claimed_by: string | null;
+    claimed_by_name: string | null;
+    notes: string | null;
+  } | null;
+}
+
+export async function getKitClaimsDashboard(runEventId: string): Promise<KitClaimRow[]> {
+  if (!supabase) return [];
+  const [
+    { data: registrations, error: regError },
+    { data: categories, error: catError },
+    { data: claims, error: claimError },
+    { data: profiles, error: profError },
+  ] = await Promise.all([
+    supabase
+      .from('run_registrations')
+      .select('*')
+      .eq('run_event_id', runEventId)
+      .eq('status', 'approved')
+      .order('bib_number', { ascending: true }),
+    supabase.from('run_categories').select('id, name').eq('run_event_id', runEventId),
+    supabase.from('kit_claims').select('*'),
+    supabase.from('profiles').select('id, full_name'),
+  ]);
+
+  if (regError) throw new Error(regError.message);
+  if (catError) throw new Error(catError.message);
+  if (claimError) throw new Error(claimError.message);
+  if (profError) throw new Error(profError.message);
+
+  const categoryMap = new Map((categories ?? []).map((c) => [c.id, c.name]));
+  const profileMap = new Map((profiles ?? []).map((p) => [p.id, p.full_name]));
+
+  const claimByRegistration = new Map(
+    (claims ?? []).map((claim) => [
+      claim.registration_id,
+      {
+        ...claim,
+        claimed_by_name: claim.claimed_by ? profileMap.get(claim.claimed_by) ?? 'Staff member' : 'Staff member',
+      },
+    ])
+  );
+
+  return ((registrations as DbRunRegistration[]) ?? []).map((reg) => ({
+    ...reg,
+    category_name: categoryMap.get(reg.category_id) ?? 'Run',
+    kit_claim: claimByRegistration.get(reg.id) ?? null,
+  }));
+}
+
+export async function claimRaceKit(input: {
+  registrationId: string;
+  bibNumber?: string | null;
+  notes?: string | null;
+}): Promise<void> {
+  if (!supabase) throw new Error('Supabase is not configured.');
+  const { data: authData } = await supabase.auth.getUser();
+  if (!authData?.user) throw new Error('You must be signed in to record kit claims.');
+
+  const { error } = await supabase.from('kit_claims').insert({
+    registration_id: input.registrationId,
+    bib_number: input.bibNumber?.trim() || null,
+    claimed_at: new Date().toISOString(),
+    claimed_by: authData.user.id,
+    notes: input.notes?.trim() || null,
+  });
+
+  if (error) {
+    if (error.code === '23505' || error.message?.includes('duplicate key')) {
+      throw new Error('This race kit has already been claimed.');
+    }
+    throw new Error(error.message);
+  }
+}
+
+export async function cancelRaceKitClaim(registrationId: string): Promise<void> {
+  if (!supabase) throw new Error('Supabase is not configured.');
+  const { error } = await supabase.from('kit_claims').delete().eq('registration_id', registrationId);
+  if (error) throw new Error(error.message);
+}
+
+export async function getKitClaimForRegistration(registrationId: string): Promise<{
+  registration_id: string;
+  bib_number: string | null;
+  claimed_at: string;
+  claimed_by: string | null;
+  notes: string | null;
+} | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('kit_claims')
+    .select('*')
+    .eq('registration_id', registrationId)
+    .maybeSingle();
+  if (error) return null;
+  return data;
 }
 

@@ -2256,3 +2256,473 @@
   color: #3d1214 !important;
 }
 
+/* ==========================================================================
+   Race Kit Claiming & Check-in Page
+   ========================================================================== */
+
+.kit-claims-page .kit-claims-metrics .m3-card {
+  transition: transform 180ms ease, box-shadow 180ms ease !important;
+}
+
+.kit-claims-page .kit-claims-metrics .m3-card:hover {
+  transform: translateY(-2px) !important;
+}
+
+.kit-claims-panel {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  border: 1px solid var(--md-sys-color-outline-variant, #e8dfd8) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Toolbar wrapper card */
+.kit-claims-toolbar-card {
+  border-radius: 16px !important;
+  background: #ffffff !important;
+  border: 1px solid var(--md-sys-color-outline-variant, #e8dfd8) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  padding: 16px !important;
+  margin-bottom: var(--md-space-4) !important;
+  box-sizing: border-box !important;
+}
+
+.kit-claims-toolbar {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  width: 100% !important;
+  padding: 0 !important;
+  border-bottom: none !important;
+  background: transparent !important;
+}
+
+.kit-claims-toolbar .registrations-search {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 48px !important;
+}
+
+/* Mobile filter grid */
+.kit-claims-filters {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+.kit-claims-filter--status {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+}
+
+.kit-claims-filters select {
+  width: 100% !important;
+  min-height: 44px !important;
+  padding: 10px 12px !important;
+  border: 1px solid #d4c5b9 !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  color: var(--ink, #1f1b13) !important;
+  font: inherit !important;
+  font-size: 0.88rem !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 440px) {
+  .kit-claims-filters {
+    grid-template-columns: 1fr !important;
+  }
+  .kit-claims-filter--status {
+    grid-column: auto !important;
+  }
+}
+
+/* Desktop layout (>= 769px) */
+@media (min-width: 769px) {
+  .kit-claims-toolbar {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .kit-claims-toolbar .registrations-search {
+    flex: 1 1 240px !important;
+    min-width: 200px !important;
+  }
+
+  .kit-claims-filters {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: auto !important;
+    flex: 0 0 auto !important;
+  }
+
+  .kit-claims-filter--status {
+    grid-column: auto !important;
+    width: auto !important;
+  }
+
+  .kit-claims-filters select {
+    width: auto !important;
+    min-width: 135px !important;
+  }
+}
+
+/* Desktop View: Single-line per account table */
+.kit-claims-desktop-view {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.kit-claims-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.kit-claims-table th {
+  padding: 12px 14px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted, #6f6259);
+  background: #fbf9f6;
+  border-bottom: 1px solid var(--line, #ede4dc);
+  white-space: nowrap;
+}
+
+.kit-claims-table td {
+  padding: 10px 14px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f2ede8;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+.kit-claims-table tbody tr {
+  transition: background-color 120ms ease;
+}
+
+.kit-claims-table tbody tr:hover {
+  background-color: #faf6f0 !important;
+}
+
+.kit-claims-table tbody tr.is-claimed {
+  background-color: rgba(32, 201, 151, 0.02);
+}
+
+/* Desktop Cell Elements */
+.kit-bib-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--md-sys-color-primary-container, #ffd8e4);
+  color: var(--md-sys-color-on-primary-container, #3b071e);
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.04em;
+  font-family: monospace;
+}
+
+.kit-runner-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.kit-runner-name {
+  font-weight: 600;
+  color: var(--ink, #1f1b13);
+  font-size: 0.92rem;
+}
+
+.kit-runner-meta {
+  color: var(--muted, #857366);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.kit-category-badge {
+  display: inline-block;
+  font-weight: 500;
+  color: var(--ink, #2b2320);
+  white-space: nowrap;
+}
+
+.kit-size-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #f0eae1;
+  color: #4a3e35;
+  font-weight: 700;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.kit-mobile-text {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--ink, #333);
+}
+
+.kit-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.kit-status-pill--claimed {
+  background: #e6fcf5 !important;
+  color: #087f5b !important;
+  border: 1px solid #96f2d7 !important;
+}
+
+.kit-status-pill--pending {
+  background: #fff9db !important;
+  color: #8f5b00 !important;
+  border: 1px solid #ffe066 !important;
+}
+
+/* Mobile View: Clean Individual Cards (No dirty rectangle, no double border) */
+.kit-claims-mobile-view {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .kit-claims-desktop-view {
+    display: none !important;
+  }
+
+  .kit-claims-mobile-view {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .kit-claim-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid #e8dfd8;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(43, 35, 32, 0.05);
+    box-sizing: border-box;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .kit-claim-card.is-claimed {
+    border-color: rgba(32, 201, 151, 0.4);
+    background: #ffffff;
+  }
+
+  /* Card Header */
+  .kit-claim-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f2ede8;
+  }
+
+  .kit-claim-card__bib-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .kit-claim-card__division {
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #f0eae1;
+    color: #655447;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  /* Card Runner Identity */
+  .kit-claim-card__name {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink, #1f1b13);
+    line-height: 1.3;
+  }
+
+  .kit-claim-card__demographics {
+    margin: 3px 0 0;
+    font-size: 0.8rem;
+    color: var(--muted, #857366);
+  }
+
+  /* 2-Column Specs Grid (Clean white, no dirty beige) */
+  .kit-claim-card__specs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .kit-spec-box {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 10px 12px;
+    background: #ffffff;
+    border: 1px solid #ede4dc;
+    border-radius: 10px;
+    min-width: 0;
+  }
+
+  .kit-spec-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8c786a;
+  }
+
+  .kit-spec-value {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--ink, #25201c);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .kit-spec-value--shirt {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--wine, #741f29);
+  }
+
+  /* Contact Lines (Clean typography on pure card background) */
+  .kit-claim-card__contact {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 10px;
+    border-top: 1px solid #f2ede8;
+    margin-top: 4px;
+    font-size: 0.84rem;
+  }
+
+  .kit-contact-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    color: #4a3e35;
+    word-break: break-word;
+  }
+
+  .kit-contact-row strong {
+    color: #741f29;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    min-width: 78px;
+    flex-shrink: 0;
+  }
+
+  /* Audit Information */
+  .kit-claim-card__audit {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 10px 12px;
+    background: #e6fcf5;
+    border: 1px solid #96f2d7;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: #0b6248;
+  }
+
+  .kit-claim-card__audit p {
+    margin: 0;
+  }
+
+  /* Card Action Button */
+  .kit-claim-card__actions {
+    margin-top: 6px;
+    padding-top: 10px;
+    border-top: 1px solid #f2ede8;
+  }
+
+  .kit-claim-card__actions .button {
+    width: 100% !important;
+    min-height: 44px !important;
+    justify-content: center !important;
+    font-size: 0.92rem !important;
+    font-weight: 600 !important;
+  }
+}
+
+@media print {
+  .no-print,
+  .portal-sidebar,
+  .portal-topbar,
+  .portal-mobile-bottom-nav,
+  .admin-floating-nav,
+  .install-prompt {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .kit-claims-page {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+  }
+  .kit-claims-table-card {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  .kit-roster-table {
+    font-size: 8.5pt !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  .kit-roster-table th,
+  .kit-roster-table td {
+    padding: 4px 6px !important;
+    border: 1px solid #777 !important;
+    color: #000 !important;
+  }
+  .kit-roster-table th {
+    background: #eee !important;
+  }
+  .kit-roster-table tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}
+

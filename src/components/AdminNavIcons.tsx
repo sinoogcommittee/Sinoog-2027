@@ -92,6 +92,28 @@ export function AdminRegistrationsIcon() {
   );
 }
 
+/** 4b. Kit Claiming: Race Kit Package / Singlet with Verified Handover Badge */
+export function AdminKitClaimIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      {/* Kit package / tote bag */}
+      <rect x="3.5" y="7" width="17" height="13" rx="2.5" fill="#ffffff" stroke="#ced4da" strokeWidth="0.8" />
+      {/* Gold Festival Bag Handle */}
+      <path d="M 8.5 7 V 4.5 C 8.5 3.4 9.4 2.5 10.5 2.5 H 13.5 C 14.6 2.5 15.5 3.4 15.5 4.5 V 7" stroke="#fcc419" strokeWidth="1.3" strokeLinecap="round" />
+      {/* Wine / Crimson Top Banner */}
+      <path d="M 3.5 9.5 C 3.5 8.1 4.6 7 6 7 H 18 C 19.4 7 20.5 8.1 20.5 9.5 V 10.5 H 3.5 V 9.5 Z" fill="#841c2b" />
+      {/* Race Bib on bag */}
+      <rect x="6.5" y="12" width="7" height="5.5" rx="1" fill="#fff9db" stroke="#f59f00" strokeWidth="0.6" />
+      <circle cx="8" cy="13.2" r="0.6" fill="#841c2b" />
+      <circle cx="12" cy="13.2" r="0.6" fill="#841c2b" />
+      <rect x="8" y="14.5" width="4" height="1.8" rx="0.5" fill="#f59f00" />
+      {/* Verified Claim Checkmark Badge */}
+      <circle cx="16.5" cy="15" r="3.5" fill="#20c997" stroke="#ffffff" strokeWidth="0.8" />
+      <path d="M 15 15 L 16.2 16.2 L 18 14" stroke="#ffffff" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /** 5. Race Timing: Checkered Finish Flag with Golden Chronometer Stopwatch */
 export function AdminTimingIcon() {
   return (

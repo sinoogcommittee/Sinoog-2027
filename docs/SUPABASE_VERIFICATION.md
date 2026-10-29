@@ -35,13 +35,13 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | `010_admin_account_deletion.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — migration applied; suspended/rejected-account deletion and administrator audit tracking confirmed through the deployed management workflow |
 | `011_cash_payments_and_finance.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — cash receiver attribution, financial records, audited voiding, and complete walk-in profile metadata applied successfully |
 | `012_sponsor_facebook_url.sql` | 2026-10-27 | SQL Editor | Site administrator | PASS — configured Supabase REST schema query confirmed `public.sponsors.facebook_url` is present |
-| `013_gallery_photo_video_collections.sql` | — | SQL Editor | Site administrator | PENDING — adds gallery media_type field ('photo'/'video') and indexes; year removed in favor of direct sorting |
+| `013_gallery_photo_video_collections.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; added gallery media_type field ('photo'/'video') and indexes; year removed in favor of direct sorting |
 | `014_registration_documents_and_timeline.sql` | 2026-10-28 | SQL Editor | Site administrator | PASS — columns, trigger, and policy versions applied |
 | `015_registration_lifecycle_backfill_fix.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; permits one-time email/approval-date backfill while preserving immutable lifecycle snapshots afterward |
 | `016_security_hardening.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; security hardening and RLS policies active in production |
 | `017_registration_integrity_and_admin_safety.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; registration integrity and admin safety triggers active |
 | `018_suspended_accounts_cannot_register.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; suspended accounts blocked from registering |
-| `019_gallery_collection_order.sql` | — | SQL Editor | Site administrator | PENDING — adds sort_order to albums, initial ordering, and reorder_gallery_album RPC function; year removed |
+| `019_gallery_collection_order.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; added sort_order to albums, initial ordering, and reorder_gallery_album RPC function; year removed |
 | `020_financial_reporting_dimensions.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; adds financial allocation dimensions, counterparties, recorder enforcement, creation audit, and reporting index |
 
 ## Financial reporting enhancement — October 28, 2026

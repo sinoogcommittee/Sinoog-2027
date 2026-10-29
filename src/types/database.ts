@@ -1296,4 +1296,5 @@ export type DbSiteSetting = Database['public']['Tables']['site_settings']['Row']
 export type DbSponsor = Database['public']['Tables']['sponsors']['Row'];
 export type DbDelegation = Database['public']['Tables']['delegations']['Row'];
 export type DbRunRegistration = Database['public']['Tables']['run_registrations']['Row'];
+export type DbKitClaim = Database['public']['Tables']['kit_claims']['Row'];
 
