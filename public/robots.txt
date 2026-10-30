@@ -1,0 +1,29 @@
+# Sinoog 2027 — Sto. Niño Parish, Guinacot, Guindulman, Bohol
+# https://sinoog2027.onrender.com
+
+User-agent: *
+Allow: /
+Allow: /festival
+Allow: /festival/*
+Allow: /run
+Allow: /run/*
+Allow: /activities
+Allow: /activities/*
+Allow: /news
+Allow: /news/*
+Allow: /gallery
+Allow: /sponsors
+Allow: /about
+Allow: /privacy
+Allow: /terms
+
+# Block private committee portal, admin tools, and authenticated runner account routes from search indexing
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /account
+Disallow: /account/*
+Disallow: /signin
+Disallow: /signup
+Disallow: /login
+
+Sitemap: https://sinoog2027.onrender.com/sitemap.xml

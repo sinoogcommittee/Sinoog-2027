@@ -600,15 +600,17 @@ Priority: **P0**
 
 ### Production
 
-- [ ] Apply final reviewed migrations to production.
+- [x] Apply final reviewed migrations `001` through `021` to production.
 - [ ] Configure the production domain and HTTPS.
-- [ ] Configure Supabase Site URL and allowed redirect URLs.
-- [ ] Configure production email sender and templates.
-- [ ] Configure Render environment variables.
-- [ ] Confirm `/* → /index.html` rewrite behavior.
-- [ ] Confirm private Storage buckets are not publicly readable.
+- [x] Configure Supabase Site URL and allowed redirect URLs (documented in `PROJECT_SETUP.md` and `SUPABASE_VERIFICATION.md`).
+- [ ] Configure production email sender and templates (personal committee communications selected per Phase 14).
+- [x] Configure Render environment variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`).
+- [x] Confirm `/* → /index.html` rewrite behavior (configured in `render.yaml` and static `public/_redirects`).
+- [x] Add search engine crawling controls (`public/robots.txt` blocking `/admin/*`, `/account/*`, `/login` and allowing public routes).
+- [x] Add canonical XML sitemap (`public/sitemap.xml` covering 16 public routes).
+- [x] Confirm private Storage buckets (`payment-evidence`, `delegation-files`) are not publicly readable while `public-media` is public.
 - [ ] Seed only approved production content.
-- [ ] Create and verify the required staff accounts.
+- [x] Create and verify the required staff accounts (admin and staff roles operational).
 - [ ] Enable monitoring, error reporting, uptime checks, budget alerts, and storage alerts.
 - [ ] Confirm database backup availability and create a separate media export/backup plan.
 - [ ] Rehearse restoration before launch.
