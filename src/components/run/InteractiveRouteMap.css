@@ -1,5 +1,6 @@
 .interactive-route {
   margin: var(--md-space-6) 0 var(--md-space-8);
+  scroll-margin-top: 80px;
   overflow: hidden;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-large);
@@ -23,7 +24,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--md-space-5);
-  padding: var(--md-space-5) var(--md-space-6);
+  padding: var(--md-space-4) var(--md-space-6);
   background: var(--md-sys-color-secondary-container);
 }
 
@@ -31,7 +32,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--md-space-2);
-  margin-bottom: var(--md-space-2);
+  margin-bottom: var(--md-space-1);
   color: var(--md-sys-color-primary);
   font-size: 0.76rem;
   font-weight: 800;
@@ -43,14 +44,15 @@
   margin: 0;
   color: var(--md-sys-color-on-secondary-container);
   font-family: 'Fraunces', Georgia, serif;
-  font-size: clamp(1.25rem, 2.3vw, 1.75rem);
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
 }
 
 .interactive-route__header p {
   max-width: 64ch;
-  margin: var(--md-space-2) 0 0;
+  margin: var(--md-space-1) 0 0;
   color: var(--md-sys-color-on-surface-variant);
-  line-height: 1.55;
+  line-height: 1.45;
+  font-size: 0.88rem;
 }
 
 .interactive-route__header-actions {
@@ -164,15 +166,27 @@
   box-shadow: var(--md-sys-elevation-level1);
 }
 
+/* Main Workspace: Side-by-Side Map & Sidebar on Desktop */
+.interactive-route__workspace {
+  display: flex;
+  align-items: stretch;
+  min-height: 520px;
+  height: 520px;
+  background: var(--md-sys-color-surface-container);
+  position: relative;
+}
+
 .interactive-route__map-wrap {
   position: relative;
-  min-height: 520px;
+  flex: 1 1 64%;
+  min-width: 0;
+  height: 100%;
   background: var(--md-sys-color-surface-container);
 }
 
 .interactive-route__map {
   width: 100%;
-  height: 520px;
+  height: 100%;
 }
 
 .interactive-route__status {
@@ -196,37 +210,47 @@
   margin: 0 auto;
 }
 
-/* Checkpoint / Waypoints section directly below map */
-.interactive-route__points-section {
-  padding: var(--md-space-4) var(--md-space-6);
-  border-top: 1px solid var(--md-sys-color-outline-variant);
+/* Sidebar: Desktop Checkpoints List & Legend */
+.interactive-route__sidebar {
+  flex: 0 0 350px;
+  width: 350px;
+  display: flex;
+  flex-direction: column;
   background: var(--md-sys-color-surface-container-low);
+  border-left: 1px solid var(--md-sys-color-outline-variant);
+  height: 100%;
+  overflow: hidden;
 }
 
-.interactive-route__points-header {
+.interactive-route__sidebar-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--md-space-3);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-lowest);
 }
 
-.interactive-route__points-header h4 {
+.interactive-route__sidebar-header h4 {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: var(--md-sys-color-on-surface);
 }
 
-.interactive-route__points-header span {
-  font-size: 0.78rem;
+.interactive-route__sidebar-header span {
+  font-size: 0.74rem;
   color: var(--md-sys-color-on-surface-variant);
   font-weight: 600;
 }
 
-.interactive-route__points-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: var(--md-space-2);
+.interactive-route__sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .interactive-route__point-btn {
@@ -246,7 +270,6 @@
 .interactive-route__point-btn:hover {
   background: var(--md-sys-color-surface-container-high);
   border-color: var(--md-sys-color-primary);
-  transform: translateY(-1px);
 }
 
 .interactive-route__point-btn:focus-visible {
@@ -298,38 +321,26 @@
   font-weight: 500;
 }
 
-.interactive-route__points-mobile {
-  display: none;
-}
-
-.interactive-route__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--md-space-5);
-  padding: var(--md-space-4) var(--md-space-6);
+.interactive-route__sidebar-footer {
+  padding: 10px 14px;
   border-top: 1px solid var(--md-sys-color-outline-variant);
-  background: var(--md-sys-color-surface-container-low);
-}
-
-.interactive-route__footer p {
-  max-width: 52ch;
-  margin: 0;
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: 0.8rem;
-  text-align: right;
+  background: var(--md-sys-color-surface-container-lowest);
 }
 
 .interactive-route__legend {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--md-space-3) var(--md-space-5);
+  gap: 6px 12px;
   margin: 0;
   padding: 0;
   list-style: none;
   color: var(--md-sys-color-on-surface-variant);
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 700;
+}
+
+.interactive-route__points-mobile {
+  display: none;
 }
 
 .route-key {
@@ -361,7 +372,7 @@
 }
 
 .interactive-route .maplibregl-popup-content {
-  padding: var(--md-space-4);
+  padding: var(--md-space-3);
   border-radius: var(--md-sys-shape-corner-medium);
   color: var(--md-sys-color-on-surface);
   box-shadow: var(--md-sys-elevation-level3);
@@ -383,7 +394,7 @@
 }
 
 .run-map-popup strong {
-  font-size: 0.92rem;
+  font-size: 0.90rem;
   line-height: 1.35;
 }
 
@@ -411,24 +422,27 @@
   color: var(--md-sys-color-on-primary) !important;
 }
 
-.interactive-route__footer-note {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: flex-end;
-}
+/* Responsive / Mobile View */
+@media (max-width: 860px) {
+  .interactive-route {
+    margin: var(--md-space-3) 0 var(--md-space-5);
+  }
 
-.interactive-route__footer-note p {
-  margin: 0;
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: 0.85rem;
-}
-
-@media (max-width: 760px) {
-  .interactive-route__header,
-  .interactive-route__footer {
-    align-items: stretch;
+  .interactive-route__header {
     flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 12px 14px;
+  }
+
+  .interactive-route__header h3 {
+    font-size: 1.15rem;
+  }
+
+  .interactive-route__header p {
+    font-size: 0.80rem;
+    line-height: 1.35;
+    margin-top: 2px;
   }
 
   .interactive-route__header-actions {
@@ -444,32 +458,82 @@
     justify-content: flex-start;
   }
 
-  .interactive-route__footer-note {
-    align-items: flex-start;
+  .interactive-route__distance {
+    min-height: 30px;
+    padding: 3px 10px;
+    font-size: 0.78rem;
+  }
+
+  .interactive-route__gmaps-compact-btn {
+    min-height: 30px;
+    padding: 3px 10px;
+    font-size: 0.78rem;
   }
 
   .interactive-route__switcher {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    padding: 4px;
   }
 
   .interactive-route__switcher button {
-    padding-inline: var(--md-space-3);
+    min-height: 36px;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    text-align: center;
+  }
+
+  .interactive-route__switcher button span {
+    font-size: 0.74rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .interactive-route__switcher button small {
+    font-size: 0.68rem;
+    opacity: 0.85;
+  }
+
+  .interactive-route__workspace {
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
   }
 
   .interactive-route__map-wrap,
   .interactive-route__map {
-    min-height: 430px;
-    height: 430px;
+    height: 275px;
+    min-height: 275px;
+    flex: none;
+    width: 100%;
   }
 
-  .interactive-route__points-grid {
-    display: none !important;
+  .interactive-route__sidebar {
+    width: 100%;
+    height: auto;
+    border-left: none;
+    border-top: 1px solid var(--md-sys-color-outline-variant);
+    background: var(--md-sys-color-surface-container-low);
+  }
+
+  .interactive-route__sidebar-header {
+    display: none;
+  }
+
+  .interactive-route__sidebar-list {
+    display: none;
   }
 
   .interactive-route__points-mobile {
     display: flex !important;
     width: 100%;
-    padding-top: var(--md-space-2);
+    padding: 8px 10px;
   }
 
   .interactive-route__nav-pill {
@@ -596,8 +660,14 @@
     text-overflow: ellipsis;
   }
 
-  .interactive-route__footer p {
-    text-align: left;
+  .interactive-route__sidebar-footer {
+    padding: 6px 12px 10px;
+  }
+
+  .interactive-route__legend {
+    justify-content: center;
+    font-size: 0.72rem;
+    gap: 4px 10px;
   }
 }
 

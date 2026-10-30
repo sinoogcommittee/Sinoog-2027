@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   FullscreenControl,
   LngLatBounds,
@@ -102,30 +102,74 @@ export function InteractiveRouteMap() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const activePopupRef = useRef<Popup | null>(null);
+  const isProgrammaticCloseRef = useRef(false);
   const [selectedId, setSelectedId] = useState(ROUTES[0].id);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [courseData, setCourseData] = useState<CourseGeoJson | null>(null);
-  const [selectedPointOrder, setSelectedPointOrder] = useState<number | null>(null);
+  const [activeWaypointIndex, setActiveWaypointIndex] = useState(0);
   const selectedRoute = ROUTES.find((route) => route.id === selectedId) ?? ROUTES[0];
 
+  const coursePoints = useMemo(() => {
+    return (courseData?.features ?? [])
+      .filter(
+        (feature): feature is CourseFeature & { geometry: { type: 'Point'; coordinates: Coordinate } } =>
+          feature.geometry.type === 'Point' && feature.properties.feature_type === 'course_point',
+      )
+      .sort((a, b) => (a.properties.order ?? 0) - (b.properties.order ?? 0));
+  }, [courseData]);
+
+  const activePoint = coursePoints[activeWaypointIndex] ?? coursePoints[0];
+
   const showPointPopup = (map: MapLibreMap, feature: CourseFeature | MapGeoJSONFeature, coords: Coordinate) => {
-    activePopupRef.current?.remove();
-    const popup = new Popup({ offset: 18, closeButton: true, closeOnClick: false })
+    if (activePopupRef.current) {
+      isProgrammaticCloseRef.current = true;
+      activePopupRef.current.remove();
+      isProgrammaticCloseRef.current = false;
+    }
+    const popup = new Popup({
+      offset: 18,
+      closeButton: true,
+      closeOnClick: false,
+      focusAfterOpen: false, // Prevents window scroll jumping on open
+    })
       .setLngLat(coords)
       .setDOMContent(makePopup(feature))
       .addTo(map);
+
     popup.on('close', () => {
-      setSelectedPointOrder(null);
+      // Keep activeWaypointIndex preserved so the checkpoint navigator stays on the current waypoint
     });
     activePopupRef.current = popup;
   };
 
-  const handleSelectPoint = (point: CourseFeature) => {
-    if (!mapRef.current || point.geometry.type !== 'Point') return;
-    const coords = point.geometry.coordinates as Coordinate;
-    setSelectedPointOrder(point.properties.order ?? null);
+  const handleSelectWaypointByIndex = (index: number) => {
+    if (!mapRef.current || !coursePoints[index]) return;
+    const targetPoint = coursePoints[index];
+    if (targetPoint.geometry.type !== 'Point') return;
+    setActiveWaypointIndex(index);
+    const coords = targetPoint.geometry.coordinates as Coordinate;
     mapRef.current.flyTo({ center: coords, zoom: 15.5, duration: 600 });
-    showPointPopup(mapRef.current, point, coords);
+    showPointPopup(mapRef.current, targetPoint, coords);
+  };
+
+  const handlePrevPoint = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (coursePoints.length === 0) return;
+    const prev = activeWaypointIndex > 0 ? activeWaypointIndex - 1 : coursePoints.length - 1;
+    handleSelectWaypointByIndex(prev);
+  };
+
+  const handleNextPoint = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (coursePoints.length === 0) return;
+    const next = activeWaypointIndex < coursePoints.length - 1 ? activeWaypointIndex + 1 : 0;
+    handleSelectWaypointByIndex(next);
   };
 
   useEffect(() => {
@@ -142,6 +186,7 @@ export function InteractiveRouteMap() {
     map.addControl(new FullscreenControl(), 'top-right');
     mapRef.current = map;
     return () => {
+      isProgrammaticCloseRef.current = true;
       activePopupRef.current?.remove();
       activePopupRef.current = null;
       map.remove();
@@ -163,9 +208,10 @@ export function InteractiveRouteMap() {
     if (!map) return;
     let cancelled = false;
     setStatus('loading');
+    isProgrammaticCloseRef.current = true;
     activePopupRef.current?.remove();
     activePopupRef.current = null;
-    setSelectedPointOrder(null);
+    setActiveWaypointIndex(0);
 
     const showRoute = async () => {
       try {
@@ -246,7 +292,13 @@ export function InteractiveRouteMap() {
               const feature = event.features?.[0];
               if (!feature || feature.geometry.type !== 'Point') return;
               const props = feature.properties as CourseProperties;
-              setSelectedPointOrder(props.order ?? null);
+              const pts = (data.features || [])
+                .filter((f) => f.geometry.type === 'Point' && f.properties?.feature_type === 'course_point')
+                .sort((a, b) => ((a.properties as CourseProperties).order ?? 0) - ((b.properties as CourseProperties).order ?? 0));
+              const idx = pts.findIndex((p) => (p.properties as CourseProperties).order === props.order);
+              if (idx !== -1) {
+                setActiveWaypointIndex(idx);
+              }
               showPointPopup(map, feature, feature.geometry.coordinates as Coordinate);
             });
           }
@@ -265,19 +317,6 @@ export function InteractiveRouteMap() {
       cancelled = true;
     };
   }, [selectedRoute]);
-
-  const coursePoints = (courseData?.features ?? [])
-    .filter(
-      (feature): feature is CourseFeature & { geometry: { type: 'Point'; coordinates: Coordinate } } =>
-        feature.geometry.type === 'Point' && feature.properties.feature_type === 'course_point',
-    )
-    .sort((a, b) => (a.properties.order ?? 0) - (b.properties.order ?? 0));
-
-  const activePointIndex = Math.max(
-    0,
-    coursePoints.findIndex((p) => p.properties.order === selectedPointOrder),
-  );
-  const activeMobilePoint = coursePoints[activePointIndex] ?? coursePoints[0];
 
   return (
     <section className="interactive-route" aria-labelledby="interactive-route-title">
@@ -307,6 +346,7 @@ export function InteractiveRouteMap() {
           </div>
         </div>
       </div>
+
       <div className="interactive-route__switcher" role="group" aria-label="Choose a course route">
         {ROUTES.map((route) => (
           <button
@@ -314,59 +354,74 @@ export function InteractiveRouteMap() {
             type="button"
             className={route.id === selectedRoute.id ? 'is-active' : ''}
             aria-pressed={route.id === selectedRoute.id}
-            onClick={() => setSelectedId(route.id)}
+            onClick={(e) => {
+              e.preventDefault();
+              if (route.id !== selectedId) {
+                setSelectedId(route.id);
+                setActiveWaypointIndex(0);
+              }
+            }}
           >
             <span>{route.shortLabel}</span>
             <small>{route.distance}</small>
           </button>
         ))}
       </div>
-      <div className="interactive-route__map-wrap" aria-busy={status === 'loading'}>
-        <div ref={containerRef} className="interactive-route__map" aria-label={`Map of ${selectedRoute.title}`} />
-        {status === 'loading' && <div className="interactive-route__status">Loading course map…</div>}
-        {status === 'error' && (
-          <div className="interactive-route__status interactive-route__status--error" role="alert">
-            <AlertCircle size={22} />
-            <strong>Map unavailable</strong>
-            <span>Please check your connection and try again.</span>
-          </div>
-        )}
-      </div>
 
-      {coursePoints.length > 0 && (
-        <div className="interactive-route__points-section" aria-label="Course checkpoints sequence">
-          <div className="interactive-route__points-header">
-            <h4>Checkpoints & Course Landmarks</h4>
+      {/* Main Workspace: Desktop Two-Column (Map + Sidebar) & Mobile Responsive */}
+      <div className="interactive-route__workspace">
+        <div className="interactive-route__map-wrap" aria-busy={status === 'loading'}>
+          <div ref={containerRef} className="interactive-route__map" aria-label={`Map of ${selectedRoute.title}`} />
+          {status === 'loading' && <div className="interactive-route__status">Loading course map…</div>}
+          {status === 'error' && (
+            <div className="interactive-route__status interactive-route__status--error" role="alert">
+              <AlertCircle size={22} />
+              <strong>Map unavailable</strong>
+              <span>Please check your connection and try again.</span>
+            </div>
+          )}
+        </div>
+
+        {/* Sidebar: Checkpoints list for desktop, single aesthetic pill navigator for mobile */}
+        <div className="interactive-route__sidebar" aria-label="Course checkpoints sequence">
+          <div className="interactive-route__sidebar-header">
+            <h4>Checkpoints & Landmarks</h4>
             <span>{coursePoints.length} verified waypoints</span>
           </div>
-          <div className="interactive-route__points-grid">
-            {coursePoints.map((point) => {
+
+          {/* Desktop Scrollable Checkpoint List */}
+          <div className="interactive-route__sidebar-list">
+            {coursePoints.map((point, index) => {
               const role = point.properties.role ?? 'checkpoint';
               const order = point.properties.order;
-              const isSelected = selectedPointOrder === order;
+              const isSelected = activeWaypointIndex === index;
+              const roleLabel =
+                role === 'start'
+                  ? 'Race Start'
+                  : role === 'finish'
+                    ? 'Race Finish'
+                    : role === 'turnaround'
+                      ? 'U-Turn Point'
+                      : role === 'junction'
+                        ? 'Intersection / Turn'
+                        : 'Checkpoint';
+
               return (
                 <button
                   key={`${point.properties.order}-${point.properties.name}`}
                   type="button"
                   className={`interactive-route__point-btn ${isSelected ? 'is-selected' : ''}`}
-                  onClick={() => handleSelectPoint(point)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSelectWaypointByIndex(index);
+                  }}
                   aria-pressed={isSelected}
                   title={`View ${point.properties.name} on map`}
                 >
                   <span className={`route-key route-key--${role}`}>{order}</span>
                   <div className="interactive-route__point-info">
                     <strong>{point.properties.name}</strong>
-                    <small>
-                      {role === 'start'
-                        ? 'Race Start'
-                        : role === 'finish'
-                          ? 'Race Finish'
-                          : role === 'turnaround'
-                            ? 'U-Turn Point'
-                            : role === 'junction'
-                              ? 'Intersection / Turn'
-                              : 'Checkpoint'}
-                    </small>
+                    <small>{roleLabel}</small>
                   </div>
                 </button>
               );
@@ -374,88 +429,85 @@ export function InteractiveRouteMap() {
           </div>
 
           {/* Mobile Checkpoint Single Button with Inner Left & Right Arrows */}
-          <div className="interactive-route__points-mobile" aria-label="Mobile course checkpoints navigation">
-            <div className="interactive-route__nav-pill">
-              <button
-                type="button"
-                className="interactive-route__nav-pill-arrow interactive-route__nav-pill-arrow--prev"
-                onClick={() => {
-                  const prev = activePointIndex > 0 ? activePointIndex - 1 : coursePoints.length - 1;
-                  handleSelectPoint(coursePoints[prev]);
-                }}
-                aria-label="Previous checkpoint"
-                title="Previous checkpoint"
-              >
-                <ChevronLeft size={16} />
-              </button>
+          {activePoint && (
+            <div className="interactive-route__points-mobile" aria-label="Mobile course checkpoints navigation">
+              <div className="interactive-route__nav-pill">
+                <button
+                  type="button"
+                  className="interactive-route__nav-pill-arrow interactive-route__nav-pill-arrow--prev"
+                  onClick={handlePrevPoint}
+                  aria-label="Previous checkpoint"
+                  title="Previous checkpoint"
+                >
+                  <ChevronLeft size={18} />
+                </button>
 
-              <button
-                type="button"
-                className="interactive-route__nav-pill-content"
-                onClick={() => handleSelectPoint(activeMobilePoint)}
-                title="Tap to focus on map"
-              >
-                <span className={`route-key route-key--${activeMobilePoint.properties.role ?? 'checkpoint'}`}>
-                  {activeMobilePoint.properties.order}
-                </span>
-                <div className="interactive-route__nav-pill-text">
-                  <div className="interactive-route__nav-pill-top">
-                    <strong>{activeMobilePoint.properties.name}</strong>
-                    <span className="interactive-route__nav-pill-counter">
-                      {activePointIndex + 1}/{coursePoints.length}
-                    </span>
+                <button
+                  type="button"
+                  className="interactive-route__nav-pill-content"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSelectWaypointByIndex(activeWaypointIndex);
+                  }}
+                  title="Tap to focus on map"
+                >
+                  <span className={`route-key route-key--${activePoint.properties.role ?? 'checkpoint'}`}>
+                    {activePoint.properties.order}
+                  </span>
+                  <div className="interactive-route__nav-pill-text">
+                    <div className="interactive-route__nav-pill-top">
+                      <strong>{activePoint.properties.name}</strong>
+                      <span className="interactive-route__nav-pill-counter">
+                        {activeWaypointIndex + 1}/{coursePoints.length}
+                      </span>
+                    </div>
+                    <small>
+                      {activePoint.properties.role === 'start'
+                        ? 'Race Start'
+                        : activePoint.properties.role === 'finish'
+                          ? 'Race Finish'
+                          : activePoint.properties.role === 'turnaround'
+                            ? 'U-Turn Point'
+                            : activePoint.properties.role === 'junction'
+                              ? 'Intersection / Turn'
+                              : 'Checkpoint'}
+                    </small>
                   </div>
-                  <small>
-                    {activeMobilePoint.properties.role === 'start'
-                      ? 'Race Start'
-                      : activeMobilePoint.properties.role === 'finish'
-                        ? 'Race Finish'
-                        : activeMobilePoint.properties.role === 'turnaround'
-                          ? 'U-Turn Point'
-                          : activeMobilePoint.properties.role === 'junction'
-                            ? 'Intersection / Turn'
-                            : 'Checkpoint'}
-                  </small>
-                </div>
-              </button>
+                </button>
 
-              <button
-                type="button"
-                className="interactive-route__nav-pill-arrow interactive-route__nav-pill-arrow--next"
-                onClick={() => {
-                  const next = activePointIndex < coursePoints.length - 1 ? activePointIndex + 1 : 0;
-                  handleSelectPoint(coursePoints[next]);
-                }}
-                aria-label="Next checkpoint"
-                title="Next checkpoint"
-              >
-                <ChevronRight size={16} />
-              </button>
+                <button
+                  type="button"
+                  className="interactive-route__nav-pill-arrow interactive-route__nav-pill-arrow--next"
+                  onClick={handleNextPoint}
+                  aria-label="Next checkpoint"
+                  title="Next checkpoint"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
 
-      <div className="interactive-route__footer">
-        <ul className="interactive-route__legend" aria-label="Map legend">
-          <li>
-            <span className="route-key route-key--start" /> Start
-          </li>
-          <li>
-            <span className="route-key route-key--finish" /> Finish
-          </li>
-          <li>
-            <span className="route-key route-key--junction" /> Junction
-          </li>
-          <li>
-            <span className="route-key route-key--turnaround" /> Turnaround
-          </li>
-          <li>
-            <span className="route-key route-key--checkpoint" /> Checkpoint
-          </li>
-        </ul>
-        <div className="interactive-route__footer-note">
-          <p>Tap a numbered point or click the waypoint buttons above to inspect details and zoom in.</p>
+          {/* Sidebar Legend Footer */}
+          <div className="interactive-route__sidebar-footer">
+            <ul className="interactive-route__legend" aria-label="Map legend">
+              <li>
+                <span className="route-key route-key--start" /> Start
+              </li>
+              <li>
+                <span className="route-key route-key--finish" /> Finish
+              </li>
+              <li>
+                <span className="route-key route-key--junction" /> Turn
+              </li>
+              <li>
+                <span className="route-key route-key--turnaround" /> U-Turn
+              </li>
+              <li>
+                <span className="route-key route-key--checkpoint" /> Checkpoint
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>
