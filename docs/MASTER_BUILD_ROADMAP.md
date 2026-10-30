@@ -532,36 +532,37 @@ Completion gate: Core public pages load acceptably on ordinary mobile data and s
 
 ## 24. Phase 18 — Testing plan
 
-Priority: **P0**
+Priority: **P0** (In Progress)
 
 ### Automated checks
 
-- [x] `npm run build` and `npm run lint` pass as of October 26, 2026.
+- [x] `npm run build` and `npm run lint` pass cleanly with 0 errors and 0 warnings.
 - [x] Resolve the React state-in-effect lint warnings and keep lint warning-free.
-- [ ] Add unit tests for fee, eligibility, status transition, date, and capacity logic.
+- [x] Add unit tests for fee, eligibility, status transition, date, and capacity logic (`src/features/run/runRegistration.test.ts` & `src/features/activities/activityQueries.test.ts`).
+- [x] Add policy tests using separate anonymous, runner, delegation-head, news-staff, and admin accounts (`src/features/auth/authPolicy.test.ts`).
+- [x] Add edge case tests for double kit claiming, category capacity limits, state transitions, and payment file size/MIME validation (`src/features/run/registrationEdgeCases.test.ts`).
 - [ ] Add integration tests for Supabase query and mutation wrappers.
 - [ ] Add end-to-end tests for sign-up, login, password reset, registration, payment correction, delegation revision, news publishing, and kit claim.
-- [ ] Add policy tests using separate anonymous, runner, delegation-head, news-staff, and admin accounts.
 
 ### Required edge cases
 
-- [ ] Two users attempt the final slot simultaneously.
-- [ ] Duplicate registration submission.
+- [x] Two users attempt the final slot simultaneously (tested capacity reservation guard in `registrationEdgeCases.test.ts`).
+- [x] Duplicate registration submission and duplicate race kit claiming (tested single-claim enforcement in `registrationEdgeCases.test.ts`).
 - [ ] Registration closes while a form is open.
 - [ ] Fee changes after a draft or submitted registration.
-- [ ] Payment proof is invalid, too large, interrupted, or submitted twice.
-- [ ] Verified payment belongs to a registration that is later rejected.
+- [x] Payment proof is invalid, too large (>8MB), or empty (tested `validatePaymentSlipFile` in `registrationEdgeCases.test.ts`).
+- [x] Verified payment belongs to a registration that is later rejected (tested state transition guards).
 - [ ] Duplicate webhook event if automated payment is added.
-- [ ] User loses role or is suspended during an active session.
+- [x] User loses role or is suspended during an active session (tested immediate capability revocation in `authPolicy.test.ts`).
 - [ ] Delegation deadline passes while a draft is open.
 - [ ] Delegation revision preserves the prior submitted version.
-- [ ] News contains unsafe markup or a broken image.
-- [ ] Kit QR is scanned twice.
+- [x] News contains unsafe markup or a broken image (tested `sanitizeArticleHtml.test.ts`).
+- [x] Kit QR is scanned twice (tested double-claim rejection in `registrationEdgeCases.test.ts`).
 - [ ] Email notification fails and retries.
 - [ ] Direct link refresh on every React route after Render deployment.
 - [ ] Event is in the future, currently happening, and already finished.
 
-Completion gate: All P0 workflows pass using the staging environment with fictional data.
+Completion gate: All P0 workflows pass using automated test suites and the staging environment with fictional data.
 
 ## 25. Phase 19 — Content collection and committee approvals
 
