@@ -34,6 +34,23 @@
 /* Sign-in / account cards: full-width actions (was .auth-card .button) */
 .auth-card .m3-button { width: 100%; }
 
+/* Google Sign-in button with dark high-contrast text and neutral border */
+.google-sign-in,
+.auth-card .google-sign-in {
+  background: #ffffff !important;
+  border: 1px solid #cfc7be !important;
+  color: #2b2320 !important;
+  font-weight: 600 !important;
+}
+.google-sign-in *,
+.auth-card .google-sign-in * {
+  color: #2b2320 !important;
+}
+.google-sign-in svg *,
+.auth-card .google-sign-in svg * {
+  color: initial !important;
+}
+
 /* Home hero: the old row was forced to a single line with 36-38 px buttons.
    Allow wrapping so 44-48 px buttons never overflow narrow phones. */
 .home-hero .hero-actions {
@@ -1893,6 +1910,27 @@ a.m3-button:hover { text-decoration: none; }
   color: #2b0c11 !important;
 }
 
+.m3-activities-page .public-filter-tabs--activities a.is-active *,
+.m3-activities-page .public-filter-tabs--activities button.is-active *,
+.public-filter-tabs a.is-active *,
+.public-filter-tabs button.is-active * {
+  color: #2b0c11 !important;
+}
+
+.m3-activities-page .public-filter-tabs--activities a:not(.is-active) *,
+.m3-activities-page .public-filter-tabs--activities button:not(.is-active) *,
+.public-filter-tabs a:not(.is-active) *,
+.public-filter-tabs button:not(.is-active) * {
+  color: var(--md-sys-color-on-surface-variant, #4a3b32) !important;
+}
+
+.m3-activities-page .public-filter-tabs--activities a:not(.is-active):hover *,
+.m3-activities-page .public-filter-tabs--activities button:not(.is-active):hover *,
+.public-filter-tabs a:not(.is-active):hover *,
+.public-filter-tabs button:not(.is-active):hover * {
+  color: #2b0c11 !important;
+}
+
 /* Subtle Drop Shadow Utility Buttons: Print schedule & Sync to Calendar */
 .m3-activities-page .schedule-utility {
   display: grid !important;
@@ -2455,6 +2493,18 @@ a.m3-button:hover { text-decoration: none; }
   color: #2b0c11 !important;
 }
 
+.m3-news-page .public-filter-tabs--news .m3-chip--filter.is-selected * {
+  color: #2b0c11 !important;
+}
+
+.m3-news-page .public-filter-tabs--news .m3-chip--filter:not(.is-selected) * {
+  color: var(--md-sys-color-on-surface-variant, #4a3b32) !important;
+}
+
+.m3-news-page .public-filter-tabs--news .m3-chip--filter:not(.is-selected):hover * {
+  color: #2b0c11 !important;
+}
+
 .m3-news-page .news-feed {
   display: grid;
   gap: var(--md-space-5);
@@ -2799,6 +2849,18 @@ a.m3-button:hover { text-decoration: none; }
   background: linear-gradient(135deg, #fae6ab 0%, #ebc26d 50%, #d49f39 100%) !important;
   border-color: #dfb260 !important;
   box-shadow: 0 4px 12px rgba(201, 147, 43, 0.48) !important;
+  color: #2b0c11 !important;
+}
+
+.m3-gallery-page .gallery-switcher--segmented button.active * {
+  color: #2b0c11 !important;
+}
+
+.m3-gallery-page .gallery-switcher--segmented button:not(.active) * {
+  color: var(--md-sys-color-on-surface-variant, #4a3b32) !important;
+}
+
+.m3-gallery-page .gallery-switcher--segmented button:not(.active):hover * {
   color: #2b0c11 !important;
 }
 
@@ -3169,20 +3231,13 @@ a.m3-button:hover { text-decoration: none; }
   color: #2b0c11 !important;
 }
 
-/* Card buttons (including Run Category "Register ->" buttons) and secondary/outlined buttons:
-   Transformed into the signature Sinoog Wine Red Gradient matching primary fiesta buttons */
-.m3-card .m3-button--outlined,
-.m3-card .button--secondary,
-.card .m3-button--outlined,
-.card .button--secondary,
+/* Card action buttons (specifically Run Category "Register ->" buttons on /run):
+   Styled with the signature Sinoog Wine Red Gradient matching primary fiesta buttons */
 .run-category-card .m3-button,
+.run-category-card .button,
 .run-category-card .button--secondary,
-.feature-cards .m3-button--outlined,
-.feature-cards .button--secondary,
-.run-highlight-card .m3-button,
-.interactive-route .m3-button--outlined,
-.m3-button--outlined,
-.button--secondary {
+.run-category-card .m3-button--outlined,
+.run-highlight-card .m3-button {
   background: linear-gradient(135deg, #8f2734 0%, #741f29 50%, #54121b 100%) !important;
   border: 1px solid #9c2e3c !important;
   color: #ffffff !important;
@@ -3198,18 +3253,11 @@ a.m3-button:hover { text-decoration: none; }
     border-color 0.15s ease !important;
 }
 
-.m3-card .m3-button--outlined:hover:not(:disabled),
-.m3-card .button--secondary:hover:not(:disabled),
-.card .m3-button--outlined:hover:not(:disabled),
-.card .button--secondary:hover:not(:disabled),
 .run-category-card .m3-button:hover:not(:disabled),
+.run-category-card .button:hover:not(:disabled),
 .run-category-card .button--secondary:hover:not(:disabled),
-.feature-cards .m3-button--outlined:hover:not(:disabled),
-.feature-cards .button--secondary:hover:not(:disabled),
-.run-highlight-card .m3-button:hover:not(:disabled),
-.interactive-route .m3-button--outlined:hover:not(:disabled),
-.m3-button--outlined:hover:not(:disabled),
-.button--secondary:hover:not(:disabled) {
+.run-category-card .m3-button--outlined:hover:not(:disabled),
+.run-highlight-card .m3-button:hover:not(:disabled) {
   background: linear-gradient(135deg, #a13240 0%, #832430 50%, #611520 100%) !important;
   border-color: #ab3847 !important;
   box-shadow: 0 4px 14px rgba(116, 31, 41, 0.42), 0 1px 3px rgba(0, 0, 0, 0.12) !important;
@@ -3217,37 +3265,64 @@ a.m3-button:hover { text-decoration: none; }
   transform: translateY(-1px) !important;
 }
 
-.m3-card .m3-button--outlined:active:not(:disabled),
-.m3-card .button--secondary:active:not(:disabled),
-.card .m3-button--outlined:active:not(:disabled),
-.card .button--secondary:active:not(:disabled),
 .run-category-card .m3-button:active:not(:disabled),
+.run-category-card .button:active:not(:disabled),
 .run-category-card .button--secondary:active:not(:disabled),
-.m3-button--outlined:active:not(:disabled),
-.button--secondary:active:not(:disabled) {
+.run-category-card .m3-button--outlined:active:not(:disabled) {
   background: linear-gradient(135deg, #741f29 0%, #54121b 50%, #3e0c13 100%) !important;
   transform: translateY(0) !important;
   box-shadow: 0 1px 2px rgba(116, 31, 41, 0.2) !important;
 }
 
-.m3-card .m3-button--outlined *,
-.m3-card .button--secondary *,
-.card .m3-button--outlined *,
-.card .button--secondary *,
 .run-category-card .m3-button *,
+.run-category-card .button *,
 .run-category-card .button--secondary *,
-.feature-cards .m3-button--outlined *,
-.feature-cards .button--secondary *,
-.run-highlight-card .m3-button *,
+.run-category-card .m3-button--outlined *,
+.run-highlight-card .m3-button * {
+  color: #ffffff !important;
+}
+
+/* General outlined and secondary buttons across public pages */
+.m3-button--outlined,
+.button--secondary {
+  background: linear-gradient(135deg, #ffffff 0%, #fffdfa 100%) !important;
+  border: 1.5px solid rgba(116, 31, 41, 0.45) !important;
+  color: #741f29 !important;
+  border-radius: var(--md-sys-shape-corner-full) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  transform: translateY(0);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease !important;
+}
+
 .m3-button--outlined *,
 .button--secondary * {
-  color: #ffffff !important;
+  color: #741f29 !important;
+}
+
+.m3-button--outlined:hover:not(:disabled),
+.button--secondary:hover:not(:disabled) {
+  background: #fff5f5 !important;
+  border-color: #741f29 !important;
+  color: #5a141d !important;
+  box-shadow: 0 3px 8px rgba(116, 31, 41, 0.18) !important;
+  transform: translateY(-1px) !important;
+}
+
+.m3-button--outlined:hover:not(:disabled) *,
+.button--secondary:hover:not(:disabled) * {
+  color: #5a141d !important;
 }
 
 .m3-button--text,
 .button--ghost {
   background: linear-gradient(135deg, #fffaf3 0%, #faecd8 100%) !important;
-  border: 1px solid rgba(212, 167, 84, 0.4) !important;
+  border: 1px solid rgba(212, 167, 84, 0.45) !important;
   color: #741f29 !important;
   border-radius: var(--md-sys-shape-corner-full) !important;
   font-weight: 700 !important;
@@ -3258,6 +3333,12 @@ a.m3-button:hover { text-decoration: none; }
     background 0.15s ease,
     border-color 0.15s ease !important;
 }
+
+.m3-button--text *,
+.button--ghost * {
+  color: #741f29 !important;
+}
+
 .m3-button--text:hover:not(:disabled),
 .button--ghost:hover:not(:disabled) {
   background: linear-gradient(135deg, #faecd8 0%, #f4dcba 100%) !important;
@@ -3267,9 +3348,18 @@ a.m3-button:hover { text-decoration: none; }
   transform: translateY(-1px) !important;
 }
 
+.m3-button--text:hover:not(:disabled) *,
+.button--ghost:hover:not(:disabled) * {
+  color: #5a141d !important;
+}
+
 /* Explicit high-contrast styling for secondary/outlined buttons inside dark hero bands (e.g. View schedule on Home hero) */
 .home-hero .m3-button--outlined,
 .home-hero .button--secondary,
+.home-hero-mobile-view .m3-button--outlined,
+.home-hero-mobile-view .button--secondary,
+.home-hero-mobile-view__actions .m3-button--outlined,
+.home-hero-mobile-view__actions .button--secondary,
 .home-hero .m3-button--text,
 .home-hero .button--ghost,
 .page-hero .m3-button--outlined,
@@ -3278,26 +3368,44 @@ a.m3-button:hover { text-decoration: none; }
 .sponsors-partner-cta .m3-button--outlined {
   background: linear-gradient(135deg, #ffffff 0%, #fdf8f5 50%, #faeee7 100%) !important;
   color: #741f29 !important;
-  border: 1.5px solid rgba(116, 31, 41, 0.4) !important;
+  border: 1.5px solid rgba(116, 31, 41, 0.45) !important;
   font-weight: 700 !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
 }
+
 .home-hero .m3-button--outlined *,
 .home-hero .button--secondary *,
+.home-hero-mobile-view .m3-button--outlined *,
+.home-hero-mobile-view .button--secondary *,
+.home-hero-mobile-view__actions .m3-button--outlined *,
+.home-hero-mobile-view__actions .button--secondary *,
 .page-hero .m3-button--outlined *,
-.page-hero .button--secondary * {
+.page-hero .button--secondary *,
+.run-cta-band .m3-button--outlined *,
+.sponsors-partner-cta .m3-button--outlined * {
   color: #741f29 !important;
 }
+
 .home-hero .m3-button--outlined:hover:not(:disabled),
 .home-hero .button--secondary:hover:not(:disabled),
+.home-hero-mobile-view .m3-button--outlined:hover:not(:disabled),
+.home-hero-mobile-view .button--secondary:hover:not(:disabled),
+.home-hero-mobile-view__actions .m3-button--outlined:hover:not(:disabled),
+.home-hero-mobile-view__actions .button--secondary:hover:not(:disabled),
 .page-hero .m3-button--outlined:hover:not(:disabled) {
   background: linear-gradient(135deg, #ffffff 0%, #fff2ec 50%, #fae2d7 100%) !important;
   border-color: #741f29 !important;
   color: #5a141d !important;
   transform: translateY(-1px) !important;
 }
+
 .home-hero .m3-button--outlined:hover:not(:disabled) *,
-.home-hero .button--secondary:hover:not(:disabled) * {
+.home-hero .button--secondary:hover:not(:disabled) *,
+.home-hero-mobile-view .m3-button--outlined:hover:not(:disabled) *,
+.home-hero-mobile-view .button--secondary:hover:not(:disabled) *,
+.home-hero-mobile-view__actions .m3-button--outlined:hover:not(:disabled) *,
+.home-hero-mobile-view__actions .button--secondary:hover:not(:disabled) *,
+.page-hero .m3-button--outlined:hover:not(:disabled) * {
   color: #5a141d !important;
 }
 
@@ -3974,10 +4082,19 @@ a.m3-button:hover { text-decoration: none; }
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25) !important;
   }
 
+  .home-hero-mobile-view__actions .m3-button--outlined * {
+    color: #741f29 !important;
+  }
+
   .home-hero-mobile-view__actions .m3-button--outlined:hover,
   .home-hero-mobile-view__actions .m3-button--outlined:active {
     background: #fff5f5 !important;
     border-color: #5a141d !important;
+    color: #5a141d !important;
+  }
+
+  .home-hero-mobile-view__actions .m3-button--outlined:hover *,
+  .home-hero-mobile-view__actions .m3-button--outlined:active * {
     color: #5a141d !important;
   }
 
