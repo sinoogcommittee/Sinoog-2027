@@ -45,6 +45,12 @@ export function NewsArticlePage() {
     };
   }, [slug, reloadKey]);
 
+  useEffect(() => {
+    if (post?.title) {
+      document.title = `${post.title} | Sinoog 2027`;
+    }
+  }, [post]);
+
   const pageUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   const handleNativeShare = () => {

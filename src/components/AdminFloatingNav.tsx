@@ -12,6 +12,7 @@ import {
   AdminFinanceIcon,
   AdminSponsorsIcon,
   AdminGalleryIcon,
+  AdminAuditIcon,
   AdminSettingsIcon,
   AdminPublicSiteIcon,
   AdminSignOutIcon,
@@ -102,6 +103,12 @@ export function AdminFloatingNav() {
         label: 'Gallery',
         path: '/admin/gallery',
         renderIcon: () => <AdminGalleryIcon />,
+        access: 'admin',
+      },
+      {
+        label: 'Audit history',
+        path: '/admin/audit',
+        renderIcon: () => <AdminAuditIcon />,
         access: 'admin',
       },
 

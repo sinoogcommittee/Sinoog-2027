@@ -80,11 +80,11 @@ export function PublicLayout() {
       <header className="pub-topbar">
         <div className="pub-topbar__inner">
           {/* Brand */}
-          <Link className="pub-topbar__brand" to="/" aria-label="Sinoog 2027 — home">
+          <Link className="pub-topbar__brand" to="/" aria-label="Sinoog Festival — home">
             <LogoMark type="parish" />
             <LogoMark type="committee" />
             <span className="pub-topbar__brand-text">
-              <strong>Sinoog 2027</strong>
+              <strong>Sinoog Festival</strong>
               <small>Sto. Niño Parish · Guinacot</small>
             </span>
           </Link>
@@ -147,7 +147,7 @@ export function PublicLayout() {
       >
         <div className="pub-drawer__header">
           <LogoMark type="parish" />
-          <span className="pub-drawer__brand">Sinoog 2027</span>
+          <span className="pub-drawer__brand">Sinoog Festival</span>
           <button
             type="button"
             className="pub-drawer__close"

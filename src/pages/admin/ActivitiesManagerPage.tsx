@@ -155,8 +155,8 @@ export function ActivitiesManagerPage() {
       return;
     }
 
-    if (startsAt && endsAt && new Date(startsAt) > new Date(endsAt)) {
-      setFormError('The start time cannot be later than the end time.');
+    if (startsAt && endsAt && new Date(startsAt) >= new Date(endsAt)) {
+      setFormError('The end time must be after the start time.');
       return;
     }
 

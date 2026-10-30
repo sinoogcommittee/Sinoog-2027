@@ -860,7 +860,7 @@ a.m3-button:hover { text-decoration: none; }
     clip-path: inset(0 0 0 0) !important;
   }
 
-  /* Gold styling line at the bottom of the header ONLY on mobile view */
+  /* Gold styling line at the bottom of the header on mobile view */
   .pub-topbar::after,
   .site-header::after {
     content: "" !important;
@@ -878,6 +878,27 @@ a.m3-button:hover { text-decoration: none; }
       #b38128 100%
     ) !important;
     box-shadow: 0 1px 6px rgba(212, 167, 84, 0.45) !important;
+    pointer-events: none !important;
+    z-index: 20 !important;
+  }
+
+  /* Gold styling line at the top of the header on mobile view (wrapping the header in the same gold lines) */
+  .pub-topbar__inner::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    height: 2.5px !important;
+    background: linear-gradient(
+      90deg,
+      #b38128 0%,
+      #e5b95c 18%,
+      #fff4ce 50%,
+      #e5b95c 82%,
+      #b38128 100%
+    ) !important;
+    box-shadow: 0 -1px 6px rgba(212, 167, 84, 0.45) !important;
     pointer-events: none !important;
     z-index: 20 !important;
   }
@@ -945,8 +966,10 @@ a.m3-button:hover { text-decoration: none; }
   }
 
   .pub-topbar .logo-mark--parish,
-  .site-header .logo-mark--parish {
-    box-shadow: 0 0 0 2px #d4a754, 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+  .site-header .logo-mark--parish,
+  .pub-drawer__header .logo-mark--parish {
+    box-shadow: none !important;
+    border-radius: 0 !important;
   }
 }
 
@@ -972,34 +995,65 @@ a.m3-button:hover { text-decoration: none; }
 
 .pub-topbar .logo-mark--parish,
 .pub-topbar .logo-mark--committee {
-  height: 44px !important;
-  max-height: 44px !important;
+  height: 50px !important;
+  max-height: 50px !important;
+  width: auto !important;
   object-fit: contain !important;
   display: block !important;
 }
 
 .pub-topbar .logo-mark--parish {
-  width: 44px !important;
-  border-radius: 50% !important;
-}
-
-.pub-topbar .logo-mark--committee {
-  width: auto !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35)) !important;
 }
 
 @media (max-width: 640px) {
+  .pub-topbar__inner {
+    height: 60px !important;
+    padding: 0 12px !important;
+    gap: 8px !important;
+  }
+
+  .pub-topbar__brand {
+    gap: 8px !important;
+    min-width: 0 !important;
+  }
+
   .pub-topbar .logo-mark--parish,
   .pub-topbar .logo-mark--committee {
-    height: 38px !important;
-    max-height: 38px !important;
-  }
-
-  .pub-topbar .logo-mark--parish {
-    width: 38px !important;
-  }
-
-  .pub-topbar .logo-mark--committee {
+    height: 40px !important;
+    max-height: 40px !important;
     width: auto !important;
+  }
+
+  .pub-topbar__brand-text {
+    line-height: 1.18 !important;
+    min-width: 0 !important;
+  }
+
+  .pub-topbar__brand-text strong {
+    font-size: clamp(0.88rem, 3.6vw, 0.98rem) !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    letter-spacing: 0.02em !important;
+    white-space: nowrap !important;
+  }
+
+  .pub-topbar__brand-text small {
+    font-size: clamp(0.64rem, 2.3vw, 0.70rem) !important;
+    font-weight: 500 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.025em !important;
+    opacity: 0.92 !important;
+    white-space: nowrap !important;
+  }
+
+  .pub-topbar__menu-btn {
+    width: 38px !important;
+    height: 38px !important;
+    padding: 7px !important;
+    margin-left: auto !important;
   }
 }
 .pub-topbar__brand-text {
@@ -3193,7 +3247,7 @@ a.m3-button:hover { text-decoration: none; }
     display: none !important;
   }
 
-  /* --- Mobile View 1: Artwork Section + Countdown Timer in One Screen View --- */
+  /* --- Mobile View 1: Details + Artwork Section + Countdown Timer in One Screen View --- */
   .home-hero-mobile-view {
     position: relative !important;
     display: flex !important;
@@ -3231,19 +3285,158 @@ a.m3-button:hover { text-decoration: none; }
     z-index: 0 !important;
   }
 
+  /* Parish cover portrait video background for mobile hero (transparent, matching desktop 0.10 opacity) */
+  .home-hero-mobile-view .home-hero__cover-wrap {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 1 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    user-select: none !important;
+  }
+
+  .home-hero-mobile-view .home-hero__cover-video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    opacity: 0.10 !important;
+    filter: saturate(110%) contrast(105%) !important;
+    pointer-events: none !important;
+  }
+
+  /* Bamboo elements commented out / hidden for now */
+  .home-hero-mobile-view .home-hero__bamboo-top,
+  .home-hero-mobile-view .home-hero__bamboo {
+    display: none !important;
+  }
+
   .home-hero-mobile-view__content {
     flex: 1 1 auto !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: space-evenly !important;
     width: 100% !important;
-    padding: 2px 16px 0 !important;
+    padding: clamp(4px, 1vh, 10px) 16px clamp(2px, 0.6vh, 6px) !important;
     position: relative !important;
     z-index: 2 !important;
     box-sizing: border-box !important;
+    min-height: 0 !important;
   }
 
+  /* Details container: placed ABOVE the artwork emblem */
+  .home-hero-mobile-view__identity {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    margin: 0 0 clamp(4px, 1vh, 10px) 0 !important;
+    padding-top: 0 !important;
+    flex-shrink: 0 !important;
+    z-index: 2 !important;
+  }
+
+  /* STO. NIÑO PARISH (Kicker): clean geometric sans, 600 SemiBold, tracking 0.25em, champagne gold framed by horizontal hairlines */
+  .home-hero-mobile-view__kicker-wrap {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: clamp(8px, 2.5vw, 14px) !important;
+    margin-bottom: 1px !important;
+  }
+
+  .home-hero-mobile-view__hairline {
+    width: clamp(16px, 5.5vw, 28px) !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, transparent, #e6c687) !important;
+    opacity: 0.75 !important;
+    display: block !important;
+  }
+
+  .home-hero-mobile-view__hairline:last-child {
+    background: linear-gradient(90deg, #e6c687, transparent) !important;
+  }
+
+  .home-hero-mobile-view__parish {
+    margin: 0 !important;
+    font-family: 'Plus Jakarta Sans', 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: clamp(0.68rem, 2.5vw, 0.75rem) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.25em !important;
+    text-transform: uppercase !important;
+    color: #e6c687 !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+  }
+
+  /* SINOOG 2027 (Main Highlight): regal classical Roman serif (Cinzel), vertical gold-to-ivory gradient, tight dark drop shadow */
+  .home-hero-mobile-view__festival {
+    margin: 0 !important;
+    font-family: 'Cinzel', 'Cormorant Garamond', 'Fraunces', Georgia, serif !important;
+    font-size: clamp(2.2rem, 8.4vw, 2.85rem) !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.07em !important;
+    text-transform: uppercase !important;
+    line-height: 1.0 !important;
+    background: linear-gradient(180deg, #fff6d6 0%, #f2c96d 48%, #c89b3c 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: #f2c96d !important;
+    filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.65)) !important;
+  }
+
+  /* Refined Divider: sits between lines with a tiny diamond accent in center */
+  .home-hero-mobile-view__divider {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: auto !important;
+    height: auto !important;
+    margin: clamp(2px, 0.4vh, 4px) 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .home-hero-mobile-view__divider-line {
+    width: clamp(24px, 7vw, 38px) !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, transparent, #f2c96d 70%, #c89b3c 100%) !important;
+    opacity: 0.85 !important;
+    display: block !important;
+  }
+
+  .home-hero-mobile-view__divider-line:last-child {
+    background: linear-gradient(90deg, #c89b3c 0%, #f2c96d 30%, transparent) !important;
+  }
+
+  .home-hero-mobile-view__divider-diamond {
+    width: 5px !important;
+    height: 5px !important;
+    background: #f2c96d !important;
+    transform: rotate(45deg) !important;
+    box-shadow: 0 0 6px rgba(242, 201, 109, 0.75) !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Viva Pit Señor! (Sub-headline): refined, formal italic serif (Playfair Display Italic), warm liturgical ivory */
+  .home-hero-mobile-view__acclamation {
+    margin: 0 !important;
+    font-family: 'Playfair Display', 'Cormorant Garamond', 'Fraunces', Georgia, serif !important;
+    font-size: clamp(1.24rem, 4.8vw, 1.45rem) !important;
+    font-style: italic !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.03em !important;
+    color: #f8efe0 !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55) !important;
+    line-height: 1.15 !important;
+  }
+
+  /* Artwork emblem centered between identity details above and action buttons below */
   .home-hero-mobile-view__emblem {
     position: relative !important;
     display: flex !important;
@@ -3252,7 +3445,9 @@ a.m3-button:hover { text-decoration: none; }
     justify-content: center !important;
     width: 100% !important;
     text-align: center !important;
-    margin-top: clamp(12px, 4.5vh, 28px) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
   }
 
   /* Floating animation applied directly to hero-artwork so image and light circle animate together */
@@ -3264,11 +3459,11 @@ a.m3-button:hover { text-decoration: none; }
     animation: parish-emblem-float 6s ease-in-out infinite !important;
   }
 
-  /* Sto. Niño image: made bigger as requested with high-resolution clarity */
+  /* Sto. Niño image: carefully preserved size per user direction */
   .home-hero-mobile-view .hero-artwork img {
-    width: min(210px, 52vw) !important;
+    width: min(185px, 45vw) !important;
     height: auto !important;
-    max-height: min(220px, 29vh) !important;
+    max-height: min(195px, 24vh) !important;
     object-fit: contain !important;
     filter: drop-shadow(0 16px 30px rgba(20, 0, 4, 0.52)) !important;
     position: relative !important;
@@ -3282,8 +3477,8 @@ a.m3-button:hover { text-decoration: none; }
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    width: min(305px, 76vw) !important;
-    height: min(305px, 76vw) !important;
+    width: min(265px, 64vw) !important;
+    height: min(265px, 64vw) !important;
     border-radius: 50% !important;
     background: radial-gradient(
       circle,
@@ -3303,8 +3498,8 @@ a.m3-button:hover { text-decoration: none; }
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    width: min(285px, 70vw) !important;
-    height: min(285px, 70vw) !important;
+    width: min(245px, 58vw) !important;
+    height: min(245px, 58vw) !important;
     border-radius: 50% !important;
     border: 1.5px solid rgba(245, 223, 171, 0.26) !important;
     box-shadow:
@@ -3322,99 +3517,91 @@ a.m3-button:hover { text-decoration: none; }
     z-index: 1 !important;
   }
 
-  /* Details container centered cleanly between the outer circle background of the logo and the top of the countdown timer */
-  .home-hero-mobile-view__identity {
+  /* Action CTA buttons situated between artwork and countdown timer */
+  .home-hero-mobile-view__actions {
     display: flex !important;
-    flex-direction: column !important;
+    flex-direction: row !important;
     align-items: center !important;
-    margin-top: clamp(58px, 9.5vh, 70px) !important;
+    justify-content: center !important;
+    gap: clamp(8px, 2.5vw, 12px) !important;
+    width: 100% !important;
+    max-width: 360px !important;
+    margin: clamp(4px, 1vh, 8px) auto 0 auto !important;
+    padding: 0 8px !important;
+    z-index: 3 !important;
+    flex-shrink: 0 !important;
   }
 
-  /* Sto. Niño Parish: SMALLER */
-  .home-hero-mobile-view__parish {
-    margin: 0 !important;
-    font-family: Fraunces, serif !important;
-    font-size: clamp(0.82rem, 3.2vw, 0.94rem) !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.14em !important;
-    text-transform: uppercase !important;
-    color: #f7e0bc !important;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45) !important;
-    opacity: 0.92 !important;
-  }
-
-  .home-hero-mobile-view__divider {
-    width: 42px !important;
-    height: 1.5px !important;
-    margin: 4px 0 6px !important;
-    background: var(--gold, #d69d2e) !important;
-    box-shadow: 0 0 10px rgba(214, 157, 46, 0.5) !important;
-    display: block !important;
-  }
-
-  /* SINOOG 2027: BIGGER */
-  .home-hero-mobile-view__festival {
-    margin: 0 !important;
-    font-family: Fraunces, serif !important;
-    font-size: clamp(1.95rem, 7.6vw, 2.5rem) !important;
+  .home-hero-mobile-view__actions .m3-button {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    padding: 0 12px !important;
+    font-size: clamp(0.78rem, 3.2vw, 0.86rem) !important;
     font-weight: 700 !important;
-    letter-spacing: 0.08em !important;
-    text-transform: uppercase !important;
-    color: #ffffff !important;
-    line-height: 1.05 !important;
-    text-shadow: 0 2px 14px rgba(20, 0, 4, 0.65) !important;
+    letter-spacing: 0.02em !important;
+    border-radius: 9999px !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    text-decoration: none !important;
   }
 
-  /* Viva Pit Señor!: A LITTLE BIGGER */
-  .home-hero-mobile-view__acclamation {
-    margin: 2px 0 0 !important;
-    font-family: Fraunces, serif !important;
-    font-size: clamp(1.12rem, 4.2vw, 1.3rem) !important;
-    font-style: italic !important;
-    letter-spacing: 0.05em !important;
-    color: var(--gold-light, #f5dfab) !important;
-    text-shadow: 0 1px 6px rgba(20, 0, 4, 0.5) !important;
+  .home-hero-mobile-view__actions .m3-button--filled {
+    background: linear-gradient(135deg, #f7e09e 0%, #e5b95c 50%, #c9932b 100%) !important;
+    border: 1px solid #d4a754 !important;
+    color: #2b0c11 !important;
+    box-shadow: 0 3px 10px rgba(201, 147, 43, 0.4) !important;
   }
 
-  /* Ambient bamboo positioning on mobile */
-  .home-hero-mobile-view .home-hero__bamboo--right {
-    display: block !important;
-    position: absolute !important;
-    right: -15px !important;
-    bottom: 0 !important;
-    width: 90px !important;
-    height: 280px !important;
-    opacity: 0.20 !important;
-    pointer-events: none !important;
-    z-index: 1 !important;
-    transform: scaleX(-1) scale(1.1) rotate(-5deg) !important;
-    transform-origin: bottom center !important;
+  .home-hero-mobile-view__actions .m3-button--filled:hover,
+  .home-hero-mobile-view__actions .m3-button--filled:active {
+    background: linear-gradient(135deg, #fae8b4 0%, #ecc46f 50%, #d8a035 100%) !important;
+    color: #1a0508 !important;
   }
 
-  .home-hero-mobile-view .home-hero__bamboo--left {
-    display: block !important;
-    position: absolute !important;
-    left: -15px !important;
-    bottom: 0 !important;
-    width: 90px !important;
-    height: 280px !important;
-    opacity: 0.20 !important;
-    pointer-events: none !important;
-    z-index: 1 !important;
-    transform: scale(1.1) rotate(-5deg) !important;
-    transform-origin: bottom center !important;
+  .home-hero-mobile-view__actions .m3-button--outlined {
+    background: #ffffff !important;
+    border: 1.5px solid #741f29 !important;
+    color: #741f29 !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25) !important;
   }
 
-  .home-hero-mobile-view .home-hero__bamboo-top {
-    position: absolute !important;
-    top: 0 !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: min(340px, 85vw) !important;
-    height: auto !important;
-    opacity: 0.22 !important;
-    z-index: 1 !important;
-    pointer-events: none !important;
+  .home-hero-mobile-view__actions .m3-button--outlined:hover,
+  .home-hero-mobile-view__actions .m3-button--outlined:active {
+    background: #fff5f5 !important;
+    border-color: #5a141d !important;
+    color: #5a141d !important;
+  }
+
+  .home-hero-mobile-view__actions .m3-button svg {
+    flex-shrink: 0 !important;
+  }
+
+  @media (max-height: 700px) {
+    .home-hero-mobile-view__identity {
+      margin-bottom: 4px !important;
+    }
+    .home-hero-mobile-view__festival {
+      font-size: clamp(1.95rem, 7.5vw, 2.4rem) !important;
+    }
+    .home-hero-mobile-view__parish {
+      font-size: 0.65rem !important;
+    }
+    .home-hero-mobile-view__acclamation {
+      font-size: 1.15rem !important;
+    }
+    .home-hero-mobile-view__actions {
+      margin-top: 4px !important;
+    }
+    .home-hero-mobile-view__actions .m3-button {
+      min-height: 36px !important;
+      height: 36px !important;
+      font-size: 0.78rem !important;
+    }
   }
 
   /* Timer at bottom of Mobile View 1 cleanly resting directly above the floating nav bar */

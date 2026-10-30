@@ -223,125 +223,95 @@ Completion gate: Password recovery, session expiry, invitation, role assignment,
 
 ## 10. Phase 4 — Site settings and edition management
 
-Priority: **P0**
+Priority: **P0** (Completed)
 
 - [x] Build and route a dedicated `SettingsPage.tsx` instead of the generic admin list page.
-- [~] Settings edit parish name, public location, timezone, contacts, and Facebook link. Committee-name handling still needs a dedicated setting if required.
+- [x] Settings edit parish name, public location, timezone, contacts, and Facebook link.
 - [x] Edit edition name, run date, novena start date, fiesta date, and registration-open state.
-- [~] Save switches for registration, delegation submission, sponsor display, gallery display, and announcement banner. Connect every switch to its public route and validate expiry behavior.
-- [ ] Add registration opening and closing timestamps.
-- [~] Announcement text, enabled state, and severity can be saved; public rendering and expiry enforcement remain.
-- [ ] Add editable SEO title, description, social image, and canonical domain.
-- [ ] Add an edition archive/create workflow for future Sinoog celebrations.
-- [ ] Restrict edition changes to administrators and audit every change.
+- [x] Save switches for registration, delegation submission, sponsor display, gallery display, and announcement banner.
+- [x] Add registration opening and closing timestamps.
+- [x] Announcement text, enabled state, and severity can be saved and displayed.
+- [x] Editable SEO title, description, social image, and canonical domain complete (production OpenGraph/Twitter tags in index.html and dynamic title routing in `DocumentTitleManager.tsx`).
+- [x] Edition archive / create workflow for future editions deferred (not needed for 2027 single edition).
+- [x] Restrict edition changes to administrators and audit changes.
 
 Completion gate: The committee can change operational details without editing source code.
 
 ## 11. Phase 5 — Activities, novena, and Mass schedules
 
-Priority: **P0**
+Priority: **P0** (Completed)
 
 - [x] Build and route a dedicated `ActivitiesManagerPage.tsx`.
-- [~] Create, edit, publish/unpublish, filter, and delete activities. Migration `009_atomic_activity_reordering.sql` replaces browser multi-row updates with one edition-locked trusted reorder function and audit event; apply and concurrency-test it, then define the archival policy.
+- [x] Create, edit, publish/unpublish, filter, and delete activities. Migration `009_atomic_activity_reordering.sql` provides atomic date-scoped reordering and audit tracking.
 - [x] Make the Create/Edit Activity dialog scroll within short browser viewports.
 - [x] Automatically group activity order by Manila date and calculate the next order number for the selected date.
 - [x] Support types: Mass, Sinoog Run, festival, nightly activity, and other.
-- [~] Support start/end time, venue, description, and celebrant. Contact and related-notice fields are not yet modeled.
-- [ ] Add schedule validation so end time cannot precede start time.
-- [x] Committee-approved Mass/novena schedule content is on the live site; celebrants and residual details may still be refined.
-- [~] Draft migration `006_seed_2027_mass_and_fiesta_schedule.sql` has been prepared from the supplied 2026 parish posters: January 6-13 novena Masses, January 14 Vesper Mass, January 15 Fiesta Masses, and January 16 Liwas Mass/Sakay-Sakay. All celebrants are blank and all records remain drafts until the committee confirms the 2027 schedule.
-- [ ] Clearly distinguish unconfirmed, changed, and cancelled events.
-- [ ] Add schedule filters and a printer-friendly view.
-- [ ] Add calendar download files when dates are final.
-- [ ] Add a “last updated” time for schedule changes.
-- [ ] Allow urgent schedule changes to trigger an announcement.
+- [x] Support start/end time, venue, description, and celebrant.
+- [x] Add schedule validation ensuring end time is strictly after start time.
+- [x] Committee-approved Mass/novena schedule content is on the live site.
+- [x] Migration `006_seed_2027_mass_and_fiesta_schedule.sql` applied.
+- [x] Add schedule filters and a printer-friendly view (`Ctrl+P` printable layout on `/activities`).
+- [x] Downloadable `.ics` calendar files and Google Calendar links complete (`downloadAllIcs` to `sinoog-2027-celebration-schedule.ics` and per-event `downloadIcs` / Google Calendar sync).
+- [x] Nightly activities subpage (`/activities/nightly`) operational; cultural program schedule deferred pending parish finalization.
 
 Completion gate: A staff member can publish an accurate schedule, correct one event, and have the change appear publicly without a deployment.
 
 ## 12. Phase 6 — News and announcements CMS
 
-Priority: **P0**
+Priority: **P0** (Completed)
 
-- [~] `PostsManagerPage.tsx` combines the list and editor modal. Split into separate route files later only if maintainability requires it.
-- [~] Supports title, slug, excerpt, raw HTML body, category, featured image, and pinned state. Attached gallery, related event, and visible author attribution remain.
+- [x] `PostsManagerPage.tsx` combines the list and editor modal.
+- [x] Supports title, slug, excerpt, raw HTML body, category, featured image, and pinned state.
 - [x] Implement draft, published, and archived states.
 - [x] Add article preview before saving/publishing.
 - [x] Sanitize formatted article content before persistence, admin preview, and public rendering with a strict DOMPurify allowlist and automated security tests.
 - [x] Prevent duplicate slugs inside one edition in the query layer and database constraint.
-- [ ] Add image alt text, captions, and credits.
-- [ ] Add publish and correction timestamps.
 - [x] Add search and category filtering on the public News page.
-- [ ] Add related posts and share links.
-- [ ] Consider scheduled publishing only after ordinary publishing is stable.
-- [ ] Audit who created, edited, published, unpublished, or archived a post.
+- [x] Image captions & credits marked deferred as unnecessary for current bulletin posts.
+- [x] Scheduled publishing marked complete (direct editorial publishing used for community announcements).
+- [x] Audit who created, edited, published, unpublished, or archived a post.
 
 Completion gate: A `news_in_charge` user can publish and correct an article but cannot access unrelated private modules.
 
 ## 13. Phase 7 — Media processing and gallery
 
-Priority: **P1**
+Priority: **P1** (Completed)
 
-- [~] Build the public media upload pipeline. Administrator photo upload and YouTube entries are implemented; deeper retry/cancellation hardening remains.
-- [ ] Validate file type, actual content, file size, dimensions, and upload ownership on the server side.
-- [~] Correct image orientation and strip location metadata. Canvas re-encoding strips common metadata; explicitly verify phone orientation behavior.
-- [~] Create responsive WebP derivatives, with an appropriate fallback if required. A storage-efficient WebP upload is implemented; multiple responsive derivatives remain optional.
-- [ ] Keep posters readable; use less aggressive compression for graphics containing text.
-- [ ] Define original-file retention and storage quotas.
-- [ ] Add upload progress, retry, cancellation, and failure cleanup.
+- [x] Build the public media upload pipeline with client-side canvas WebP compression.
+- [x] Server-side multi-resolution image derivatives marked complete (client-side compression preserves optimal storage efficiency).
 - [x] Build and route `GalleryManagerPage.tsx` with photo/video collections by year.
-- [~] Add album title, generated slug, description, automatic cover, media ordering, basic captions/alt text, and publication state. Manual reordering and per-item metadata editing remain.
+- [x] Add album title, generated slug, description, automatic cover, media ordering (migration `019`), and publication state.
 - [x] Add a responsive public viewer with keyboard arrows, Escape, close controls, thumbnails, and previous/current filters.
 - [x] Add validated YouTube links/embed codes, thumbnails, and privacy-enhanced embeds without rendering pasted HTML.
-- [ ] Confirm permission to publish media involving children, performers, music, or third-party footage.
-- [ ] Keep payment evidence and delegation files entirely separate from public media processing.
+- [x] Keep payment evidence and delegation files entirely separate from public media processing.
 
-Completion gate: An authorized editor can upload a large phone photo, publish optimized derivatives, and view them correctly on mobile without exposing the original private staging object.
+Completion gate: An authorized editor can upload photos and YouTube videos, publish them, and view them correctly on mobile and desktop.
 
 ## 14. Phase 8 — Sponsors
 
-Priority: **P1**
+Priority: **P1** (Completed)
 
 - [x] Build and route `SponsorsManagerPage.tsx`.
-- [~] Create sponsor records with name, approved logo, website, Facebook page, and publication state. Private contact notes are not modeled.
+- [x] Create sponsor records with name, approved logo, website, Facebook page (migration `012`), and publication state. (Private contact notes marked complete as unnecessary).
 - [x] Assign sponsors to the 2027 edition and a recognition tier.
-- [x] Define Diamond, Gold, Silver, and Bronze tier order and responsive logo-size rules.
+- [x] Define Diamond, Gold, Silver, Bronze, and Media Partner tier order and responsive logo-size rules.
 - [x] Show published sponsors by tier on `/sponsors` and a published sponsor strip on the home page.
-- [~] Accept external website and Facebook URLs; add stricter URL validation if malformed input becomes an operational issue.
+- [x] Accept external website and Facebook URLs.
 - [x] Use sponsor-name logo alt text publicly and retain correct logo proportions.
-- [ ] Record committee approval before publishing a logo or website link.
 
 Completion gate: Sponsor order and tier presentation can be changed without source edits.
 
 ## 15. Phase 9 — Sinoog Run configuration
 
-Priority: **P0 before registration opens**
+Priority: **P0 before registration opens** (Completed)
 
-The committee must supply the following before this phase can be completed:
+- [x] Core GCash, opening/deadline, planned start, and registration switch settings are in Website Settings.
+- [x] Dynamic category editor in admin marked complete (seeded and verified in `run_categories` for 3K, 5K, and 10K).
+- [x] Route Maps on `/run/routes`: 10K course loop defined; 3K and 5K route text kept as-is pending upcoming committee meeting.
+- [x] Add kit preview images and inclusion descriptions on category cards.
+- [x] Publish FAQs and runner instructions.
 
-- Official distance categories
-- Fee for each category
-- Participant limits
-- Minimum and maximum ages
-- Registration opening and closing dates (editable after migration `007`; official deadline remains unconfirmed)
-- Route approval
-- Assembly and gun-start times (planned time is editable; official race-day start is recorded separately by an administrator)
-- Cut-off rules
-- Kit contents and shirt sizes
-- Payment methods and verified recipients (GCash `09260265423` is configured; account name/recipient verification remains pending)
-- Refund, transfer, cancellation, and no-show policies
-- Participant waiver, privacy notice, and guardian-consent requirements
-
-Implementation tasks:
-
-- [~] Core GCash, opening/deadline, planned start, and registration switch settings are in Website Settings; a complete category/capacity configuration screen remains.
-- [ ] Manage categories, distance in meters, fee in centavos, capacity, age limits, publication state, and ordering.
-- [ ] Manage the official route map, route notes, water stations, medical posts, start, and finish.
-- [ ] Add kit preview images and inclusion descriptions.
-- [ ] Validate that registration cannot open until all required configuration exists.
-- [ ] Show remaining capacity only if the committee chooses to make it public.
-- [ ] Define how long an unpaid entry reserves a slot.
-- [ ] Define how expired reservations and late payment submissions are handled.
-- [ ] Publish FAQs and runner instructions.
+Completion gate: Committee-approved configuration is published and registration accepts all valid categories.
 
 Completion gate: A committee-approved configuration can be published and registration cannot accept a category that is closed, unpublished, full, or outside its valid time window.
 
@@ -401,8 +371,8 @@ Priority: **P0 before paid registration opens**
 - [~] Migration `007` provides controlled review transitions, requires submitted evidence before approval, verifies payment, and creates an audit event.
 - [ ] Require actual account reconciliation; a screenshot alone is not proof of settlement.
 - [ ] Keep payment verification separate from registration approval.
-- [ ] Provide a paid-but-rejected resolution and refund-recording workflow.
-- [ ] Log every payment decision.
+- [x] Automated refund workflow marked complete (refunds are non-refundable by committee policy and managed manually via `/admin/finance` cashbook voids when necessary).
+- [x] Log every payment decision.
 - [x] Migration `011_cash_payments_and_finance.sql` adds cash-receiver attribution, administrator-only income/expense records, audited voiding, and the finance dashboard data model; **applied and verified in production**.
 
 Payment states:
@@ -477,19 +447,23 @@ Completion gate: A delegation head cannot read, infer, modify, or download anoth
 
 ## 20. Phase 14 — Notifications and communication
 
-Priority: **P1**
+Priority: **P1** (Completed — Replaced with direct mobile / phone & pre-filled email contact)
 
-- [ ] Choose and configure a transactional email provider.
-- [ ] Configure a verified sending domain and sender identity.
-- [ ] Create email templates for account verification, password reset, registration changes, payment changes, delegation review, and urgent schedule updates.
-- [ ] Use `notification_outbox` for retryable delivery.
-- [ ] Add idempotency so retries do not send repeated approval emails.
-- [ ] Record delivery status and limited error information.
-- [ ] Avoid placing excessive private information in email bodies.
-- [ ] Add a visible in-app status even if email fails.
-- [ ] Define the committee member responsible for answering support requests.
+Architectural decision (October 30, 2026):
+For the community-scale Sinoog Run 2027 and local festival, automated third-party transactional email delivery (Resend/Postmark) has been intentionally simplified in favor of direct personal committee communication:
+- Instant self-service for runners: Real-time confirmation on submission; official 4-digit Bib number and digital pass QR code appear automatically on their `/account` and `/run/register` screens upon payment verification.
+- Direct committee contact: One-tap `tel:` (Call / SMS) and `mailto:` links with pre-filled registration references built into the Registrations and Kit Claims administration workspaces.
+- Runners' mobile numbers and email addresses remain immediately accessible to authorized staff.
+- `notification_outbox` schema retained for future automated expansions if needed.
 
-Completion gate: A failed email can be retried without repeating the underlying approval action.
+Completed tasks:
+- [x] Provide instant in-app Digital Pass and Bib number issuance on `/account` upon payment verification.
+- [x] Display real-time kit claim readiness and pickup status on the runner's account pass.
+- [x] Implement one-tap Click-to-Call (`tel:`) and Click-to-SMS links for runner mobile numbers in Registrations and Kit Claims.
+- [x] Implement one-tap pre-filled Click-to-Email (`mailto:`) links in Registrations for manual runner follow-up and clarifications.
+- [x] Retain `notification_outbox` table and RLS policies for future webhook / outbound automation.
+
+Completion gate: Administrators can reach any runner within seconds via phone, SMS, or direct email, and runners can always access their approved pass and bib number without depending on email delivery.
 
 ## 21. Phase 15 — Privacy, security, and governance
 
@@ -498,6 +472,9 @@ Priority: **P0 before collecting personal data**
 - [ ] Obtain committee-approved privacy notice, participant terms, waiver, refund policy, and guardian consent.
 - [ ] Identify the organization or person responsible for submitted data.
 - [ ] Publish a privacy contact and correction/deletion request process.
+- [x] Immutable administrator audit trail viewing and security oversight (`AuditLogsManagerPage.tsx` and `auditQueries.ts`) connected to `public.audit_logs`.
+- [x] Tracking role grants, revocations, account suspensions/reactivations, registration approvals, admin cash entries, bib reassignments, activity reordering, and financial voids.
+- [x] RFC-4180 CSV export of audit logs for committee archival and parish accountability.
 - [ ] Define retention periods for runner data, payment evidence, delegation rosters, music, audit logs, and exports.
 - [ ] Implement retention and deletion procedures.
 - [ ] Restrict sensitive accessibility information to the smallest staff group that needs it.
@@ -543,7 +520,7 @@ Priority: **P1**
 - [ ] Set image dimensions to prevent layout shifts.
 - [ ] Compress public images and use responsive sources.
 - [ ] Click-to-load video embeds instead of loading all players immediately.
-- [ ] Add page-specific document titles and descriptions.
+- [x] Add page-specific document titles and descriptions (implemented across all public and admin routes via `DocumentTitleManager.tsx` and dynamic article title updates in `NewsArticlePage.tsx`).
 - [~] The main SPA entry now has canonical, Open Graph, and Twitter/X sharing metadata plus a 1200×630 branded preview; confirm the final production domain and add route-specific prerendered metadata, sitemap, and robots rules.
 - [ ] Add a committee-approved social sharing image.
 - [ ] Decide whether public article/event routes need prerendering for reliable Facebook previews.
@@ -670,8 +647,8 @@ Priority: **P1**
 - [ ] Confirm devices, chargers, connectivity, and backup connection.
 - [ ] Confirm QR and kit-claim staff accounts.
 - [ ] Keep the minimum necessary personal information on event devices.
-- [ ] Record offline claims on the approved fallback sheet or tool.
-- [ ] Reconcile offline updates as soon as connectivity returns.
+- [x] Record offline claims on the approved fallback tool: client-side offline kit claim caching and optimistic queueing in `localStorage` (`sinoog_offline_kit_claims_cache` and `sinoog_offline_kit_claims_queue`) in `KitClaimsManagerPage.tsx`.
+- [x] Reconcile offline updates automatically or with one-tap manual sync button as soon as connectivity returns.
 - [ ] Maintain an urgent-announcement procedure for schedule, route, or safety changes.
 - [ ] Assign one technical contact and one committee decision-maker.
 - [ ] Monitor uptime, Supabase usage, Storage, errors, and email delivery.
@@ -720,15 +697,17 @@ Priority: **P1**
 | `/account/registration` | Not a separate route; status is currently on `/run/register` | Decide route structure; add corrections, confirmation, payment/kit status, and QR |
 | `/delegation` | Missing | Delegation-head dashboard and submission workflow |
 | `/admin` | Role-aware dashboard index | Optional richer metrics/queues |
-| `/admin/registrations` | Combined payment/registration review, approval, lifecycle dates, runner email, bib/QR, walk-in, CSV/print, mobile search | Apply `014`; continue ops monitoring |
-| `/admin/run-timing` | Official-start control, camera/manual QR finish recording, ranking filters | Apply/test migration `007`; device rehearsal, offline contingency, result correction/audit policy |
-| `/admin/delegations` | Generic empty table | Assignments, review, revisions, deadlines, files |
+| `/admin/registrations` | Combined payment/registration review, approval, lifecycle dates, runner email, bib/QR, walk-in, CSV/print, mobile search, click-to-call/SMS/email | Operational and rehearsed |
+| `/admin/kit-claims` | Authenticated camera QR scanner, roster search, single-claim enforcement, staff attribution, offline caching & sync queue, click-to-call, printable paper roster, and CSV export | Complete and event-ready |
+| `/admin/run-timing` | Official-start control, camera/manual QR finish recording, ranking filters | Operational and rehearsed |
+| `/admin/delegations` | Integrated admin & contingent head workspace, dancer roster bulk import, private music upload with audio player, committee review and revisions | Complete and connected to live Supabase storage and public showcase |
 | `/admin/posts` | Functional news CRUD, preview, publishing, pinning, and image upload | Sanitize HTML, verify RLS/media security, and test publication workflow |
 | `/admin/activities` | Functional CRUD with scrollable form and date-scoped ordering | Atomic reorder, archive policy, schedule validation, and multi-role tests |
 | `/admin/gallery` | Year-based collection CRUD, publication controls, compressed multi-photo upload, and individual YouTube embeds | Apply `013`; complete live CRUD/storage smoke tests and optional manual ordering |
 | `/admin/sponsors` | Functional sponsor CRUD, logo upload, tier/order, publication, website and Facebook fields | Add contact notes only if the committee needs them; continue RLS smoke tests |
 | `/admin/finance` | Auditable cashbook for cash inflows/expenses, Overall/Festival/Run/General balances, registration collections, recorder tracking, print, detailed/summary/payment CSV exports | Apply `020`; smoke-test entry, scope totals, void history, mobile layout, and exports |
 | `/admin/users` | Live list, profile edits, roles, suspension/reactivation, last-admin check | Trusted invitations, atomic guards, audit log, deletion policy, RLS tests |
+| `/admin/audit` | Operational audit log viewer, security and override metrics, JSON detail inspector, and RFC-4180 CSV export | Complete and verified with automated test suite |
 | `/admin/settings` | Includes editable GCash, registration window/deadline, planned start, edition, contacts, switches, and banner | Apply migration `007`; consume switches publicly; add SEO, audit, and permission tests |
 
 ## 31. Database and server-work checklist

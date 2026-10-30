@@ -11,6 +11,8 @@ import {
   Printer,
   RefreshCw,
   Shirt,
+  Wifi,
+  WifiOff,
 } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/m3/Card';
@@ -60,14 +62,121 @@ export function KitClaimsManagerPage() {
     new Date().toLocaleString('en-PH', { timeZone: 'Asia/Manila' })
   );
 
+  // Offline PWA & Network Resilience states
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [offlineCachedAt, setOfflineCachedAt] = useState<string | null>(null);
+  const [pendingSyncCount, setPendingSyncCount] = useState<number>(() => {
+    try {
+      const q = localStorage.getItem('sinoog_offline_kit_claims_queue');
+      return q ? JSON.parse(q).length : 0;
+    } catch {
+      return 0;
+    }
+  });
+
+  const syncOfflineQueue = useCallback(async () => {
+    try {
+      const rawQueue = localStorage.getItem('sinoog_offline_kit_claims_queue');
+      if (!rawQueue) return;
+      const queue: Array<{ registrationId: string; bibNumber?: string | null; notes?: string }> = JSON.parse(rawQueue);
+      if (!queue.length) return;
+
+      let syncedCount = 0;
+      const remaining: typeof queue = [];
+      for (const item of queue) {
+        try {
+          await claimRaceKit({
+            registrationId: item.registrationId,
+            bibNumber: item.bibNumber,
+            notes: item.notes,
+          });
+          syncedCount++;
+        } catch {
+          remaining.push(item);
+        }
+      }
+
+      if (remaining.length > 0) {
+        localStorage.setItem('sinoog_offline_kit_claims_queue', JSON.stringify(remaining));
+      } else {
+        localStorage.removeItem('sinoog_offline_kit_claims_queue');
+      }
+      setPendingSyncCount(remaining.length);
+
+      if (syncedCount > 0) {
+        toast(`Synced ${syncedCount} offline kit claim(s) to the server.`, 'success');
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }, [toast]);
+
   const refresh = useCallback(async () => {
-    const edition = await getCurrentEdition();
-    const { event, categories: categoryList } = await getRunEventAndCategories(edition.id);
-    setRunEvent(event);
-    setCategories(categoryList);
-    const data = await getKitClaimsDashboard(event.id);
-    setRows(data);
-  }, []);
+    try {
+      const edition = await getCurrentEdition();
+      const { event, categories: categoryList } = await getRunEventAndCategories(edition.id);
+      setRunEvent(event);
+      setCategories(categoryList);
+      const data = await getKitClaimsDashboard(event.id);
+      setRows(data);
+      setIsOffline(false);
+      setOfflineCachedAt(null);
+
+      // Save offline snapshot to local storage
+      try {
+        localStorage.setItem(
+          'sinoog_offline_kit_claims_cache',
+          JSON.stringify({
+            savedAt: new Date().toISOString(),
+            event,
+            categories: categoryList,
+            rows: data,
+          })
+        );
+      } catch {
+        // Storage quota limit fallback
+      }
+
+      // Auto-drain pending queue if we have internet
+      await syncOfflineQueue();
+    } catch (netErr: unknown) {
+      // Offline fallback: load from cached local snapshot
+      const rawCache = localStorage.getItem('sinoog_offline_kit_claims_cache');
+      if (rawCache) {
+        try {
+          const cache = JSON.parse(rawCache);
+          if (cache.rows) setRows(cache.rows);
+          if (cache.event) setRunEvent(cache.event);
+          if (cache.categories) setCategories(cache.categories);
+          setIsOffline(true);
+          setOfflineCachedAt(cache.savedAt || new Date().toISOString());
+          return;
+        } catch {
+          // Fall through
+        }
+      }
+      throw netErr;
+    }
+  }, [syncOfflineQueue]);
+
+  // Online / offline event listeners
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOffline(false);
+      void syncOfflineQueue();
+      void refresh();
+    };
+    const handleOffline = () => {
+      setIsOffline(true);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [refresh, syncOfflineQueue]);
 
   useEffect(() => {
     let mounted = true;
@@ -195,6 +304,43 @@ export function KitClaimsManagerPage() {
   const handleClaim = async (runner: KitClaimRow) => {
     setClaiming(true);
     try {
+      if (isOffline || !navigator.onLine) {
+        // Enqueue claim locally for offline sync
+        const rawQueue = localStorage.getItem('sinoog_offline_kit_claims_queue') || '[]';
+        const queue: Array<{ registrationId: string; bibNumber?: string | null; notes?: string }> = JSON.parse(rawQueue);
+        queue.push({
+          registrationId: runner.id,
+          bibNumber: runner.bib_number,
+          notes: claimNotes.trim() || undefined,
+        });
+        localStorage.setItem('sinoog_offline_kit_claims_queue', JSON.stringify(queue));
+        setPendingSyncCount(queue.length);
+
+        // Optimistically mark row as claimed in memory
+        setRows((prev) =>
+          prev.map((r) =>
+            r.id === runner.id
+              ? {
+                  ...r,
+                  kit_claim: {
+                    registration_id: runner.id,
+                    bib_number: runner.bib_number,
+                    claimed_at: new Date().toISOString(),
+                    claimed_by: null,
+                    claimed_by_name: 'Local Desk (Pending Sync)',
+                    notes: claimNotes.trim() || null,
+                  },
+                }
+              : r
+          )
+        );
+
+        toast(`Recorded kit claim offline for #${runner.bib_number || '---'}. Will sync when reconnected.`, 'info');
+        setActiveRunner(null);
+        setClaimNotes('');
+        return;
+      }
+
       await claimRaceKit({
         registrationId: runner.id,
         bibNumber: runner.bib_number,
@@ -327,6 +473,60 @@ export function KitClaimsManagerPage() {
           </Button>
         </div>
       </div>
+
+      {/* Offline Status & Pending Sync Alert Banner */}
+      {(isOffline || pendingSyncCount > 0) && (
+        <div
+          className="no-print"
+          style={{
+            padding: '12px 16px',
+            background: isOffline ? '#fff9db' : '#e7f5ff',
+            border: `1.5px solid ${isOffline ? '#f59f00' : '#339af0'}`,
+            borderRadius: '12px',
+            marginBottom: 'var(--md-space-4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            flexWrap: 'wrap',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {isOffline ? <WifiOff size={20} color="#e67700" /> : <Wifi size={20} color="#1c7ed6" />}
+            <div>
+              <strong style={{ fontSize: '0.92rem', color: isOffline ? '#c92a2a' : '#1864ab', display: 'block' }}>
+                {isOffline ? 'Offline Mode Active' : 'Online & Syncing'}
+              </strong>
+              <span style={{ fontSize: '0.82rem', color: isOffline ? '#7f4f00' : '#1971c2' }}>
+                {isOffline
+                  ? `Operating from local cached roster${offlineCachedAt ? ` (Cached: ${new Date(offlineCachedAt).toLocaleTimeString()})` : ''}. All kit claims are stored safely on this device.`
+                  : 'Reconnected! You can now sync locally recorded claims to the database.'}
+                {pendingSyncCount > 0 && ` · ${pendingSyncCount} claims waiting to sync.`}
+              </span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={async () => {
+                setRefreshing(true);
+                try {
+                  await syncOfflineQueue();
+                  await refresh();
+                } catch {
+                  toast('Still offline. Offline claims are preserved.', 'info');
+                } finally {
+                  setRefreshing(false);
+                }
+              }}
+            >
+              {pendingSyncCount > 0 ? `Sync ${pendingSyncCount} Claims Now` : 'Check Connection'}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Metrics Cards */}
       <div className="kit-claims-metrics no-print" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--md-space-3)', marginBottom: 'var(--md-space-4)' }}>
@@ -552,7 +752,17 @@ export function KitClaimsManagerPage() {
 
                         {/* Mobile Number */}
                         <td>
-                          <span className="kit-mobile-text">{runner.mobile || '—'}</span>
+                          {runner.mobile ? (
+                            <a
+                              href={`tel:${runner.mobile}`}
+                              title="Tap to call or SMS runner"
+                              style={{ color: "var(--wine, #741724)", fontWeight: 600, textDecoration: "none" }}
+                            >
+                              📞 {runner.mobile}
+                            </a>
+                          ) : (
+                            <span className="kit-mobile-text">—</span>
+                          )}
                         </td>
 
                         {/* Kit Status */}
@@ -649,14 +859,35 @@ export function KitClaimsManagerPage() {
                   <div className="kit-claim-card__contact">
                     <div className="kit-contact-row">
                       <strong>Mobile:</strong>
-                      <span>{runner.mobile || 'No phone'}</span>
+                      {runner.mobile ? (
+                        <a
+                          href={`tel:${runner.mobile}`}
+                          style={{ color: "var(--wine, #741724)", fontWeight: 600, textDecoration: "none" }}
+                        >
+                          📞 {runner.mobile}
+                        </a>
+                      ) : (
+                        <span>No phone</span>
+                      )}
                     </div>
                     {runner.emergency_name && (
                       <div className="kit-contact-row">
                         <strong>Emergency:</strong>
                         <span>
                           {runner.emergency_name}
-                          {runner.emergency_mobile ? ` · ${runner.emergency_mobile}` : ''}
+                          {runner.emergency_mobile ? (
+                            <>
+                              {" · "}
+                              <a
+                                href={`tel:${runner.emergency_mobile}`}
+                                style={{ color: "var(--wine, #741724)", textDecoration: "none", fontWeight: 600 }}
+                              >
+                                📞 {runner.emergency_mobile}
+                              </a>
+                            </>
+                          ) : (
+                            ""
+                          )}
                         </span>
                       </div>
                     )}
@@ -807,11 +1038,32 @@ export function KitClaimsManagerPage() {
               </div>
               <div>
                 <small style={{ color: 'var(--md-sys-color-on-surface-variant)', display: 'block' }}>Mobile</small>
-                <span>{activeRunner.mobile || 'Not provided'}</span>
+                {activeRunner.mobile ? (
+                  <a
+                    href={`tel:${activeRunner.mobile}`}
+                    style={{ color: "var(--wine, #741724)", fontWeight: 700, textDecoration: "none" }}
+                  >
+                    📞 {activeRunner.mobile}
+                  </a>
+                ) : (
+                  <span>Not provided</span>
+                )}
               </div>
               <div>
                 <small style={{ color: 'var(--md-sys-color-on-surface-variant)', display: 'block' }}>Emergency Contact</small>
-                <span>{activeRunner.emergency_name || 'N/A'} ({activeRunner.emergency_mobile || 'N/A'})</span>
+                <span>
+                  {activeRunner.emergency_name || 'N/A'}{' '}
+                  {activeRunner.emergency_mobile ? (
+                    <a
+                      href={`tel:${activeRunner.emergency_mobile}`}
+                      style={{ color: "var(--wine, #741724)", textDecoration: "underline", fontWeight: 600 }}
+                    >
+                      (📞 {activeRunner.emergency_mobile})
+                    </a>
+                  ) : (
+                    ''
+                  )}
+                </span>
               </div>
             </div>
 

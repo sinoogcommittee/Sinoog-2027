@@ -271,7 +271,26 @@ export function AdminPublicSiteIcon() {
   );
 }
 
-/** 13. Sign Out: Cardinal Liturgical Exit Portal Doorway with Golden Arrow */
+/** 13. Audit History & Activity Log: Security Shield with Ledger Lines & Golden Stamp */
+export function AdminAuditIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      {/* Security Shield */}
+      <path d="M 12 2.5 L 4 5.5 V 11.5 C 4 16.5 7.5 20.5 12 22 C 16.5 20.5 20 16.5 20 11.5 V 5.5 L 12 2.5 Z" fill="#1864ab" stroke="#4dabf7" strokeWidth="0.9" />
+      {/* Inner Ledger Sheet */}
+      <rect x="7" y="6.5" width="10" height="10" rx="1.5" fill="#ffffff" />
+      {/* Ledger Lines */}
+      <line x1="9" y1="9" x2="15" y2="9" stroke="#741f29" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="9" y1="11.5" x2="15" y2="11.5" stroke="#495057" strokeWidth="1.1" strokeLinecap="round" />
+      <line x1="9" y1="14" x2="13" y2="14" stroke="#20c997" strokeWidth="1.1" strokeLinecap="round" />
+      {/* Golden Inspection Stamp */}
+      <circle cx="16.5" cy="16.5" r="3.2" fill="#ffd43b" stroke="#e67700" strokeWidth="0.8" />
+      <path d="M 15.2 16.5 L 16.1 17.4 L 17.8 15.7" stroke="#741f29" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/** 14. Sign Out: Cardinal Liturgical Exit Portal Doorway with Golden Arrow */
 export function AdminSignOutIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

@@ -1307,4 +1307,5 @@ export type DbDelegationParticipant = Database['public']['Tables']['delegation_p
 export type DbDelegationFile = Database['public']['Tables']['delegation_files']['Row'];
 export type DbRunRegistration = Database['public']['Tables']['run_registrations']['Row'];
 export type DbKitClaim = Database['public']['Tables']['kit_claims']['Row'];
+export type DbAuditLog = Database['public']['Tables']['audit_logs']['Row'];
 

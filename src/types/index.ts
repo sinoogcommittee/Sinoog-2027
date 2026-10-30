@@ -19,6 +19,7 @@ import type {
   DbDelegationFile,
   DbRunRegistration,
   DbKitClaim,
+  DbAuditLog,
 } from './database';
 
 export type {
@@ -42,6 +43,7 @@ export type {
   DbDelegationFile,
   DbRunRegistration,
   DbKitClaim,
+  DbAuditLog,
 };
 
 export type Role = AppRole;

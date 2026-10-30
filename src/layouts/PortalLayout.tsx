@@ -14,6 +14,7 @@ import {
   AdminFinanceIcon,
   AdminSponsorsIcon,
   AdminGalleryIcon,
+  AdminAuditIcon,
   AdminSettingsIcon,
   AdminPublicSiteIcon,
   AdminSignOutIcon,
@@ -31,6 +32,7 @@ const items = [
   ['Financial records', '/admin/finance', AdminFinanceIcon, 'admin'],
   ['Sponsors', '/admin/sponsors', AdminSponsorsIcon, 'admin'],
   ['Gallery', '/admin/gallery', AdminGalleryIcon, 'admin'],
+  ['Audit history', '/admin/audit', AdminAuditIcon, 'admin'],
   ['Website settings', '/admin/settings', AdminSettingsIcon, 'admin'],
 ] as const;
 
@@ -64,7 +66,7 @@ export function PortalLayout() {
         <Link className="brand brand--light" to="/">
           <LogoMark type="committee" />
           <span>
-            <strong>Sinoog 2027</strong>
+            <strong>Sinoog Festival</strong>
             <small>Committee workspace</small>
           </span>
         </Link>
@@ -103,10 +105,10 @@ export function PortalLayout() {
       </aside>
       <div className="portal-content">
         <header className="portal-topbar">
-          <Link className="portal-topbar-brand brand brand--light" to="/" title="Sinoog 2027 home">
+          <Link className="portal-topbar-brand brand brand--light" to="/" title="Sinoog Festival home">
             <LogoMark type="committee" />
             <span>
-              <strong>Sinoog 2027</strong>
+              <strong>Sinoog Festival</strong>
               <small>Committee workspace</small>
             </span>
           </Link>

@@ -253,10 +253,26 @@ export function HomePage() {
       </section>
 
       {/* ==============================================================
-          02. MOBILE VIEW 1 (< 900px): Artwork + Countdown in ONE screen view
+          02. MOBILE VIEW 1 (< 900px): Details + Artwork + Countdown in ONE screen view
           ============================================================== */}
       <section className="home-hero-mobile-view" aria-label="Sto. Niño Parish Celebration">
-        {/* Hanging bamboo leaves at top beneath header */}
+        {/* Parish cover portrait video background: transparent, looping video under mobile hero */}
+        <div className="home-hero__cover-wrap" aria-hidden="true">
+          <video
+            className="home-hero__cover-video home-hero__cover-photo"
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster="/images/parishcover_photo.webp"
+            aria-hidden="true"
+          >
+            <source src="/video/parishcover_video_portrait.webm" type="video/webm" />
+            <source src="/video/parishcover_video_portrait.mp4" type="video/mp4" />
+          </video>
+        </div>
+
+        {/* Ambient bamboo leaves and stalks temporarily hidden on mobile
         <div className="home-hero__bamboo-top" aria-hidden="true">
           <svg
             className="home-hero__bamboo-top-svg"
@@ -336,7 +352,6 @@ export function HomePage() {
           </svg>
         </div>
 
-        {/* Ambient bamboo stalks on mobile */}
         <div className="home-hero__bamboo home-hero__bamboo--left" aria-hidden="true">
           <span className="bamboo-stalk bamboo-stalk--one" />
           <span className="bamboo-stalk bamboo-stalk--two" />
@@ -355,9 +370,34 @@ export function HomePage() {
           <span className="bamboo-leaf bamboo-leaf--three" />
           <span className="bamboo-leaf bamboo-leaf--four" />
         </div>
+        */}
 
-        {/* Artwork Emblem & Dynamic Identity */}
+        {/* Details above, Artwork Emblem in center, Action buttons between artwork and timer */}
         <div className="home-hero-mobile-view__content">
+          <div className="home-hero-mobile-view__identity">
+            <div className="home-hero-mobile-view__kicker-wrap">
+              <span className="home-hero-mobile-view__hairline" aria-hidden="true" />
+              <p className="home-hero-mobile-view__parish">Sto. Niño Parish</p>
+              <span className="home-hero-mobile-view__hairline" aria-hidden="true" />
+            </div>
+
+            <div className="home-hero-mobile-view__divider" aria-hidden="true">
+              <span className="home-hero-mobile-view__divider-line" />
+              <span className="home-hero-mobile-view__divider-diamond" />
+              <span className="home-hero-mobile-view__divider-line" />
+            </div>
+
+            <p className="home-hero-mobile-view__festival">SINOOG 2027</p>
+
+            <div className="home-hero-mobile-view__divider" aria-hidden="true">
+              <span className="home-hero-mobile-view__divider-line" />
+              <span className="home-hero-mobile-view__divider-diamond" />
+              <span className="home-hero-mobile-view__divider-line" />
+            </div>
+
+            <p className="home-hero-mobile-view__acclamation">Viva Pit Señor!</p>
+          </div>
+
           <div className="home-hero-mobile-view__emblem">
             <picture className="hero-artwork">
               <source srcSet="/images/hero_section_art.webp" type="image/webp" />
@@ -370,12 +410,16 @@ export function HomePage() {
                 decoding="async"
               />
             </picture>
-            <div className="home-hero-mobile-view__identity">
-              <p className="home-hero-mobile-view__parish">Sto. Niño Parish</p>
-              <span className="home-hero-mobile-view__divider" aria-hidden="true" />
-              <p className="home-hero-mobile-view__festival">SINOOG 2027</p>
-              <p className="home-hero-mobile-view__acclamation">Viva Pit Señor!</p>
-            </div>
+          </div>
+
+          <div className="home-hero-mobile-view__actions">
+            <Button to={registerHref}>
+              <span className="hero-action-label hero-action-label--mobile">Register run</span>
+              <ArrowRight size={17} />
+            </Button>
+            <Button to="/activities" variant="secondary">
+              <span className="hero-action-label hero-action-label--mobile">View schedule</span>
+            </Button>
           </div>
         </div>
 
@@ -402,15 +446,6 @@ export function HomePage() {
             Come home to Guinacot as we honor the Holy Child through prayer, movement, music, and a community
             celebration rooted in tradition.
           </p>
-          <div className="hero-actions">
-            <Button to={registerHref}>
-              <span className="hero-action-label hero-action-label--mobile">Register run</span>
-              <ArrowRight size={17} />
-            </Button>
-            <Button to="/activities" variant="secondary">
-              <span className="hero-action-label hero-action-label--mobile">View schedule</span>
-            </Button>
-          </div>
         </div>
       </section>
 

@@ -544,10 +544,52 @@ export function RegistrationsManagerPage() {
                       {r.participant_name}
                     </strong>
                     <small
-                      style={{ color: "var(--muted)", fontSize: "0.82rem" }}
+                      style={{ color: "var(--muted)", fontSize: "0.82rem", display: "block" }}
                     >
-                      {r.locality || "Address not provided"} · {r.mobile}
+                      {r.locality || "Address not provided"}
                     </small>
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "4px", fontSize: "0.78rem" }}>
+                      {r.mobile && (
+                        <a
+                          href={`tel:${r.mobile}`}
+                          title="Call or SMS runner"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "3px",
+                            color: "var(--wine, #741724)",
+                            fontWeight: 600,
+                            textDecoration: "none",
+                            background: "rgba(116, 23, 36, 0.08)",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          📞 {r.mobile}
+                        </a>
+                      )}
+                      {r.registration_email && (
+                        <a
+                          href={`mailto:${r.registration_email}?subject=${encodeURIComponent(`Sinoog Run 2027: Update regarding registration #${r.reference}`)}`}
+                          title="Send direct email"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "3px",
+                            color: "#1864ab",
+                            fontWeight: 600,
+                            textDecoration: "none",
+                            background: "rgba(24, 100, 171, 0.08)",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          ✉️ {r.registration_email}
+                        </a>
+                      )}
+                    </div>
                   </div>
 
                   <div className="registration-cell registration-cell--category">
@@ -983,10 +1025,72 @@ export function RegistrationsManagerPage() {
                     : "Not set"}
               </div>
               <div>
-                <strong>Mobile:</strong> {selectedReg.mobile}
+                <strong>Mobile:</strong>{" "}
+                {selectedReg.mobile ? (
+                  <a
+                    href={`tel:${selectedReg.mobile}`}
+                    style={{ color: "var(--wine, #741724)", fontWeight: 700, textDecoration: "underline" }}
+                  >
+                    📞 {selectedReg.mobile}
+                  </a>
+                ) : (
+                  "Not provided"
+                )}
               </div>
               <div>
-                <strong>Email:</strong> {selectedReg.registration_email || "Not available"}
+                <strong>Email:</strong>{" "}
+                {selectedReg.registration_email ? (
+                  <a
+                    href={`mailto:${selectedReg.registration_email}?subject=${encodeURIComponent(`Sinoog Run 2027: Update regarding registration #${selectedReg.reference}`)}`}
+                    style={{ color: "#1864ab", fontWeight: 700, textDecoration: "underline" }}
+                  >
+                    ✉️ {selectedReg.registration_email}
+                  </a>
+                ) : (
+                  "Not available"
+                )}
+              </div>
+              <div
+                style={{
+                  gridColumn: "1 / -1",
+                  display: "flex",
+                  gap: "8px",
+                  flexWrap: "wrap",
+                  padding: "8px 12px",
+                  background: "#f8f5f0",
+                  borderRadius: "8px",
+                  border: "1px solid #ede4dc",
+                  alignItems: "center",
+                }}
+              >
+                <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "#6f6259" }}>Direct Contact:</span>
+                {selectedReg.mobile && (
+                  <a
+                    href={`tel:${selectedReg.mobile}`}
+                    className="button button--small button--outlined"
+                    style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "0.82rem", padding: "4px 10px" }}
+                  >
+                    📞 Call / SMS ({selectedReg.mobile})
+                  </a>
+                )}
+                {selectedReg.registration_email && (
+                  <a
+                    href={`mailto:${selectedReg.registration_email}?subject=${encodeURIComponent(`Sinoog Run 2027: Update regarding registration #${selectedReg.reference}`)}`}
+                    className="button button--small button--outlined"
+                    style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "0.82rem", padding: "4px 10px" }}
+                  >
+                    ✉️ Compose Email
+                  </a>
+                )}
+                {selectedReg.emergency_mobile && (
+                  <a
+                    href={`tel:${selectedReg.emergency_mobile}`}
+                    className="button button--small button--ghost"
+                    style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "0.82rem", padding: "4px 10px", color: "#857366" }}
+                  >
+                    🚨 Emergency: {selectedReg.emergency_name} ({selectedReg.emergency_mobile})
+                  </a>
+                )}
               </div>
               <div style={{ gridColumn: "1 / -1" }}>
                 <strong>Address:</strong>{" "}

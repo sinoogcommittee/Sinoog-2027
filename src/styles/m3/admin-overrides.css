@@ -14,16 +14,60 @@
 }
 
 /* Sidebar on Desktop / Expanded */
+.portal,
+.m3-portal {
+  grid-template-columns: 260px 1fr !important;
+}
+
 .portal-sidebar {
   background: #2b0c11; /* Parish deep wine header surface */
   color: #fff;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: var(--md-sys-elevation-level1);
+  padding: 24px 18px !important;
 }
 
 .portal-sidebar .brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
   padding-bottom: var(--md-space-3);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-decoration: none !important;
+  min-width: 0 !important;
+}
+
+.portal-sidebar .brand .logo-mark--committee {
+  width: 44px !important;
+  height: auto !important;
+  flex-shrink: 0 !important;
+  object-fit: contain !important;
+}
+
+.portal-sidebar .brand span {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  line-height: 1.2 !important;
+}
+
+.portal-sidebar .brand strong {
+  font-family: 'Fraunces', Georgia, serif !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  color: #ffffff !important;
+  white-space: nowrap !important;
+  line-height: 1.15 !important;
+}
+
+.portal-sidebar .brand small {
+  color: #f7e4be !important;
+  font-size: 0.72rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.025em !important;
+  opacity: 0.9 !important;
+  white-space: nowrap !important;
 }
 
 .portal-sidebar nav {

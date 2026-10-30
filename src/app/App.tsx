@@ -30,9 +30,11 @@ import { FinancePage } from '../pages/admin/FinancePage';
 import { SponsorsManagerPage } from '../pages/admin/SponsorsManagerPage';
 import { GalleryManagerPage } from '../pages/admin/GalleryManagerPage';
 import { DelegationsManagerPage } from '../pages/admin/DelegationsManagerPage';
+import { AuditLogsManagerPage } from '../pages/admin/AuditLogsManagerPage';
 import { NotFoundPage } from '../pages/public/NotFoundPage';
 import { RequireAdmin } from '../components/RequireAdmin';
 import { ScrollToTop } from '../components/ScrollToTop';
+import { DocumentTitleManager } from '../components/DocumentTitleManager';
 import { InstallAppPrompt } from '../components/InstallAppPrompt';
 import { RequireRole } from '../features/auth/RequireRole';
 import { useAuth } from '../features/auth/useAuth';
@@ -54,6 +56,7 @@ export default function App() {
   return (
     <>
     <ScrollToTop />
+    <DocumentTitleManager />
     <InstallAppPrompt />
     <Routes>
       <Route element={<PublicLayout />}>
@@ -104,6 +107,7 @@ export default function App() {
             <Route path="finance" element={<FinancePage />} />
             <Route path="sponsors" element={<SponsorsManagerPage />} />
             <Route path="gallery" element={<GalleryManagerPage />} />
+            <Route path="audit" element={<AuditLogsManagerPage />} />
           </Route>
 
           <Route element={<RequireRole role="news_in_charge" />}>
