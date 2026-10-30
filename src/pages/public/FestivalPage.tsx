@@ -1,4 +1,4 @@
-import { useState, useId, type ReactNode } from 'react';
+import { useState, useEffect, useId, type ReactNode } from 'react';
 import {
   ArrowRight,
   ChevronDown,
@@ -6,12 +6,18 @@ import {
   FileText,
   MapPin,
   Music,
+  Sparkles,
   Users,
 } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { PageHero } from '../../components/PageHero';
 import { SectionHeading } from '../../components/SectionHeading';
 import { Card } from '../../components/m3/Card';
+import { getCurrentEdition } from '../../features/editions/editionQueries';
+import {
+  getPublicApprovedDelegations,
+  type PublicApprovedDelegation,
+} from '../../features/delegations/delegationQueries';
 
 type FestivalSection = 'participants' | 'guidelines' | undefined;
 
@@ -163,7 +169,95 @@ function ParadeMapGraphic() {
   );
 }
 
-function MainFestivalView() {
+function ContingentShowcaseCard({ contingent }: { contingent: PublicApprovedDelegation }) {
+  return (
+    <Card
+      variant="outlined"
+      className="festival-contingent-card"
+      style={{
+        padding: '20px',
+        borderRadius: '14px',
+        background: '#ffffff',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        border: '1px solid var(--line, #ede4dc)',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', flexWrap: 'wrap' }}>
+        <div>
+          <h3 style={{ margin: 0, fontSize: '1.25rem', fontFamily: 'Fraunces, serif', color: 'var(--wine, #741724)' }}>
+            {contingent.name}
+          </h3>
+          {contingent.locality && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', color: '#6b5a52', marginTop: '2px' }}>
+              <MapPin size={14} />
+              {contingent.locality}
+            </span>
+          )}
+        </div>
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+            padding: '4px 10px',
+            borderRadius: '20px',
+            background: 'rgba(32, 201, 151, 0.12)',
+            color: '#099268',
+            fontSize: '0.78rem',
+            fontWeight: 700,
+          }}
+        >
+          <Sparkles size={13} />
+          Official Contingent
+        </span>
+      </div>
+
+      {contingent.theme && (
+        <div style={{ padding: '8px 12px', background: '#faf6ef', borderRadius: '8px', borderLeft: '3px solid var(--gold, #c9a227)' }}>
+          <small style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700, color: '#8b6914' }}>
+            Choreography Theme
+          </small>
+          <strong style={{ fontSize: '0.94rem', color: 'var(--wine, #5c0a12)' }}>{contingent.theme}</strong>
+        </div>
+      )}
+
+      {contingent.description && (
+        <p style={{ margin: 0, fontSize: '0.88rem', color: '#554941', lineHeight: 1.55 }}>
+          {contingent.description}
+        </p>
+      )}
+
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginTop: 'auto',
+          paddingTop: '10px',
+          borderTop: '1px solid #f2ede8',
+          fontSize: '0.82rem',
+          color: '#6b5a52',
+          flexWrap: 'wrap',
+          gap: '8px',
+        }}
+      >
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+          <Users size={15} color="#741724" />
+          <strong>{contingent.participantCount}</strong> {contingent.participantCount === 1 ? 'performer' : 'performers'}
+        </span>
+        {contingent.hasMusic && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#099268', fontWeight: 600 }}>
+            <Music size={13} /> Official music verified
+          </span>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function MainFestivalView({ approvedContingents }: { approvedContingents: PublicApprovedDelegation[] }) {
   return (
     <>
       <section className="section">
@@ -255,14 +349,22 @@ function MainFestivalView() {
             title="Delegations & roster"
             description="Expand each panel for roster and official delegation information as it is published."
           />
-          <div className="festival-accordion-list">
-            {CONTINGENT_PANELS.map((panel) => (
-              <AccordionPanel key={panel.id} title={panel.title}>
-                <p>{panel.body}</p>
-                <p className="festival-accordion__hint">Details to be announced after committee approval.</p>
-              </AccordionPanel>
-            ))}
-          </div>
+          {approvedContingents.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+              {approvedContingents.map((contingent) => (
+                <ContingentShowcaseCard key={contingent.id} contingent={contingent} />
+              ))}
+            </div>
+          ) : (
+            <div className="festival-accordion-list">
+              {CONTINGENT_PANELS.map((panel) => (
+                <AccordionPanel key={panel.id} title={panel.title}>
+                  <p>{panel.body}</p>
+                  <p className="festival-accordion__hint">Details to be announced after committee approval.</p>
+                </AccordionPanel>
+              ))}
+            </div>
+          )}
           <div className="festival-cta-stack">
             <Button to="/festival/participants">
               View participants <ArrowRight size={16} />
@@ -277,31 +379,39 @@ function MainFestivalView() {
   );
 }
 
-function ParticipantsView() {
+function ParticipantsView({ approvedContingents }: { approvedContingents: PublicApprovedDelegation[] }) {
   return (
     <section className="section">
       <div className="container">
         <SectionHeading
           eyebrow="Festival participants"
           title="Delegations taking part"
-          description="Approved groups will be listed here with community, team lead, and performance theme once published."
+          description="Approved groups representing communities and schools of Guindulman and neighboring parishes."
         />
-        <Card variant="filled" className="empty-state festival-empty-state">
-          <Users size={40} aria-hidden />
-          <h3>Participants will be announced</h3>
-          <p>
-            Contingents and official delegations appear after committee review. Check back as Sinoog 2027 approaches, or
-            follow parish announcements for the first published roster.
-          </p>
-          <div className="button-row festival-empty-state__actions">
-            <Button to="/festival" variant="secondary">
-              Back to festival overview
-            </Button>
-            <Button to="/festival/guidelines" variant="ghost">
-              Read guidelines
-            </Button>
+        {approvedContingents.length > 0 ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+            {approvedContingents.map((contingent) => (
+              <ContingentShowcaseCard key={contingent.id} contingent={contingent} />
+            ))}
           </div>
-        </Card>
+        ) : (
+          <Card variant="filled" className="empty-state festival-empty-state">
+            <Users size={40} aria-hidden />
+            <h3>Participants will be announced</h3>
+            <p>
+              Contingents and official delegations appear after committee review. Check back as Sinoog 2027 approaches, or
+              follow parish announcements for the first published roster.
+            </p>
+            <div className="button-row festival-empty-state__actions">
+              <Button to="/festival" variant="secondary">
+                Back to festival overview
+              </Button>
+              <Button to="/festival/guidelines" variant="ghost">
+                Read guidelines
+              </Button>
+            </div>
+          </Card>
+        )}
       </div>
     </section>
   );
@@ -350,6 +460,23 @@ function GuidelinesView() {
 }
 
 export function FestivalPage({ section }: { section?: FestivalSection }) {
+  const [approvedContingents, setApprovedContingents] = useState<PublicApprovedDelegation[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    getCurrentEdition()
+      .then((edition) => getPublicApprovedDelegations(edition.id))
+      .then((data) => {
+        if (active) setApprovedContingents(data);
+      })
+      .catch((err) => {
+        console.warn('Could not load approved contingents:', err);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const title =
     section === 'participants'
       ? 'Festival participants'
@@ -368,11 +495,11 @@ export function FestivalPage({ section }: { section?: FestivalSection }) {
     <main className="m3-festival-page">
       <PageHero eyebrow="January 15 · Guinacot" title={title} description={description} />
       {section === 'participants' ? (
-        <ParticipantsView />
+        <ParticipantsView approvedContingents={approvedContingents} />
       ) : section === 'guidelines' ? (
         <GuidelinesView />
       ) : (
-        <MainFestivalView />
+        <MainFestivalView approvedContingents={approvedContingents} />
       )}
     </main>
   );

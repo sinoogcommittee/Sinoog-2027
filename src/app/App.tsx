@@ -21,7 +21,6 @@ import { AuthCallbackPage } from '../pages/auth/AuthCallbackPage';
 import { RunnerAuthPage } from '../pages/auth/RunnerAuthPage';
 import { AccountPage } from '../pages/auth/AccountPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
-import { AdminListPage } from '../pages/admin/AdminListPage';
 import { ActivitiesManagerPage } from '../pages/admin/ActivitiesManagerPage';
 import { SettingsPage } from '../pages/admin/SettingsPage';
 import { PostsManagerPage } from '../pages/admin/PostsManagerPage';
@@ -30,6 +29,7 @@ import { UsersManagerPage } from '../pages/admin/UsersManagerPage';
 import { FinancePage } from '../pages/admin/FinancePage';
 import { SponsorsManagerPage } from '../pages/admin/SponsorsManagerPage';
 import { GalleryManagerPage } from '../pages/admin/GalleryManagerPage';
+import { DelegationsManagerPage } from '../pages/admin/DelegationsManagerPage';
 import { NotFoundPage } from '../pages/public/NotFoundPage';
 import { RequireAdmin } from '../components/RequireAdmin';
 import { ScrollToTop } from '../components/ScrollToTop';
@@ -111,7 +111,7 @@ export default function App() {
           </Route>
 
           <Route element={<RequireRole role="delegation_head" />}>
-            <Route path="delegations" element={<AdminListPage type="delegations" />} />
+            <Route path="delegations" element={<DelegationsManagerPage />} />
           </Route>
         </Route>
       </Route>

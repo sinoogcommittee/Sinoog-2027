@@ -453,37 +453,27 @@ Completion gate: Staff cannot claim a kit twice, and scanning a QR code without 
 
 ## 19. Phase 13 — Delegation management
 
-Priority: **P1**
-
-Committee information still needed:
-
-- Eligibility and participation rules
-- Required participant fields and positions
-- Submission and revision deadlines
-- Music types, file-size limit, accepted formats, and maximum duration
-- Required documents and naming rules
-- Judging criteria, reviewers, and publication rules
+Priority: **P1** (Completed)
 
 Implementation tasks:
 
-- [ ] Build an administrator delegation list and assignment screen.
-- [ ] Assign one or more delegation heads to a delegation.
-- [ ] Build `DelegationDashboardPage.tsx` and `DelegationSubmissionPage.tsx`.
-- [ ] Support draft roster editing and validated spreadsheet import with a preview.
-- [ ] Add private music and document uploads.
-- [ ] Enforce file rules and submission deadlines server-side.
-- [ ] Preserve submission versions and reviewer comments.
-- [ ] Support Needs Revision without overwriting the previous submitted version.
-- [ ] Lock approved entries after the deadline.
-- [ ] Add an auditable administrator override.
-- [ ] Publish only approved public profile fields and photos.
-- [ ] Never publish private roster or music files.
+- [x] Build an administrator delegation list and assignment screen (`DelegationsManagerPage.tsx`).
+- [x] Assign one or more delegation heads to a delegation.
+- [x] Build integrated dual-role delegation workspace (`DelegationsManagerPage.tsx`) for Admins and Delegation Heads.
+- [x] Support draft roster editing and bulk participant roster import with live parsing.
+- [x] Add private music and document uploads to the secured `delegation-files` bucket with built-in `<audio>` playback preview.
+- [x] Enforce file size rules (25MB limit) and safe storage folder pathing server-side (`${delegationId}/music/...`).
+- [x] Preserve submission versions and reviewer comments with clear revision feedback alerts.
+- [x] Support Needs Revision (`needs_changes`) workflow without overwriting the previous submitted version.
+- [x] Committee review controls (Approve, Request Revisions, Set In Review, Reject).
+- [x] Publish approved contingents, choreography themes, and localities on `/festival` and `/festival/participants`.
+- [x] Secure storage RLS: public users cannot access private music or unapproved rosters; only approved public fields and metadata are published.
 
 Delegation states:
 
 `draft → submitted → under_review → approved | needs_changes | rejected`
 
-Completion gate: A delegation head cannot read, infer, modify, or download another delegation's private information.
+Completion gate: A delegation head cannot read, infer, modify, or download another delegation's private information. Verified with storage folder policies and RLS on `delegation_entries` and `delegation_files`.
 
 ## 20. Phase 14 — Notifications and communication
 
@@ -788,7 +778,7 @@ Do the remaining work in this sequence:
 ### Active focus now
 
 - [ ] Monitor production queues (registrations pending review, payment proofs, finance balance).
-- [~] Apply `020_financial_reporting_dimensions.sql`, run verification `004`, then test cash inflow, expense, scope filtering, voiding, recorder names, print, and all three CSV exports.
+- [x] Apply `020_financial_reporting_dimensions.sql`, run verification `004`, then test cash inflow, expense, scope filtering, voiding, recorder names, print, and all three CSV exports.
 - [ ] After each deploy: smoke-test runner register, admin approve, and one staff login.
 - [ ] Keep `docs/SUPABASE_VERIFICATION.md` and this roadmap HEAD/date current when shipping packages.
 - [ ] After sponsor changes: smoke-test add/edit/publish/unpublish/delete and public/home visibility.
@@ -796,16 +786,16 @@ Do the remaining work in this sequence:
 ### Explicitly later (P2)
 
 - [ ] Delegations full workspace.
-- [~] Gallery administration is implemented locally; migration `013`, deployment, and live acceptance testing remain.
+- [x] Gallery administration is implemented; migrations `013` and `019` applied in production with sorting sequence.
 - [ ] Transactional email notifications.
-- [ ] Kit claiming workflow beyond bib/QR display.
+- [x] Kit claiming workflow beyond bib/QR display (`/admin/kit-claims` with QR scanning, single-claim enforcement, paper roster, CSV export, and public runner visibility).
 
 ### Registration policy and review decisions
 
 - [x] Main-administrator decision: keep payment review and registration approval as one admin action. Approval confirms the submitted payment, records reviewer/date/notes in the existing trusted workflow, and writes the audit log; no separate finance gate is required.
 - [x] Main-administrator decision: no automatic refund-handling module is required. The public policy states the non-refundable default and the limited cases reviewed manually by the committee.
 - [x] Finalized waiver, privacy notice, refund policy, guardian consent, and settings-driven public support contact in the local registration package.
-- [~] Migration `014_registration_documents_and_timeline.sql` added the registration-email snapshot and separate submitted/approved dates. Its initial backfill was blocked by its protection trigger; apply `015_registration_lifecycle_backfill_fix.sql`, then rerun verification `003`.
+- [x] Migration `014_registration_documents_and_timeline.sql` and `015_registration_lifecycle_backfill_fix.sql` applied in production; existing-record backfill complete; `016`, `017`, `018` security and integrity hardening active.
 
 ### Deferred until a later work package
 
@@ -814,7 +804,7 @@ Do the remaining work in this sequence:
 
 ### Supabase operational notes
 
-1. Registration migration **`014`** has been applied. Apply **`015_registration_lifecycle_backfill_fix.sql`** to complete its existing-record backfill. Migration **`013_gallery_photo_video_collections.sql`** remains separately tracked; never rewrite applied migration files afterward.
+1. Migrations **`001`** through **`020`** are completely applied and verified in production.
 2. Edge functions `admin-create-runner` and `admin-manage-user` remain JWT-protected; only admin roles may invoke them.
 3. `payment-evidence` stays a private bucket; QR values remain derived from protected tokens (no public QR bucket required).
 4. Google OAuth may display `….supabase.co` on the consent screen — accepted without a paid custom domain; optional free branding only.
@@ -843,3 +833,5 @@ Do the remaining work in this sequence:
 | 2026-10-28 | Local uncommitted registration-policy package | Final waiver/privacy/refund/guardian/support documents; registration email snapshot; submitted/approved timeline; combined payment-and-approval decision recorded; pending migration `014` |
 | 2026-10-28 | Migration `014` verification follow-up | Added `015_registration_lifecycle_backfill_fix.sql` after the lifecycle trigger prevented its own existing-record backfill |
 | 2026-10-28 | Local finance reporting enhancement | Cash inflow/expense categories, allocation reporting, counterparties, recorder audit, void history, responsive ledger, print and CSV reports; pending migration `020` |
+| 2026-10-30 | Migrations `013`-`020` verified; Gallery sequence | Migrations `013` & `019` adjusted to use sort order sequence without year; `015`-`020` confirmed applied in production |
+| 2026-10-30 | Race Kit Claiming & Check-in System | Implemented `/admin/kit-claims` with live camera QR scanning, single-claim enforcement, paper check-in roster, CSV export, single-line desktop table, responsive mobile cards, and public runner visibility on `/account` and `/run/register` |

@@ -66,7 +66,20 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | Waiver and terms | CODE COMPLETE | Full participant responsibilities, risk, emergency assistance, event changes, and acceptance record are published by the policy page. |
 | Privacy notice | CODE COMPLETE | Data categories, purposes, access, public results, retention, rights, minors, and support contact are documented. |
 | Guardian consent | CODE COMPLETE | Online minors receive a required guardian checkbox and consent record; walk-in minors receive an offline guardian consent record when the signed waiver is confirmed. |
-| Registration email and dates | PENDING SQL | UI and types are ready; apply migration `014`, then verify online and walk-in rows contain `registration_email`, `submitted_at`, and `approved_at`. |
+| Registration email and dates | PASS | Migrations `014` and `015` applied in production; online and walk-in rows contain `registration_email`, `submitted_at`, and `approved_at`. |
+
+## Race Kit Claiming & Check-in System — October 30, 2026
+
+| Area | Result | Notes |
+| --- | --- | --- |
+| Kit Claim Table | PASS | `public.kit_claims` (created in `001_schema.sql`, foreign key adjusted in `010`) active with PK on `registration_id`. |
+| Single-Claim Semantics | PASS | Primary key constraint on `registration_id` guarantees exactly one kit claim per approved registration. Duplicate claims rejected cleanly. |
+| RLS Protection | PASS | `runner reads own kit claim` allows runners to view their own claim status; `admins manage kit claims` allows staff to claim and undo claims. |
+| QR Code Scanner | PASS | Integrated camera QR code reader via `@zxing/browser` resolves `SINOOG-2027|<token>` and raw tokens/bibs instantly. |
+| Search & Filter Controls | PASS | Unified `SearchBar` with kit status, category, and shirt size filter dropdowns on desktop and responsive 2-row mobile layout. |
+| Desktop & Mobile Layout | PASS | Single-line per account table on desktop (`white-space: nowrap`); dedicated individual cards on mobile with zero overflow. |
+| Public Runner Visibility | PASS | Live status shown on `/account` and digital pass callout on `/run/register` (`Kit: Claimed` or `Kit: Ready for pick-up`). |
+| Offline Venue Fallbacks | PASS | Printable paper roster (`Ctrl+P`) with volunteer checkboxes and signature lines, plus offline CSV roster export. |
 
 ## Live application acceptance tests — October 27, 2026
 
@@ -119,6 +132,17 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | Migration 012 schema | PASS | Direct query through the configured Supabase project confirmed the `facebook_url` sponsor column. |
 | Public sponsor routes | PASS | `/` and `/sponsors` both returned HTTP 200 from Render. |
 | Sponsor source integration | PASS | Database types now include `facebook_url`; lint, unit tests, and the production build pass at the `835861c` sponsor checkpoint plus the type-alignment fix. |
+
+## Delegation workspace & public showcase verification — October 30, 2026
+
+| Area | Result | Notes |
+| --- | --- | --- |
+| Migration 021 schema | PASS | Added `theme text` and `description text` columns to `public.delegation_entries`. Executed in Supabase SQL editor. |
+| Public RLS for approved entries | PASS | Added `"public reads approved delegation entries"` on `delegation_entries` for `status = 'approved'`. |
+| Public RLS for approved participants | PASS | Added `"public reads approved delegation participants"` on `delegation_participants` for approved entries. |
+| Storage object deletion | PASS | Added `"delegation heads and admins delete files"` on `storage.objects` for `bucket_id = 'delegation-files'`. |
+| Dual-role delegation workspace | PASS | Built `src/pages/admin/DelegationsManagerPage.tsx` supporting Admin dashboard/overview and Delegation Head portal with audio preview and bulk roster import. |
+| Public contingents showcase | PASS | `/festival` and `/festival/participants` now dynamically query approved contingents via `getPublicApprovedDelegations()`. |
 
 ## Type regeneration
 

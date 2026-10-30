@@ -13,6 +13,10 @@ import type {
   DbSiteSetting,
   DbSponsor,
   DbDelegation,
+  DbDelegationEntry,
+  DbDelegationMembership,
+  DbDelegationParticipant,
+  DbDelegationFile,
   DbRunRegistration,
   DbKitClaim,
 } from './database';
@@ -32,6 +36,10 @@ export type {
   DbSiteSetting,
   DbSponsor,
   DbDelegation,
+  DbDelegationEntry,
+  DbDelegationMembership,
+  DbDelegationParticipant,
+  DbDelegationFile,
   DbRunRegistration,
   DbKitClaim,
 };

@@ -490,6 +490,8 @@ export interface Database {
           delegation_id: string;
           status: ReviewStatus;
           current_version: number;
+          theme: string | null;
+          description: string | null;
           submitted_at: string | null;
           reviewed_by: string | null;
           reviewed_at: string | null;
@@ -503,6 +505,8 @@ export interface Database {
           delegation_id: string;
           status?: ReviewStatus;
           current_version?: number;
+          theme?: string | null;
+          description?: string | null;
           submitted_at?: string | null;
           reviewed_by?: string | null;
           reviewed_at?: string | null;
@@ -516,6 +520,8 @@ export interface Database {
           delegation_id?: string;
           status?: ReviewStatus;
           current_version?: number;
+          theme?: string | null;
+          description?: string | null;
           submitted_at?: string | null;
           reviewed_by?: string | null;
           reviewed_at?: string | null;
@@ -1295,6 +1301,10 @@ export type DbAlbumItem = Database['public']['Tables']['album_items']['Row'];
 export type DbSiteSetting = Database['public']['Tables']['site_settings']['Row'];
 export type DbSponsor = Database['public']['Tables']['sponsors']['Row'];
 export type DbDelegation = Database['public']['Tables']['delegations']['Row'];
+export type DbDelegationEntry = Database['public']['Tables']['delegation_entries']['Row'];
+export type DbDelegationMembership = Database['public']['Tables']['delegation_memberships']['Row'];
+export type DbDelegationParticipant = Database['public']['Tables']['delegation_participants']['Row'];
+export type DbDelegationFile = Database['public']['Tables']['delegation_files']['Row'];
 export type DbRunRegistration = Database['public']['Tables']['run_registrations']['Row'];
 export type DbKitClaim = Database['public']['Tables']['kit_claims']['Row'];
 
