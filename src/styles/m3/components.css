@@ -79,13 +79,13 @@
 }
 
 .m3-button--filled {
-  background: #741f29;
-  border: 1px solid #5a141d;
+  background: linear-gradient(135deg, #8f2734 0%, #741f29 50%, #54121b 100%);
+  border: 1px solid #9c2e3c;
   color: #ffffff;
   border-radius: var(--md-sys-shape-corner-full);
   font-weight: 700;
   letter-spacing: 0.01em;
-  box-shadow: 0 2px 6px rgba(116, 31, 41, 0.28), 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 10px rgba(116, 31, 41, 0.32), 0 1px 2px rgba(0, 0, 0, 0.1);
   transform: translateY(0);
   transition:
     transform 0.15s ease,
@@ -94,14 +94,14 @@
     border-color 0.15s ease;
 }
 .m3-button--filled:hover:not(:disabled) {
-  background: #5a141d;
-  border-color: #4a0f16;
+  background: linear-gradient(135deg, #a13240 0%, #832430 50%, #611520 100%);
+  border-color: #ab3847;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(116, 31, 41, 0.35), 0 1px 3px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 14px rgba(116, 31, 41, 0.42), 0 1px 3px rgba(0, 0, 0, 0.12);
   color: #ffffff;
 }
 .m3-button--filled:active:not(:disabled) {
-  background: #4a0f16;
+  background: linear-gradient(135deg, #741f29 0%, #54121b 50%, #3e0c13 100%);
   transform: translateY(0);
   box-shadow: 0 1px 2px rgba(116, 31, 41, 0.2);
 }
@@ -285,11 +285,11 @@
   color: var(--md-sys-color-on-surface);
 }
 .m3-chip--filter.is-selected {
-  background: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
-  border: 0;
+  background: linear-gradient(135deg, #f7e09e 0%, #e5b95c 50%, #c9932b 100%);
+  border: 1px solid #d4a754;
+  color: #2b0c11;
   font-weight: 700;
-  box-shadow: var(--md-sys-elevation-level1);
+  box-shadow: 0 2px 6px rgba(201, 147, 43, 0.35);
 }
 .m3-chip--filter.is-selected::before {
   display: none;
@@ -612,9 +612,9 @@
 .admin-segmented-control a.is-active,
 .filter-tabs a.is-active,
 .segmented-control a.is-active {
-  background: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
+  background: linear-gradient(135deg, #f7e09e 0%, #e5b95c 50%, #c9932b 100%);
+  border: 1px solid #d4a754;
+  color: #2b0c11;
   font-weight: 700;
-  box-shadow: var(--md-sys-elevation-level1);
-  border: 0;
+  box-shadow: 0 2px 6px rgba(201, 147, 43, 0.35);
 }

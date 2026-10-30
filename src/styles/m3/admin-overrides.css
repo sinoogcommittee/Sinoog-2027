@@ -753,13 +753,13 @@
 .admin-panel .m3-button--filled,
 .dialog .m3-button--filled,
 .admin-heading .m3-button--filled {
-  background: #741f29 !important;
-  border: 1px solid #5a141d !important;
+  background: linear-gradient(135deg, #8f2734 0%, #741f29 50%, #54121b 100%) !important;
+  border: 1px solid #9c2e3c !important;
   color: #ffffff !important;
   border-radius: var(--md-sys-shape-corner-full) !important;
   font-weight: 700 !important;
   letter-spacing: 0.01em !important;
-  box-shadow: 0 2px 6px rgba(116, 31, 41, 0.28), 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 3px 10px rgba(116, 31, 41, 0.32), 0 1px 2px rgba(0, 0, 0, 0.1) !important;
   transform: translateY(0);
   transition:
     transform 0.15s ease,
@@ -775,10 +775,10 @@
 .admin-panel .m3-button--filled:hover:not(:disabled),
 .dialog .m3-button--filled:hover:not(:disabled),
 .admin-heading .m3-button--filled:hover:not(:disabled) {
-  background: #5a141d !important;
-  border-color: #4a0f16 !important;
+  background: linear-gradient(135deg, #a13240 0%, #832430 50%, #611520 100%) !important;
+  border-color: #ab3847 !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 4px 12px rgba(116, 31, 41, 0.35), 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 4px 14px rgba(116, 31, 41, 0.42), 0 1px 3px rgba(0, 0, 0, 0.12) !important;
   color: #ffffff !important;
 }
 
@@ -789,7 +789,7 @@
 .admin-panel .m3-button--filled:active:not(:disabled),
 .dialog .m3-button--filled:active:not(:disabled),
 .admin-heading .m3-button--filled:active:not(:disabled) {
-  background: #4a0f16 !important;
+  background: linear-gradient(135deg, #741f29 0%, #54121b 50%, #3e0c13 100%) !important;
   transform: translateY(0) !important;
   box-shadow: 0 1px 2px rgba(116, 31, 41, 0.2) !important;
 }

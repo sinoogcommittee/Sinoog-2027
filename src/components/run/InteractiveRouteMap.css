@@ -2,9 +2,21 @@
   margin: var(--md-space-6) 0 var(--md-space-8);
   scroll-margin-top: 80px;
   overflow: hidden;
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--md-sys-shape-corner-large);
-  background: var(--md-sys-color-surface-container-lowest);
+  border: var(--sinoog-border-card, 1px solid #e8d5d8);
+  border-radius: var(--md-sys-shape-corner-large, 16px);
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 92%, transparent);
+  box-shadow: var(--sinoog-shadow-card);
+  -webkit-backdrop-filter: blur(10px) saturate(112%);
+  backdrop-filter: blur(10px) saturate(112%);
+  isolation: isolate;
+  transition:
+    box-shadow 180ms var(--sinoog-ease-card, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color 180ms ease;
+}
+
+.interactive-route:hover {
+  border-color: var(--sinoog-border-card-hover, #b89050);
+  box-shadow: var(--sinoog-shadow-card-hover);
 }
 
 .run-route-map-loading {
@@ -12,11 +24,12 @@
   min-height: 420px;
   margin: var(--md-space-6) 0 var(--md-space-8);
   place-content: center;
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--md-sys-shape-corner-large);
+  border: var(--sinoog-border-card, 1px solid #e8d5d8);
+  border-radius: var(--md-sys-shape-corner-large, 16px);
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
   font-weight: 700;
+  box-shadow: var(--sinoog-shadow-card);
 }
 
 .interactive-route__header {
@@ -425,7 +438,7 @@
 /* Responsive / Mobile View */
 @media (max-width: 860px) {
   .interactive-route {
-    margin: var(--md-space-3) 0 var(--md-space-5);
+    margin: var(--md-space-3) 0 var(--md-space-4);
   }
 
   .interactive-route__header {
@@ -504,6 +517,7 @@
     flex-direction: column;
     height: auto;
     min-height: 0;
+    max-height: none;
   }
 
   .interactive-route__map-wrap,
@@ -515,8 +529,11 @@
   }
 
   .interactive-route__sidebar {
+    flex: none;
     width: 100%;
     height: auto;
+    min-height: 0;
+    max-height: none;
     border-left: none;
     border-top: 1px solid var(--md-sys-color-outline-variant);
     background: var(--md-sys-color-surface-container-low);
@@ -533,7 +550,7 @@
   .interactive-route__points-mobile {
     display: flex !important;
     width: 100%;
-    padding: 8px 10px;
+    padding: 8px 10px 6px;
   }
 
   .interactive-route__nav-pill {
@@ -661,6 +678,7 @@
   }
 
   .interactive-route__sidebar-footer {
+    flex: none;
     padding: 6px 12px 10px;
   }
 

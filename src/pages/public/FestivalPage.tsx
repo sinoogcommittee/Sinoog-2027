@@ -9,12 +9,12 @@ import {
   Music,
   Sparkles,
   Users,
+  X,
 } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { PageHero } from '../../components/PageHero';
 import { SectionHeading } from '../../components/SectionHeading';
 import { Card } from '../../components/m3/Card';
-import { Dialog } from '../../components/m3/Dialog';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import {
   getPublicApprovedDelegations,
@@ -99,14 +99,6 @@ function FestivalGroundsMaps({ onZoomFloorPlan }: { onZoomFloorPlan: () => void 
             <span className="festival-map-card__eyebrow">Arena Layout</span>
             <h3 className="festival-map-card__title">Street Dancing & Grand Showdown Floor Plan</h3>
           </div>
-          <button
-            type="button"
-            className="festival-map-card__zoom-btn"
-            onClick={onZoomFloorPlan}
-            title="Expand floor plan to full screen"
-          >
-            <Maximize2 size={15} /> Full View
-          </button>
         </div>
         <p className="festival-map-card__desc">
           Sto. Niño Parish Grounds layout showing the official Street Dancing judging pavilion, bleachers, and Grand Showdown arena.
@@ -313,6 +305,22 @@ function ContingentShowcaseCard({ contingent }: { contingent: PublicApprovedDele
 
 function MainFestivalView({ approvedContingents }: { approvedContingents: PublicApprovedDelegation[] }) {
   const [floorPlanZoomOpen, setFloorPlanZoomOpen] = useState(false);
+
+  useEffect(() => {
+    if (!floorPlanZoomOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setFloorPlanZoomOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [floorPlanZoomOpen]);
   return (
     <>
       <section className="section">
@@ -431,28 +439,47 @@ function MainFestivalView({ approvedContingents }: { approvedContingents: Public
         </div>
       </section>
 
-      <Dialog
-        open={floorPlanZoomOpen}
-        title="Sinoog Festival Arena & Showdown Floor Plan"
-        onClose={() => setFloorPlanZoomOpen(false)}
-        className="festival-floor-plan-dialog"
-        actions={
-          <Button type="button" variant="text" onClick={() => setFloorPlanZoomOpen(false)}>
-            Close
-          </Button>
-        }
-      >
-        <div style={{ textAlign: 'center', padding: '8px 0' }}>
-          <img
-            src="/images/festival_floor_plan.webp"
-            alt="Sinoog Festival Arena Floor Plan full resolution"
-            className="festival-floor-plan-dialog-img"
-          />
-          <p style={{ marginTop: '12px', fontSize: '0.85rem', color: 'var(--md-sys-color-on-surface-variant)' }}>
-            Official Sto. Niño Parish Grounds spatial plan for street dancing flow, judges pavilion, and grand showdown arena.
-          </p>
+      {/* Fullscreen floor plan image viewer */}
+      {floorPlanZoomOpen && (
+        <div
+          className="floor-plan-fullscreen"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Sinoog Festival Arena Floor Plan Fullscreen"
+          onClick={() => setFloorPlanZoomOpen(false)}
+        >
+          <button
+            type="button"
+            className="floor-plan-fullscreen__close"
+            onClick={() => setFloorPlanZoomOpen(false)}
+            aria-label="Close fullscreen view"
+            title="Close (Esc)"
+          >
+            <X size={22} />
+          </button>
+
+          <div
+            className="floor-plan-fullscreen__stage"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src="/images/festival_floor_plan.webp"
+              alt="Sinoog Festival Arena Floor Plan full resolution"
+              className="floor-plan-fullscreen__img"
+            />
+            <div className="floor-plan-fullscreen__caption">
+              <span>Street Dancing &amp; Grand Showdown Arena Floor Plan</span>
+              <button
+                type="button"
+                className="floor-plan-fullscreen__close-pill"
+                onClick={() => setFloorPlanZoomOpen(false)}
+              >
+                <X size={14} /> Close
+              </button>
+            </div>
+          </div>
         </div>
-      </Dialog>
+      )}
     </>
   );
 }

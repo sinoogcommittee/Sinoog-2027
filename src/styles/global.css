@@ -1380,10 +1380,11 @@ button:focus-visible {
 }
 .public-filter-tabs a.is-active,
 .public-filter-tabs button.is-active {
-  border-color: var(--wine);
-  background: var(--wine);
-  color: #fff;
-  box-shadow: 0 5px 14px rgba(116, 31, 41, 0.2);
+  border: 1px solid #d4a754;
+  background: linear-gradient(135deg, #f7e09e 0%, #e5b95c 50%, #c9932b 100%);
+  color: #2b0c11;
+  font-weight: 700;
+  box-shadow: 0 3px 8px rgba(201, 147, 43, 0.35);
 }
 .public-filter-tabs a:focus-visible,
 .public-filter-tabs button:focus-visible {
