@@ -10,7 +10,16 @@ import {
   type MapGeoJSONFeature,
   type StyleSpecification,
 } from 'maplibre-gl';
-import { AlertCircle, Download, ExternalLink, MapPinned, Navigation, Route } from 'lucide-react';
+import {
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  ExternalLink,
+  MapPinned,
+  Navigation,
+  Route,
+} from 'lucide-react';
 import type { FeatureCollection } from 'geojson';
 import mapLibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -266,6 +275,12 @@ export function InteractiveRouteMap() {
     )
     .sort((a, b) => (a.properties.order ?? 0) - (b.properties.order ?? 0));
 
+  const activePointIndex = Math.max(
+    0,
+    coursePoints.findIndex((p) => p.properties.order === selectedPointOrder),
+  );
+  const activeMobilePoint = coursePoints[activePointIndex] ?? coursePoints[0];
+
   return (
     <section className="interactive-route" aria-labelledby="interactive-route-title">
       <div className="interactive-route__header">
@@ -382,6 +397,73 @@ export function InteractiveRouteMap() {
                 </button>
               );
             })}
+          </div>
+
+          {/* Mobile Checkpoint Carousel with Left/Right Arrows */}
+          <div className="interactive-route__points-mobile" aria-label="Mobile course checkpoints navigation">
+            <button
+              type="button"
+              className="interactive-route__mobile-arrow"
+              onClick={() => {
+                const prev = activePointIndex > 0 ? activePointIndex - 1 : coursePoints.length - 1;
+                handleSelectPoint(coursePoints[prev]);
+              }}
+              aria-label="Previous checkpoint"
+              title="Previous checkpoint"
+            >
+              <ChevronLeft size={24} />
+            </button>
+
+            <div
+              className="interactive-route__mobile-card"
+              onClick={() => handleSelectPoint(activeMobilePoint)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleSelectPoint(activeMobilePoint);
+                }
+              }}
+              title="Tap to focus on map"
+            >
+              <span className={`route-key route-key--${activeMobilePoint.properties.role ?? 'checkpoint'}`}>
+                {activeMobilePoint.properties.order}
+              </span>
+              <div className="interactive-route__mobile-info">
+                <div className="interactive-route__mobile-info-top">
+                  <strong>{activeMobilePoint.properties.name}</strong>
+                  <span className="interactive-route__mobile-badge">
+                    {activePointIndex + 1} / {coursePoints.length}
+                  </span>
+                </div>
+                <small>
+                  {activeMobilePoint.properties.role === 'start'
+                    ? 'Race Start'
+                    : activeMobilePoint.properties.role === 'finish'
+                      ? 'Race Finish'
+                      : activeMobilePoint.properties.role === 'turnaround'
+                        ? 'U-Turn Point'
+                        : activeMobilePoint.properties.role === 'junction'
+                          ? 'Intersection / Turn'
+                          : 'Checkpoint'}
+                  {activeMobilePoint.properties.plus_code ? ` · ${activeMobilePoint.properties.plus_code}` : ''}
+                </small>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="interactive-route__mobile-arrow"
+              onClick={() => {
+                const next = activePointIndex < coursePoints.length - 1 ? activePointIndex + 1 : 0;
+                handleSelectPoint(coursePoints[next]);
+              }}
+              aria-label="Next checkpoint"
+              title="Next checkpoint"
+            >
+              <ChevronRight size={24} />
+            </button>
           </div>
         </div>
       )}

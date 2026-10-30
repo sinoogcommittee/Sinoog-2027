@@ -5,6 +5,7 @@ import {
   Download,
   FileText,
   MapPin,
+  Maximize2,
   Music,
   Sparkles,
   Users,
@@ -13,6 +14,7 @@ import { Button } from '../../components/Button';
 import { PageHero } from '../../components/PageHero';
 import { SectionHeading } from '../../components/SectionHeading';
 import { Card } from '../../components/m3/Card';
+import { Dialog } from '../../components/m3/Dialog';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import {
   getPublicApprovedDelegations,
@@ -87,85 +89,137 @@ function AccordionPanel({
   );
 }
 
-function ParadeMapGraphic() {
+function FestivalGroundsMaps({ onZoomFloorPlan }: { onZoomFloorPlan: () => void }) {
   return (
-    <Card variant="outlined" className="parade-map" aria-label="Parade and showdown route schematic">
-      <div className="parade-map__legend">
-        <span>
-          <i className="parade-map__dot parade-map__dot--assembly" /> Parade assembly
-        </span>
-        <span>
-          <i className="parade-map__dot parade-map__dot--flow" /> Street flow
-        </span>
-        <span>
-          <i className="parade-map__dot parade-map__dot--arena" /> Arena points
-        </span>
-      </div>
-      <svg
-        className="parade-map__svg"
-        viewBox="0 0 640 280"
-        role="img"
-        aria-labelledby="parade-map-title"
-      >
-        <title id="parade-map-title">Schematic: assembly area, street dancing flow, and showdown arena</title>
-        {/* soft background paths */}
-        <path
-          d="M40 200 C120 200 160 80 280 90 C380 98 420 160 520 150"
-          fill="none"
-          stroke="#c9a227"
-          strokeWidth="14"
-          strokeLinecap="round"
-          opacity="0.35"
-        />
-        <path
-          d="M40 200 C120 200 160 80 280 90 C380 98 420 160 520 150"
-          fill="none"
-          stroke="#8b6914"
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeDasharray="2 10"
-        />
-        {/* Assembly */}
-        <circle cx="48" cy="200" r="28" fill="#fff8e8" stroke="#c9a227" strokeWidth="3" />
-        <text x="48" y="205" textAnchor="middle" fontSize="11" fontWeight="700" fill="#5c3d0a">
-          Assembly
-        </text>
-        {/* Mid flow markers */}
-        <circle cx="200" cy="120" r="8" fill="#9b2226" />
-        <circle cx="320" cy="95" r="8" fill="#9b2226" />
-        <circle cx="420" cy="140" r="8" fill="#9b2226" />
-        {/* Arena */}
-        <rect
-          x="500"
-          y="100"
-          width="110"
-          height="90"
-          rx="12"
-          fill="#fff8e8"
-          stroke="#9b2226"
-          strokeWidth="3"
-        />
-        <text x="555" y="150" textAnchor="middle" fontSize="13" fontWeight="700" fill="#5c0a12">
-          Arena
-        </text>
-        <text x="555" y="168" textAnchor="middle" fontSize="10" fill="#7a4a1a">
-          Showdown
-        </text>
-        {/* Labels */}
-        <text x="120" y="240" fontSize="11" fill="#6b5a52">
-          Street Flow
-        </text>
-        <text x="300" y="70" fontSize="11" fill="#6b5a52">
-          Street Flow
-        </text>
-      </svg>
-      <p className="parade-map__note">
-        Route details and assembly points will be confirmed by the committee. This schematic is illustrative only.
-      </p>
-      <Button to="/activities" variant="outlined" className="parade-map__cta" leadingIcon={<ArrowRight size={18} />}>
-        View parade schedule
-      </Button>
-    </Card>
+    <div className="festival-maps-grid">
+      {/* 1. Street Dancing & Grand Showdown Arena Floor Plan */}
+      <Card variant="outlined" className="festival-map-card">
+        <div className="festival-map-card__header">
+          <div>
+            <span className="festival-map-card__eyebrow">Arena Layout</span>
+            <h3 className="festival-map-card__title">Street Dancing & Grand Showdown Floor Plan</h3>
+          </div>
+          <button
+            type="button"
+            className="festival-map-card__zoom-btn"
+            onClick={onZoomFloorPlan}
+            title="Expand floor plan to full screen"
+          >
+            <Maximize2 size={15} /> Full View
+          </button>
+        </div>
+        <p className="festival-map-card__desc">
+          Sto. Niño Parish Grounds layout showing the official Street Dancing judging pavilion, bleachers, and Grand Showdown arena.
+        </p>
+        <div
+          className="festival-map-card__img-wrap"
+          onClick={onZoomFloorPlan}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onZoomFloorPlan();
+            }
+          }}
+          title="Click to view full-size floor plan"
+        >
+          <img
+            src="/images/festival_floor_plan.webp"
+            alt="Sinoog Festival Arena Floor Plan showing street dancing and grand showdown layout"
+            className="festival-map-card__img"
+            loading="lazy"
+            decoding="async"
+          />
+          <div className="festival-map-card__overlay">
+            <Maximize2 size={16} /> Tap to expand
+          </div>
+        </div>
+      </Card>
+
+      {/* 2. Parade Route Map */}
+      <Card variant="outlined" className="festival-map-card">
+        <div className="festival-map-card__header">
+          <div>
+            <span className="festival-map-card__eyebrow">Procession Route</span>
+            <h3 className="festival-map-card__title">Parade Route Map</h3>
+          </div>
+          <span className="festival-map-card__status-pill">Official photo coming soon</span>
+        </div>
+        <p className="festival-map-card__desc">
+          Assembly points, street procession corridors, and entry gates across Barangay Guinacot.
+        </p>
+        <div className="festival-map-card__schematic-wrap">
+          <div className="parade-map__legend">
+            <span>
+              <i className="parade-map__dot parade-map__dot--assembly" /> Parade assembly
+            </span>
+            <span>
+              <i className="parade-map__dot parade-map__dot--flow" /> Street flow
+            </span>
+            <span>
+              <i className="parade-map__dot parade-map__dot--arena" /> Arena points
+            </span>
+          </div>
+          <svg
+            className="parade-map__svg"
+            viewBox="0 0 640 280"
+            role="img"
+            aria-labelledby="parade-map-title"
+          >
+            <title id="parade-map-title">Schematic: assembly area, street dancing flow, and showdown arena</title>
+            <path
+              d="M40 200 C120 200 160 80 280 90 C380 98 420 160 520 150"
+              fill="none"
+              stroke="#c9a227"
+              strokeWidth="14"
+              strokeLinecap="round"
+              opacity="0.35"
+            />
+            <path
+              d="M40 200 C120 200 160 80 280 90 C380 98 420 160 520 150"
+              fill="none"
+              stroke="#8b6914"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeDasharray="2 10"
+            />
+            <circle cx="48" cy="200" r="28" fill="#fff8e8" stroke="#c9a227" strokeWidth="3" />
+            <text x="48" y="205" textAnchor="middle" fontSize="11" fontWeight="700" fill="#5c3d0a">
+              Assembly
+            </text>
+            <circle cx="200" cy="120" r="8" fill="#9b2226" />
+            <circle cx="320" cy="95" r="8" fill="#9b2226" />
+            <circle cx="420" cy="140" r="8" fill="#9b2226" />
+            <rect
+              x="500"
+              y="100"
+              width="110"
+              height="90"
+              rx="12"
+              fill="#fff8e8"
+              stroke="#9b2226"
+              strokeWidth="3"
+            />
+            <text x="555" y="150" textAnchor="middle" fontSize="13" fontWeight="700" fill="#5c0a12">
+              Arena
+            </text>
+            <text x="555" y="168" textAnchor="middle" fontSize="10" fill="#7a4a1a">
+              Showdown
+            </text>
+            <text x="120" y="240" fontSize="11" fill="#6b5a52">
+              Street Flow
+            </text>
+            <text x="300" y="70" fontSize="11" fill="#6b5a52">
+              Street Flow
+            </text>
+          </svg>
+          <p className="parade-map__note">
+            The committee will upload the official surveyed parade route map photo here soon.
+          </p>
+        </div>
+      </Card>
+    </div>
   );
 }
 
@@ -258,6 +312,7 @@ function ContingentShowcaseCard({ contingent }: { contingent: PublicApprovedDele
 }
 
 function MainFestivalView({ approvedContingents }: { approvedContingents: PublicApprovedDelegation[] }) {
+  const [floorPlanZoomOpen, setFloorPlanZoomOpen] = useState(false);
   return (
     <>
       <section className="section">
@@ -304,7 +359,7 @@ function MainFestivalView({ approvedContingents }: { approvedContingents: Public
             title="How the celebration moves"
             description="Assembly, street flow, and the final arena — a simple guide for participants and visitors."
           />
-          <ParadeMapGraphic />
+          <FestivalGroundsMaps onZoomFloorPlan={() => setFloorPlanZoomOpen(true)} />
         </div>
       </section>
 
@@ -375,6 +430,29 @@ function MainFestivalView({ approvedContingents }: { approvedContingents: Public
           </div>
         </div>
       </section>
+
+      <Dialog
+        open={floorPlanZoomOpen}
+        title="Sinoog Festival Arena & Showdown Floor Plan"
+        onClose={() => setFloorPlanZoomOpen(false)}
+        className="festival-floor-plan-dialog"
+        actions={
+          <Button type="button" variant="text" onClick={() => setFloorPlanZoomOpen(false)}>
+            Close
+          </Button>
+        }
+      >
+        <div style={{ textAlign: 'center', padding: '8px 0' }}>
+          <img
+            src="/images/festival_floor_plan.webp"
+            alt="Sinoog Festival Arena Floor Plan full resolution"
+            className="festival-floor-plan-dialog-img"
+          />
+          <p style={{ marginTop: '12px', fontSize: '0.85rem', color: 'var(--md-sys-color-on-surface-variant)' }}>
+            Official Sto. Niño Parish Grounds spatial plan for street dancing flow, judges pavilion, and grand showdown arena.
+          </p>
+        </div>
+      </Dialog>
     </>
   );
 }

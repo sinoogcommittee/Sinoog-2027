@@ -406,6 +406,161 @@ a.m3-button:hover { text-decoration: none; }
   background: var(--md-sys-color-secondary-container);
 }
 
+/* Festival grounds & parade map grid */
+.m3-festival-page .festival-maps-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--md-space-6);
+  margin-top: var(--md-space-4);
+}
+
+.m3-festival-page .festival-map-card {
+  padding: var(--md-space-5);
+  border-radius: var(--md-sys-shape-corner-large);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-lowest);
+  display: flex;
+  flex-direction: column;
+  gap: var(--md-space-3);
+  overflow: hidden;
+}
+
+.m3-festival-page .festival-map-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--md-space-3);
+  flex-wrap: wrap;
+}
+
+.m3-festival-page .festival-map-card__eyebrow {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--md-sys-color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 2px;
+}
+
+.m3-festival-page .festival-map-card__title {
+  margin: 0;
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.25rem;
+  color: #741f29;
+  line-height: 1.25;
+}
+
+.m3-festival-page .festival-map-card__desc {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.m3-festival-page .festival-map-card__status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.m3-festival-page .festival-map-card__zoom-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  border: 1px solid transparent;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.m3-festival-page .festival-map-card__zoom-btn:hover {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.m3-festival-page .festival-map-card__img-wrap {
+  position: relative;
+  border-radius: var(--md-sys-shape-corner-medium);
+  overflow: hidden;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+}
+
+.m3-festival-page .festival-map-card__img {
+  width: 100%;
+  height: auto;
+  max-height: 380px;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.m3-festival-page .festival-map-card__img-wrap:hover .festival-map-card__img {
+  transform: scale(1.02);
+}
+
+.m3-festival-page .festival-map-card__overlay {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(43, 12, 17, 0.85);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+}
+
+.m3-festival-page .festival-map-card__schematic-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--md-space-3);
+}
+
+.festival-floor-plan-dialog-img {
+  width: 100%;
+  height: auto;
+  max-height: 75vh;
+  object-fit: contain;
+  display: block;
+  border-radius: var(--md-sys-shape-corner-small);
+  background: #ffffff;
+}
+
+.festival-floor-plan-dialog .m3-dialog__surface {
+  max-width: 960px !important;
+  width: 94vw !important;
+}
+
+@media (max-width: 900px) {
+  .m3-festival-page .festival-maps-grid {
+    grid-template-columns: 1fr;
+    gap: var(--md-space-4);
+  }
+}
+
 .m3-festival-page .festival-docs {
   gap: var(--md-space-3);
 }
