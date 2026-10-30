@@ -53,99 +53,63 @@
   line-height: 1.55;
 }
 
+.interactive-route__header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.interactive-route__compact-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--md-space-2);
+  flex-wrap: nowrap;
+}
+
 .interactive-route__distance {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
-  gap: var(--md-space-2);
-  min-height: var(--md-target-min);
-  padding: var(--md-space-2) var(--md-space-4);
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 14px;
   border-radius: 999px;
   background: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
   white-space: nowrap;
+  font-size: 0.84rem;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
-.interactive-route__header-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--md-space-2);
-  flex-shrink: 0;
-}
-
-.interactive-route__action-group {
-  display: flex;
-  align-items: center;
-  gap: var(--md-space-2);
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.interactive-route__gmaps-btn {
+.interactive-route__gmaps-compact-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: var(--md-target-min);
-  padding: var(--md-space-2) var(--md-space-4);
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 14px;
   border-radius: 999px;
   background: #1a73e8; /* Official Google Maps Blue */
   color: #ffffff !important;
   font-weight: 700;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   letter-spacing: 0.01em;
   text-decoration: none;
-  box-shadow: 0 2px 6px rgba(26, 115, 232, 0.32);
+  box-shadow: 0 1px 4px rgba(26, 115, 232, 0.28);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 }
 
-.interactive-route__gmaps-btn:hover {
+.interactive-route__gmaps-compact-btn:hover {
   background: #1557b0;
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.45);
+  box-shadow: 0 3px 10px rgba(26, 115, 232, 0.4);
   transform: translateY(-1px);
 }
 
-.interactive-route__gmaps-btn:active {
+.interactive-route__gmaps-compact-btn:active {
   transform: translateY(0);
-}
-
-.interactive-route__dl-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--md-sys-color-on-surface-variant);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.interactive-route__downloads {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.interactive-route__download-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: var(--md-sys-shape-corner-full);
-  background: var(--md-sys-color-surface);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  color: var(--md-sys-color-on-surface);
-  font-size: 0.76rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition: all 0.15s ease;
-}
-
-.interactive-route__download-btn:hover {
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
-  border-color: var(--md-sys-color-primary);
 }
 
 .interactive-route__switcher {
@@ -460,22 +424,6 @@
   font-size: 0.85rem;
 }
 
-.interactive-route__footer-gmaps-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #1a73e8;
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-.interactive-route__footer-gmaps-link:hover {
-  color: #1557b0;
-  text-decoration: underline;
-}
-
 @media (max-width: 760px) {
   .interactive-route__header,
   .interactive-route__footer {
@@ -483,26 +431,16 @@
     flex-direction: column;
   }
 
-  .interactive-route__distance {
-    align-self: flex-start;
-  }
-
   .interactive-route__header-actions {
     align-items: flex-start;
     width: 100%;
   }
 
-  .interactive-route__action-group {
-    justify-content: flex-start;
+  .interactive-route__compact-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     width: 100%;
-  }
-
-  .interactive-route__gmaps-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .interactive-route__downloads {
     justify-content: flex-start;
   }
 
@@ -530,65 +468,84 @@
 
   .interactive-route__points-mobile {
     display: flex !important;
-    align-items: center;
-    gap: 8px;
+    width: 100%;
     padding-top: var(--md-space-2);
   }
 
-  .interactive-route__mobile-arrow {
+  .interactive-route__nav-pill {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    background: var(--md-sys-color-surface-container-lowest, #ffffff);
+    border: 1.5px solid var(--md-sys-color-outline-variant);
+    border-radius: var(--md-sys-shape-corner-medium, 12px);
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(43, 35, 32, 0.05);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .interactive-route__nav-pill:focus-within {
+    border-color: var(--gold, #d69d2e);
+    box-shadow: 0 0 0 2px rgba(214, 157, 46, 0.25);
+  }
+
+  .interactive-route__nav-pill-arrow {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 54px;
-    flex-shrink: 0;
-    border-radius: var(--md-sys-shape-corner-medium);
-    background: var(--md-sys-color-surface);
-    border: 1.5px solid var(--md-sys-color-outline-variant);
+    flex: 0 0 38px;
+    width: 38px;
+    min-height: 48px;
+    border: none;
+    background: var(--md-sys-color-surface-container-low, #f7f3ee);
     color: var(--md-sys-color-primary);
     cursor: pointer;
-    transition: all 0.15s ease;
-    box-shadow: var(--md-sys-elevation-level1);
+    padding: 0;
+    transition: background 0.15s ease, color 0.15s ease;
   }
 
-  .interactive-route__mobile-arrow:hover,
-  .interactive-route__mobile-arrow:active {
+  .interactive-route__nav-pill-arrow--prev {
+    border-right: 1px solid var(--md-sys-color-outline-variant);
+  }
+
+  .interactive-route__nav-pill-arrow--next {
+    border-left: 1px solid var(--md-sys-color-outline-variant);
+  }
+
+  .interactive-route__nav-pill-arrow:hover,
+  .interactive-route__nav-pill-arrow:active {
     background: var(--md-sys-color-primary-container);
     color: var(--md-sys-color-on-primary-container);
-    border-color: var(--md-sys-color-primary);
   }
 
-  .interactive-route__mobile-card {
+  .interactive-route__nav-pill-content {
     display: flex;
     align-items: center;
     gap: var(--md-space-3);
     flex: 1;
     min-width: 0;
-    padding: 10px 14px;
-    border-radius: var(--md-sys-shape-corner-medium);
-    background: var(--md-sys-color-surface);
-    border: 1.5px solid var(--md-sys-color-outline-variant);
-    box-shadow: var(--md-sys-elevation-level1);
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
     cursor: pointer;
     text-align: left;
-    transition: all 0.15s ease;
+    transition: background 0.15s ease;
   }
 
-  .interactive-route__mobile-card:hover,
-  .interactive-route__mobile-card:active {
-    border-color: var(--gold, #d69d2e);
+  .interactive-route__nav-pill-content:hover,
+  .interactive-route__nav-pill-content:active {
     background: #fdfaf3;
   }
 
-  .interactive-route__mobile-card .route-key {
+  .interactive-route__nav-pill-content .route-key {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     color: #ffffff;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 800;
     flex-shrink: 0;
     border: none;
@@ -596,23 +553,23 @@
     margin-right: 0;
   }
 
-  .interactive-route__mobile-info {
+  .interactive-route__nav-pill-text {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
     min-width: 0;
     flex: 1;
   }
 
-  .interactive-route__mobile-info-top {
+  .interactive-route__nav-pill-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 6px;
   }
 
-  .interactive-route__mobile-info-top strong {
-    font-size: 0.88rem;
+  .interactive-route__nav-pill-top strong {
+    font-size: 0.86rem;
     font-weight: 700;
     color: var(--md-sys-color-on-surface);
     white-space: nowrap;
@@ -620,19 +577,19 @@
     text-overflow: ellipsis;
   }
 
-  .interactive-route__mobile-badge {
+  .interactive-route__nav-pill-counter {
     font-size: 0.70rem;
     font-weight: 800;
     color: var(--md-sys-color-primary);
     background: var(--md-sys-color-primary-container);
-    padding: 2px 7px;
+    padding: 1px 7px;
     border-radius: 999px;
     white-space: nowrap;
     flex-shrink: 0;
   }
 
-  .interactive-route__mobile-info small {
-    font-size: 0.75rem;
+  .interactive-route__nav-pill-text small {
+    font-size: 0.72rem;
     color: var(--md-sys-color-on-surface-variant);
     white-space: nowrap;
     overflow: hidden;

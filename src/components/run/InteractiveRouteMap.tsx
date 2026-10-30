@@ -14,10 +14,8 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-  Download,
   ExternalLink,
   MapPinned,
-  Navigation,
   Route,
 } from 'lucide-react';
 import type { FeatureCollection } from 'geojson';
@@ -292,44 +290,20 @@ export function InteractiveRouteMap() {
           <p>{selectedRoute.description}</p>
         </div>
         <div className="interactive-route__header-actions">
-          <div className="interactive-route__action-group">
+          <div className="interactive-route__compact-row">
             <strong className="interactive-route__distance">
-              <Route size={18} /> {selectedRoute.distance}
+              <Route size={16} /> {selectedRoute.distance}
             </strong>
             <a
               href={selectedRoute.googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="interactive-route__gmaps-btn"
-              title="Connect and open full surveyed route in Google Maps app for turn-by-turn navigation"
+              className="interactive-route__gmaps-compact-btn"
+              title="Open route in Google Maps"
             >
-              <Navigation size={15} />
-              <span>Connect to Google Maps</span>
+              <span>Google Maps</span>
               <ExternalLink size={13} />
             </a>
-          </div>
-          <div className="interactive-route__downloads">
-            <span className="interactive-route__dl-label">Files:</span>
-            {selectedRoute.kmlFile && (
-              <a
-                href={selectedRoute.kmlFile}
-                download
-                className="interactive-route__download-btn"
-                title="Download KML file for Google My Maps import on phone"
-              >
-                <Download size={13} /> KML (.kml)
-              </a>
-            )}
-            {selectedRoute.gpxFile && (
-              <a
-                href={selectedRoute.gpxFile}
-                download
-                className="interactive-route__download-btn"
-                title="Download GPX file for Strava, Garmin, or GPS smartwatch"
-              >
-                <Download size={13} /> GPX (.gpx)
-              </a>
-            )}
           </div>
         </div>
       </div>
@@ -399,71 +373,65 @@ export function InteractiveRouteMap() {
             })}
           </div>
 
-          {/* Mobile Checkpoint Carousel with Left/Right Arrows */}
+          {/* Mobile Checkpoint Single Button with Inner Left & Right Arrows */}
           <div className="interactive-route__points-mobile" aria-label="Mobile course checkpoints navigation">
-            <button
-              type="button"
-              className="interactive-route__mobile-arrow"
-              onClick={() => {
-                const prev = activePointIndex > 0 ? activePointIndex - 1 : coursePoints.length - 1;
-                handleSelectPoint(coursePoints[prev]);
-              }}
-              aria-label="Previous checkpoint"
-              title="Previous checkpoint"
-            >
-              <ChevronLeft size={24} />
-            </button>
+            <div className="interactive-route__nav-pill">
+              <button
+                type="button"
+                className="interactive-route__nav-pill-arrow interactive-route__nav-pill-arrow--prev"
+                onClick={() => {
+                  const prev = activePointIndex > 0 ? activePointIndex - 1 : coursePoints.length - 1;
+                  handleSelectPoint(coursePoints[prev]);
+                }}
+                aria-label="Previous checkpoint"
+                title="Previous checkpoint"
+              >
+                <ChevronLeft size={16} />
+              </button>
 
-            <div
-              className="interactive-route__mobile-card"
-              onClick={() => handleSelectPoint(activeMobilePoint)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleSelectPoint(activeMobilePoint);
-                }
-              }}
-              title="Tap to focus on map"
-            >
-              <span className={`route-key route-key--${activeMobilePoint.properties.role ?? 'checkpoint'}`}>
-                {activeMobilePoint.properties.order}
-              </span>
-              <div className="interactive-route__mobile-info">
-                <div className="interactive-route__mobile-info-top">
-                  <strong>{activeMobilePoint.properties.name}</strong>
-                  <span className="interactive-route__mobile-badge">
-                    {activePointIndex + 1} / {coursePoints.length}
-                  </span>
+              <button
+                type="button"
+                className="interactive-route__nav-pill-content"
+                onClick={() => handleSelectPoint(activeMobilePoint)}
+                title="Tap to focus on map"
+              >
+                <span className={`route-key route-key--${activeMobilePoint.properties.role ?? 'checkpoint'}`}>
+                  {activeMobilePoint.properties.order}
+                </span>
+                <div className="interactive-route__nav-pill-text">
+                  <div className="interactive-route__nav-pill-top">
+                    <strong>{activeMobilePoint.properties.name}</strong>
+                    <span className="interactive-route__nav-pill-counter">
+                      {activePointIndex + 1}/{coursePoints.length}
+                    </span>
+                  </div>
+                  <small>
+                    {activeMobilePoint.properties.role === 'start'
+                      ? 'Race Start'
+                      : activeMobilePoint.properties.role === 'finish'
+                        ? 'Race Finish'
+                        : activeMobilePoint.properties.role === 'turnaround'
+                          ? 'U-Turn Point'
+                          : activeMobilePoint.properties.role === 'junction'
+                            ? 'Intersection / Turn'
+                            : 'Checkpoint'}
+                  </small>
                 </div>
-                <small>
-                  {activeMobilePoint.properties.role === 'start'
-                    ? 'Race Start'
-                    : activeMobilePoint.properties.role === 'finish'
-                      ? 'Race Finish'
-                      : activeMobilePoint.properties.role === 'turnaround'
-                        ? 'U-Turn Point'
-                        : activeMobilePoint.properties.role === 'junction'
-                          ? 'Intersection / Turn'
-                          : 'Checkpoint'}
-                  {activeMobilePoint.properties.plus_code ? ` · ${activeMobilePoint.properties.plus_code}` : ''}
-                </small>
-              </div>
-            </div>
+              </button>
 
-            <button
-              type="button"
-              className="interactive-route__mobile-arrow"
-              onClick={() => {
-                const next = activePointIndex < coursePoints.length - 1 ? activePointIndex + 1 : 0;
-                handleSelectPoint(coursePoints[next]);
-              }}
-              aria-label="Next checkpoint"
-              title="Next checkpoint"
-            >
-              <ChevronRight size={24} />
-            </button>
+              <button
+                type="button"
+                className="interactive-route__nav-pill-arrow interactive-route__nav-pill-arrow--next"
+                onClick={() => {
+                  const next = activePointIndex < coursePoints.length - 1 ? activePointIndex + 1 : 0;
+                  handleSelectPoint(coursePoints[next]);
+                }}
+                aria-label="Next checkpoint"
+                title="Next checkpoint"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -488,16 +456,6 @@ export function InteractiveRouteMap() {
         </ul>
         <div className="interactive-route__footer-note">
           <p>Tap a numbered point or click the waypoint buttons above to inspect details and zoom in.</p>
-          <a
-            href={selectedRoute.googleMapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="interactive-route__footer-gmaps-link"
-          >
-            <Navigation size={13} />
-            <span>Open {selectedRoute.shortLabel} course in Google Maps</span>
-            <ExternalLink size={12} />
-          </a>
         </div>
       </div>
     </section>
