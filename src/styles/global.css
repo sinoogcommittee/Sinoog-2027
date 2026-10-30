@@ -1853,6 +1853,17 @@ button:focus-visible {
 }
 .portal-sidebar > .brand {
   flex-shrink: 0;
+  white-space: nowrap;
+}
+.portal-sidebar .brand strong,
+.portal-brand-title {
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+}
+.portal-sidebar .brand small,
+.portal-brand-sub {
+  white-space: nowrap !important;
+  word-break: keep-all !important;
 }
 .portal-sidebar nav {
   display: grid;

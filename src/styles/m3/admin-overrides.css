@@ -35,6 +35,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   text-decoration: none !important;
   min-width: 0 !important;
+  white-space: nowrap !important;
 }
 
 .portal-sidebar .brand .logo-mark--committee {
@@ -49,25 +50,32 @@
   flex-direction: column !important;
   min-width: 0 !important;
   line-height: 1.2 !important;
+  white-space: nowrap !important;
 }
 
-.portal-sidebar .brand strong {
+.portal-sidebar .brand strong,
+.portal-brand-title {
   font-family: 'Fraunces', Georgia, serif !important;
   font-size: 1.05rem !important;
   font-weight: 700 !important;
   letter-spacing: 0.02em !important;
   color: #ffffff !important;
   white-space: nowrap !important;
+  word-break: keep-all !important;
   line-height: 1.15 !important;
+  display: block !important;
 }
 
-.portal-sidebar .brand small {
+.portal-sidebar .brand small,
+.portal-brand-sub {
   color: #f7e4be !important;
   font-size: 0.72rem !important;
   font-weight: 500 !important;
   letter-spacing: 0.025em !important;
   opacity: 0.9 !important;
   white-space: nowrap !important;
+  word-break: keep-all !important;
+  display: block !important;
 }
 
 .portal-sidebar nav {

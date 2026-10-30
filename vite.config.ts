@@ -5,6 +5,7 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react()],
   build: {
+    chunkSizeWarningLimit: 1200,
     rolldownOptions: {
       output: {
         codeSplitting: {
@@ -20,6 +21,10 @@ export default defineConfig({
             {
               name: 'ui-vendor',
               test: /node_modules\/(?:lucide-react|qrcode\.react|dompurify)\//,
+            },
+            {
+              name: 'map-vendor',
+              test: /node_modules\/(?:maplibre-gl)\//,
             },
           ],
         },

@@ -307,7 +307,7 @@ Priority: **P0 before registration opens** (Completed)
 
 - [x] Core GCash, opening/deadline, planned start, and registration switch settings are in Website Settings.
 - [x] Dynamic category editor in admin marked complete (seeded and verified in `run_categories` for 3K, 5K, and 10K).
-- [x] Route Maps on `/run/routes`: 10K course loop defined; 3K and 5K route text kept as-is pending upcoming committee meeting.
+- [x] Interactive Route Maps on `/run/routes`: MapLibre GL viewer with three surveyed GeoJSON course options (Sta. Cruz + Stampa at 12.38 km, Direct Cansiwang at 10.91 km, Cabantian + Stampa at 10.34 km), interactive checkpoint sequence with one-tap flyTo & popup, cooperative gestures, responsive layout, automated integrity test suite, and zero-paid map API requirements.
 - [x] Add kit preview images and inclusion descriptions on category cards.
 - [x] Publish FAQs and runner instructions.
 
@@ -681,7 +681,7 @@ Priority: **P1**
 | `/festival/participants` | Empty state | Approved delegation public profiles and ordering |
 | `/festival/guidelines` | Empty state | Versioned guidelines and downloadable files |
 | `/run` | Updated 3K/5K/10K categories, fees, kits, editable deadline/start display | Apply migration `007`; confirm capacities, age rules, deadline, start, and policy copy |
-| `/run/routes` | Confirmed 10K route text; 3K/5K marked pending | Approved route maps, checkpoints, water/medical points |
+| `/run/routes` | Interactive MapLibre map with three planning routes and checkpoint details | Committee selects the official course; add approved water and medical points |
 | `/run/register` | Authenticated form, GCash/cash proof, finalized policy acceptance, minor guardian consent, status, bib/QR, result; **edit details when not approved**; live rehearsed | Apply `014`; monitor production; optional email notices; kit-claim later |
 | `/activities` | Published Supabase activities with fallback, filters, and print view | Remove production demo fallback and confirm all content |
 | `/activities/masses` | Live filtered schedule with corrected Jan. 6 fallback | Enter and approve the complete novena and Pontifical Mass schedule |

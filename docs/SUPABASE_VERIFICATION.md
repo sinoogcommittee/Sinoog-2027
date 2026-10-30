@@ -144,6 +144,14 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | Dual-role delegation workspace | PASS | Built `src/pages/admin/DelegationsManagerPage.tsx` supporting Admin dashboard/overview and Delegation Head portal with audio preview and bulk roster import. |
 | Public contingents showcase | PASS | `/festival` and `/festival/participants` now dynamically query approved contingents via `getPublicApprovedDelegations()`. |
 
+## Public route map verification — October 30, 2026
+
+| Area | Result | Notes |
+| --- | --- | --- |
+| Database impact | NOT REQUIRED | Route geometry is static public GeoJSON; no Supabase schema, RLS, or storage change is required. |
+| Public route integration | PASS | `/run/routes` loads three MapLibre course variants from `public/data/routes` with numbered checkpoint popups and responsive controls. |
+| Free map source | PASS | Uses OpenStreetMap raster tiles with visible attribution and no paid Google Maps dependency. |
+
 ## Type regeneration
 
 After every applied migration, regenerate the live database types from the linked project:

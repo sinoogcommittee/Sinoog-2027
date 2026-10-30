@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   CheckCircle2,
   Clock,
   LogIn,
-  Map,
   PackageOpen,
   Route,
   Ruler,
@@ -23,6 +23,10 @@ import {
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import { useAuth } from '../../features/auth/useAuth';
 import type { DbRunRegistration } from '../../types';
+
+const InteractiveRouteMap = lazy(() =>
+  import('../../components/run/InteractiveRouteMap').then((module) => ({ default: module.InteractiveRouteMap })),
+);
 
 function formatFee(centavos: number) {
   return (centavos / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
@@ -125,29 +129,9 @@ export function RunPage({ section }: { section?: 'routes' }) {
                 description="All distance categories begin and finish at the Guinacot Parish Grounds. Water stations and medical posts will be marked on the official course once approved."
               />
 
-              <Card variant="outlined" className="run-route-map" aria-label="Route map placeholder">
-                <div className="run-route-map__canvas">
-                  <Map size={28} aria-hidden />
-                  <p>
-                    <strong>Interactive route map</strong>
-                  </p>
-                  <p>
-                    Official GPX / route graphics with water stations, medical tents, and turn-around points will appear
-                    here after committee and safety approval.
-                  </p>
-                </div>
-                <ul className="run-route-map__legend">
-                  <li>
-                    <span className="run-route-map__dot run-route-map__dot--start" /> Start / Finish — Parish Grounds
-                  </li>
-                  <li>
-                    <span className="run-route-map__dot run-route-map__dot--water" /> Water stations — TBA
-                  </li>
-                  <li>
-                    <span className="run-route-map__dot run-route-map__dot--med" /> Medical tents — TBA
-                  </li>
-                </ul>
-              </Card>
+              <Suspense fallback={<div className="run-route-map-loading">Loading interactive route map…</div>}>
+                <InteractiveRouteMap />
+              </Suspense>
 
               <div className="run-category-grid">
                 {categories.map((category) => (
@@ -156,10 +140,10 @@ export function RunPage({ section }: { section?: 'routes' }) {
                     <h3>{category.name}</h3>
                     <p>
                       {category.distance_meters === 10000
-                        ? 'Longer loop for experienced runners. Full course details pending safety approval.'
+                        ? 'Official 10K+ course options include the Sta. Cruz + Stampa Hills loop (12.38 km), Direct Cansiwang loop (10.91 km), and Cabantian–Cansiwang + Stampa (10.34 km) beginning and ending at the Sto. Niño Parish Grounds.'
                         : category.distance_meters === 5000
-                          ? 'Community stride through Guinacot. Checkpoints to be published with the official map.'
-                          : 'Fun run distance for families and first-time participants.'}
+                          ? 'Scenic 5K community stride through Guinacot passing Sta. Cruz Chapel, Awa-aw Square, and local landmark checkpoints with dedicated hydration support.'
+                          : 'Family-friendly 3K fun run and community walk loop with turnaround near the parish proper.'}
                     </p>
                     <strong>{formatFee(category.fee_centavos)}</strong>
                   </Card>
@@ -253,8 +237,12 @@ export function RunPage({ section }: { section?: 'routes' }) {
                     <Route size={24} />
                   </div>
                   <h3>Scenic Route</h3>
-                  <p>Official course details will be published after committee and safety approval.</p>
-                  <strong className="run-highlight-card__footer">Route confirmation pending</strong>
+                  <p>Explore official surveyed 10K, 5K, and 3K courses, elevation checkpoints, and turnarounds on our interactive route map.</p>
+                  <strong className="run-highlight-card__footer">
+                    <Link to="/run/routes" style={{ color: 'inherit', textDecoration: 'none' }}>
+                      View interactive map →
+                    </Link>
+                  </strong>
                 </Card>
                 <Card as="article" variant="outlined" className="run-highlight-card">
                   <div className="run-highlight-card__icon-badge">

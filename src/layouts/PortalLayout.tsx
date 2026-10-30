@@ -66,8 +66,8 @@ export function PortalLayout() {
         <Link className="brand brand--light" to="/">
           <LogoMark type="committee" />
           <span>
-            <strong>Sinoog Festival</strong>
-            <small>Committee workspace</small>
+            <strong className="portal-brand-title" style={{ whiteSpace: 'nowrap' }}>Sinoog Festival</strong>
+            <small className="portal-brand-sub" style={{ whiteSpace: 'nowrap' }}>Committee workspace</small>
           </span>
         </Link>
         <div className="portal-nav-scroll">
@@ -108,8 +108,8 @@ export function PortalLayout() {
           <Link className="portal-topbar-brand brand brand--light" to="/" title="Sinoog Festival home">
             <LogoMark type="committee" />
             <span>
-              <strong>Sinoog Festival</strong>
-              <small>Committee workspace</small>
+              <strong className="portal-brand-title" style={{ whiteSpace: 'nowrap' }}>Sinoog Festival</strong>
+              <small className="portal-brand-sub" style={{ whiteSpace: 'nowrap' }}>Committee workspace</small>
             </span>
           </Link>
           <div className="portal-topbar-user" title={`${displayName} (${roleLabel}) · ${displayEmail}`}>
