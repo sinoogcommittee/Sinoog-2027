@@ -1,4 +1,5 @@
 import React, { useId, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { Printer, Upload, X, Search, Filter } from 'lucide-react';
 import type { DbRunRegistration } from '../../types/database';
@@ -60,7 +61,7 @@ export function RaceBibPrintSheet({
     });
   }, [approvedRunners, categoryFilter, searchTerm]);
 
-  // Pair runners into 2-per-sheet (8x13 inches landscape)
+  // Pair runners into 2-per-sheet (8.5x13 inches portrait, stacked vertically)
   const sheets = useMemo(() => {
     const pairs: DbRunRegistration[][] = [];
     for (let i = 0; i < filteredRunners.length; i += 2) {
@@ -121,7 +122,7 @@ export function RaceBibPrintSheet({
 
   if (!open) return null;
 
-  return (
+  const modalContent = (
     <div className="race-bib-modal-backdrop" role="dialog" aria-modal="true" aria-label="Race Bib Print Preview">
       {/* Top Action Toolbar (Hidden during print) */}
       <div className="race-bib-modal-header">
@@ -130,7 +131,7 @@ export function RaceBibPrintSheet({
           <h2>Print Approved Race Bibs</h2>
           <span>
             {filteredRunners.length} {filteredRunners.length === 1 ? 'Runner' : 'Runners'} ({sheets.length}{' '}
-            {sheets.length === 1 ? 'Sheet' : 'Sheets'} of 8×13″)
+            {sheets.length === 1 ? 'Sheet' : 'Sheets'} of 8.5×13″)
           </span>
         </div>
 
@@ -191,10 +192,10 @@ export function RaceBibPrintSheet({
             type="button"
             className="race-bib-action-btn race-bib-action-btn--print"
             onClick={handlePrint}
-            title="Print 8x13 landscape sheets (Ctrl+P)"
+            title="Print 8.5×13″ portrait sheets (Ctrl+P)"
           >
             <Printer size={15} />
-            <span>Print Bibs (8×13″)</span>
+            <span>Print Bibs (8.5×13″)</span>
           </button>
 
           {/* Close Modal */}
@@ -219,15 +220,15 @@ export function RaceBibPrintSheet({
         ) : (
           sheets.map((pair, sheetIdx) => (
             <div key={`sheet-${sheetIdx}`} className="race-bib-sheet">
-              {/* Cut line in the middle */}
-              <div className="race-bib-sheet__cut-line">
-                <span className="race-bib-sheet__cut-icon">✂</span>
-              </div>
-
-              {/* Bib Left (Slot 1) */}
+              {/* Bib Top (Slot 1) */}
               <BibCard runner={pair[0]} categories={categories} logoUrl={logoUrl} />
 
-              {/* Bib Right (Slot 2) */}
+              {/* Horizontal Cut line between Top and Bottom */}
+              <div className="race-bib-sheet__cut-line">
+                <span className="race-bib-sheet__cut-icon">✂ Cut line</span>
+              </div>
+
+              {/* Bib Bottom (Slot 2) */}
               {pair[1] ? (
                 <BibCard runner={pair[1]} categories={categories} logoUrl={logoUrl} />
               ) : (
@@ -241,6 +242,8 @@ export function RaceBibPrintSheet({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 }
 
 function BibCard({
@@ -278,7 +281,7 @@ function BibCard({
 
           <div className="race-bib-card__qr-wrap">
             <div className="race-bib-card__qr" title={`Pass verification QR for ${runner.participant_name}`}>
-              <QRCodeSVG value={qrValue} size={74} level="H" marginSize={1} />
+              <QRCodeSVG value={qrValue} size={90} level="H" marginSize={1} />
             </div>
           </div>
         </div>
@@ -292,11 +295,6 @@ function BibCard({
         <div className="race-bib-card__name-wrap">
           <h2 className="race-bib-card__fullname">{runner.participant_name}</h2>
         </div>
-
-        {/* Footnote Tag for Kit Claim Desk */}
-        {runner.shirt_size && (
-          <div className="race-bib-card__footer-tag">Kit: {runner.shirt_size}</div>
-        )}
       </div>
 
       {/* Bottom Gradient Stripe */}

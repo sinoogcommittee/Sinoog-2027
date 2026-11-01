@@ -1,4 +1,17 @@
-/* Race Bib Print Sheet & Modal Styles (8x13 inches Landscape, 2 bibs per sheet) */
+/* ==========================================================================
+   RACE BIB CONFIGURATION VARIABLES
+   Adjust the runner number & name font sizes directly below:
+   ========================================================================== */
+:root {
+  /* Runner Bib Number Font Size on Screen Preview */
+  --bib-number-size-screen: 9.2rem;
+
+  /* Runner Bib Number Font Size in Print / Save as PDF */
+  --bib-number-size-print: 150pt;
+
+  /* Runner Name Font Size in Print */
+  --bib-name-size-print: 22pt;
+}
 
 /* Modal Dialog Preview Styles */
 .race-bib-modal-backdrop {
@@ -125,52 +138,64 @@
   background: #0b1120;
 }
 
-/* Sheet Layout (8x13 inches Landscape = 13" wide x 8" tall) */
+/* Sheet Layout (Portrait Preview: 2 bibs stacked vertically) */
 .race-bib-sheet {
-  width: 960px;
-  height: 590px;
+  width: 580px;
+  height: 870px;
   background: #ffffff;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   border-radius: 4px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
-  padding: 12px;
-  gap: 16px;
+  padding: 12px 14px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
-/* Cut guide in the middle of the sheet */
+/* Horizontal Cut guide between Top and Bottom Bibs */
 .race-bib-sheet__cut-line {
-  position: absolute;
-  top: 12px;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-left: 1.5px dashed #cbd5e1;
+  height: 22px;
+  width: 100%;
+  position: relative;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  margin: 1px 0;
   pointer-events: none;
-  z-index: 5;
+}
+
+.race-bib-sheet__cut-line::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1.5px dashed #cbd5e1;
 }
 
 .race-bib-sheet__cut-icon {
+  position: relative;
   background: #ffffff;
-  padding: 3px 0;
+  padding: 0 10px;
   color: #94a3b8;
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  font-family: Arial, sans-serif;
 }
 
 /* Individual Race Bib Card */
 .race-bib-card {
-  height: 100%;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
+  border: 1px solid #f1f5f9;
+  border-radius: 2px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -181,9 +206,9 @@
 
 /* Top & Bottom Gradient Borders */
 .race-bib-card__gradient-bar {
-  height: 14px;
+  height: 22px;
   width: 100%;
-  background: linear-gradient(90deg, #f7b733 0%, #e65100 45%, #8a2430 100%);
+  background: linear-gradient(90deg, #f59e0b 0%, #ea580c 45%, #741f29 100%);
   flex-shrink: 0;
 }
 
@@ -193,29 +218,33 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 10px 14px 6px;
+  padding: 10px 16px 8px;
   box-sizing: border-box;
 }
 
-/* Upper Header: Logo (left), Category (center), QR (right) */
+/* Upper Header: Logo (left), Category (center), QR (right) — Identical square sizes */
 .race-bib-card__header {
   display: grid;
-  grid-template-columns: 100px 1fr 82px;
+  grid-template-columns: 80px 1fr 80px;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
 }
 
 .race-bib-card__logo-wrap {
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  height: 64px;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .race-bib-card__logo {
-  max-width: 100%;
-  max-height: 62px;
+  width: 80px;
+  height: 80px;
+  max-width: 80px;
+  max-height: 80px;
   object-fit: contain;
   display: block;
 }
@@ -228,7 +257,7 @@
 .race-bib-card__category-name {
   font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
   font-weight: 900;
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   color: #000000;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -238,43 +267,66 @@
 
 .race-bib-card__category-sub {
   font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
-  font-weight: 800;
-  font-size: 0.82rem;
+  font-weight: 900;
+  font-size: 0.95rem;
   color: #000000;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   line-height: 1.1;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .race-bib-card__qr-wrap {
+  width: 80px;
+  height: 80px;
   display: flex;
-  justify-content: flex-end;
   align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .race-bib-card__qr {
+  width: 80px;
+  height: 80px;
   border: 1px solid #000000;
   padding: 2px;
   background: #ffffff;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
   line-height: 0;
 }
 
-/* Center Giant Bib Number */
+.race-bib-card__qr svg {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  shape-rendering: crispEdges;
+}
+
+/* Center Giant Bib Number — Enforced single line */
 .race-bib-card__number-wrap {
   text-align: center;
   margin: auto 0;
-  padding: 4px 0;
+  padding: 2px 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .race-bib-card__number {
-  font-family: 'Arial Black', Arial, 'Helvetica Neue', Impact, sans-serif;
+  font-family: 'Arial Black', Impact, 'Segoe UI Black', Arial, sans-serif;
   font-weight: 900;
-  font-size: 5.6rem;
+  font-size: var(--bib-number-size-screen);
   color: #000000;
-  line-height: 0.95;
-  letter-spacing: -2px;
+  line-height: 0.85;
+  letter-spacing: -3px;
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: clip;
   margin: 0;
   user-select: all;
 }
@@ -282,13 +334,13 @@
 /* Runner Full Name */
 .race-bib-card__name-wrap {
   text-align: center;
-  padding: 2px 4px 6px;
+  padding: 2px 6px 4px;
 }
 
 .race-bib-card__fullname {
   font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
-  font-weight: 800;
-  font-size: 1.35rem;
+  font-weight: 900;
+  font-size: 1.65rem;
   color: #000000;
   line-height: 1.15;
   margin: 0;
@@ -298,18 +350,9 @@
   text-overflow: ellipsis;
 }
 
-/* Footer Tag: Discreet Kit Details for Committee Volunteers */
-.race-bib-card__footer-tag {
-  font-family: Arial, sans-serif;
-  font-size: 0.62rem;
-  color: #64748b;
-  text-align: right;
-  padding: 0 4px 2px;
-}
-
 /* Empty Sheet Slot when odd count */
 .race-bib-card--empty {
-  border: 1px dashed #cbd5e1;
+  border: 1.5px dashed #cbd5e1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -319,99 +362,355 @@
   background: #f8fafc;
 }
 
-/* Print Styles (Strict 8x13 inches Landscape, 2 per sheet) */
-@media print {
-  @page {
-    size: 13in 8in landscape;
-    margin: 0.15in;
+/* Responsive Modal Sheet Viewport for Small Screens */
+@media screen and (max-width: 640px) {
+  .race-bib-sheet {
+    width: 100%;
+    max-width: 360px;
+    height: 550px;
+    padding: 8px;
+    gap: 6px;
   }
 
+  .race-bib-card__gradient-bar {
+    height: 14px;
+  }
+
+  .race-bib-card__header {
+    grid-template-columns: 55px 1fr 55px;
+    gap: 4px;
+  }
+
+  .race-bib-card__logo-wrap,
+  .race-bib-card__logo,
+  .race-bib-card__qr-wrap,
+  .race-bib-card__qr {
+    width: 55px;
+    height: 55px;
+    max-width: 55px;
+    max-height: 55px;
+  }
+
+  .race-bib-card__category-name {
+    font-size: 0.95rem;
+  }
+
+  .race-bib-card__category-sub {
+    font-size: 0.72rem;
+  }
+
+  .race-bib-card__number {
+    font-size: 4.0rem;
+  }
+
+  .race-bib-card__fullname {
+    font-size: 1.1rem;
+  }
+}
+
+/* Print Styles (Zero extra blank pages across Letter, A4, Folio & 8.5x13) */
+@media print {
+  @page {
+    size: 8.5in 13in portrait;
+    margin: 0.20in 0.30in;
+  }
+
+  /* 1. Completely remove the main application tree from print flow */
+  #root,
+  body > *:not(.race-bib-modal-backdrop) {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* 2. Reset html & body to auto height with zero margin so no trailing blank page is produced */
   html,
   body {
-    width: 13in !important;
-    height: 8in !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #ffffff !important;
     color: #000000 !important;
+    overflow: visible !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  /* Hide everything on the page except the printable bib sheets */
-  body * {
-    visibility: hidden;
-  }
-
-  .race-bib-modal-backdrop,
-  .race-bib-modal-backdrop * {
-    visibility: visible;
+  /* 3. Modal Backdrop becomes the direct visible root */
+  .race-bib-modal-backdrop {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+    visibility: visible !important;
   }
 
   .race-bib-modal-header {
     display: none !important;
-  }
-
-  .race-bib-modal-backdrop {
-    position: static !important;
-    inset: auto !important;
-    background: transparent !important;
-    overflow: visible !important;
-    display: block !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
   }
 
   .race-bib-modal-body {
-    padding: 0 !important;
+    display: block !important;
     margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     background: transparent !important;
     overflow: visible !important;
-    display: block !important;
+    visibility: visible !important;
   }
 
+  /* 4. Sheet height is strictly 10.2in: fits Letter (10.6in printable), A4 (11.3in), and 8.5x13 (12.5in).
+        This guarantees 2 bibs NEVER split onto separate pages! */
   .race-bib-sheet {
-    width: 12.7in !important;
-    height: 7.7in !important;
+    width: 7.86in !important;
+    max-width: 7.86in !important;
+    height: 10.20in !important;
+    max-height: 10.20in !important;
     margin: 0 auto !important;
-    padding: 0.12in !important;
-    gap: 0.25in !important;
+    padding: 0 !important;
     box-shadow: none !important;
     border-radius: 0 !important;
+    border: none !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    gap: 0 !important;
     page-break-after: always !important;
     break-after: page !important;
-    box-sizing: border-box !important;
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-  }
-
-  .race-bib-sheet:last-child {
-    page-break-after: auto !important;
-    break-after: auto !important;
-  }
-
-  .race-bib-card {
-    border: 1px solid #cbd5e1 !important;
-    box-shadow: none !important;
+    page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
 
+  /* 5. PREVENT EXTRA BLANK PAGE AT THE END */
+  .race-bib-sheet:last-child {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* 6. Individual Bib Card fits 4.95in height (4.95in * 2 + 0.30in cut line = 10.20in) */
+  .race-bib-card {
+    height: 4.95in !important;
+    max-height: 4.95in !important;
+    width: 100% !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    box-sizing: border-box !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    overflow: hidden !important;
+  }
+
   .race-bib-card__gradient-bar {
+    height: 20pt !important;
+    width: 100% !important;
+    background: linear-gradient(90deg, #f59e0b 0%, #ea580c 45%, #741f29 100%) !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  .race-bib-card__number {
-    font-size: 68pt !important;
+  .race-bib-card__body {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    padding: 6pt 14pt 4pt !important;
+    box-sizing: border-box !important;
   }
 
-  .race-bib-card__fullname {
-    font-size: 18pt !important;
+  /* Upper Header: Logo & QR identical 66pt x 66pt in print */
+  .race-bib-card__header {
+    display: grid !important;
+    grid-template-columns: 66pt 1fr 66pt !important;
+    align-items: center !important;
+    gap: 8pt !important;
+    width: 100% !important;
+  }
+
+  .race-bib-card__logo-wrap {
+    width: 66pt !important;
+    height: 66pt !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .race-bib-card__logo {
+    width: 66pt !important;
+    height: 66pt !important;
+    max-width: 66pt !important;
+    max-height: 66pt !important;
+    object-fit: contain !important;
+    display: block !important;
+  }
+
+  .race-bib-card__category {
+    text-align: center !important;
+    padding: 0 4pt !important;
   }
 
   .race-bib-card__category-name {
-    font-size: 14pt !important;
+    font-size: 18pt !important;
+    font-weight: 900 !important;
+    font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif !important;
+    color: #000000 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1.1 !important;
+    margin: 0 !important;
   }
 
   .race-bib-card__category-sub {
+    font-size: 12.5pt !important;
+    font-weight: 900 !important;
+    font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif !important;
+    color: #000000 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    line-height: 1.1 !important;
+    margin-top: 2pt !important;
+  }
+
+  .race-bib-card__qr-wrap {
+    width: 66pt !important;
+    height: 66pt !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .race-bib-card__qr {
+    width: 66pt !important;
+    height: 66pt !important;
+    border: 1px solid #000000 !important;
+    padding: 2pt !important;
+    background: #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    line-height: 0 !important;
+  }
+
+  .race-bib-card__qr svg {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+  }
+
+  /* Center Giant Bib Number in Print — Enforced single line */
+  .race-bib-card__number-wrap {
+    margin: auto 0 !important;
+    padding: 0 !important;
+    text-align: center !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+
+  .race-bib-card__number {
+    font-size: var(--bib-number-size-print) !important;
+    font-weight: 900 !important;
+    font-family: 'Arial Black', Impact, 'Segoe UI Black', Arial, sans-serif !important;
+    color: #000000 !important;
+    line-height: 0.84 !important;
+    letter-spacing: -3px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+    margin: 0 !important;
+  }
+
+  .race-bib-card__name-wrap {
+    text-align: center !important;
+    padding: 2pt 8pt 3pt !important;
+  }
+
+  .race-bib-card__fullname {
+    font-size: var(--bib-name-size-print) !important;
+    font-weight: 900 !important;
+    font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif !important;
+    color: #000000 !important;
+    line-height: 1.15 !important;
+    margin: 0 !important;
+    text-transform: capitalize !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+  }
+
+  .race-bib-sheet__cut-line {
+    height: 0.30in !important;
+    width: 100% !important;
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .race-bib-sheet__cut-line::before {
+    content: '' !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 50% !important;
+    border-top: 1px dashed #cbd5e1 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .race-bib-sheet__cut-icon {
+    font-size: 9pt !important;
+    color: #94a3b8 !important;
+    background: #ffffff !important;
+    padding: 0 8pt !important;
+    font-family: Arial, sans-serif !important;
+    font-weight: 700 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .race-bib-card--empty {
+    height: 4.95in !important;
+    max-height: 4.95in !important;
+    width: 100% !important;
+    border: 1px dashed #e2e8f0 !important;
+    background: transparent !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #cbd5e1 !important;
     font-size: 11pt !important;
   }
 }

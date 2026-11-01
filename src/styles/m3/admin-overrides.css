@@ -19,94 +19,43 @@
   grid-template-columns: 260px 1fr !important;
 }
 
-/* Tablet Portrait Navigation & Layout (840px - 1024px) */
-@media (min-width: 840px) and (max-width: 1024px) {
+/* Mobile & Tablet Portrait Layout: Full-width 1 column, hidden sidebar, bottom clearance for floating navbar */
+@media (max-width: 839px), (max-width: 1080px) and (orientation: portrait) {
   .portal,
   .m3-portal {
-    grid-template-columns: 220px 1fr !important;
+    display: block !important;
+    grid-template-columns: 1fr !important;
+    padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .portal-sidebar {
-    padding: 20px 12px !important;
+    display: none !important;
   }
 
-  .portal-sidebar .brand {
-    gap: 8px !important;
-    padding-bottom: 12px !important;
-  }
-
-  .portal-sidebar .brand .logo-mark--committee {
-    width: 36px !important;
-  }
-
-  .portal-sidebar .brand strong,
-  .portal-brand-title {
-    font-size: 0.95rem !important;
-  }
-
-  .portal-sidebar .brand small,
-  .portal-brand-sub {
-    font-size: 0.65rem !important;
-  }
-
-  .portal-sidebar nav {
-    gap: 3px !important;
-    margin-top: 12px !important;
-  }
-
-  .portal-sidebar .portal-nav-item,
-  .portal-sidebar .portal-public-site,
-  .portal-sidebar button.portal-exit {
-    padding: 0 10px !important;
-    font-size: 0.8rem !important;
-    min-height: 40px !important;
-    gap: 8px !important;
-  }
-
-  .portal-sidebar .portal-nav-icon svg {
-    width: 18px !important;
-    height: 18px !important;
-  }
-
-  .portal-topbar {
-    padding: 0 20px !important;
-    height: 58px !important;
-  }
-
-  .portal-topbar-user {
-    padding: 3px 10px !important;
-    font-size: 0.8rem !important;
+  .portal-topbar-brand {
+    display: flex !important;
   }
 
   .admin-page {
-    padding: 20px 20px 80px !important;
+    padding: 20px 16px 84px !important;
+  }
+}
+
+/* Desktop & Landscape Tablet Layout */
+@media (min-width: 1081px), (min-width: 840px) and (orientation: landscape) {
+  .portal,
+  .m3-portal {
+    display: grid !important;
+    grid-template-columns: 260px 1fr !important;
+    padding-bottom: 0 !important;
   }
 
-  .admin-heading {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 14px !important;
-  }
-
-  .admin-heading .button-row,
-  .admin-heading .registration-heading-actions,
-  .admin-heading .registrations-header-actions {
-    width: 100% !important;
+  .portal-sidebar {
     display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 8px !important;
   }
 
-  .admin-heading .button-row .button,
-  .admin-heading .button-row .m3-button,
-  .admin-heading .registration-heading-actions .button,
-  .admin-heading .registration-heading-actions .m3-button,
-  .admin-heading .registrations-header-actions .button,
-  .admin-heading .registrations-header-actions .m3-button {
-    flex: 1 1 auto !important;
-    min-width: 130px !important;
-    padding: 0 10px !important;
-    font-size: 0.8rem !important;
+  .portal-topbar-brand {
+    display: none !important;
   }
 }
 
@@ -273,7 +222,7 @@
 }
 
 /* Mobile & Tablet Top App Bar: Exactly matched to public header */
-@media (max-width: 839px) {
+@media (max-width: 839px), (max-width: 1080px) and (orientation: portrait) {
   .portal-topbar {
     position: sticky !important;
     top: 0 !important;
@@ -484,7 +433,7 @@
 }
 
 /* Mobile & Tablet Bottom Navigation Strip: Hide desktop sidebar, add bottom clearance for floating navbar */
-@media (max-width: 839px) {
+@media (max-width: 839px), (max-width: 1080px) and (orientation: portrait) {
   .portal-sidebar {
     display: none !important;
   }
@@ -1760,13 +1709,14 @@
   left: 50% !important;
   transform: translateX(-50%) translateY(0) !important;
   bottom: calc(0.55rem + env(safe-area-inset-bottom, 0px)) !important;
-  width: min(calc(100% - 20px), 440px) !important;
+  width: min(calc(100% - 20px), 480px) !important;
   z-index: 99 !important;
   pointer-events: auto !important;
   opacity: 1 !important;
+  display: block !important;
 }
 
-@media (min-width: 840px) {
+@media (min-width: 1081px), (min-width: 840px) and (orientation: landscape) {
   .admin-floating-nav {
     display: none !important;
   }
