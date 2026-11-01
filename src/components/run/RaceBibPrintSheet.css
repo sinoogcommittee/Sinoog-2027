@@ -222,18 +222,19 @@
   box-sizing: border-box;
 }
 
-/* Upper Header: Logo (left), Category (center), QR (right) — Identical square sizes */
+/* Upper Header: Logo (left), Category (center), QR (right) — Close to category & center-aligned */
 .race-bib-card__header {
-  display: grid;
-  grid-template-columns: 80px 1fr 80px;
+  display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 24px;
   width: 100%;
+  margin: 0 auto;
 }
 
 .race-bib-card__logo-wrap {
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -241,16 +242,20 @@
 }
 
 .race-bib-card__logo {
-  width: 80px;
-  height: 80px;
-  max-width: 80px;
-  max-height: 80px;
+  width: 72px;
+  height: 72px;
+  max-width: 72px;
+  max-height: 72px;
   object-fit: contain;
   display: block;
 }
 
 .race-bib-card__category {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 0 4px;
 }
 
@@ -263,6 +268,7 @@
   letter-spacing: 0.04em;
   line-height: 1.1;
   margin: 0;
+  text-align: center;
 }
 
 .race-bib-card__category-sub {
@@ -274,11 +280,12 @@
   letter-spacing: 0.1em;
   line-height: 1.1;
   margin-top: 3px;
+  text-align: center;
 }
 
 .race-bib-card__qr-wrap {
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -286,8 +293,8 @@
 }
 
 .race-bib-card__qr {
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
   border: 1px solid #000000;
   padding: 2px;
   background: #ffffff;
@@ -545,18 +552,19 @@
     box-sizing: border-box !important;
   }
 
-  /* Upper Header: Logo & QR identical 66pt x 66pt in print */
+  /* Upper Header: Logo & QR brought closer to Category, center-aligned in print */
   .race-bib-card__header {
-    display: grid !important;
-    grid-template-columns: 66pt 1fr 66pt !important;
+    display: flex !important;
     align-items: center !important;
-    gap: 8pt !important;
+    justify-content: center !important;
+    gap: 18pt !important;
     width: 100% !important;
+    margin: 0 auto !important;
   }
 
   .race-bib-card__logo-wrap {
-    width: 66pt !important;
-    height: 66pt !important;
+    width: 62pt !important;
+    height: 62pt !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -564,16 +572,20 @@
   }
 
   .race-bib-card__logo {
-    width: 66pt !important;
-    height: 66pt !important;
-    max-width: 66pt !important;
-    max-height: 66pt !important;
+    width: 62pt !important;
+    height: 62pt !important;
+    max-width: 62pt !important;
+    max-height: 62pt !important;
     object-fit: contain !important;
     display: block !important;
   }
 
   .race-bib-card__category {
     text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
     padding: 0 4pt !important;
   }
 
@@ -586,6 +598,7 @@
     letter-spacing: 0.04em !important;
     line-height: 1.1 !important;
     margin: 0 !important;
+    text-align: center !important;
   }
 
   .race-bib-card__category-sub {
@@ -597,11 +610,12 @@
     letter-spacing: 0.1em !important;
     line-height: 1.1 !important;
     margin-top: 2pt !important;
+    text-align: center !important;
   }
 
   .race-bib-card__qr-wrap {
-    width: 66pt !important;
-    height: 66pt !important;
+    width: 62pt !important;
+    height: 62pt !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -609,8 +623,8 @@
   }
 
   .race-bib-card__qr {
-    width: 66pt !important;
-    height: 66pt !important;
+    width: 62pt !important;
+    height: 62pt !important;
     border: 1px solid #000000 !important;
     padding: 2pt !important;
     background: #ffffff !important;
