@@ -670,6 +670,9 @@ export interface Database {
           kit_description: string | null;
           published: boolean;
           sort_order: number;
+          official_started_at: string | null;
+          official_started_by: string | null;
+          planned_start_time: string | null;
         };
         Insert: {
           id?: string;
@@ -683,6 +686,9 @@ export interface Database {
           kit_description?: string | null;
           published?: boolean;
           sort_order?: number;
+          official_started_at?: string | null;
+          official_started_by?: string | null;
+          planned_start_time?: string | null;
         };
         Update: {
           id?: string;
@@ -696,6 +702,9 @@ export interface Database {
           kit_description?: string | null;
           published?: boolean;
           sort_order?: number;
+          official_started_at?: string | null;
+          official_started_by?: string | null;
+          planned_start_time?: string | null;
         };
         Relationships: [];
       };
@@ -1234,6 +1243,14 @@ export interface Database {
       start_run_timing: {
         Args: { p_run_event_id: string };
         Returns: string;
+      };
+      start_category_timing: {
+        Args: { p_category_id: string };
+        Returns: string;
+      };
+      reset_category_timing: {
+        Args: { p_category_id: string };
+        Returns: number;
       };
       record_run_finish: {
         Args: { p_qr_token: string };

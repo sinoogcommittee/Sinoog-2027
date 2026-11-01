@@ -1,11 +1,26 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserQRCodeReader, type IScannerControls } from '@zxing/browser';
-import { AlertTriangle, CalendarDays, Camera, Clock3, Flag, Medal, PersonStanding, Play, RefreshCw, RotateCcw, ScanLine, Timer, Users } from 'lucide-react';
+import {
+  AlertTriangle,
+  CalendarDays,
+  Camera,
+  Clock3,
+  Flag,
+  Medal,
+  PersonStanding,
+  Play,
+  RefreshCw,
+  RotateCcw,
+  ScanLine,
+  Timer,
+  Users,
+} from 'lucide-react';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/m3/Card';
 import { Dialog } from '../../components/m3/Dialog';
 import { TextField } from '../../components/m3/TextField';
 import { TextArea } from '../../components/m3/TextArea';
+import { SelectField } from '../../components/m3/SelectField';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import {
   formatElapsed,
@@ -13,7 +28,10 @@ import {
   getTimingDashboard,
   recordRunnerFinish,
   resetOfficialRun,
-  startOfficialRun,
+  startCategoryTiming,
+  resetCategoryTiming,
+  getCategoryPlannedStart,
+  getCategoryBadgeStyle,
   type RunCategory,
   type RunEvent,
   type TimingDashboardRow,
@@ -54,10 +72,11 @@ export function RunTimingPage() {
   const [categories, setCategories] = useState<RunCategory[]>([]);
   const [rows, setRows] = useState<TimingDashboardRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [starting, setStarting] = useState(false);
+  const [startingCategoryId, setStartingCategoryId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetTargetId, setResetTargetId] = useState<string | 'all'>('all');
   const [resetEmail, setResetEmail] = useState('');
   const [resetPassword, setResetPassword] = useState('');
   const [resetError, setResetError] = useState('');
@@ -83,22 +102,50 @@ export function RunTimingPage() {
 
   useEffect(() => () => scannerControls.current?.stop(), []);
 
+  // Sort categories descending by distance (10K -> 5K -> 3K) matching the gun start schedule
+  const sortedCategories = useMemo(() => {
+    return [...categories].sort((a, b) => b.distance_meters - a.distance_meters);
+  }, [categories]);
+
+  // Keep live timers running whenever any category clock or event clock is active
+  const hasAnyCategoryRunning = useMemo(() => {
+    return categories.some((c) => Boolean(c.official_started_at)) || Boolean(runEvent?.official_started_at);
+  }, [categories, runEvent?.official_started_at]);
+
   useEffect(() => {
-    if (!runEvent?.official_started_at) return;
+    if (!hasAnyCategoryRunning) return;
     const initialTick = window.setTimeout(() => setNow(Date.now()), 0);
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => {
       window.clearTimeout(initialTick);
       window.clearInterval(timer);
     };
-  }, [runEvent?.official_started_at]);
+  }, [hasAnyCategoryRunning]);
 
   const submitFinish = useCallback(async (value: string) => {
     if (scanBusy.current) return;
     scanBusy.current = true;
     try {
+      const runner = rows.find(
+        (r) => r.qr_token && (value.includes(r.qr_token) || r.qr_token === value.trim())
+      );
+      if (runner) {
+        const category = categories.find((c) => c.id === runner.category_id);
+        if (category && !category.official_started_at && !runEvent?.official_started_at) {
+          const planned = getCategoryPlannedStart(category);
+          throw new Error(
+            `Cannot record finish: The official clock for ${category.name} has not been started yet (Planned gun start: ${planned}).`
+          );
+        }
+      }
+
       await recordRunnerFinish(value);
-      toast('Official finish recorded.', 'success');
+      toast(
+        runner
+          ? `Official finish recorded for #${runner.bib_number} ${runner.participant_name}!`
+          : 'Official finish recorded.',
+        'success'
+      );
       setManualQr('');
       await refresh();
     } catch (error: unknown) {
@@ -106,7 +153,7 @@ export function RunTimingPage() {
     } finally {
       window.setTimeout(() => { scanBusy.current = false; }, 1200);
     }
-  }, [refresh, toast]);
+  }, [categories, rows, runEvent, refresh, toast]);
 
   const startScanner = async () => {
     if (!videoRef.current) return;
@@ -128,20 +175,29 @@ export function RunTimingPage() {
     setScannerActive(false);
   };
 
-  const handleOfficialStart = async () => {
-    if (!runEvent || !window.confirm('Start the official race clock now? The timer begins immediately for all runners.')) return;
-    setStarting(true);
+  const handleCategoryStart = useCallback(async (category: RunCategory) => {
+    if (!runEvent) return;
+    const planned = getCategoryPlannedStart(category);
+    const confirmMessage = `Start the official gun clock for ${category.name} now?\n\n` +
+      `Planned gun start was ${planned}.\n` +
+      `The official elapsed clock for this category will begin immediately.`;
+    if (!window.confirm(confirmMessage)) return;
+
+    setStartingCategoryId(category.id);
     try {
-      const startedAt = await startOfficialRun(runEvent.id);
-      setRunEvent({ ...runEvent, official_started_at: startedAt });
+      const startedAt = await startCategoryTiming(category.id, runEvent.id);
+      setCategories((prev) =>
+        prev.map((c) => (c.id === category.id ? { ...c, official_started_at: startedAt } : c))
+      );
       setNow(Date.now());
-      toast('Official race clock started.', 'success');
+      toast(`Official gun start recorded for ${category.name}!`, 'success');
+      await refresh();
     } catch (error: unknown) {
-      toast(error instanceof Error ? error.message : 'Unable to start the race clock.', 'error');
+      toast(error instanceof Error ? error.message : `Unable to start race clock for ${category.name}.`, 'error');
     } finally {
-      setStarting(false);
+      setStartingCategoryId(null);
     }
-  };
+  }, [runEvent, refresh, toast]);
 
   const handleRefresh = async () => {
     try {
@@ -155,7 +211,8 @@ export function RunTimingPage() {
     }
   };
 
-  const openResetConfirm = () => {
+  const openResetConfirm = (targetId: string | 'all' = 'all') => {
+    setResetTargetId(targetId);
     setResetEmail(user?.email ?? '');
     setResetPassword('');
     setResetError('');
@@ -197,12 +254,19 @@ export function RunTimingPage() {
       }
 
       stopScanner();
-      const deletedFinishCount = await resetOfficialRun(runEvent.id);
+      if (resetTargetId === 'all') {
+        const deletedFinishCount = await resetOfficialRun(runEvent.id);
+        toast(`All category race times reset. ${deletedFinishCount} finish record${deletedFinishCount === 1 ? '' : 's'} cleared.`, 'success');
+      } else {
+        const targetCategory = categories.find((c) => c.id === resetTargetId);
+        const deletedFinishCount = await resetCategoryTiming(resetTargetId, runEvent.id);
+        toast(`${targetCategory?.name || 'Category'} race time reset. ${deletedFinishCount} finish record${deletedFinishCount === 1 ? '' : 's'} cleared.`, 'success');
+      }
+
       setShowResetConfirm(false);
       setResetPassword('');
       await refresh();
       setNow(Date.now());
-      toast(`Race time reset. ${deletedFinishCount} finish record${deletedFinishCount === 1 ? '' : 's'} cleared.`, 'success');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unable to reset race timing.';
       setResetError(message);
@@ -211,10 +275,6 @@ export function RunTimingPage() {
       setResetting(false);
     }
   };
-
-  const liveElapsed = runEvent?.official_started_at
-    ? formatElapsed(Math.max(0, (now || new Date(runEvent.official_started_at).getTime()) - new Date(runEvent.official_started_at).getTime()))
-    : '00:00:00';
 
   const rankedRows = useMemo(() => {
     const rankById = new Map<string, number>();
@@ -237,6 +297,12 @@ export function RunTimingPage() {
     return a.finish ? -1 : b.finish ? 1 : (a.bib_number || '').localeCompare(b.bib_number || '');
   });
 
+  const totalFinished = useMemo(() => rows.filter((r) => r.finish).length, [rows]);
+  const targetCategoryForReset = useMemo(
+    () => categories.find((c) => c.id === resetTargetId),
+    [categories, resetTargetId]
+  );
+
   if (loading) return <div className="admin-page"><LoadingState message="Loading race timing…" /></div>;
 
   return (
@@ -245,7 +311,7 @@ export function RunTimingPage() {
         <div>
           <p className="eyebrow">Race-day operations</p>
           <h1>Official Timing & Finish Line</h1>
-          <p>Start the official clock, scan each approved QR once, and review category rankings.</p>
+          <p>Staggered gun starts for 10K (4:00 AM), 5K (4:30 AM), and 3K (5:00 AM). The official clock tracks from each category's actual start button.</p>
         </div>
         <Button
           type="button"
@@ -259,55 +325,125 @@ export function RunTimingPage() {
         </Button>
       </div>
 
-      <Card as="section" variant="outlined" className="timing-control-panel">
-        <div className="timing-control-panel__start">
-          <small>Official start</small>
-          <strong>
-            {runEvent?.official_started_at
-              ? new Date(runEvent.official_started_at).toLocaleString('en-PH', {
-                  dateStyle: 'long',
-                  timeStyle: 'medium',
-                  timeZone: 'Asia/Manila',
-                })
-              : 'Not started'}
-          </strong>
+      {/* Staggered Category Gun Start Cards */}
+      <div className="timing-category-grid" role="region" aria-label="Category Gun Start Clocks">
+        {sortedCategories.map((cat) => {
+          const badge = getCategoryBadgeStyle(cat.name);
+          const planned = getCategoryPlannedStart(cat);
+          const isStarted = Boolean(cat.official_started_at);
+          const isStarting = startingCategoryId === cat.id;
+
+          const elapsedMs = isStarted
+            ? Math.max(0, (now || new Date(cat.official_started_at!).getTime()) - new Date(cat.official_started_at!).getTime())
+            : 0;
+          const formattedClock = isStarted ? formatElapsed(elapsedMs) : '00:00:00';
+
+          return (
+            <Card
+              as="section"
+              key={cat.id}
+              variant="outlined"
+              className={`timing-category-card ${isStarted ? 'is-running' : ''}`}
+            >
+              <div className="timing-category-card__header">
+                <span
+                  className="timing-category-card__badge"
+                  style={{ backgroundColor: badge.bg, color: badge.color, borderColor: badge.border }}
+                >
+                  {badge.label}
+                </span>
+                <div>
+                  <h3 className="timing-category-card__title">{cat.name}</h3>
+                  <p className="timing-category-card__planned">
+                    <Clock3 size={13} aria-hidden /> Planned Gun Start: <strong>{planned}</strong>
+                  </p>
+                </div>
+              </div>
+
+              <div className="timing-category-card__body">
+                <div className="timing-category-card__start-time">
+                  <small>Actual Gun Start</small>
+                  <strong>
+                    {isStarted
+                      ? new Date(cat.official_started_at!).toLocaleTimeString('en-PH', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                          timeZone: 'Asia/Manila',
+                        })
+                      : 'Pending Gun Start'}
+                  </strong>
+                </div>
+
+                <div className="timing-category-card__clock" aria-live="polite">
+                  <small>Live Elapsed Clock</small>
+                  <strong className={isStarted ? 'clock-active' : 'clock-idle'}>
+                    {formattedClock}
+                  </strong>
+                </div>
+              </div>
+
+              <div className="timing-category-card__actions">
+                {!isStarted ? (
+                  <Button
+                    type="button"
+                    variant="filled"
+                    disabled={isStarting}
+                    onClick={() => void handleCategoryStart(cat)}
+                    leadingIcon={<Play size={16} />}
+                    className="timing-category-start-btn"
+                  >
+                    {isStarting ? 'Starting…' : `Start ${badge.label} Gun Clock (${planned})`}
+                  </Button>
+                ) : (
+                  <div className="timing-category-card__running-controls">
+                    <span className="timing-running-badge">
+                      <span className="pulse-dot" /> Clock Running
+                    </span>
+                    {isAdmin && (
+                      <Button
+                        type="button"
+                        variant="outlined"
+                        className="timing-category-reset-btn"
+                        onClick={() => openResetConfirm(cat.id)}
+                        title={`Reset ${cat.name} clock and finisher records`}
+                        leadingIcon={<RotateCcw size={14} />}
+                      >
+                        Reset {badge.label}
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Global Status Bar with Full Event Reset */}
+      <div className="timing-overview-summary">
+        <div className="timing-overview-stats">
+          <span>Total Approved: <strong>{rows.length}</strong></span>
+          <span>Official Finishers: <strong>{totalFinished}</strong></span>
+          <span>Pending Finish: <strong>{Math.max(0, rows.length - totalFinished)}</strong></span>
         </div>
-        <div className="timing-live-clock" aria-live="polite">
-          <small>Live elapsed time</small>
-          <strong>{liveElapsed}</strong>
-        </div>
-        <div className="timing-control-panel__actions">
+        {isAdmin && hasAnyCategoryRunning && (
           <Button
             type="button"
-            variant="filled"
-            disabled={starting || Boolean(runEvent?.official_started_at)}
-            onClick={() => void handleOfficialStart()}
-            leadingIcon={<Play size={17} />}
+            variant="danger"
+            onClick={() => openResetConfirm('all')}
+            leadingIcon={<RotateCcw size={16} />}
+            title="Reset timing and recorded finishes for all categories"
           >
-            {starting
-              ? 'Starting…'
-              : runEvent?.official_started_at
-                ? 'Official clock running'
-                : 'Start official race time'}
+            Reset All Categories
           </Button>
-          {runEvent?.official_started_at && isAdmin && (
-            <Button
-              type="button"
-              variant="danger"
-              className="timing-reset-button"
-              onClick={openResetConfirm}
-              leadingIcon={<RotateCcw size={17} />}
-            >
-              Reset official start
-            </Button>
-          )}
-        </div>
-      </Card>
+        )}
+      </div>
 
       <Card as="section" variant="outlined" className="admin-panel finish-scanner-panel">
         <div className="panel-heading">
           <h2><ScanLine size={18} /> Finish-line QR scanner</h2>
-          <p>Camera scanning requires HTTPS. Manual token entry remains available as backup.</p>
+          <p>Camera scanning requires HTTPS. Manual token entry remains available as backup. Elapsed times calculate from each runner's specific category start.</p>
         </div>
         <div className="finish-scanner-grid">
           <div>
@@ -336,7 +472,7 @@ export function RunTimingPage() {
             <Button
               type="submit"
               variant="filled"
-              disabled={!manualQr.trim() || !runEvent?.official_started_at}
+              disabled={!manualQr.trim() || !hasAnyCategoryRunning}
               leadingIcon={<Flag size={17} />}
             >
               Record official finish
@@ -349,7 +485,7 @@ export function RunTimingPage() {
         <div className="table-tools timing-filters">
           <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} aria-label="Filter category">
             <option value="all">All categories</option>
-            {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+            {sortedCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
           </select>
           <select value={divisionFilter} onChange={(event) => setDivisionFilter(event.target.value)} aria-label="Filter division">
             <option value="all">Male & Female</option>
@@ -377,50 +513,64 @@ export function RunTimingPage() {
               <span>Age</span>
               <span>Official Time</span>
             </div>
-            {filteredRows.map((row) => (
-              <div className="timing-results-row timing-runner-card" key={row.id}>
-                <strong className="timing-runner-card__place">
-                  <small>Place</small>
-                  <span className="timing-runner-card__place-value">
-                    <Medal className="timing-card-icon" size={24} aria-hidden="true" />
-                    <span>{row.rank ? row.rank : '—'}</span>
+            {filteredRows.map((row) => {
+              const rowCategory = categories.find((c) => c.id === row.category_id);
+              const isCategoryStarted = Boolean(rowCategory?.official_started_at || runEvent?.official_started_at);
+              const planned = rowCategory ? getCategoryPlannedStart(rowCategory) : '4:00 AM';
+
+              return (
+                <div className="timing-results-row timing-runner-card" key={row.id}>
+                  <strong className="timing-runner-card__place">
+                    <small>Place</small>
+                    <span className="timing-runner-card__place-value">
+                      <Medal className="timing-card-icon" size={24} aria-hidden="true" />
+                      <span>{row.rank ? row.rank : '—'}</span>
+                    </span>
+                  </strong>
+                  <span className="timing-runner-card__runner">
+                    <small>Runner</small>
+                    <b>#{row.bib_number}</b>
+                    <span>{row.participant_name}</span>
                   </span>
-                </strong>
-                <span className="timing-runner-card__runner">
-                  <small>Runner</small>
-                  <b>#{row.bib_number}</b>
-                  <span>{row.participant_name}</span>
-                </span>
-                <span className="timing-runner-card__category">
-                  <span className="timing-card-stat__icon timing-card-stat__icon--category"><PersonStanding size={20} aria-hidden="true" /></span>
-                  <span className="timing-card-stat__content">
-                    <small>Category</small>
-                    <strong>{categories.find((category) => category.id === row.category_id)?.name || 'Run'}</strong>
+                  <span className="timing-runner-card__category">
+                    <span className="timing-card-stat__icon timing-card-stat__icon--category"><PersonStanding size={20} aria-hidden="true" /></span>
+                    <span className="timing-card-stat__content">
+                      <small>Category</small>
+                      <strong>{rowCategory?.name || 'Run'}</strong>
+                    </span>
                   </span>
-                </span>
-                <span className="timing-runner-card__division">
-                  <span className="timing-card-stat__icon timing-card-stat__icon--division"><Users size={20} aria-hidden="true" /></span>
-                  <span className="timing-card-stat__content">
-                    <small>Division</small>
-                    <strong>{row.division === 'female' ? 'Female' : row.division === 'male' ? 'Male' : '—'}</strong>
+                  <span className="timing-runner-card__division">
+                    <span className="timing-card-stat__icon timing-card-stat__icon--division"><Users size={20} aria-hidden="true" /></span>
+                    <span className="timing-card-stat__content">
+                      <small>Division</small>
+                      <strong>{row.division === 'female' ? 'Female' : row.division === 'male' ? 'Male' : '—'}</strong>
+                    </span>
                   </span>
-                </span>
-                <span className="timing-runner-card__age">
-                  <span className="timing-card-stat__icon timing-card-stat__icon--age"><CalendarDays size={20} aria-hidden="true" /></span>
-                  <span className="timing-card-stat__content">
-                    <small>Age</small>
-                    <strong>{ageOnRaceDay(row.birth_date) ?? '—'}</strong>
+                  <span className="timing-runner-card__age">
+                    <span className="timing-card-stat__icon timing-card-stat__icon--age"><CalendarDays size={20} aria-hidden="true" /></span>
+                    <span className="timing-card-stat__content">
+                      <small>Age</small>
+                      <strong>{ageOnRaceDay(row.birth_date) ?? '—'}</strong>
+                    </span>
                   </span>
-                </span>
-                <span className={`timing-runner-card__time${row.finish ? ' is-finished' : ''}`}>
-                  <span className="timing-card-stat__icon timing-card-stat__icon--time"><Timer size={20} aria-hidden="true" /></span>
-                  <span className="timing-card-stat__content">
-                    <small>Official time</small>
-                    <strong>{row.finish ? <><Clock3 size={14} /> {formatElapsed(row.finish.elapsed_milliseconds)}</> : 'Not finished'}</strong>
+                  <span className={`timing-runner-card__time${row.finish ? ' is-finished' : ''}`}>
+                    <span className="timing-card-stat__icon timing-card-stat__icon--time"><Timer size={20} aria-hidden="true" /></span>
+                    <span className="timing-card-stat__content">
+                      <small>Official time</small>
+                      {row.finish ? (
+                        <strong><Clock3 size={14} /> {formatElapsed(row.finish.elapsed_milliseconds)}</strong>
+                      ) : isCategoryStarted ? (
+                        <span className="timing-status-running">On Course (Running)</span>
+                      ) : (
+                        <span className="timing-status-pending" title={`Planned gun start: ${planned}`}>
+                          Awaiting Start ({planned})
+                        </span>
+                      )}
+                    </span>
                   </span>
-                </span>
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
         )}
       </Card>
@@ -428,15 +578,35 @@ export function RunTimingPage() {
       <Dialog
         open={showResetConfirm}
         onClose={closeResetConfirm}
-        title="Reset the official start?"
+        title={
+          resetTargetId === 'all'
+            ? 'Reset all official starts?'
+            : `Reset ${targetCategoryForReset?.name || 'Category'} start?`
+        }
       >
         <form onSubmit={(event) => { event.preventDefault(); void handleReset(); }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--md-sys-color-error)' }}>
             <AlertTriangle size={32} aria-hidden="true" />
             <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--md-sys-color-on-surface-variant)' }}>
-              This removes the official start time and every recorded finish. Runner registrations, bib numbers, and QR codes remain unchanged. Verify your administrator credentials to continue.
+              {resetTargetId === 'all'
+                ? 'This removes the official start time for all categories (10K, 5K, 3K) and every recorded finish across the event. Runner registrations, bib numbers, and QR codes remain unchanged. Verify your administrator credentials to continue.'
+                : `This removes the official start time and recorded finish records for ${targetCategoryForReset?.name || 'this category'} only. Other categories will not be affected.`}
             </p>
           </div>
+
+          <SelectField
+            label="Category to reset"
+            value={resetTargetId}
+            onChange={(event) => setResetTargetId(event.target.value as string | 'all')}
+            disabled={resetting}
+          >
+            <option value="all">All Categories (Full Event Reset)</option>
+            {sortedCategories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name} ({getCategoryBadgeStyle(c.name).label})
+              </option>
+            ))}
+          </SelectField>
 
           <TextField
             label="Administrator email"
@@ -483,4 +653,3 @@ export function RunTimingPage() {
     </div>
   );
 }
-

@@ -28,6 +28,9 @@ export interface RunCategory {
   kit_description: string | null;
   published: boolean;
   sort_order: number;
+  official_started_at?: string | null;
+  official_started_by?: string | null;
+  planned_start_time?: string | null;
 }
 
 export interface RunEvent {
@@ -77,6 +80,9 @@ export const FALLBACK_CATEGORIES: RunCategory[] = [
     kit_description: 'Official Sinoog 2027 Singlet, Race Bib, Finisher Ribbon, Post-race Refreshment',
     published: true,
     sort_order: 1,
+    planned_start_time: '05:00:00',
+    official_started_at: null,
+    official_started_by: null,
   },
   {
     id: 'cat-5k',
@@ -90,6 +96,9 @@ export const FALLBACK_CATEGORIES: RunCategory[] = [
     kit_description: 'Official Sinoog 2027 Singlet, Race Bib, Finisher Medal, Hydration Support',
     published: true,
     sort_order: 2,
+    planned_start_time: '04:30:00',
+    official_started_at: null,
+    official_started_by: null,
   },
   {
     id: 'cat-10k',
@@ -103,6 +112,9 @@ export const FALLBACK_CATEGORIES: RunCategory[] = [
     kit_description: 'Official Sinoog 2027 Singlet, Timing Bib, Heavy Cast Finisher Medal, Energy Station & Hot Meal',
     published: true,
     sort_order: 3,
+    planned_start_time: '04:00:00',
+    official_started_at: null,
+    official_started_by: null,
   },
 ];
 
@@ -197,6 +209,58 @@ export function getBibCategoryLabel(categoryName?: string | null): { title: stri
     return { title: '3KM FUN RUN', subtitle: 'CATEGORY' };
   }
   return { title: categoryName.toUpperCase(), subtitle: 'CATEGORY' };
+}
+
+export function getCategoryPlannedStart(category: { name?: string | null; planned_start_time?: string | null }): string {
+  if (category.planned_start_time) {
+    const parts = category.planned_start_time.split(':');
+    if (parts.length >= 2) {
+      const hour = parseInt(parts[0], 10);
+      const min = parts[1];
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const hour12 = hour % 12 || 12;
+      return `${hour12}:${min} ${ampm}`;
+    }
+  }
+  const lower = (category.name || '').toLowerCase();
+  if (lower.includes('10k')) return '4:00 AM';
+  if (lower.includes('5k')) return '4:30 AM';
+  if (lower.includes('3k')) return '5:00 AM';
+  return '4:00 AM';
+}
+
+export function getCategoryBadgeStyle(categoryName: string): { bg: string; color: string; border: string; label: string } {
+  const lower = categoryName.toLowerCase();
+  if (lower.includes('10k')) {
+    return {
+      bg: '#fff3e0',
+      color: '#e65100',
+      border: '#ffb74d',
+      label: '10K',
+    };
+  }
+  if (lower.includes('5k')) {
+    return {
+      bg: '#e3f2fd',
+      color: '#1565c0',
+      border: '#90caf9',
+      label: '5K',
+    };
+  }
+  if (lower.includes('3k')) {
+    return {
+      bg: '#e8f5e9',
+      color: '#2e7d32',
+      border: '#a5d6a7',
+      label: '3K',
+    };
+  }
+  return {
+    bg: '#f5f5f5',
+    color: '#424242',
+    border: '#e0e0e0',
+    label: 'RUN',
+  };
 }
 
 export interface AdminCashRegistrationInput extends RegistrationInput {
@@ -621,6 +685,74 @@ export async function resetOfficialRun(runEventId: string): Promise<number> {
   const { data, error } = await supabase.rpc('reset_run_timing', { p_run_event_id: runEventId });
   if (error) throw new Error(error.message);
   return data ?? 0;
+}
+
+export async function startCategoryTiming(categoryId: string, runEventId: string): Promise<string> {
+  if (!supabase) return new Date().toISOString();
+  
+  // Try dedicated category RPC first
+  const { data, error } = await supabase.rpc('start_category_timing', { p_category_id: categoryId });
+  if (!error && data) {
+    return data;
+  }
+
+  // Fallback: update run_categories row and ensure event start is recorded
+  const startedAt = new Date().toISOString();
+  const { error: updateError } = await supabase
+    .from('run_categories')
+    .update({ official_started_at: startedAt })
+    .eq('id', categoryId);
+
+  // Set run_events official_started_at if not set yet
+  await supabase
+    .from('run_events')
+    .update({ official_started_at: startedAt })
+    .eq('id', runEventId)
+    .is('official_started_at', null);
+
+  if (updateError) {
+    // If column doesn't exist yet, fallback to startOfficialRun
+    return await startOfficialRun(runEventId);
+  }
+
+  return startedAt;
+}
+
+export async function resetCategoryTiming(categoryId: string, runEventId: string): Promise<number> {
+  if (!supabase) return 0;
+
+  // Try category reset RPC
+  const { data, error } = await supabase.rpc('reset_category_timing', { p_category_id: categoryId });
+  if (!error && data !== null) {
+    return data;
+  }
+
+  // Fallback direct cleanup
+  const { count } = await supabase
+    .from('run_finish_records')
+    .delete({ count: 'exact' })
+    .eq('category_id', categoryId);
+
+  await supabase
+    .from('run_categories')
+    .update({ official_started_at: null, official_started_by: null })
+    .eq('id', categoryId);
+
+  // If no other category is running, reset event start
+  const { data: runningCats } = await supabase
+    .from('run_categories')
+    .select('id')
+    .eq('run_event_id', runEventId)
+    .not('official_started_at', 'is', null);
+
+  if (!runningCats || runningCats.length === 0) {
+    await supabase
+      .from('run_events')
+      .update({ official_started_at: null, official_started_by: null })
+      .eq('id', runEventId);
+  }
+
+  return count ?? 0;
 }
 
 export async function recordRunnerFinish(qrValue: string): Promise<void> {

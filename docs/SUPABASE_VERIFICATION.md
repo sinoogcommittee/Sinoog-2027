@@ -45,6 +45,7 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | `020_financial_reporting_dimensions.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; adds financial allocation dimensions, counterparties, recorder enforcement, creation audit, and reporting index |
 | `021_delegation_workspace_and_public_policy.sql` | 2026-10-31 | SQL Editor | Site administrator | PASS — applied; contingent workspace metadata, RLS, and storage deletion policies active |
 | `022_category_bib_sequence.sql` | 2026-11-01 | SQL Editor | Site administrator | PASS — applied; category-specific bib sequences (3K: 3001-3999, 5K: 5001-5999, 10K: 10001-10999) and 4-5 digit constraint active in production |
+| `023_category_timing_starts.sql` | Prepared | SQL Editor | Site administrator | Ready for production; staggered category gun starts (10K @ 4:00 AM, 5K @ 4:30 AM, 3K @ 5:00 AM), category-specific clock RPCs, and elapsed time calculation |
 
 ## Financial reporting enhancement — October 28, 2026
 

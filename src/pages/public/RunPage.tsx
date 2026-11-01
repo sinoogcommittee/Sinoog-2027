@@ -257,7 +257,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
                     <Clock size={24} />
                   </div>
                   <h3>Race-Day Guide</h3>
-                  <p>Race starts at 4:00 AM.</p>
+                  <p>Gun Starts: 10K @ 4:00 AM • 5K @ 4:30 AM • 3K @ 5:00 AM</p>
                   <strong className="run-highlight-card__footer">January 9, 2027</strong>
                 </Card>
               </div>

@@ -2827,6 +2827,221 @@ button:focus-visible {
     serif;
   color: var(--wine);
 }
+/* Staggered Category Gun Start Timing Controls */
+.timing-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.timing-category-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--md-sys-color-surface, #ffffff);
+  border: 1px solid var(--md-sys-color-outline-variant, #e0d0c0);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.timing-category-card.is-running {
+  border-color: #2e7d32;
+  box-shadow: 0 4px 16px rgba(46, 125, 50, 0.12);
+}
+
+.timing-category-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.timing-category-card__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid;
+  flex-shrink: 0;
+}
+
+.timing-category-card__title {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface, #211b19);
+  line-height: 1.3;
+}
+
+.timing-category-card__planned {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--md-sys-color-on-surface-variant, #6b5a50);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.timing-category-card__planned strong {
+  color: var(--md-sys-color-primary, #8a2430);
+  font-weight: 700;
+}
+
+.timing-category-card__body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 14px;
+  background: #fdfaf6;
+  border: 1px solid #ebdcd0;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.timing-category-card__start-time small,
+.timing-category-card__clock small {
+  display: block;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--md-sys-color-on-surface-variant, #7c685c);
+  margin-bottom: 2px;
+}
+
+.timing-category-card__start-time strong {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface, #211b19);
+  display: block;
+}
+
+.timing-category-card__clock strong {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+  font-size: 1.25rem !important;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.timing-category-card__clock strong.clock-active {
+  color: #1b5e20;
+}
+
+.timing-category-card__clock strong.clock-idle {
+  color: #9e9e9e;
+}
+
+.timing-category-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.timing-category-start-btn {
+  width: 100%;
+  font-weight: 700;
+}
+
+.timing-category-card__running-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.timing-running-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #2e7d32;
+  background: #e8f5e9;
+  padding: 5px 10px;
+  border-radius: 20px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #2e7d32;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulseDotAnim 1.4s ease-in-out infinite;
+}
+
+@keyframes pulseDotAnim {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+.timing-category-reset-btn {
+  font-size: 0.75rem !important;
+  padding: 4px 10px !important;
+  border-color: #ffcdd2 !important;
+  color: #c62828 !important;
+}
+
+.timing-category-reset-btn:hover {
+  background: #ffebee !important;
+}
+
+.timing-overview-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 18px;
+  background: #fbf8f4;
+  border: 1px solid #e8dcce;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.timing-overview-stats {
+  display: flex;
+  gap: 20px;
+  font-size: 0.88rem;
+}
+
+.timing-overview-stats strong {
+  color: var(--md-sys-color-primary, #8a2430);
+  font-size: 1.05rem;
+}
+
+.timing-status-running {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1565c0;
+  background: #e3f2fd;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.timing-status-pending {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #616161;
+  background: #eeeeee;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
 .timing-control-panel {
   display: flex;
   justify-content: space-between;
@@ -2952,6 +3167,9 @@ button:focus-visible {
   .timing-control-panel {
     align-items: flex-start;
     flex-direction: column;
+  }
+  .timing-category-grid {
+    grid-template-columns: 1fr;
   }
 }
 @media (max-width: 640px) {
