@@ -1362,10 +1362,70 @@ a.m3-button:hover { text-decoration: none; }
   margin-left: auto;
   align-items: center;
   gap: var(--md-space-1);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 @media (min-width: 840px) {
   .pub-topbar__nav { display: flex; }
+}
+
+/* Tablet Portrait Navigation & Brand (840px - 1024px) */
+@media (min-width: 840px) and (max-width: 1024px) {
+  .pub-topbar {
+    height: 56px !important;
+  }
+
+  .pub-topbar__inner {
+    height: 56px !important;
+    padding: 0 12px !important;
+    gap: 8px !important;
+  }
+
+  .pub-topbar__brand {
+    gap: 6px !important;
+    min-width: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .pub-topbar .logo-mark--parish,
+  .pub-topbar .logo-mark--committee {
+    height: 38px !important;
+    max-height: 38px !important;
+    width: auto !important;
+  }
+
+  .pub-topbar__brand-text strong {
+    font-size: 0.92rem !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+  }
+
+  /* Hide parish subtitle on tablet portrait to prevent any header wrap/overflow */
+  .pub-topbar__brand-text small {
+    display: none !important;
+  }
+
+  .pub-topbar__nav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 2px !important;
+    margin-left: auto !important;
+  }
+
+  .pub-topbar__navlink {
+    padding: 0 7px !important;
+    font-size: 0.78rem !important;
+    min-height: 34px !important;
+    white-space: nowrap !important;
+    border-radius: var(--md-sys-shape-corner-small) !important;
+  }
+
+  .pub-topbar__signin {
+    padding: 0 10px !important;
+    font-size: 0.78rem !important;
+    min-height: 34px !important;
+    margin-left: 2px !important;
+    white-space: nowrap !important;
+  }
 }
 
 .pub-topbar__navlink {
@@ -3735,6 +3795,113 @@ a.m3-button:hover { text-decoration: none; }
   .home-hero .countdown-sep {
     font-size: 1.4rem !important;
     margin-bottom: 8px !important;
+  }
+}
+
+/* ==========================================================================
+   Tablet Portrait View (840px - 1024px, e.g. Galaxy Tab S11 Ultra, iPad)
+   Ensures Header (56px) + Hero Copy + Artwork + Countdown Timer in ONE View
+   ========================================================================== */
+@media (min-width: 840px) and (max-width: 1024px) {
+  :root {
+    --site-header-height: 56px;
+  }
+
+  .home-hero {
+    min-height: calc(100dvh - 56px) !important;
+    max-height: calc(100dvh - 56px) !important;
+    height: calc(100dvh - 56px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+  }
+
+  .home-hero__inner {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr) !important;
+    align-items: center !important;
+    gap: clamp(16px, 2.5vw, 32px) !important;
+    padding-top: clamp(12px, 1.8vh, 24px) !important;
+    padding-bottom: clamp(10px, 1.4vh, 18px) !important;
+    box-sizing: border-box !important;
+  }
+
+  .home-hero .hero-kicker {
+    margin-bottom: 8px !important;
+    font-size: 0.80rem !important;
+  }
+
+  .home-hero h1 {
+    font-size: clamp(2.3rem, 4.2vw, 3.2rem) !important;
+    line-height: 1.16 !important;
+    margin: 6px 0 12px !important;
+  }
+
+  .home-hero .hero-lead {
+    font-size: 0.94rem !important;
+    line-height: 1.52 !important;
+    margin: 0 0 16px 0 !important;
+    max-width: 44ch !important;
+  }
+
+  .home-hero .hero-actions {
+    gap: 10px !important;
+  }
+
+  .home-hero .hero-actions .m3-button {
+    min-height: 40px !important;
+    font-size: 0.86rem !important;
+    padding-inline: 18px !important;
+  }
+
+  .home-hero .hero-emblem {
+    width: min(100%, min(360px, 44vh)) !important;
+  }
+
+  .home-hero .hero-artwork img {
+    max-height: min(280px, 34vh) !important;
+  }
+
+  .home-hero .hero-artwork::before {
+    width: min(360px, 40vh) !important;
+    height: min(360px, 40vh) !important;
+  }
+
+  .home-hero .hero-artwork::after {
+    width: min(320px, 35vh) !important;
+    height: min(320px, 35vh) !important;
+  }
+
+  .home-hero .hero-emblem::before {
+    width: min(400px, 44vh) !important;
+    height: min(400px, 44vh) !important;
+    top: calc(min(280px, 34vh) / 2) !important;
+  }
+
+  .home-hero .countdown-bar {
+    padding: 10px 16px !important;
+    flex-shrink: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .home-hero .countdown-unit__value {
+    font-size: 1.55rem !important;
+  }
+
+  .home-hero .countdown-unit__label {
+    font-size: 0.65rem !important;
+    display: block !important;
+    opacity: 0.85 !important;
+  }
+
+  .home-hero .countdown-sep {
+    font-size: 1.3rem !important;
+    margin-bottom: 6px !important;
   }
 }
 

@@ -2202,26 +2202,6 @@ button:focus-visible {
   .sponsor-strip {
     grid-template-columns: 1fr 1fr;
   }
-  .portal {
-    grid-template-columns: 76px 1fr;
-  }
-  .portal-sidebar {
-    padding: 24px 12px;
-  }
-  .portal-sidebar .brand span:last-child,
-  .portal-sidebar nav a:not(.active) {
-    font-size: 0;
-  }
-  .portal-sidebar nav a {
-    justify-content: center;
-  }
-  .portal-sidebar nav a.active {
-    font-size: 0;
-  }
-  .portal-exit {
-    font-size: 0;
-    justify-content: center;
-  }
   .stat-grid {
     grid-template-columns: 1fr 1fr;
   }

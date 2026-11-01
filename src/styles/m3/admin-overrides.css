@@ -19,6 +19,97 @@
   grid-template-columns: 260px 1fr !important;
 }
 
+/* Tablet Portrait Navigation & Layout (840px - 1024px) */
+@media (min-width: 840px) and (max-width: 1024px) {
+  .portal,
+  .m3-portal {
+    grid-template-columns: 220px 1fr !important;
+  }
+
+  .portal-sidebar {
+    padding: 20px 12px !important;
+  }
+
+  .portal-sidebar .brand {
+    gap: 8px !important;
+    padding-bottom: 12px !important;
+  }
+
+  .portal-sidebar .brand .logo-mark--committee {
+    width: 36px !important;
+  }
+
+  .portal-sidebar .brand strong,
+  .portal-brand-title {
+    font-size: 0.95rem !important;
+  }
+
+  .portal-sidebar .brand small,
+  .portal-brand-sub {
+    font-size: 0.65rem !important;
+  }
+
+  .portal-sidebar nav {
+    gap: 3px !important;
+    margin-top: 12px !important;
+  }
+
+  .portal-sidebar .portal-nav-item,
+  .portal-sidebar .portal-public-site,
+  .portal-sidebar button.portal-exit {
+    padding: 0 10px !important;
+    font-size: 0.8rem !important;
+    min-height: 40px !important;
+    gap: 8px !important;
+  }
+
+  .portal-sidebar .portal-nav-icon svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .portal-topbar {
+    padding: 0 20px !important;
+    height: 58px !important;
+  }
+
+  .portal-topbar-user {
+    padding: 3px 10px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .admin-page {
+    padding: 20px 20px 80px !important;
+  }
+
+  .admin-heading {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+  }
+
+  .admin-heading .button-row,
+  .admin-heading .registration-heading-actions,
+  .admin-heading .registrations-header-actions {
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .admin-heading .button-row .button,
+  .admin-heading .button-row .m3-button,
+  .admin-heading .registration-heading-actions .button,
+  .admin-heading .registration-heading-actions .m3-button,
+  .admin-heading .registrations-header-actions .button,
+  .admin-heading .registrations-header-actions .m3-button {
+    flex: 1 1 auto !important;
+    min-width: 130px !important;
+    padding: 0 10px !important;
+    font-size: 0.8rem !important;
+  }
+}
+
 .portal-sidebar {
   background: #2b0c11; /* Parish deep wine header surface */
   color: #fff;
