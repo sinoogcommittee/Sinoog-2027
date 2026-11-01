@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback, type FormEvent } from 'react';
-import { Save, Calendar, Shield, Bell, Mail, CreditCard } from 'lucide-react';
+import { useEffect, useState, useCallback, useRef, useId, type FormEvent } from 'react';
+import { Save, Calendar, Shield, Bell, Mail, CreditCard, Printer, Upload } from 'lucide-react';
 import {
   getCurrentEdition,
   getSiteSettings,
@@ -8,13 +8,15 @@ import {
 } from '../../features/editions/editionQueries';
 import { LoadingState } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
-import type { Edition } from '../../types/database';
-import { getRunEventAndCategories, updateRunEventSettings } from '../../features/run/runQueries';
+import type { Edition, DbRunRegistration } from '../../types/database';
+import { getRunEventAndCategories, updateRunEventSettings, getAllRegistrationsForAdmin, type RunCategory } from '../../features/run/runQueries';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/m3/Card';
 import { TextField } from '../../components/m3/TextField';
 import { SelectField } from '../../components/m3/SelectField';
 import { Checkbox } from '../../components/m3/Checkbox';
+import { RaceBibPrintSheet } from '../../components/run/RaceBibPrintSheet';
+import { supabase } from '../../lib/supabase';
 
 const toManilaInput = (value: string | null) => value
   ? new Date(value).toLocaleString('sv-SE', { timeZone: 'Asia/Manila' }).replace(' ', 'T').slice(0, 16)
@@ -59,6 +61,17 @@ export function SettingsPage() {
   const [officeHours, setOfficeHours] = useState('');
   const [socialFb, setSocialFb] = useState('');
 
+  // Site settings - Race Bibs & Logo
+  const [bibLogoUrl, setBibLogoUrl] = useState<string>(() => {
+    return localStorage.getItem('sinoog_bib_logo_url') || '/images/sinoog_run_logo.png';
+  });
+  const [uploadingBibLogo, setUploadingBibLogo] = useState(false);
+  const [bibPrintModalOpen, setBibPrintModalOpen] = useState(false);
+  const [registrations, setRegistrations] = useState<DbRunRegistration[]>([]);
+  const [categories, setCategories] = useState<RunCategory[]>([]);
+  const logoFileInputRef = useRef<HTMLInputElement | null>(null);
+  const logoInputId = useId();
+
   const fetchSettings = useCallback(async () => {
     try {
       const ed = await getCurrentEdition();
@@ -73,7 +86,12 @@ export function SettingsPage() {
       setFiestaDate(ed.fiesta_date || '');
       setRegistrationOpen(ed.registration_open);
 
-      const { event } = await getRunEventAndCategories(ed.id);
+      const [{ event, categories: cats }, regs] = await Promise.all([
+        getRunEventAndCategories(ed.id),
+        getAllRegistrationsForAdmin().catch(() => []),
+      ]);
+      setCategories(cats);
+      setRegistrations(regs);
       setRunEventId(event.id);
       setRegistrationOpensAt(toManilaInput(event.registration_opens_at));
       setRegistrationClosesAt(toManilaInput(event.registration_closes_at));
@@ -97,6 +115,10 @@ export function SettingsPage() {
         setContactPhone(settings.contact_info.phone || '');
         setOfficeHours(settings.contact_info.office_hours || '');
         setSocialFb(settings.contact_info.social_fb || '');
+      }
+      if (settings.race_bib?.logo_url) {
+        setBibLogoUrl(settings.race_bib.logo_url);
+        localStorage.setItem('sinoog_bib_logo_url', settings.race_bib.logo_url);
       }
     } catch (err: unknown) {
       console.error('Failed to load settings:', err);
@@ -212,6 +234,11 @@ export function SettingsPage() {
         social_fb: socialFb,
       });
 
+      // 5. Save race bib settings
+      await saveSiteSetting(edition.id, 'race_bib', {
+        logo_url: bibLogoUrl,
+      });
+
       if (runEventId) {
         await updateRunEventSettings(runEventId, {
           registration_opens_at: fromManilaInput(registrationOpensAt),
@@ -229,6 +256,50 @@ export function SettingsPage() {
       toast(err instanceof Error ? err.message : 'Failed to save settings.', 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleUploadBibLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !edition) return;
+
+    try {
+      setUploadingBibLogo(true);
+      if (supabase) {
+        const fileExt = file.name.split('.').pop() || 'png';
+        const fileName = `branding/sinoog_run_bib_logo_${Date.now()}.${fileExt}`;
+        const { error: uploadErr } = await supabase.storage
+          .from('public-media')
+          .upload(fileName, file, { upsert: true });
+
+        if (!uploadErr) {
+          const {
+            data: { publicUrl },
+          } = supabase.storage.from('public-media').getPublicUrl(fileName);
+          setBibLogoUrl(publicUrl);
+          localStorage.setItem('sinoog_bib_logo_url', publicUrl);
+          await saveSiteSetting(edition.id, 'race_bib', { logo_url: publicUrl });
+          toast('Sinoog Run bib logo updated successfully! All bibs will now use this logo.', 'success');
+          return;
+        }
+      }
+
+      // Local fallback
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const resultUrl = event.target?.result as string;
+        if (resultUrl) {
+          setBibLogoUrl(resultUrl);
+          localStorage.setItem('sinoog_bib_logo_url', resultUrl);
+          toast('Sinoog Run bib logo updated locally!', 'success');
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Bib logo upload failed:', err);
+      toast('Failed to upload bib logo.', 'error');
+    } finally {
+      setUploadingBibLogo(false);
     }
   };
 
@@ -342,6 +413,63 @@ export function SettingsPage() {
                 onChange={(e) => setRaceStartsAt(e.target.value)}
                 helperText="Leave blank until official start time is confirmed."
               />
+            </div>
+          </Card>
+
+          {/* Section 2B: Race Bibs & Official Logo */}
+          <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
+            <div style={{ marginBottom: 'var(--md-space-4)' }}>
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
+                <Printer size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
+                Race Bibs &amp; Official Logo
+              </h2>
+              <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+                Upload the official Sinoog Run bib logo and print approved runner bibs in 8×13″ landscape (2 bibs per sheet).
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--md-space-4)', flexWrap: 'wrap', background: 'var(--md-sys-color-surface-container-low)', padding: 'var(--md-space-4)', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-4)' }}>
+                <div style={{ width: '90px', height: '65px', background: '#ffffff', border: '1px solid var(--md-sys-color-outline-variant)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }}>
+                  <img src={bibLogoUrl} alt="Bib Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                </div>
+                <div>
+                  <strong style={{ display: 'block', fontSize: '0.95rem' }}>Upper Left Bib Logo</strong>
+                  <span style={{ fontSize: '0.80rem', color: 'var(--md-sys-color-on-surface-variant)' }}>
+                    Upload finalized event logo here anytime — automatically converts on all race bibs.
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', flexWrap: 'wrap' }}>
+                <input
+                  id={logoInputId}
+                  ref={logoFileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                  style={{ display: 'none' }}
+                  onChange={handleUploadBibLogo}
+                />
+                <Button
+                  type="button"
+                  variant="outlined"
+                  size="small"
+                  leadingIcon={<Upload size={16} />}
+                  disabled={uploadingBibLogo}
+                  onClick={() => logoFileInputRef.current?.click()}
+                >
+                  {uploadingBibLogo ? 'Uploading logo…' : 'Upload final logo'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="filled"
+                  size="small"
+                  leadingIcon={<Printer size={16} />}
+                  onClick={() => setBibPrintModalOpen(true)}
+                >
+                  Print approved bibs (8×13″)
+                </Button>
+              </div>
             </div>
           </Card>
 
@@ -529,6 +657,15 @@ export function SettingsPage() {
           </div>
         </div>
       </form>
+
+      <RaceBibPrintSheet
+        open={bibPrintModalOpen}
+        onClose={() => setBibPrintModalOpen(false)}
+        registrations={registrations}
+        categories={categories}
+        currentLogoUrl={bibLogoUrl}
+        onLogoUpdated={(url) => setBibLogoUrl(url)}
+      />
     </div>
   );
 }

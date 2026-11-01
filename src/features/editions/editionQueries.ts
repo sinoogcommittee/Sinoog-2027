@@ -37,6 +37,9 @@ export interface SiteSettingsMap {
     sponsors_enabled?: boolean;
     gallery_enabled?: boolean;
   };
+  race_bib?: {
+    logo_url?: string;
+  };
 }
 
 export async function getCurrentEdition(): Promise<Edition> {
@@ -80,6 +83,8 @@ export async function getSiteSettings(editionId: string): Promise<SiteSettingsMa
         settings.contact_info = item.value as unknown as SiteSettingsMap['contact_info'];
       } else if (item.key === 'feature_switches') {
         settings.feature_switches = item.value as unknown as SiteSettingsMap['feature_switches'];
+      } else if (item.key === 'race_bib') {
+        settings.race_bib = item.value as unknown as SiteSettingsMap['race_bib'];
       }
     }
     return settings;

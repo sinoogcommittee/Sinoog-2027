@@ -43,6 +43,8 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | `018_suspended_accounts_cannot_register.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; suspended accounts blocked from registering |
 | `019_gallery_collection_order.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; added sort_order to albums, initial ordering, and reorder_gallery_album RPC function; year removed |
 | `020_financial_reporting_dimensions.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; adds financial allocation dimensions, counterparties, recorder enforcement, creation audit, and reporting index |
+| `021_delegation_workspace_and_public_policy.sql` | 2026-10-31 | SQL Editor | Site administrator | PASS — applied; contingent workspace metadata, RLS, and storage deletion policies active |
+| `022_category_bib_sequence.sql` | 2026-11-01 | SQL Editor | Site administrator | PASS — applied; category-specific bib sequences (3K: 3001-3999, 5K: 5001-5999, 10K: 10001-10999) and 4-5 digit constraint active in production |
 
 ## Financial reporting enhancement — October 28, 2026
 

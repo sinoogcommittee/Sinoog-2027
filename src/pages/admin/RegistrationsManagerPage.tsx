@@ -23,20 +23,20 @@ import {
   getRunEventAndCategories,
   type RunCategory,
   getAdminPaymentDetails,
-  getRunnerQrValue,
   type AdminPaymentDetails,
   adminCreateCashRunner,
   deleteRejectedRegistration,
   type AdminCashRegistrationInput,
   EMERGENCY_RELATIONSHIPS,
+  formatShirtSelection,
 } from "../../features/run/runQueries";
 import { getCurrentEdition } from "../../features/editions/editionQueries";
 import { StatusBadge } from "../../components/StatusBadge";
 import { LoadingState, EmptyState } from "../../features/ui/FeedbackStates";
 import { useToast } from "../../features/ui/useToast";
 import type { DbRunRegistration } from "../../types";
-import { QRCodeSVG } from "qrcode.react";
 import { generateTemporaryPassword } from "../../lib/temporaryPassword";
+import { RaceBibPrintSheet } from "../../components/run/RaceBibPrintSheet";
 
 export function RegistrationsManagerPage() {
   const { toast } = useToast();
@@ -61,6 +61,9 @@ export function RegistrationsManagerPage() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [showWalkIn, setShowWalkIn] = useState(false);
   const [walkInSaving, setWalkInSaving] = useState(false);
+  const [printBibsOpen, setPrintBibsOpen] = useState(false);
+  const [walkInShirtStyle, setWalkInShirtStyle] = useState<'singlet' | 'full_sub'>('singlet');
+  const [walkInShirtSize, setWalkInShirtSize] = useState('M');
   const [createdCredentials, setCreatedCredentials] = useState<{
     email: string;
     password: string;
@@ -134,6 +137,8 @@ export function RegistrationsManagerPage() {
 
   const openWalkInRegistration = () => {
     setCreatedCredentials(null);
+    setWalkInShirtStyle('singlet');
+    setWalkInShirtSize('M');
     setWalkIn((current) => ({
       ...current,
       run_event_id: runEventId,
@@ -149,8 +154,20 @@ export function RegistrationsManagerPage() {
     event.preventDefault();
     try {
       setWalkInSaving(true);
+      const selectedWalkInCat = categories.find((c) => c.id === walkIn.category_id);
+      const isWalkIn5Kor10K = Boolean(
+        selectedWalkInCat &&
+          (selectedWalkInCat.distance_meters >= 5000 ||
+            selectedWalkInCat.name.includes('5K') ||
+            selectedWalkInCat.name.includes('10K'))
+      );
+      const computedShirt = isWalkIn5Kor10K
+        ? formatShirtSelection(walkInShirtStyle, walkInShirtSize)
+        : formatShirtSelection('singlet', walkInShirtSize);
+
       const registration = await adminCreateCashRunner({
         ...walkIn,
+        shirt_size: computedShirt,
         run_event_id: runEventId,
       });
       setCreatedCredentials({
@@ -343,18 +360,11 @@ export function RegistrationsManagerPage() {
     toast("Exported runner records to CSV.", "success");
   };
 
-  // Shirt Size Totals
-  const shirtCounts: Record<string, number> = {
-    XS: 0,
-    S: 0,
-    M: 0,
-    L: 0,
-    XL: 0,
-    "2XL": 0,
-  };
+  // Shirt Size Totals (counts distinct selections e.g. Full Sub (L), Singlet (M))
+  const shirtCounts: Record<string, number> = {};
   for (const r of registrations) {
-    if (r.shirt_size && shirtCounts[r.shirt_size] !== undefined) {
-      shirtCounts[r.shirt_size] += 1;
+    if (r.shirt_size) {
+      shirtCounts[r.shirt_size] = (shirtCounts[r.shirt_size] || 0) + 1;
     }
   }
 
@@ -389,9 +399,9 @@ export function RegistrationsManagerPage() {
             type="button"
             variant="outlined"
             leadingIcon={<Printer size={16} aria-hidden />}
-            onClick={() => window.print()}
+            onClick={() => setPrintBibsOpen(true)}
           >
-            Print approved runners
+            Print race bibs (8×13″)
           </Button>
           <Button
             type="button"
@@ -828,18 +838,32 @@ export function RegistrationsManagerPage() {
                         }
                       />
                     </label>
+                    {Boolean(
+                      categories.find((c) => c.id === walkIn.category_id)?.distance_meters &&
+                        categories.find((c) => c.id === walkIn.category_id)!.distance_meters >= 5000
+                    ) && (
+                      <label>
+                        Shirt style
+                        <select
+                          value={walkInShirtStyle}
+                          onChange={(e) =>
+                            setWalkInShirtStyle(e.target.value as 'singlet' | 'full_sub')
+                          }
+                        >
+                          <option value="singlet">Singlet</option>
+                          <option value="full_sub">Full Sublimation</option>
+                        </select>
+                      </label>
+                    )}
                     <label>
                       Shirt size
                       <select
                         required
-                        value={walkIn.shirt_size}
-                        onChange={(e) =>
-                          setWalkIn({ ...walkIn, shirt_size: e.target.value })
-                        }
+                        value={walkInShirtSize}
+                        onChange={(e) => setWalkInShirtSize(e.target.value)}
                       >
-                        <option value="">Select size</option>
-                        {["XS", "S", "M", "L", "XL", "2XL"].map((size) => (
-                          <option key={size}>{size}</option>
+                        {["XS", "S", "M", "L", "XL", "2XL", "3XL"].map((size) => (
+                          <option key={size} value={size}>{size}</option>
                         ))}
                       </select>
                     </label>
@@ -1306,45 +1330,12 @@ export function RegistrationsManagerPage() {
         )}
       </Dialog>
 
-      <section className="runner-print-sheet" aria-hidden="true">
-        <h1>Sinoog Run 2027 — Approved Runners</h1>
-        <p>Sto. Niño Parish — Guinacot, Guindulman, Bohol</p>
-        <div className="runner-print-grid">
-          {registrations
-            .filter(
-              (registration) =>
-                registration.status === "approved" &&
-                registration.bib_number &&
-                registration.qr_token,
-            )
-            .map((registration) => {
-              const qrValue = getRunnerQrValue(registration);
-              const category = categories.find(
-                (item) => item.id === registration.category_id,
-              );
-              return (
-                <article key={registration.id}>
-                  {qrValue && (
-                    <QRCodeSVG
-                      value={qrValue}
-                      size={92}
-                      level="H"
-                      marginSize={1}
-                    />
-                  )}
-                  <div>
-                    <strong className="runner-print-bib">
-                      {registration.bib_number}
-                    </strong>
-                    <b>{registration.participant_name}</b>
-                    <span>{category?.name || "Sinoog Run 2027"}</span>
-                    <small>{registration.reference}</small>
-                  </div>
-                </article>
-              );
-            })}
-        </div>
-      </section>
+      <RaceBibPrintSheet
+        open={printBibsOpen}
+        onClose={() => setPrintBibsOpen(false)}
+        registrations={registrations}
+        categories={categories}
+      />
     </div>
   );
 }

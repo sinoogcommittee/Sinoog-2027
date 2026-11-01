@@ -848,9 +848,9 @@ export function KitClaimsManagerPage() {
                       </strong>
                     </div>
                     <div className="kit-spec-box">
-                      <span className="kit-spec-label">Shirt Size</span>
+                      <span className="kit-spec-label">Shirt Kit</span>
                       <strong className="kit-spec-value kit-spec-value--shirt">
-                        <Shirt size={14} /> Size {runner.shirt_size || 'N/A'}
+                        <Shirt size={14} /> {runner.shirt_size || 'N/A'}
                       </strong>
                     </div>
                   </div>

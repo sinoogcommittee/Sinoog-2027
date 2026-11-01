@@ -96,6 +96,7 @@ export function RunRegistrationPage() {
   const [mobile, setMobile] = useState('');
   const [locality, setLocality] = useState('');
   const [birthDate, setBirthDate] = useState('');
+  const [shirtStyle, setShirtStyle] = useState<'singlet' | 'full_sub'>('singlet');
   const [shirtSize, setShirtSize] = useState('M');
   const [sizeChartOpen, setSizeChartOpen] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -185,6 +186,12 @@ export function RunRegistrationPage() {
   }, [activeUserId, profileName, profileMobile, profileAddress]);
 
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId) || categories[0];
+  const is5Kor10K = Boolean(
+    selectedCategory &&
+      (selectedCategory.distance_meters >= 5000 ||
+        selectedCategory.name.includes('5K') ||
+        selectedCategory.name.includes('10K'))
+  );
   const ageAtRace = ageOnDate(birthDate, runEvent?.race_starts_at || '2027-01-09');
   const requiresGuardianConsent = ageAtRace !== null && ageAtRace < 18;
 
@@ -280,7 +287,9 @@ export function RunRegistrationPage() {
         birth_date: birthDate,
         mobile: mobile.trim(),
         locality: locality.trim(),
-        shirt_size: shirtSize,
+        shirt_size: is5Kor10K
+          ? (shirtStyle === 'full_sub' ? `Full Sub (${shirtSize})` : `Singlet (${shirtSize})`)
+          : `Singlet (${shirtSize})`,
         club_name: clubName.trim() || null,
         emergency_name: emergencyName.trim(),
         emergency_relationship: emergencyRelationship.trim(),
@@ -1208,8 +1217,23 @@ export function RunRegistrationPage() {
                         Size chart
                       </Button>
                     </div>
+                    {is5Kor10K && (
+                      <div style={{ marginBottom: '0.85rem' }}>
+                        <SelectField
+                          label="Shirt Style / Cut (5K & 10K Category)"
+                          value={shirtStyle}
+                          onChange={(e) => setShirtStyle(e.target.value as 'singlet' | 'full_sub')}
+                        >
+                          <option value="singlet">Official Sinoog Singlet (Sleeveless)</option>
+                          <option value="full_sub">Full Sublimation Running Shirt (Short Sleeve)</option>
+                        </SelectField>
+                        <small style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.78rem', display: 'block', marginTop: '2px' }}>
+                          Included with your {selectedCategory?.name || '5K/10K'} registration kit.
+                        </small>
+                      </div>
+                    )}
                     <SelectField
-                      label="Event Singlet / Shirt Size"
+                      label={is5Kor10K ? `${shirtStyle === 'full_sub' ? 'Full Sublimation' : 'Singlet'} Size` : 'Event Singlet Size'}
                       value={shirtSize}
                       onChange={(e) => setShirtSize(e.target.value)}
                     >
@@ -1219,6 +1243,7 @@ export function RunRegistrationPage() {
                       <option value="L">Large (L)</option>
                       <option value="XL">Extra Large (XL)</option>
                       <option value="2XL">Double Extra Large (2XL)</option>
+                      <option value="3XL">Triple Extra Large (3XL)</option>
                     </SelectField>
                   </div>
                 </div>
@@ -1381,7 +1406,8 @@ export function RunRegistrationPage() {
                     <strong>Mobile:</strong> {mobile}
                   </div>
                   <div>
-                    <strong>Shirt Size:</strong> {shirtSize}
+                    <strong>Shirt:</strong>{' '}
+                    {is5Kor10K ? (shirtStyle === 'full_sub' ? 'Full Sub' : 'Singlet') : 'Singlet'} ({shirtSize})
                   </div>
                   <div>
                     <strong>Address:</strong> {locality}

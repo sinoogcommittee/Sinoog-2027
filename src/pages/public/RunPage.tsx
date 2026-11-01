@@ -140,10 +140,10 @@ export function RunPage({ section }: { section?: 'routes' }) {
                     <h3>{category.name}</h3>
                     <p>
                       {category.distance_meters === 10000
-                        ? 'Official 10K+ course options include the Sta. Cruz + Stampa Hills loop (12.38 km), Direct Cansiwang loop (10.91 km), and Cabantian–Cansiwang + Stampa (10.34 km) beginning and ending at the Sto. Niño Parish Grounds.'
+                        ? 'Official 10K highway double-loop along Bohol Circumferential Road. Starts at Sto. Niño Parish Grounds → Southwest to Turn 1 at Sta. Cruz - Pangpang Chapel → Northeast to Turn 2 at Sta. Cruz - East Guinacot Chapel → Finish at Sto. Niño Parish.'
                         : category.distance_meters === 5000
-                          ? 'Scenic 5K community stride through Guinacot passing Sta. Cruz Chapel, Awa-aw Square, and local landmark checkpoints with dedicated hydration support.'
-                          : 'Family-friendly 3K fun run and community walk loop with turnaround near the parish proper.'}
+                          ? 'Scenic 5K highway stride along Bohol Circumferential Road starting at Sto. Niño Parish Grounds, heading Southwest past Cabantian with turnaround at Sta. Cruz - Pangpang Chapel and dedicated hydration support.'
+                          : 'Family-friendly 3K highway fun run and walk starting at Sto. Niño Parish Grounds, heading Southwest along Bohol Circumferential Road with turnaround at Sta. Cruz Chapel, Cabantian.'}
                     </p>
                     <strong>{formatFee(category.fee_centavos)}</strong>
                   </Card>

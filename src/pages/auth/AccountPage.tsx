@@ -177,7 +177,7 @@ export function AccountPage() {
                 <div><dt>Birth date</dt><dd>{registration.birth_date || 'Not provided'}</dd></div>
                 <div><dt>Mobile number</dt><dd>{registration.mobile}</dd></div>
                 <div className="runner-account-details__wide"><dt>Address</dt><dd>{registration.locality || 'Not provided'}</dd></div>
-                <div><dt>Shirt size</dt><dd>{registration.shirt_size || 'Not provided'}</dd></div>
+                <div><dt>Shirt / Singlet</dt><dd>{registration.shirt_size || 'Not provided'}</dd></div>
                 <div><dt>Club / team</dt><dd>{registration.club_name || 'None'}</dd></div>
                 <div><dt>Emergency contact</dt><dd>{registration.emergency_name}</dd></div>
                 <div><dt>Relationship</dt><dd>{registration.emergency_relationship || 'Not provided'}</dd></div>

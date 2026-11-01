@@ -159,6 +159,46 @@ export interface RegistrationInput {
   guardian_consent?: boolean;
 }
 
+export function formatShirtSelection(style: 'singlet' | 'full_sub', size: string): string {
+  const styleLabel = style === 'full_sub' ? 'Full Sub' : 'Singlet';
+  return `${styleLabel} (${size.toUpperCase()})`;
+}
+
+export function parseShirtSelection(shirtSizeStr: string | null | undefined): {
+  style: 'singlet' | 'full_sub';
+  size: string;
+} {
+  if (!shirtSizeStr) return { style: 'singlet', size: 'M' };
+  const isFullSub = shirtSizeStr.toLowerCase().includes('sub');
+  const parenMatch = shirtSizeStr.match(/\((2XL|3XL|XS|[SMLX])\)/i);
+  if (parenMatch) {
+    return {
+      style: isFullSub ? 'full_sub' : 'singlet',
+      size: parenMatch[1].toUpperCase(),
+    };
+  }
+  const tokenMatch = shirtSizeStr.match(/\b(2XL|3XL|XS|[SMLX])\b/i);
+  return {
+    style: isFullSub ? 'full_sub' : 'singlet',
+    size: tokenMatch ? tokenMatch[1].toUpperCase() : 'M',
+  };
+}
+
+export function getBibCategoryLabel(categoryName?: string | null): { title: string; subtitle: string } {
+  if (!categoryName) return { title: 'SINOOG RUN 2027', subtitle: 'CATEGORY' };
+  const lower = categoryName.toLowerCase();
+  if (lower.includes('10k')) {
+    return { title: '10KM FIESTA LOOP', subtitle: 'CATEGORY' };
+  }
+  if (lower.includes('5k')) {
+    return { title: '5KM STRIDE', subtitle: 'CATEGORY' };
+  }
+  if (lower.includes('3k')) {
+    return { title: '3KM FUN RUN', subtitle: 'CATEGORY' };
+  }
+  return { title: categoryName.toUpperCase(), subtitle: 'CATEGORY' };
+}
+
 export interface AdminCashRegistrationInput extends RegistrationInput {
   email: string;
   temporary_password: string;

@@ -307,7 +307,7 @@ Priority: **P0 before registration opens** (Completed)
 
 - [x] Core GCash, opening/deadline, planned start, and registration switch settings are in Website Settings.
 - [x] Dynamic category editor in admin marked complete (seeded and verified in `run_categories` for 3K, 5K, and 10K).
-- [x] Interactive Route Maps on `/run/routes`: MapLibre GL viewer with three surveyed GeoJSON course options (Sta. Cruz + Stampa at 12.38 km, Direct Cansiwang at 10.91 km, Cabantian + Stampa at 10.34 km), interactive checkpoint sequence with one-tap flyTo & popup, cooperative gestures, responsive layout, automated integrity test suite, and zero-paid map API requirements.
+- [x] Interactive Route Maps on `/run/routes`: Streamlined single-screen Bohol Circumferential Road (Highway 850) course viewer (3K Emerald Green, 5K Electric Blue, 10K Fiery Orange), default Google Maps Roadmap with Satellite Hybrid switcher (plus Carto Voyager), real-time animated runner simulation located directly below the map, verified Plus Codes (`PFJ4+RC3` parish church grounds with left exit and right finish entrance pathways, `PCFX+VGH`, `PCCP+J77`, `PFV9+J6G`), category-filtered turnaround lists, and mobile single-pill checkpoint navigator with inner arrows.
 - [x] Add kit preview images and inclusion descriptions on category cards.
 - [x] Publish FAQs and runner instructions.
 
@@ -681,7 +681,7 @@ Priority: **P1**
 | `/festival/participants` | Empty state | Approved delegation public profiles and ordering |
 | `/festival/guidelines` | Empty state | Versioned guidelines and downloadable files |
 | `/run` | Updated 3K/5K/10K categories, fees, kits, editable deadline/start display | Apply migration `007`; confirm capacities, age rules, deadline, start, and policy copy |
-| `/run/routes` | Interactive MapLibre map with three planning routes and checkpoint details | Committee selects the official course; add approved water and medical points |
+| `/run/routes` | Official Bohol Circumferential Rd Highway Course (3K/5K/10K), Google Maps default basemap, animated runner simulation, elevation scrubber, 10K mode toggle & export center | Complete |
 | `/run/register` | Authenticated form, GCash/cash proof, finalized policy acceptance, minor guardian consent, status, bib/QR, result; **edit details when not approved**; live rehearsed | Apply `014`; monitor production; optional email notices; kit-claim later |
 | `/activities` | Published Supabase activities with fallback, filters, and print view | Remove production demo fallback and confirm all content |
 | `/activities/masses` | Live filtered schedule with corrected Jan. 6 fallback | Enter and approve the complete novena and Pontifical Mass schedule |
@@ -817,3 +817,5 @@ Do the remaining work in this sequence:
 | 2026-10-28 | Local finance reporting enhancement | Cash inflow/expense categories, allocation reporting, counterparties, recorder audit, void history, responsive ledger, print and CSV reports; pending migration `020` |
 | 2026-10-30 | Migrations `013`-`020` verified; Gallery sequence | Migrations `013` & `019` adjusted to use sort order sequence without year; `015`-`020` confirmed applied in production |
 | 2026-10-30 | Race Kit Claiming & Check-in System | Implemented `/admin/kit-claims` with live camera QR scanning, single-claim enforcement, paper check-in roster, CSV export, single-line desktop table, responsive mobile cards, and public runner visibility on `/account` and `/run/register` |
+| 2026-11-01 | Highway Route Viewer & Marker Polish | Separated outbound/return checkpoint badges to road shoulders eliminating overlap; removed all technical Plus Codes; single-screen responsive layout with simulation bar directly beneath map; Google Maps default basemap |
+| 2026-11-01 | Category Bib Sequences, Shirt Options & 8x13″ Race Bib Printing | Added Full Sub / Singlet selection for 5K & 10K with kit claim badges; category-based bib numbering (3K: 3001+, 5K: 5001+, 10K: 10001+); 8x13″ landscape 2-up race bib print sheet with Sinoog Run logo upload, QR code, giant number, and runner name (migration `022`) |
