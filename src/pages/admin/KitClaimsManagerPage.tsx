@@ -10,11 +10,13 @@ import {
   PackageCheck,
   Printer,
   RefreshCw,
+  ShieldCheck,
   Shirt,
   Wifi,
   WifiOff,
 } from 'lucide-react';
 import { Button } from '../../components/Button';
+import { QrScannerViewport } from '../../components/QrScannerViewport';
 import { Card } from '../../components/m3/Card';
 import { Dialog } from '../../components/m3/Dialog';
 import { TextField } from '../../components/m3/TextField';
@@ -35,7 +37,8 @@ import { useAuth } from '../../features/auth/useAuth';
 
 export function KitClaimsManagerPage() {
   const { toast } = useToast();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user, profile } = useAuth();
+  const currentAdminName = profile?.full_name || user?.email || 'Committee Administrator';
   const videoRef = useRef<HTMLVideoElement>(null);
   const scannerControls = useRef<IScannerControls | null>(null);
   const scanBusy = useRef(false);
@@ -595,25 +598,12 @@ export function KitClaimsManagerPage() {
             marginTop: 'var(--md-space-4)',
             maxWidth: '420px',
             marginInline: 'auto',
-            borderRadius: '12px',
-            overflow: 'hidden',
-            background: '#000',
-            position: 'relative',
           }}
         >
-          <video ref={videoRef} style={{ width: '100%', height: 'auto', display: 'block' }} muted playsInline />
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '60%',
-              aspectRatio: '1',
-              border: '2px dashed rgba(255, 255, 255, 0.75)',
-              borderRadius: '12px',
-              pointerEvents: 'none',
-            }}
+          <QrScannerViewport
+            videoRef={videoRef}
+            active={scannerActive}
+            hint="Align runner QR code inside frame"
           />
         </div>
       </Card>
@@ -709,20 +699,29 @@ export function KitClaimsManagerPage() {
               <table className="kit-claims-table">
                 <thead>
                   <tr>
-                    <th style={{ width: '85px' }}>Bib #</th>
+                    <th style={{ width: '75px' }}>Bib #</th>
                     <th>Participant Name</th>
-                    <th>Category</th>
-                    <th style={{ width: '100px', textAlign: 'center' }}>Shirt Size</th>
-                    <th style={{ width: '125px' }}>Mobile</th>
-                    <th style={{ width: '135px' }}>Kit Status</th>
-                    <th style={{ width: '130px', textAlign: 'right' }}>Action</th>
+                    <th style={{ width: '135px' }}>Category</th>
+                    <th style={{ width: '105px', textAlign: 'center' }}>Shirt Size</th>
+                    <th style={{ width: '120px' }}>Mobile</th>
+                    <th style={{ width: '125px' }}>Kit Status</th>
+                    <th style={{ width: '135px', textAlign: 'right' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredRows.map((runner) => {
                     const isClaimed = runner.kit_claim !== null;
                     return (
-                      <tr key={runner.id} className={isClaimed ? 'is-claimed' : ''}>
+                      <tr
+                        key={runner.id}
+                        className={isClaimed ? 'is-claimed' : ''}
+                        onClick={() => {
+                          setActiveRunner(runner);
+                          setClaimNotes(runner.kit_claim?.notes || '');
+                        }}
+                        style={{ cursor: 'pointer' }}
+                        title="Click row to view details or process kit handover"
+                      >
                         {/* Bib # */}
                         <td>
                           <span className="kit-bib-tag">#{runner.bib_number || '---'}</span>
@@ -730,7 +729,7 @@ export function KitClaimsManagerPage() {
 
                         {/* Participant Name (single line with compact division meta) */}
                         <td>
-                          <div className="kit-runner-cell">
+                          <div className="kit-runner-cell" title={`${runner.participant_name} ${runner.division ? `(${runner.division})` : ''}`}>
                             <strong className="kit-runner-name">{runner.participant_name}</strong>
                             {runner.division && (
                               <span className="kit-runner-meta">({runner.division})</span>
@@ -740,7 +739,7 @@ export function KitClaimsManagerPage() {
 
                         {/* Category */}
                         <td>
-                          <span className="kit-category-badge">{runner.category_name}</span>
+                          <span className="kit-category-badge" title={runner.category_name}>{runner.category_name}</span>
                         </td>
 
                         {/* Shirt Size */}
@@ -755,6 +754,7 @@ export function KitClaimsManagerPage() {
                           {runner.mobile ? (
                             <a
                               href={`tel:${runner.mobile}`}
+                              onClick={(e) => e.stopPropagation()}
                               title="Tap to call or SMS runner"
                               style={{ color: "var(--wine, #741724)", fontWeight: 600, textDecoration: "none" }}
                             >
@@ -765,17 +765,22 @@ export function KitClaimsManagerPage() {
                           )}
                         </td>
 
-                        {/* Kit Status */}
+                        {/* Kit Status & Admin Tracking Info */}
                         <td>
                           {isClaimed ? (
-                            <span
-                              className="kit-status-pill kit-status-pill--claimed"
-                              title={`Claimed by ${runner.kit_claim!.claimed_by_name || 'Staff'}`}
-                            >
-                              <CheckCircle2 size={13} /> Claimed
-                            </span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                              <span
+                                className="kit-status-pill kit-status-pill--claimed"
+                                title={`Claimed by ${runner.kit_claim!.claimed_by_name || 'Staff'}`}
+                              >
+                                <CheckCircle2 size={12} /> Claimed
+                              </span>
+                              <small style={{ fontSize: '0.70rem', color: '#099268', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                Handed: {runner.kit_claim!.claimed_by_name || 'Staff'}
+                              </small>
+                            </div>
                           ) : (
-                            <span className="kit-status-pill kit-status-pill--pending">
+                            <span className="kit-status-pill kit-status-pill--pending" title="Kit waiting to be claimed">
                               <Clock size={12} /> Pending
                             </span>
                           )}
@@ -786,12 +791,24 @@ export function KitClaimsManagerPage() {
                           <Button
                             variant={isClaimed ? 'outlined' : 'filled'}
                             size="small"
-                            onClick={() => {
+                            leadingIcon={isClaimed ? <CheckCircle2 size={13} /> : <PackageCheck size={14} />}
+                            style={!isClaimed ? {
+                              background: '#099268',
+                              borderColor: '#099268',
+                              color: '#ffffff',
+                              fontWeight: 700,
+                              boxShadow: '0 2px 6px rgba(9, 146, 104, 0.25)',
+                              whiteSpace: 'nowrap',
+                            } : {
+                              whiteSpace: 'nowrap',
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setActiveRunner(runner);
                               setClaimNotes(runner.kit_claim?.notes || '');
                             }}
                           >
-                            {isClaimed ? 'View claim' : 'Hand over kit'}
+                            {isClaimed ? 'View / Undo' : 'Hand over kit'}
                           </Button>
                         </td>
                       </tr>
@@ -1083,10 +1100,12 @@ export function KitClaimsManagerPage() {
                   <strong style={{ fontSize: '1rem', color: '#c92a2a' }}>ALREADY CLAIMED</strong>
                 </div>
                 <p style={{ margin: '4px 0 2px', fontSize: '0.85rem' }}>
-                  Claimed on{' '}
+                  Handed over on{' '}
                   <strong>
                     {new Date(activeRunner.kit_claim.claimed_at).toLocaleString('en-PH', {
                       timeZone: 'Asia/Manila',
+                      dateStyle: 'medium',
+                      timeStyle: 'short',
                     })}
                   </strong>{' '}
                   by staff member: <strong>{activeRunner.kit_claim.claimed_by_name}</strong>.
@@ -1111,11 +1130,70 @@ export function KitClaimsManagerPage() {
                 )}
               </div>
             ) : (
-              /* Unclaimed Form Controls */
+              /* Unclaimed Form Controls with Logged-in Admin Tracking */
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-3)' }}>
+                {/* Admin Audit Stamp Indicator */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    gap: '12px',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '8px',
+                        background: 'rgba(32, 201, 151, 0.15)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#099268',
+                      }}
+                    >
+                      <ShieldCheck size={20} />
+                    </div>
+                    <div>
+                      <span
+                        style={{
+                          fontSize: '0.72rem',
+                          color: '#64748b',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.04em',
+                          display: 'block',
+                        }}
+                      >
+                        Handover Admin (Tracking)
+                      </span>
+                      <strong style={{ fontSize: '0.90rem', color: '#0f172a' }}>
+                        {currentAdminName}
+                      </strong>
+                    </div>
+                  </div>
+                  <span
+                    style={{
+                      fontSize: '0.74rem',
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      background: 'rgba(32, 201, 151, 0.12)',
+                      color: '#099268',
+                      fontWeight: 700,
+                    }}
+                  >
+                    Logged-in Admin
+                  </span>
+                </div>
+
                 <TextField
                   label="Handover Notes (Optional)"
-                  placeholder="e.g. Picked up by sister with authorization letter, size exchanged..."
+                  placeholder="e.g. Picked up by sister with authorization letter, size verified..."
                   value={claimNotes}
                   onChange={(e) => setClaimNotes(e.target.value)}
                 />
@@ -1129,9 +1207,9 @@ export function KitClaimsManagerPage() {
                     leadingIcon={<PackageCheck size={18} />}
                     onClick={() => void handleClaim(activeRunner)}
                     disabled={claiming}
-                    style={{ background: '#099268', borderColor: '#099268' }}
+                    style={{ background: '#099268', borderColor: '#099268', color: '#ffffff', fontWeight: 700 }}
                   >
-                    {claiming ? 'Confirming…' : 'Confirm & Hand Over Kit'}
+                    {claiming ? 'Recording claim…' : 'Confirm & Hand Over Kit'}
                   </Button>
                 </div>
               </div>

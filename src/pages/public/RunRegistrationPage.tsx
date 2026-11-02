@@ -289,7 +289,7 @@ export function RunRegistrationPage() {
         locality: locality.trim(),
         shirt_size: is5Kor10K
           ? (shirtStyle === 'full_sub' ? `Full Sub (${shirtSize})` : `Singlet (${shirtSize})`)
-          : `Singlet (${shirtSize})`,
+          : shirtSize,
         club_name: clubName.trim() || null,
         emergency_name: emergencyName.trim(),
         emergency_relationship: emergencyRelationship.trim(),
@@ -1233,7 +1233,7 @@ export function RunRegistrationPage() {
                       </div>
                     )}
                     <SelectField
-                      label={is5Kor10K ? `${shirtStyle === 'full_sub' ? 'Full Sublimation' : 'Singlet'} Size` : 'Event Singlet Size'}
+                      label={is5Kor10K ? `${shirtStyle === 'full_sub' ? 'Full Sublimation' : 'Singlet'} Size` : 'Event Shirt Size (3K)'}
                       value={shirtSize}
                       onChange={(e) => setShirtSize(e.target.value)}
                     >
@@ -1407,7 +1407,7 @@ export function RunRegistrationPage() {
                   </div>
                   <div>
                     <strong>Shirt:</strong>{' '}
-                    {is5Kor10K ? (shirtStyle === 'full_sub' ? 'Full Sub' : 'Singlet') : 'Singlet'} ({shirtSize})
+                    {is5Kor10K ? `${shirtStyle === 'full_sub' ? 'Full Sub' : 'Singlet'} (${shirtSize})` : `Size ${shirtSize}`}
                   </div>
                   <div>
                     <strong>Address:</strong> {locality}

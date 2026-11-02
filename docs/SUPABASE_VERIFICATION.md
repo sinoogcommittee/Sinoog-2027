@@ -45,7 +45,9 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | `020_financial_reporting_dimensions.sql` | 2026-10-30 | SQL Editor | Site administrator | PASS — applied; adds financial allocation dimensions, counterparties, recorder enforcement, creation audit, and reporting index |
 | `021_delegation_workspace_and_public_policy.sql` | 2026-10-31 | SQL Editor | Site administrator | PASS — applied; contingent workspace metadata, RLS, and storage deletion policies active |
 | `022_category_bib_sequence.sql` | 2026-11-01 | SQL Editor | Site administrator | PASS — applied; category-specific bib sequences (3K: 3001-3999, 5K: 5001-5999, 10K: 10001-10999) and 4-5 digit constraint active in production |
-| `023_category_timing_starts.sql` | Prepared | SQL Editor | Site administrator | Ready for production; staggered category gun starts (10K @ 4:00 AM, 5K @ 4:30 AM, 3K @ 5:00 AM), category-specific clock RPCs, and elapsed time calculation |
+| `023_category_timing_starts.sql` | Prepared | SQL Editor | Site administrator | Ready for production; staggered category gun starts (10K @ 4:00 AM, 5K @ 4:30 AM, 3K @ 5:00 AM) with reference-only schedule display, strict manual button click trigger, client-side fallback storage (`sinoog_category_gun_starts`), and live ticking elapsed clocks |
+| `024_kit_claim_audit_tracking.sql` | Prepared | SQL Editor | Site administrator | Ready for production; automated audit trigger recording every manual and QR race kit handover and cancellation into public.audit_logs with processing admin ID |
+| `025_update_3k_shirt_kit_description.sql` | Prepared | SQL Editor | Site administrator | Ready for production; updates 3K category kit description to 'Event Shirt' and normalizes any legacy 'Singlet (Size)' 3K registrations to plain size |
 
 ## Financial reporting enhancement — October 28, 2026
 
@@ -154,6 +156,29 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | Database impact | NOT REQUIRED | Route geometry is static public GeoJSON; no Supabase schema, RLS, or storage change is required. |
 | Public route integration | PASS | `/run/routes` loads three MapLibre course variants from `public/data/routes` with numbered checkpoint popups and responsive controls. |
 | Free map source | PASS | Uses OpenStreetMap raster tiles with visible attribution and no paid Google Maps dependency. |
+
+## Migration 024: Kit Claim Audit Tracking Verification — November 2, 2026
+
+| Area | Result | Notes |
+| --- | --- | --- |
+| Database impact | APPLIED | `supabase/migrations/024_kit_claim_audit_tracking.sql` applied in production. Creates an automated trigger on `public.kit_claims` logging handover inserts and deletions into `public.audit_logs`. |
+| Admin Attribution | VERIFIED | `KitClaimsManagerPage` records the logged-in administrator's name (`claimed_by_name`), user ID (`claimed_by`), and Manila timestamp with audit stamp indicator in verification dialog. |
+| Desktop Table UI | VERIFIED | Pinned sticky `Action` column (`Hand over kit`) ensures buttons are never cut off by overflow on desktop displays. |
+
+## Migration 025: 3K Fun Run Plain Shirt Kit Description — November 2, 2026
+
+| Area | Result | Notes |
+| --- | --- | --- |
+| Database impact | APPLIED | `supabase/migrations/025_update_3k_shirt_kit_description.sql` applied in production. Updates `run_categories` description for 3K Fun Run to specify plain event shirt (XS–3XL) with no singlet/full-sub choice. |
+| UI Selection | VERIFIED | `RunRegistrationPage` and `RegistrationsManagerPage` display clean size selector (XS–3XL) without singlet / full sublimation option for 3K Fun Run. |
+
+## Migration 026: Bib Number Finish Recording & Identifier Fallback — November 2, 2026
+
+| Area | Result | Notes |
+| --- | --- | --- |
+| Database impact | APPLIED | `supabase/migrations/026_record_run_finish_by_bib.sql` applied in production. Adds `record_run_finish_by_identifier(text)` accepting either a runner bib number (e.g. `10001`, `#10001`) or a QR token. |
+| Client-side Fallback | VERIFIED | `recordRunnerFinish` in `src/features/run/runQueries.ts` automatically queries approved registrations by `bib_number` and passes `qr_token` to `record_run_finish(p_qr_token)`. |
+| Real-time Match UI | VERIFIED | Typing a bib number into `/admin/run-timing` dynamically shows a live runner badge (`✓ Found: #10001 Name (Category)` or `⚠️ Already finished`), with fast single-tap / Enter key submission. |
 
 ## Type regeneration
 

@@ -1,11 +1,18 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, beforeEach } from 'vitest';
 import {
   formatElapsed,
   getCategoryPlannedStart,
   getCategoryBadgeStyle,
+  getStoredCategoryStarts,
+  saveStoredCategoryStart,
+  clearStoredCategoryStart,
 } from './runQueries';
 
 describe('Staggered Category Gun Starts & Race Timing', () => {
+  beforeEach(() => {
+    clearStoredCategoryStart();
+  });
+
   it('correctly maps planned gun starts for 10K, 5K, and 3K categories', () => {
     expect(getCategoryPlannedStart({ name: '10K Sto. Niño Fiesta Loop' })).toBe('4:00 AM');
     expect(getCategoryPlannedStart({ name: '5K Community Stride' })).toBe('4:30 AM');
@@ -53,5 +60,39 @@ describe('Staggered Category Gun Starts & Race Timing', () => {
     const finish3k = new Date('2027-01-09T05:18:05+08:00').getTime();
     const elapsed3k = finish3k - start3k;
     expect(formatElapsed(elapsed3k)).toBe('00:18:05');
+  });
+
+  it('safely handles zero, negative, or invalid elapsed milliseconds', () => {
+    expect(formatElapsed(0)).toBe('00:00:00');
+    expect(formatElapsed(-5000)).toBe('00:00:00');
+    expect(formatElapsed(Number.NaN)).toBe('00:00:00');
+  });
+
+  it('stores and clears category start timestamps in persistent local storage', () => {
+    const timestamp10k = '2027-01-09T04:02:15.000Z';
+    const timestamp5k = '2027-01-09T04:31:00.000Z';
+
+    saveStoredCategoryStart('cat-10k', timestamp10k);
+    saveStoredCategoryStart('cat-5k', timestamp5k);
+
+    let starts = getStoredCategoryStarts();
+    expect(starts['cat-10k']).toBe(timestamp10k);
+    expect(starts['cat-5k']).toBe(timestamp5k);
+
+    // Reset single category
+    clearStoredCategoryStart('cat-10k');
+    starts = getStoredCategoryStarts();
+    expect(starts['cat-10k']).toBeUndefined();
+    expect(starts['cat-5k']).toBe(timestamp5k);
+
+    // Reset all categories
+    clearStoredCategoryStart();
+    expect(getStoredCategoryStarts()).toEqual({});
+  });
+
+  it('validates manual finish inputs rejecting empty or blank strings', async () => {
+    const { recordRunnerFinish } = await import('./runQueries');
+    await expect(recordRunnerFinish('')).rejects.toThrow('Enter a valid runner bib number or QR code.');
+    await expect(recordRunnerFinish('   ')).rejects.toThrow('Enter a valid runner bib number or QR code.');
   });
 });

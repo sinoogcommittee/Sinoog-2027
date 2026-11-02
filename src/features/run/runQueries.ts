@@ -77,7 +77,7 @@ export const FALLBACK_CATEGORIES: RunCategory[] = [
     capacity: null,
     min_age: null,
     max_age: null,
-    kit_description: 'Official Sinoog 2027 Singlet, Race Bib, Finisher Ribbon, Post-race Refreshment',
+    kit_description: 'Official Sinoog 2027 Event Shirt, Race Bib, Finisher Ribbon, Post-race Refreshment',
     published: true,
     sort_order: 1,
     planned_start_time: '05:00:00',
@@ -93,7 +93,7 @@ export const FALLBACK_CATEGORIES: RunCategory[] = [
     capacity: null,
     min_age: null,
     max_age: null,
-    kit_description: 'Official Sinoog 2027 Singlet, Race Bib, Finisher Medal, Hydration Support',
+    kit_description: 'Official Sinoog 2027 Singlet / Full Sub, Race Bib, Finisher Medal, Hydration Support',
     published: true,
     sort_order: 2,
     planned_start_time: '04:30:00',
@@ -109,7 +109,7 @@ export const FALLBACK_CATEGORIES: RunCategory[] = [
     capacity: null,
     min_age: null,
     max_age: null,
-    kit_description: 'Official Sinoog 2027 Singlet, Timing Bib, Heavy Cast Finisher Medal, Energy Station & Hot Meal',
+    kit_description: 'Official Sinoog 2027 Singlet / Full Sub, Timing Bib, Heavy Cast Finisher Medal, Energy Station & Hot Meal',
     published: true,
     sort_order: 3,
     planned_start_time: '04:00:00',
@@ -147,10 +147,22 @@ export async function getRunEventAndCategories(editionId: string): Promise<{
       categories = FALLBACK_CATEGORIES;
     }
 
+    // Merge persistent local category start timestamps if column is missing or pending sync
+    const storedStarts = getStoredCategoryStarts();
+    categories = categories.map((cat) => ({
+      ...cat,
+      official_started_at: cat.official_started_at || storedStarts[cat.id] || null,
+    }));
+
     return { event: currentEvent, categories };
   } catch (err) {
     console.warn('Failed to load run event from Supabase, using defaults:', err);
-    return { event: FALLBACK_RUN_EVENT, categories: FALLBACK_CATEGORIES };
+    const storedStarts = getStoredCategoryStarts();
+    const fallbackWithStarts = FALLBACK_CATEGORIES.map((cat) => ({
+      ...cat,
+      official_started_at: storedStarts[cat.id] || null,
+    }));
+    return { event: FALLBACK_RUN_EVENT, categories: fallbackWithStarts };
   }
 }
 
@@ -171,7 +183,8 @@ export interface RegistrationInput {
   guardian_consent?: boolean;
 }
 
-export function formatShirtSelection(style: 'singlet' | 'full_sub', size: string): string {
+export function formatShirtSelection(style: 'singlet' | 'full_sub' | 'shirt' | null | undefined, size: string): string {
+  if (style === 'shirt' || !style) return size.toUpperCase();
   const styleLabel = style === 'full_sub' ? 'Full Sub' : 'Singlet';
   return `${styleLabel} (${size.toUpperCase()})`;
 }
@@ -673,6 +686,60 @@ export interface TimingDashboardRow extends DbRunRegistration {
   } | null;
 }
 
+// Persistent storage keys for category timing resilience
+const TIMING_STARTS_STORAGE_KEY = 'sinoog_category_gun_starts';
+const inMemoryTimingFallback = new Map<string, string>();
+
+function getTimingStorage(): { getItem(key: string): string | null; setItem(key: string, value: string): void; removeItem(key: string): void } {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) return window.localStorage;
+    if (typeof localStorage !== 'undefined') return localStorage;
+  } catch {
+    // Fall back to in-memory map
+  }
+  return {
+    getItem: (key: string) => inMemoryTimingFallback.get(key) ?? null,
+    setItem: (key: string, value: string) => { inMemoryTimingFallback.set(key, value); },
+    removeItem: (key: string) => { inMemoryTimingFallback.delete(key); },
+  };
+}
+
+export function getStoredCategoryStarts(): Record<string, string> {
+  try {
+    const storage = getTimingStorage();
+    const raw = storage.getItem(TIMING_STARTS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveStoredCategoryStart(categoryId: string, startedAt: string): void {
+  try {
+    const storage = getTimingStorage();
+    const current = getStoredCategoryStarts();
+    current[categoryId] = startedAt;
+    storage.setItem(TIMING_STARTS_STORAGE_KEY, JSON.stringify(current));
+  } catch {
+    // Ignore storage write errors
+  }
+}
+
+export function clearStoredCategoryStart(categoryId?: string): void {
+  try {
+    const storage = getTimingStorage();
+    if (!categoryId) {
+      storage.removeItem(TIMING_STARTS_STORAGE_KEY);
+      return;
+    }
+    const current = getStoredCategoryStarts();
+    delete current[categoryId];
+    storage.setItem(TIMING_STARTS_STORAGE_KEY, JSON.stringify(current));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export async function startOfficialRun(runEventId: string): Promise<string> {
   if (!supabase) return new Date().toISOString();
   const { data, error } = await supabase.rpc('start_run_timing', { p_run_event_id: runEventId });
@@ -681,6 +748,7 @@ export async function startOfficialRun(runEventId: string): Promise<string> {
 }
 
 export async function resetOfficialRun(runEventId: string): Promise<number> {
+  clearStoredCategoryStart(); // Clear all category clocks from local persistence
   if (!supabase) return 0;
   const { data, error } = await supabase.rpc('reset_run_timing', { p_run_event_id: runEventId });
   if (error) throw new Error(error.message);
@@ -688,16 +756,20 @@ export async function resetOfficialRun(runEventId: string): Promise<number> {
 }
 
 export async function startCategoryTiming(categoryId: string, runEventId: string): Promise<string> {
-  if (!supabase) return new Date().toISOString();
-  
+  const startedAt = new Date().toISOString();
+  // Always persist locally first so state survives refresh and offline drops
+  saveStoredCategoryStart(categoryId, startedAt);
+
+  if (!supabase) return startedAt;
+
   // Try dedicated category RPC first
   const { data, error } = await supabase.rpc('start_category_timing', { p_category_id: categoryId });
   if (!error && data) {
+    saveStoredCategoryStart(categoryId, data);
     return data;
   }
 
   // Fallback: update run_categories row and ensure event start is recorded
-  const startedAt = new Date().toISOString();
   const { error: updateError } = await supabase
     .from('run_categories')
     .update({ official_started_at: startedAt })
@@ -712,13 +784,18 @@ export async function startCategoryTiming(categoryId: string, runEventId: string
 
   if (updateError) {
     // If column doesn't exist yet, fallback to startOfficialRun
-    return await startOfficialRun(runEventId);
+    try {
+      await startOfficialRun(runEventId);
+    } catch {
+      // Ignore if event was already started
+    }
   }
 
   return startedAt;
 }
 
 export async function resetCategoryTiming(categoryId: string, runEventId: string): Promise<number> {
+  clearStoredCategoryStart(categoryId); // Clear category clock from local persistence
   if (!supabase) return 0;
 
   // Try category reset RPC
@@ -755,11 +832,34 @@ export async function resetCategoryTiming(categoryId: string, runEventId: string
   return count ?? 0;
 }
 
-export async function recordRunnerFinish(qrValue: string): Promise<void> {
+export async function recordRunnerFinish(input: string): Promise<void> {
   if (!supabase) return;
-  const token = qrValue.includes('|') ? qrValue.split('|').pop()?.trim() : qrValue.trim();
-  if (!token) throw new Error('The QR code is invalid.');
-  const { error } = await supabase.rpc('record_run_finish', { p_qr_token: token });
+  const raw = input.trim();
+  if (!raw) throw new Error('Enter a valid runner bib number or QR code.');
+
+  const tokenCandidate = raw.includes('|') ? raw.split('|').pop()?.trim() : raw;
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tokenCandidate || '');
+
+  let tokenToRecord: string | null = isUuid ? tokenCandidate! : null;
+
+  if (!tokenToRecord) {
+    // Treat as runner bib number (strip optional leading #)
+    const cleanBib = raw.replace(/^#/, '').trim();
+    const { data: reg, error: regError } = await supabase
+      .from('run_registrations')
+      .select('qr_token, bib_number, participant_name')
+      .eq('bib_number', cleanBib)
+      .eq('status', 'approved')
+      .maybeSingle();
+
+    if (regError) throw new Error(regError.message);
+    if (!reg?.qr_token) {
+      throw new Error(`No approved runner found with Bib #${cleanBib}.`);
+    }
+    tokenToRecord = reg.qr_token;
+  }
+
+  const { error } = await supabase.rpc('record_run_finish', { p_qr_token: tokenToRecord });
   if (error) throw new Error(error.message);
 }
 
@@ -779,6 +879,7 @@ export async function getTimingDashboard(runEventId: string): Promise<TimingDash
 }
 
 export function formatElapsed(milliseconds: number): string {
+  if (!Number.isFinite(milliseconds) || milliseconds < 0) return '00:00:00';
   const totalSeconds = Math.floor(milliseconds / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);

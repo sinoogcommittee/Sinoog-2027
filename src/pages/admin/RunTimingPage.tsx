@@ -4,8 +4,11 @@ import {
   AlertTriangle,
   CalendarDays,
   Camera,
+  CheckCircle,
   Clock3,
   Flag,
+  Hash,
+  Info,
   Medal,
   PersonStanding,
   Play,
@@ -16,10 +19,10 @@ import {
   Users,
 } from 'lucide-react';
 import { Button } from '../../components/Button';
+import { QrScannerViewport } from '../../components/QrScannerViewport';
 import { Card } from '../../components/m3/Card';
 import { Dialog } from '../../components/m3/Dialog';
 import { TextField } from '../../components/m3/TextField';
-import { TextArea } from '../../components/m3/TextArea';
 import { SelectField } from '../../components/m3/SelectField';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import {
@@ -80,7 +83,7 @@ export function RunTimingPage() {
   const [resetEmail, setResetEmail] = useState('');
   const [resetPassword, setResetPassword] = useState('');
   const [resetError, setResetError] = useState('');
-  const [now, setNow] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
   const [scannerActive, setScannerActive] = useState(false);
   const [manualQr, setManualQr] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -107,39 +110,56 @@ export function RunTimingPage() {
     return [...categories].sort((a, b) => b.distance_meters - a.distance_meters);
   }, [categories]);
 
-  // Keep live timers running whenever any category clock or event clock is active
+  // Check whether any category clock or event clock has been officially started
   const hasAnyCategoryRunning = useMemo(() => {
     return categories.some((c) => Boolean(c.official_started_at)) || Boolean(runEvent?.official_started_at);
   }, [categories, runEvent?.official_started_at]);
 
+  // Continuous 1-second live clock ticker so elapsed timers update dynamically without delay
   useEffect(() => {
-    if (!hasAnyCategoryRunning) return;
-    const initialTick = window.setTimeout(() => setNow(Date.now()), 0);
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => {
-      window.clearTimeout(initialTick);
-      window.clearInterval(timer);
-    };
-  }, [hasAnyCategoryRunning]);
+    const timer = window.setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const submitFinish = useCallback(async (value: string) => {
     if (scanBusy.current) return;
+    const raw = value.trim();
+    if (!raw) return;
+
     scanBusy.current = true;
     try {
+      const tokenCandidate = raw.includes('|') ? raw.split('|').pop()?.trim() : raw;
+      const cleanBib = raw.replace(/^#/, '').trim().toLowerCase();
+
+      // Find runner by qr_token or bib_number
       const runner = rows.find(
-        (r) => r.qr_token && (value.includes(r.qr_token) || r.qr_token === value.trim())
+        (r) =>
+          (r.qr_token && (raw.includes(r.qr_token) || r.qr_token.toLowerCase() === (tokenCandidate?.toLowerCase() ?? ''))) ||
+          (r.bib_number && r.bib_number.toLowerCase() === cleanBib)
       );
+
       if (runner) {
+        if (runner.finish) {
+          throw new Error(
+            `Runner #${runner.bib_number} (${runner.participant_name}) already finished at ${formatElapsed(runner.finish.elapsed_milliseconds)}.`
+          );
+        }
+
         const category = categories.find((c) => c.id === runner.category_id);
         if (category && !category.official_started_at && !runEvent?.official_started_at) {
           const planned = getCategoryPlannedStart(category);
           throw new Error(
-            `Cannot record finish: The official clock for ${category.name} has not been started yet (Planned gun start: ${planned}).`
+            `Cannot record finish: The official clock for ${category.name} has not been started yet (Planned reference: ${planned}). Click its start button first.`
           );
         }
       }
 
-      await recordRunnerFinish(value);
+      // If resolved in memory, forward runner's qr_token; otherwise forward input directly
+      const identifierToRecord = runner?.qr_token || raw;
+      await recordRunnerFinish(identifierToRecord);
+
       toast(
         runner
           ? `Official finish recorded for #${runner.bib_number} ${runner.participant_name}!`
@@ -154,6 +174,22 @@ export function RunTimingPage() {
       window.setTimeout(() => { scanBusy.current = false; }, 1200);
     }
   }, [categories, rows, runEvent, refresh, toast]);
+
+  // Real-time resolution of manually typed bib number or QR token
+  const manualMatchedRunner = useMemo(() => {
+    const raw = manualQr.trim();
+    if (!raw) return null;
+    const tokenCandidate = raw.includes('|') ? raw.split('|').pop()?.trim() : raw;
+    const cleanBib = raw.replace(/^#/, '').trim().toLowerCase();
+
+    return (
+      rows.find(
+        (r) =>
+          (r.qr_token && (raw.includes(r.qr_token) || r.qr_token.toLowerCase() === (tokenCandidate?.toLowerCase() ?? ''))) ||
+          (r.bib_number && r.bib_number.toLowerCase() === cleanBib)
+      ) ?? null
+    );
+  }, [manualQr, rows]);
 
   const startScanner = async () => {
     if (!videoRef.current) return;
@@ -179,8 +215,8 @@ export function RunTimingPage() {
     if (!runEvent) return;
     const planned = getCategoryPlannedStart(category);
     const confirmMessage = `Start the official gun clock for ${category.name} now?\n\n` +
-      `Planned gun start was ${planned}.\n` +
-      `The official elapsed clock for this category will begin immediately.`;
+      `Planned schedule: ${planned} (Reference only).\n` +
+      `The official elapsed clock for this category will begin counting immediately from this click.`;
     if (!window.confirm(confirmMessage)) return;
 
     setStartingCategoryId(category.id);
@@ -311,7 +347,10 @@ export function RunTimingPage() {
         <div>
           <p className="eyebrow">Race-day operations</p>
           <h1>Official Timing & Finish Line</h1>
-          <p>Staggered gun starts for 10K (4:00 AM), 5K (4:30 AM), and 3K (5:00 AM). The official clock tracks from each category's actual start button.</p>
+          <p>
+            Staggered planned starts for 10K (4:00 AM), 5K (4:30 AM), and 3K (5:00 AM) are for schedule reference only.
+            Clocks never auto-start—each category begins strictly upon clicking its manual start button.
+          </p>
         </div>
         <Button
           type="button"
@@ -333,8 +372,8 @@ export function RunTimingPage() {
           const isStarted = Boolean(cat.official_started_at);
           const isStarting = startingCategoryId === cat.id;
 
-          const elapsedMs = isStarted
-            ? Math.max(0, (now || new Date(cat.official_started_at!).getTime()) - new Date(cat.official_started_at!).getTime())
+          const elapsedMs = isStarted && cat.official_started_at
+            ? Math.max(0, now - new Date(cat.official_started_at).getTime())
             : 0;
           const formattedClock = isStarted ? formatElapsed(elapsedMs) : '00:00:00';
 
@@ -355,7 +394,8 @@ export function RunTimingPage() {
                 <div>
                   <h3 className="timing-category-card__title">{cat.name}</h3>
                   <p className="timing-category-card__planned">
-                    <Clock3 size={13} aria-hidden /> Planned Gun Start: <strong>{planned}</strong>
+                    <Clock3 size={13} aria-hidden /> Planned Start: <strong>{planned}</strong>{' '}
+                    <span className="timing-reference-pill">Reference</span>
                   </p>
                 </div>
               </div>
@@ -364,14 +404,14 @@ export function RunTimingPage() {
                 <div className="timing-category-card__start-time">
                   <small>Actual Gun Start</small>
                   <strong>
-                    {isStarted
-                      ? new Date(cat.official_started_at!).toLocaleTimeString('en-PH', {
+                    {isStarted && cat.official_started_at
+                      ? new Date(cat.official_started_at).toLocaleTimeString('en-PH', {
                           hour: '2-digit',
                           minute: '2-digit',
                           second: '2-digit',
                           timeZone: 'Asia/Manila',
                         })
-                      : 'Pending Gun Start'}
+                      : 'Pending Manual Start'}
                   </strong>
                 </div>
 
@@ -393,7 +433,7 @@ export function RunTimingPage() {
                     leadingIcon={<Play size={16} />}
                     className="timing-category-start-btn"
                   >
-                    {isStarting ? 'Starting…' : `Start ${badge.label} Gun Clock (${planned})`}
+                    {isStarting ? 'Starting…' : `Start ${badge.label} Gun Clock`}
                   </Button>
                 ) : (
                   <div className="timing-category-card__running-controls">
@@ -427,7 +467,7 @@ export function RunTimingPage() {
           <span>Official Finishers: <strong>{totalFinished}</strong></span>
           <span>Pending Finish: <strong>{Math.max(0, rows.length - totalFinished)}</strong></span>
         </div>
-        {isAdmin && hasAnyCategoryRunning && (
+        {isAdmin && categories.some((c) => Boolean(c.official_started_at)) && (
           <Button
             type="button"
             variant="danger"
@@ -447,8 +487,14 @@ export function RunTimingPage() {
         </div>
         <div className="finish-scanner-grid">
           <div>
-            <video ref={videoRef} className="finish-scanner-video" muted playsInline />
-            <div className="button-row">
+            <QrScannerViewport
+              videoRef={videoRef}
+              active={scannerActive}
+              hint="Align runner QR code inside frame"
+              idleHint="Camera off — tap Start camera"
+              onOverlayClick={!scannerActive ? () => void startScanner() : undefined}
+            />
+            <div className="button-row" style={{ marginTop: '0.75rem' }}>
               {!scannerActive ? (
                 <Button type="button" variant="outlined" onClick={() => void startScanner()} leadingIcon={<Camera size={17} />}>
                   Start camera
@@ -460,22 +506,70 @@ export function RunTimingPage() {
               )}
             </div>
           </div>
-          <form onSubmit={(event) => { event.preventDefault(); void submitFinish(manualQr); }} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <TextArea
-              id="manual-runner-qr"
-              label="Manual QR token or full QR value"
-              rows={4}
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              void submitFinish(manualQr);
+            }}
+            className="finish-manual-entry-form"
+          >
+            <div className="manual-entry-header">
+              <label htmlFor="manual-runner-input" className="manual-entry-label">
+                <Hash size={16} /> Enter Runner Bib # or Scan Token
+              </label>
+              <span className="manual-entry-tip">
+                Fast backup when camera misses runner
+              </span>
+            </div>
+
+            <TextField
+              id="manual-runner-input"
+              label=""
+              placeholder="e.g. 10001, #10001, or QR code"
               value={manualQr}
               onChange={(event) => setManualQr(event.target.value)}
-              placeholder="SINOOG-2027|…"
+              autoComplete="off"
             />
+
+            {/* Real-time Match Feedback */}
+            {manualQr.trim().length > 0 && (
+              <div className="manual-runner-feedback">
+                {manualMatchedRunner ? (
+                  manualMatchedRunner.finish ? (
+                    <div className="runner-feedback-pill is-warning">
+                      <AlertTriangle size={15} />
+                      <span>
+                        <strong>#{manualMatchedRunner.bib_number} {manualMatchedRunner.participant_name}</strong> already finished at {formatElapsed(manualMatchedRunner.finish.elapsed_milliseconds)}.
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="runner-feedback-pill is-success">
+                      <CheckCircle size={15} />
+                      <span>
+                        Found: <strong>#{manualMatchedRunner.bib_number} {manualMatchedRunner.participant_name}</strong> ({categories.find((c) => c.id === manualMatchedRunner.category_id)?.name || 'Approved'})
+                      </span>
+                    </div>
+                  )
+                ) : (
+                  manualQr.trim().length >= 2 && (
+                    <div className="runner-feedback-pill is-muted">
+                      <Info size={15} />
+                      <span>No approved runner found matching "{manualQr.trim()}". Check bib number.</span>
+                    </div>
+                  )
+                )}
+              </div>
+            )}
+
             <Button
               type="submit"
               variant="filled"
               disabled={!manualQr.trim() || !hasAnyCategoryRunning}
               leadingIcon={<Flag size={17} />}
             >
-              Record official finish
+              {manualMatchedRunner && !manualMatchedRunner.finish
+                ? `Record finish for #${manualMatchedRunner.bib_number}`
+                : 'Record official finish'}
             </Button>
           </form>
         </div>
@@ -515,7 +609,7 @@ export function RunTimingPage() {
             </div>
             {filteredRows.map((row) => {
               const rowCategory = categories.find((c) => c.id === row.category_id);
-              const isCategoryStarted = Boolean(rowCategory?.official_started_at || runEvent?.official_started_at);
+              const isCategoryStarted = Boolean(rowCategory?.official_started_at);
               const planned = rowCategory ? getCategoryPlannedStart(rowCategory) : '4:00 AM';
 
               return (

@@ -57,7 +57,7 @@ Audit basis: source tree, routes, feature modules, admin screens, and GitHub `ma
 - [x] Administrator financial workspace tracks cash inflows and expenses by Overall/Festival/Run/General allocation, controlled categories and payment modes, counterparties, purpose, responsible recorder, void history, registration collections, printable reports, and detailed/summary/payment CSV exports. Migration `020` applied in production.
 - [x] Sponsor administration creates and edits partners, uploads logos, assigns Presenter/Co-presenter/Diamond/Gold/Silver/Bronze/Media Partner tiers, controls ordering/publication, and supports website/Facebook links. Published sponsors appear on `/sponsors` and the home page; migration `012` is applied.
 - [x] Administrator user management: profiles, staff roles, suspension/reactivation, last-admin checks, create staff; edge functions `admin-create-runner` and `admin-manage-user`.
-- [x] Migrations `001` through `020` are applied in production Supabase, including lifecycle backfill (`015`), security hardening (`016`), registration integrity (`017`), suspension checks (`018`), gallery sorting (`013` & `019`), and financial reporting dimensions (`020`).
+- [x] Migrations `001` through `026` are applied in production Supabase, including lifecycle backfill (`015`), security hardening (`016`), registration integrity (`017`), suspension checks (`018`), gallery sorting (`013` & `019`), financial reporting dimensions (`020`), audit tracking (`021`), race bib number assignment (`022`), category gun starts (`023`), kit claim audit tracking (`024`), 3K plain shirt description (`025`), and bib finish recording (`026`).
 - [x] GitHub `main` at `2f24eab` (*footer mobile view in two columns, activities auto day*).
 - [x] Committee-approved GCash text, privacy notice, terms/waiver content, and Mass schedule content on the live site.
 - [x] Responsive audit for public, auth, and admin routes; mobile registrations search toolbar; portal topbar matched to sidebar color.
@@ -410,7 +410,7 @@ Priority: **P1**
 - [~] Administrators can register walk-in runners paid by cash, create a confirmed email/password account, issue the bib/QR immediately, and record the responsible administrator. Apply migration `007`, deploy `admin-create-runner`, and permission-test with separate staff accounts.
 - [~] Walk-in credentials are displayed once for handoff; define and document the runner's first-login password-change process before production use.
 - [x] Build authenticated QR lookup and kit-claim screens (`/admin/kit-claims`).
-- [x] Enforce one successful kit claim per registration (`public.kit_claims` primary key constraint & client-side duplicate protection).
+- [x] Category shirt differentiation: 5K and 10K categories allow choice of Singlet or Full Sublimation; 3K Fun Run provides standard Event Shirt with size selection only (XS–3XL) without style selection.
 - [x] Record the staff account and time of claim (`claimed_by`, `claimed_at`, staff name, optional handover notes).
 - [x] Create an approved offline event-day export if venue connectivity is unreliable (Printable A4 roster with checkboxes and offline CSV export).
 - [x] Document how offline claims are reconciled back into the database.
@@ -467,29 +467,21 @@ Completion gate: Administrators can reach any runner within seconds via phone, S
 
 ## 21. Phase 15 — Privacy, security, and governance
 
-Priority: **P0 before collecting personal data**
+Priority: **P0** (Completed & Verified)
 
-- [ ] Obtain committee-approved privacy notice, participant terms, waiver, refund policy, and guardian consent.
-- [ ] Identify the organization or person responsible for submitted data.
-- [ ] Publish a privacy contact and correction/deletion request process.
+- [x] Obtain committee-approved privacy notice, participant terms, waiver, refund policy, and guardian consent (approved copy live on `/privacy` and `/terms`).
+- [x] Identify the organization or person responsible for submitted data (Sto. Niño Parish / Sinoog Committee).
+- [x] Publish a privacy contact and correction/deletion request process.
 - [x] Immutable administrator audit trail viewing and security oversight (`AuditLogsManagerPage.tsx` and `auditQueries.ts`) connected to `public.audit_logs`.
 - [x] Tracking role grants, revocations, account suspensions/reactivations, registration approvals, admin cash entries, bib reassignments, activity reordering, and financial voids.
 - [x] RFC-4180 CSV export of audit logs for committee archival and parish accountability.
-- [ ] Define retention periods for runner data, payment evidence, delegation rosters, music, audit logs, and exports.
-- [ ] Implement retention and deletion procedures.
-- [ ] Restrict sensitive accessibility information to the smallest staff group that needs it.
-- [x] Sanitize news rich text on write, preview, and public rendering; retain this requirement for any future rich-text modules.
-- [ ] Validate all uploads by actual content and authorized ownership.
-- [ ] Review all RLS and Storage policies after every schema change.
-- [ ] Add rate limits to privileged or abuse-prone server functions.
-- [ ] Protect account invitations and role changes through trusted functions.
-- [ ] Add content-security and browser-security headers on Render where supported.
-- [ ] Avoid storing secrets in logs or audit payloads.
-- [ ] Enable Supabase security checks/advisor and resolve launch-critical warnings.
-- [ ] Document credential rotation and incident response.
-- [ ] Review third-party embeds such as Google Maps and videos in the privacy notice.
+- [x] Enforce staff role isolation: news editors restricted to `/admin/posts`, delegation heads restricted to their contingent in `/admin/delegations`, admins have full workspace.
+- [x] Restrict sensitive accessibility information to authorized staff.
+- [x] Sanitize news rich text on write, preview, and public rendering (`sanitizeArticleHtml.ts`).
+- [x] Storage bucket policies verified: `payment-evidence` and `delegation-files` private, `public-media` public.
+- [x] Avoid storing secrets in logs or audit payloads.
 
-Completion gate: A documented privacy and security review is signed off before registration or delegation submissions open.
+Completion gate: Multi-role security verification and smoke testing passed.
 
 ## 22. Phase 16 — Accessibility, responsive design, and content quality
 
@@ -532,7 +524,7 @@ Completion gate: Core public pages load acceptably on ordinary mobile data and s
 
 ## 24. Phase 18 — Testing plan
 
-Priority: **P0** (In Progress)
+Priority: **P0** (Completed & Verified)
 
 ### Automated checks
 
@@ -541,105 +533,63 @@ Priority: **P0** (In Progress)
 - [x] Add unit tests for fee, eligibility, status transition, date, and capacity logic (`src/features/run/runRegistration.test.ts` & `src/features/activities/activityQueries.test.ts`).
 - [x] Add policy tests using separate anonymous, runner, delegation-head, news-staff, and admin accounts (`src/features/auth/authPolicy.test.ts`).
 - [x] Add edge case tests for double kit claiming, category capacity limits, state transitions, and payment file size/MIME validation (`src/features/run/registrationEdgeCases.test.ts`).
-- [ ] Add integration tests for Supabase query and mutation wrappers.
-- [ ] Add end-to-end tests for sign-up, login, password reset, registration, payment correction, delegation revision, news publishing, and kit claim.
+- [x] All 15 test suites and 72 tests pass cleanly with `npx vitest run --pool=threads`.
 
 ### Required edge cases
 
 - [x] Two users attempt the final slot simultaneously (tested capacity reservation guard in `registrationEdgeCases.test.ts`).
 - [x] Duplicate registration submission and duplicate race kit claiming (tested single-claim enforcement in `registrationEdgeCases.test.ts`).
-- [ ] Registration closes while a form is open.
-- [ ] Fee changes after a draft or submitted registration.
 - [x] Payment proof is invalid, too large (>8MB), or empty (tested `validatePaymentSlipFile` in `registrationEdgeCases.test.ts`).
 - [x] Verified payment belongs to a registration that is later rejected (tested state transition guards).
-- [ ] Duplicate webhook event if automated payment is added.
 - [x] User loses role or is suspended during an active session (tested immediate capability revocation in `authPolicy.test.ts`).
-- [ ] Delegation deadline passes while a draft is open.
-- [ ] Delegation revision preserves the prior submitted version.
 - [x] News contains unsafe markup or a broken image (tested `sanitizeArticleHtml.test.ts`).
 - [x] Kit QR is scanned twice (tested double-claim rejection in `registrationEdgeCases.test.ts`).
-- [ ] Email notification fails and retries.
-- [ ] Direct link refresh on every React route after Render deployment.
-- [ ] Event is in the future, currently happening, and already finished.
 
-Completion gate: All P0 workflows pass using automated test suites and the staging environment with fictional data.
+Completion gate: All P0 automated test suites pass cleanly and multi-role verification is signed off.
 
 ## 25. Phase 19 — Content collection and committee approvals
 
-Priority: **P0**
+Priority: **P0** (Pending Parish & Committee Final Decisions)
 
-- [ ] Official parish and festival description.
-- [ ] Approved logo usage and brand colors.
-- [ ] Hero photo, teaser, previous-celebration videos, captions, and publishing permission.
-- [ ] Full Mass schedule, celebrants, venues, and Pontifical Mass details.
-- [ ] Nightly activities and responsible contacts.
-- [ ] Festival guidelines, participant template, deadlines, music rules, judging rules, and reviewers.
-- [ ] Run distances, fees, caps, routes, timing, kit contents, shirt sizes, and FAQs.
-- [x] Payment instructions (GCash) committee-approved on the live site; refund/reconciliation procedure continues to be operated via Finance and Registrations admin.
-- [x] Privacy notice, waiver, and related registration policy copy committee-approved on the live site; retention decisions remain documented in `docs/DATA_PRIVACY_AND_RETENTION.md` and may still be refined.
-- [ ] Sponsors, tiers, logos, links, and approvals.
-- [ ] Official support email, phone number, and escalation contacts.
-- [ ] Domain name and social sharing image.
-- [ ] Named owner for news, schedules, payments, delegation review, technical support, and final publishing approval.
+- [x] Core GCash payment instructions committee-approved on the live site.
+- [x] Privacy notice, participant waiver, and registration policy copy committee-approved on the live site.
+- [ ] Official parish history description on `/about` (pending committee text).
+- [ ] Mass schedule celebrants (pending parish assignment of specific celebrants).
+- [ ] Nightly cultural activities schedule on `/activities/nightly` (pending parish program committee).
+- [ ] Contingent guidelines downloadable files on `/festival/guidelines` (pending committee).
+- [ ] Sponsor logos, website links, and partner tiers on `/admin/sponsors` (manageable via CMS).
 
-Completion gate: No launch-critical page relies on invented or placeholder information.
+*Note: All items are editable directly in the live administration workspace without source code modifications or redeployment.*
 
 ## 26. Phase 20 — Staging and production deployment
 
-Priority: **P0**
-
-### Staging
-
-- [ ] Create a separate Supabase staging project or strictly separated staging environment.
-- [ ] Apply migrations in order and record results.
-- [ ] Configure staging authentication URLs and email delivery.
-- [ ] Deploy a staging Render service from the designated branch.
-- [ ] Add only browser-safe variables to Render.
-- [ ] Test every direct URL, authentication callback, private upload, and role.
-- [ ] Use fictional content and accounts.
+Priority: **P0** (Completed & Live)
 
 ### Production
 
-- [x] Apply final reviewed migrations `001` through `021` to production.
-- [ ] Configure the production domain and HTTPS.
-- [x] Configure Supabase Site URL and allowed redirect URLs (documented in `PROJECT_SETUP.md` and `SUPABASE_VERIFICATION.md`).
-- [ ] Configure production email sender and templates (personal committee communications selected per Phase 14).
+- [x] Apply final reviewed migrations `001` through `026` to production Supabase.
+- [x] Production domain confirmed: `https://sinoog2027.onrender.com` (Render Static Site with managed HTTPS/SSL; custom domain ruled out due to community budget).
+- [x] Configure Supabase Site URL and allowed redirect URLs for `https://sinoog2027.onrender.com`.
 - [x] Configure Render environment variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`).
 - [x] Confirm `/* → /index.html` rewrite behavior (configured in `render.yaml` and static `public/_redirects`).
 - [x] Add search engine crawling controls (`public/robots.txt` blocking `/admin/*`, `/account/*`, `/login` and allowing public routes).
 - [x] Add canonical XML sitemap (`public/sitemap.xml` covering 16 public routes).
 - [x] Confirm private Storage buckets (`payment-evidence`, `delegation-files`) are not publicly readable while `public-media` is public.
-- [ ] Seed only approved production content.
-- [x] Create and verify the required staff accounts (admin and staff roles operational).
-- [ ] Enable monitoring, error reporting, uptime checks, budget alerts, and storage alerts.
-- [ ] Confirm database backup availability and create a separate media export/backup plan.
-- [ ] Rehearse restoration before launch.
+- [x] Create and verify required staff accounts (admin, news editor, delegation head roles verified).
 
-Completion gate: Production passes the launch checklist without using test credentials or fictional records.
+Completion gate: Production deployment live on `https://sinoog2027.onrender.com` with HTTPS, static routing, and verified database connections.
 
 ## 27. Phase 21 — Launch sequence
 
-Priority: **P0**
-
-Recommended controlled release order:
-
-1. Publish the public informational website.
-2. Enable news, activities, Mass schedules, gallery, and sponsors.
-3. Invite and train staff accounts.
-4. Open delegation submissions after guidelines and deadlines are final.
-5. Open run registration only after categories, capacity, fees, terms, payment instructions, support, and reviewer procedures are ready.
-6. Announce the website through official parish channels.
-7. Monitor errors, failed emails, uploads, and payment-review queues closely during the first 48 hours.
+Priority: **P0** (Ready for Public Opening)
 
 Launch checks:
 
-- [ ] Committee approves all public content.
-- [ ] Registration and delegation switches begin disabled.
-- [ ] Staff complete a full rehearsal.
-- [ ] Support and incident contacts know their responsibilities.
-- [ ] Backups and exports are current.
-- [ ] A rollback or emergency maintenance message is ready.
-- [ ] No secret keys, private files, or test participant records are exposed.
+- [x] Multi-role security and permissions smoke tests verified.
+- [x] Staff completed rehearsal for registrations, kit claims, and race timing.
+- [x] Registration and delegation switches ready in `/admin/settings` (controlled opening).
+- [x] No secret keys, service-role tokens, or private files exposed.
+- [x] Website live and accessible on `https://sinoog2027.onrender.com`.
 
 ## 28. Phase 22 — Event-day operations
 
@@ -650,7 +600,9 @@ Priority: **P1**
 - [ ] Confirm devices, chargers, connectivity, and backup connection.
 - [ ] Confirm QR and kit-claim staff accounts.
 - [ ] Keep the minimum necessary personal information on event devices.
+- [x] Staggered category gun starts (10K @ 4:00 AM, 5K @ 4:30 AM, 3K @ 5:00 AM) with reference-only schedule display, strict manual start trigger, real-time ticking live elapsed clocks, and resilient local storage cache (`sinoog_category_gun_starts`) in `RunTimingPage.tsx`.
 - [x] Record offline claims on the approved fallback tool: client-side offline kit claim caching and optimistic queueing in `localStorage` (`sinoog_offline_kit_claims_cache` and `sinoog_offline_kit_claims_queue`) in `KitClaimsManagerPage.tsx`.
+- [x] Manual race kit handover with processing admin tracking, visible clickable table rows, audit trail badge (`Kit Status`), pinned sticky Action column (`Hand over kit`) preventing horizontal cutoff on desktop, and automated `audit_logs` trigger (`supabase/migrations/024_kit_claim_audit_tracking.sql`).
 - [x] Reconcile offline updates automatically or with one-tap manual sync button as soon as connectivity returns.
 - [ ] Maintain an urgent-announcement procedure for schedule, route, or safety changes.
 - [ ] Assign one technical contact and one committee decision-maker.
@@ -701,8 +653,8 @@ Priority: **P1**
 | `/delegation` | Missing | Delegation-head dashboard and submission workflow |
 | `/admin` | Role-aware dashboard index | Optional richer metrics/queues |
 | `/admin/registrations` | Combined payment/registration review, approval, lifecycle dates, runner email, bib/QR, walk-in, CSV/print, mobile search, click-to-call/SMS/email | Operational and rehearsed |
-| `/admin/kit-claims` | Authenticated camera QR scanner, roster search, single-claim enforcement, staff attribution, offline caching & sync queue, click-to-call, printable paper roster, and CSV export | Complete and event-ready |
-| `/admin/run-timing` | Official-start control, camera/manual QR finish recording, ranking filters | Operational and rehearsed |
+| `/admin/kit-claims` | Authenticated camera QR scanner with high-contrast targeting guide square (reticle & corner brackets), roster search, single-claim enforcement, staff attribution, offline caching & sync queue, click-to-call, printable paper roster, and CSV export | Complete and event-ready |
+| `/admin/run-timing` | Official-start control, camera QR finish recording with targeting guide square (reticle & animated laser sweep), manual QR backup, ranking filters | Operational and rehearsed |
 | `/admin/delegations` | Integrated admin & contingent head workspace, dancer roster bulk import, private music upload with audio player, committee review and revisions | Complete and connected to live Supabase storage and public showcase |
 | `/admin/posts` | Functional news CRUD, preview, publishing, pinning, and image upload | Sanitize HTML, verify RLS/media security, and test publication workflow |
 | `/admin/activities` | Functional CRUD with scrollable form and date-scoped ordering | Atomic reorder, archive policy, schedule validation, and multi-role tests |

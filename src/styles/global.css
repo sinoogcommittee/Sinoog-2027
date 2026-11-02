@@ -2874,6 +2874,19 @@ button:focus-visible {
   font-weight: 700;
 }
 
+.timing-reference-pill {
+  font-size: 0.65rem;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(116, 31, 41, 0.08);
+  color: #741724;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(116, 31, 41, 0.15);
+  margin-left: 2px;
+}
+
 .timing-category-card__body {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -3056,25 +3069,303 @@ button:focus-visible {
   gap: 24px;
   padding: 20px;
 }
-.finish-scanner-video {
+.finish-scanner-video,
+.qr-scanner-video {
   width: 100%;
-  aspect-ratio: 16/9;
-  background: #211b19;
+  height: 100%;
+  display: block;
   object-fit: cover;
+  background: #14100e;
 }
-.finish-scanner-grid form {
+
+/* ==========================================================================
+   QR Scanner Viewport & Targeting Guide Square
+   Used by /admin/run-timing (Race Timing) and /admin/kit-claims (Kit Check-in)
+   ========================================================================== */
+.qr-scanner-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 360px;
+  background: #14100e;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  user-select: none;
+}
+
+.qr-scanner-viewport.is-idle {
+  cursor: pointer;
+}
+
+.qr-scanner-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Targeting Guide Square (Reticle) */
+.qr-scanner-reticle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(170px, 58%, 220px);
+  max-width: 70%;
+  max-height: 70%;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  /* Dark vignette masks outside the guide square */
+  box-shadow: 0 0 0 9999px rgba(10, 8, 8, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.qr-scanner-viewport.is-active .qr-scanner-reticle {
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+/* 4 High-contrast golden corner brackets */
+.qr-reticle-corner {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-color: #f59e0b;
+  border-style: solid;
+  pointer-events: none;
+  transition: border-color 0.2s ease;
+}
+
+.qr-scanner-viewport.is-active .qr-reticle-corner {
+  border-color: #fbbf24;
+}
+
+.qr-reticle-corner--tl {
+  top: 0;
+  left: 0;
+  border-width: 4px 0 0 4px;
+  border-top-left-radius: 14px;
+}
+
+.qr-reticle-corner--tr {
+  top: 0;
+  right: 0;
+  border-width: 4px 4px 0 0;
+  border-top-right-radius: 14px;
+}
+
+.qr-reticle-corner--bl {
+  bottom: 0;
+  left: 0;
+  border-width: 0 0 4px 4px;
+  border-bottom-left-radius: 14px;
+}
+
+.qr-reticle-corner--br {
+  bottom: 0;
+  right: 0;
+  border-width: 0 4px 4px 0;
+  border-bottom-right-radius: 14px;
+}
+
+/* Idle State Centered Watermark */
+.qr-reticle-idle-target {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-reticle-idle-icon {
+  color: rgba(255, 255, 255, 0.28);
+}
+
+/* Animated Sweeping Laser Bar for Active Scanning */
+.qr-reticle-laser {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(251, 191, 36, 0.8) 20%,
+    #ffffff 50%,
+    rgba(251, 191, 36, 0.8) 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 10px 2px rgba(251, 191, 36, 0.7);
+  animation: qr-laser-scan 2.2s ease-in-out infinite;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+@keyframes qr-laser-scan {
+  0% {
+    top: 6%;
+    opacity: 0.2;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 94%;
+    opacity: 0.2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qr-reticle-laser {
+    animation: none;
+    top: 50%;
+    opacity: 0.75;
+  }
+}
+
+/* User Guidance Pill Badge */
+.qr-scanner-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  background: rgba(18, 14, 12, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+  pointer-events: none;
+  max-width: 90%;
+}
+
+.qr-hint-icon {
+  color: #fbbf24;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .qr-scanner-viewport {
+    aspect-ratio: 4 / 3;
+    max-height: 280px;
+    border-radius: 12px;
+  }
+
+  .qr-scanner-reticle {
+    width: clamp(150px, 62%, 200px);
+    max-width: 72%;
+    max-height: 72%;
+    border-radius: 14px;
+  }
+
+  .qr-reticle-corner {
+    width: 22px;
+    height: 22px;
+  }
+
+  .qr-reticle-corner--tl {
+    border-top-left-radius: 12px;
+  }
+  .qr-reticle-corner--tr {
+    border-top-right-radius: 12px;
+  }
+  .qr-reticle-corner--bl {
+    border-bottom-left-radius: 12px;
+  }
+  .qr-reticle-corner--br {
+    border-bottom-right-radius: 12px;
+  }
+
+  .qr-scanner-hint {
+    bottom: 8px;
+    font-size: 0.72rem;
+    padding: 4px 10px;
+  }
+}
+.finish-manual-entry-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  background: var(--surface, #faf8f5);
+  border: 1px solid var(--line, #e2dcd2);
+  border-radius: 12px;
+  padding: 18px;
 }
-.finish-scanner-grid label {
+
+.manual-entry-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.manual-entry-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.92rem;
   font-weight: 700;
+  color: var(--text, #211b19);
 }
-.finish-scanner-grid textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--line);
-  resize: vertical;
+
+.manual-entry-tip {
+  font-size: 0.74rem;
+  color: var(--muted, #7c7267);
+}
+
+.manual-runner-feedback {
+  min-height: 28px;
+}
+
+.runner-feedback-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.runner-feedback-pill.is-success {
+  background: rgba(46, 125, 50, 0.1);
+  color: #1b5e20;
+  border: 1px solid rgba(46, 125, 50, 0.25);
+}
+
+.runner-feedback-pill.is-warning {
+  background: rgba(230, 81, 0, 0.1);
+  color: #b73e00;
+  border: 1px solid rgba(230, 81, 0, 0.25);
+}
+
+.runner-feedback-pill.is-muted {
+  background: rgba(120, 110, 100, 0.08);
+  color: #635b54;
+  border: 1px solid rgba(120, 110, 100, 0.18);
 }
 .timing-filters {
   justify-content: flex-start;

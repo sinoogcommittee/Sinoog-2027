@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { formatShirtSelection, parseShirtSelection, getBibCategoryLabel } from './runQueries';
 
 describe('Category-Specific Bib Numbers & Shirt Selection', () => {
-  it('formats and parses shirt selections correctly for Singlet and Full Sublimation', () => {
+  it('formats and parses shirt selections correctly for Singlet, Full Sublimation, and 3K plain shirts', () => {
     expect(formatShirtSelection('full_sub', 'L')).toBe('Full Sub (L)');
     expect(formatShirtSelection('singlet', 'M')).toBe('Singlet (M)');
     expect(formatShirtSelection('full_sub', '2XL')).toBe('Full Sub (2XL)');
+    expect(formatShirtSelection('shirt', 'L')).toBe('L');
+    expect(formatShirtSelection(null, 'XL')).toBe('XL');
 
     expect(parseShirtSelection('Full Sub (L)')).toEqual({ style: 'full_sub', size: 'L' });
     expect(parseShirtSelection('Singlet (M)')).toEqual({ style: 'singlet', size: 'M' });

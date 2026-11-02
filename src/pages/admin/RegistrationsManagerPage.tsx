@@ -163,7 +163,7 @@ export function RegistrationsManagerPage() {
       );
       const computedShirt = isWalkIn5Kor10K
         ? formatShirtSelection(walkInShirtStyle, walkInShirtSize)
-        : formatShirtSelection('singlet', walkInShirtSize);
+        : walkInShirtSize;
 
       const registration = await adminCreateCashRunner({
         ...walkIn,
@@ -843,7 +843,7 @@ export function RegistrationsManagerPage() {
                         categories.find((c) => c.id === walkIn.category_id)!.distance_meters >= 5000
                     ) && (
                       <label>
-                        Shirt style
+                        Shirt style (5K / 10K)
                         <select
                           value={walkInShirtStyle}
                           onChange={(e) =>
@@ -856,7 +856,9 @@ export function RegistrationsManagerPage() {
                       </label>
                     )}
                     <label>
-                      Shirt size
+                      {(categories.find((c) => c.id === walkIn.category_id)?.distance_meters ?? 0) >= 5000
+                        ? 'Shirt size'
+                        : 'Event shirt size (3K)'}
                       <select
                         required
                         value={walkInShirtSize}

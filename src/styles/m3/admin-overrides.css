@@ -2363,7 +2363,10 @@
 
 .kit-claims-panel {
   border-radius: 16px !important;
-  overflow: hidden !important;
+  padding: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
   background: #ffffff !important;
   border: 1px solid var(--md-sys-color-outline-variant, #e8dfd8) !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
@@ -2468,8 +2471,6 @@
 .kit-claims-desktop-view {
   display: block;
   width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .kit-claims-table {
@@ -2479,8 +2480,8 @@
 }
 
 .kit-claims-table th {
-  padding: 12px 14px;
-  font-size: 0.75rem;
+  padding: 10px 12px;
+  font-size: 0.74rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -2491,23 +2492,57 @@
 }
 
 .kit-claims-table td {
-  padding: 10px 14px;
+  padding: 8px 12px;
   vertical-align: middle;
   border-bottom: 1px solid #f2ede8;
   white-space: nowrap;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .kit-claims-table tbody tr {
+  cursor: pointer;
   transition: background-color 120ms ease;
 }
 
 .kit-claims-table tbody tr:hover {
-  background-color: #faf6f0 !important;
+  background-color: #faf4ed !important;
+}
+
+.kit-claims-table tbody tr:hover td {
+  background-color: #faf4ed !important;
 }
 
 .kit-claims-table tbody tr.is-claimed {
   background-color: rgba(32, 201, 151, 0.02);
+}
+
+/* Pinned Sticky Action Column (Always 100% visible on desktop without scrolling) */
+.kit-claims-table th:last-child,
+.kit-claims-table td:last-child {
+  position: sticky;
+  right: 0;
+  background: #ffffff;
+  z-index: 2;
+  text-align: right;
+  box-shadow: -4px 0 8px rgba(0, 0, 0, 0.04);
+  padding-right: 16px;
+}
+
+.kit-claims-table th:last-child {
+  background: #fbf9f6;
+  z-index: 3;
+}
+
+.kit-claims-table tbody tr:hover td:last-child {
+  background-color: #faf4ed !important;
+}
+
+.kit-claims-table tbody tr.is-claimed td:last-child {
+  background-color: #ffffff;
+}
+
+.kit-claims-table tbody tr.is-claimed:hover td:last-child {
+  background-color: #faf4ed !important;
 }
 
 /* Desktop Cell Elements */
@@ -2528,25 +2563,35 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .kit-runner-name {
   font-weight: 600;
   color: var(--ink, #1f1b13);
-  font-size: 0.92rem;
+  font-size: 0.90rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .kit-runner-meta {
   color: var(--muted, #857366);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 400;
+  flex-shrink: 0;
 }
 
 .kit-category-badge {
   display: inline-block;
   font-weight: 500;
   color: var(--ink, #2b2320);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
