@@ -1,14 +1,39 @@
 import { useEffect, useState } from 'react';
-import { Calendar, CircleDollarSign, Newspaper, Users, Plus, ArrowRight } from 'lucide-react';
+import {
+  Calendar,
+  CircleDollarSign,
+  Newspaper,
+  Users,
+  Plus,
+  ArrowRight,
+  CheckCircle,
+  AlertCircle,
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/m3/Card';
-import { StatusBadge } from '../../components/StatusBadge';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import { getAllActivitiesForAdmin } from '../../features/activities/activityQueries';
 import { getAllPostsForAdmin } from '../../features/content/postQueries';
 import { getAllRegistrationsForAdmin } from '../../features/run/runQueries';
+import { useAuth } from '../../features/auth/useAuth';
+import {
+  AdminActivitiesIcon,
+  AdminNewsIcon,
+  AdminRegistrationsIcon,
+  AdminKitClaimIcon,
+  AdminTimingIcon,
+  AdminDelegationsIcon,
+  AdminUsersIcon,
+  AdminFinanceIcon,
+  AdminSponsorsIcon,
+  AdminGalleryIcon,
+  AdminAuditIcon,
+  AdminSettingsIcon,
+} from '../../components/AdminNavIcons';
 
 export function AdminDashboardPage() {
+  const { isAdmin, isNewsInCharge, isDelegationHead } = useAuth();
   const [activitiesCount, setActivitiesCount] = useState<number>(0);
   const [postsCount, setPostsCount] = useState<number>(0);
   const [registrationsCount, setRegistrationsCount] = useState<number>(0);
@@ -38,6 +63,111 @@ export function AdminDashboardPage() {
       mounted = false;
     };
   }, []);
+
+  const allShortcuts = [
+    {
+      title: 'Registrations',
+      path: '/admin/registrations',
+      icon: AdminRegistrationsIcon,
+      category: 'Run Operations',
+      description: 'Review participant signups, verify GCash payments, and assign bib/QR codes.',
+      access: 'admin' as const,
+    },
+    {
+      title: 'Kit Claiming',
+      path: '/admin/kit-claims',
+      icon: AdminKitClaimIcon,
+      category: 'Run Operations',
+      description: 'Camera QR scanner, singlet check-in roster, and offline cache sync queue.',
+      access: 'admin' as const,
+    },
+    {
+      title: 'Race Timing',
+      path: '/admin/run-timing',
+      icon: AdminTimingIcon,
+      category: 'Run Operations',
+      description: 'Staggered gun start clocks, finish line scanner, and live leaderboard.',
+      access: 'admin' as const,
+    },
+    {
+      title: 'Activities & Schedule',
+      path: '/admin/activities',
+      icon: AdminActivitiesIcon,
+      category: 'Festival & Liturgy',
+      description: 'Novena mass schedules, nightly cultural presentations, and event timeline.',
+      access: 'admin' as const,
+    },
+    {
+      title: 'News Posts',
+      path: '/admin/posts',
+      icon: AdminNewsIcon,
+      category: 'Festival & Liturgy',
+      description: 'Parish announcements, newsletter bulletins, and editorial publishing.',
+      access: 'news' as const,
+    },
+    {
+      title: 'Delegations',
+      path: '/admin/delegations',
+      icon: AdminDelegationsIcon,
+      category: 'Festival & Liturgy',
+      description: 'Contingent workspace, musical audio track uploads, and dancer rosters.',
+      access: 'delegation' as const,
+    },
+    {
+      title: 'Financial Records',
+      path: '/admin/finance',
+      icon: AdminFinanceIcon,
+      category: 'Finance & Records',
+      description: 'Cashbook ledger, registration & general funds, void logs, and CSV export.',
+      access: 'admin' as const,
+    },
+    {
+      title: 'Sponsors',
+      path: '/admin/sponsors',
+      icon: AdminSponsorsIcon,
+      category: 'Media & Community',
+      description: 'Corporate and benefactors directory, sponsorship tiers, and logos.',
+      access: 'admin' as const,
+    },
+    {
+      title: 'Media Gallery',
+      path: '/admin/gallery',
+      icon: AdminGalleryIcon,
+      category: 'Media & Community',
+      description: 'Photo and video albums, YouTube video embeds, and festival highlights.',
+      access: 'admin' as const,
+    },
+    {
+      title: 'Users & Staff',
+      path: '/admin/users',
+      icon: AdminUsersIcon,
+      category: 'Administration',
+      description: 'Manage committee staff accounts, role assignments, and permissions.',
+      access: 'admin' as const,
+    },
+    {
+      title: 'Audit History',
+      path: '/admin/audit',
+      icon: AdminAuditIcon,
+      category: 'Administration',
+      description: 'Immutable security event logs, detail inspector, and RFC-4180 CSV export.',
+      access: 'admin' as const,
+    },
+    {
+      title: 'Website Settings',
+      path: '/admin/settings',
+      icon: AdminSettingsIcon,
+      category: 'Administration',
+      description: 'Edition parameters, registration toggle, emergency banner, and bib printing.',
+      access: 'admin' as const,
+    },
+  ];
+
+  const visibleShortcuts = allShortcuts.filter((item) =>
+    isAdmin ||
+    (item.access === 'news' && isNewsInCharge) ||
+    (item.access === 'delegation' && isDelegationHead),
+  );
 
   return (
     <div className="m3-admin-dashboard admin-page">
@@ -78,58 +208,54 @@ export function AdminDashboardPage() {
         </Card>
       </div>
 
-      <Card as="section" variant="outlined" className="admin-panel">
-        <div className="panel-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      {/* Workspace Page Shortcuts (replaces obsolete Launch readiness checklist) */}
+      <section className="admin-shortcuts-section" aria-labelledby="shortcuts-heading">
+        <div className="section-header">
           <div>
-            <h2>Launch readiness</h2>
-            <p>Verification checklist before opening registration to participants.</p>
+            <h2 id="shortcuts-heading">Workspace Page Shortcuts</h2>
+            <p>Direct navigation to all committee management modules, race-day tools, and settings.</p>
           </div>
-          <Button
-            to="/admin/settings"
-            variant="text"
-            size="small"
-            leadingIcon={<ArrowRight size={14} aria-hidden />}
-          >
-            Edit settings
-          </Button>
-        </div>
-
-        <div className="readiness-list">
-          <div>
-            <StatusBadge tone="success">Ready</StatusBadge>
-            <span>
-              <strong>Run categories, distances, and race kits</strong>
-              <small>3K Fun Run (₱500), 5K Community Stride (₱800), 10K Fiesta Loop (₱1000) configured.</small>
-            </span>
-          </div>
-
-          <div>
-            <StatusBadge tone="success">Ready</StatusBadge>
-            <span>
-              <strong>Registration & payment proof workflow</strong>
-              <small>Multi-step registration with reference generator and payment proof upload operational.</small>
-            </span>
-          </div>
-
-          <div>
-            <StatusBadge tone="success">Ready</StatusBadge>
-            <span>
-              <strong>News CMS & media upload pipeline</strong>
-              <small>Authorized editors can create, preview, upload cover images, and publish articles.</small>
-            </span>
-          </div>
-
-          <div>
-            <StatusBadge tone={registrationOpen ? 'success' : 'warning'}>
-              {registrationOpen ? 'Open' : 'Pending switch'}
-            </StatusBadge>
-            <span>
-              <strong>Sinoog Run registration switch</strong>
-              <small>Controlled via Website Settings. Currently set to {registrationOpen ? 'OPEN' : 'CLOSED'}.</small>
-            </span>
+          <div className="registration-status-chip">
+            {registrationOpen ? (
+              <span className="status-pill status-pill--open">
+                <CheckCircle size={14} aria-hidden="true" />
+                <span>Run Registration: <strong>OPEN</strong></span>
+              </span>
+            ) : (
+              <span className="status-pill status-pill--closed">
+                <AlertCircle size={14} aria-hidden="true" />
+                <span>Run Registration: <strong>CLOSED</strong></span>
+              </span>
+            )}
           </div>
         </div>
-      </Card>
+
+        <div className="admin-shortcuts-grid">
+          {visibleShortcuts.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className="admin-shortcut-card"
+                title={`Open ${item.title}`}
+              >
+                <div className="admin-shortcut-icon-wrap">
+                  <IconComponent />
+                </div>
+                <div className="admin-shortcut-body">
+                  <div className="admin-shortcut-title-row">
+                    <strong>{item.title}</strong>
+                    <ArrowRight size={16} className="admin-shortcut-arrow" aria-hidden="true" />
+                  </div>
+                  <small className="admin-shortcut-category">{item.category}</small>
+                  <p>{item.description}</p>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }

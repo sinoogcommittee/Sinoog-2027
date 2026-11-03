@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Facebook, Globe, MapPin, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { CountdownTimer } from '../../components/CountdownTimer';
 import { SectionHeading } from '../../components/SectionHeading';
+import { FestiveMedallion } from '../../components/FestiveMedallion';
+import { FestiveParticleCanvas, type FestiveParticleCanvasRef } from '../../components/FestiveParticleCanvas';
 import { getCurrentEdition } from '../../features/editions/editionQueries';
 import { getPublishedActivities, formatActivityDateTime } from '../../features/activities/activityQueries';
 import { getPublishedPosts } from '../../features/content/postQueries';
@@ -30,6 +32,9 @@ export function HomePage() {
   const [contentLoading, setContentLoading] = useState(true);
   const [contentError, setContentError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+
+  const desktopCanvasRef = useRef<FestiveParticleCanvasRef>(null);
+  const mobileCanvasRef = useRef<FestiveParticleCanvasRef>(null);
 
   useEffect(() => {
     let active = true;
@@ -98,6 +103,8 @@ export function HomePage() {
             <source src="/video/parishcover_video.mp4" type="video/mp4" />
           </video>
         </div>
+        {/* Ambient rising gold embers & interactive celebration sparks */}
+        <FestiveParticleCanvas ref={desktopCanvasRef} />
         <div className="home-hero__pattern" />
         {/* Desktop bamboos temporarily commented out for review:
         <div className="home-hero__bamboo home-hero__bamboo--left" aria-hidden="true">
@@ -232,17 +239,10 @@ export function HomePage() {
             </div>
           </div>
           <div className="hero-emblem home-hero__emblem-desktop">
-            <picture className="hero-artwork">
-              <source srcSet="/images/hero_section_art.webp" type="image/webp" />
-              <img
-                src="/images/hero_section_art.png"
-                alt="Sto. Niño Parish seal surrounded by a ceremonial festival pattern"
-                width="1200"
-                height="1200"
-                fetchPriority="high"
-                decoding="async"
-              />
-            </picture>
+            <FestiveMedallion
+              size="desktop"
+              onBurst={(x, y) => desktopCanvasRef.current?.triggerBurst(x, y)}
+            />
             <p>SINOOG 2027</p>
             <small>Viva Pit Señor!</small>
           </div>
@@ -271,6 +271,8 @@ export function HomePage() {
             <source src="/video/parishcover_video_portrait.mp4" type="video/mp4" />
           </video>
         </div>
+        {/* Ambient rising gold embers & interactive celebration sparks */}
+        <FestiveParticleCanvas ref={mobileCanvasRef} />
 
         {/* Ambient bamboo leaves and stalks temporarily hidden on mobile
         <div className="home-hero__bamboo-top" aria-hidden="true">
@@ -399,26 +401,19 @@ export function HomePage() {
           </div>
 
           <div className="home-hero-mobile-view__emblem">
-            <picture className="hero-artwork">
-              <source srcSet="/images/hero_section_art.webp" type="image/webp" />
-              <img
-                src="/images/hero_section_art.png"
-                alt="Sto. Niño Parish seal"
-                width="400"
-                height="400"
-                fetchPriority="high"
-                decoding="async"
-              />
-            </picture>
+            <FestiveMedallion
+              size="mobile"
+              onBurst={(x, y) => mobileCanvasRef.current?.triggerBurst(x, y)}
+            />
           </div>
 
           <div className="home-hero-mobile-view__actions">
             <Button to={registerHref}>
-              <span className="hero-action-label hero-action-label--mobile">Register run</span>
+              <span>Register run</span>
               <ArrowRight size={17} />
             </Button>
             <Button to="/activities" variant="secondary">
-              <span className="hero-action-label hero-action-label--mobile">View schedule</span>
+              <span>View schedule</span>
             </Button>
           </div>
         </div>

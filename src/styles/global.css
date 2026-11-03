@@ -8881,3 +8881,169 @@ button:focus-visible {
   font-size: 0.82rem !important;
   color: #8a7468 !important;
 }
+
+/* ==========================================================================
+   Festive Medallion, Interactive Particles, & Fiesta Sound Controls
+   ========================================================================== */
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinReverseSlow {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes pulseHalo {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.78;
+    filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.75));
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.98;
+    filter: drop-shadow(0 0 30px rgba(255, 235, 120, 0.98));
+  }
+}
+
+@keyframes floatMedallion {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes shockwaveRing {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.95;
+    border-width: 5px;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+    border-width: 1px;
+  }
+}
+
+.spin-slow {
+  animation: spinSlow 48s linear infinite;
+  transform-origin: 250px 250px;
+}
+
+.spin-reverse-slow {
+  animation: spinReverseSlow 36s linear infinite;
+  transform-origin: 250px 250px;
+}
+
+.pulse-halo {
+  animation: pulseHalo 3.4s ease-in-out infinite;
+}
+
+.medallion-float {
+  animation: floatMedallion 5s ease-in-out infinite;
+}
+
+/* 3D Perspective Stage for Medallion */
+.medallion-stage {
+  perspective: 1100px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  margin: 0 auto;
+  width: fit-content;
+}
+
+.medallion-3d {
+  transform-style: preserve-3d;
+  transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+  margin: 0 auto;
+}
+
+.medallion-size--desktop {
+  width: min(490px, min(44vw, 56vh));
+  height: min(490px, min(44vw, 56vh));
+  max-width: 500px;
+  max-height: 500px;
+  aspect-ratio: 1;
+}
+
+.medallion-size--mobile {
+  width: min(260px, 64vw);
+  height: min(260px, 64vw);
+  max-height: 31vh;
+  aspect-ratio: 1;
+}
+
+/* Tablet portrait & large mobile: expand medallion to match original artwork halo (up to 400px) */
+@media (min-width: 600px) and (orientation: portrait),
+       (min-width: 600px) and (max-width: 839px) {
+  .medallion-size--mobile {
+    width: min(400px, min(54vw, 38vh));
+    height: min(400px, min(54vw, 38vh));
+    max-height: 38vh;
+  }
+}
+
+.medallion-halo-glow {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle,
+    rgba(231, 175, 63, 0.36) 0%,
+    rgba(214, 157, 46, 0.14) 48%,
+    transparent 70%
+  );
+  filter: blur(16px);
+  pointer-events: none;
+}
+
+.medallion-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at var(--glow-x, 50%) var(--glow-y, 50%),
+    rgba(255, 243, 176, 0.36) 0%,
+    rgba(255, 200, 80, 0.12) 36%,
+    transparent 68%
+  );
+  pointer-events: none;
+}
+
+.shockwave-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 4px solid #ffd966;
+  box-shadow: 0 0 28px #ffd966, inset 0 0 16px rgba(255, 217, 102, 0.45);
+  pointer-events: none;
+  animation: shockwaveRing 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.festive-particle-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}

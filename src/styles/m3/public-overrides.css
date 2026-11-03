@@ -3660,7 +3660,7 @@ a.m3-button:hover { text-decoration: none; }
     font-size: clamp(1.1rem, 1.4vw, 1.3rem) !important;
     font-weight: 700 !important;
     letter-spacing: 0.05em !important;
-    margin-top: 6px !important;
+    margin-top: 18px !important;
   }
 
   .home-hero .hero-emblem > small {
@@ -3668,22 +3668,9 @@ a.m3-button:hover { text-decoration: none; }
     letter-spacing: 0.02em !important;
   }
 
-  /* Outer Concentric Circle Element - centered vertically with the artwork */
+  /* Outer Concentric Circle Element - replaced by dynamic FestiveMedallion rays */
   .home-hero .hero-emblem::before {
-    content: "" !important;
-    position: absolute !important;
-    z-index: -3 !important;
-    width: min(580px, 64vh) !important;
-    height: min(580px, 64vh) !important;
-    left: 50% !important;
-    top: calc(min(435px, 51vh) / 2) !important;
-    transform: translate(-50%, -50%) !important;
-    border: 1.5px solid rgba(245, 223, 171, 0.22) !important;
-    border-radius: 50% !important;
-    box-shadow:
-      0 0 0 16px rgba(214, 157, 46, 0.035),
-      0 0 60px rgba(214, 157, 46, 0.12) !important;
-    pointer-events: none !important;
+    display: none !important;
   }
 
   .home-hero .hero-emblem::after {
@@ -3955,7 +3942,7 @@ a.m3-button:hover { text-decoration: none; }
     justify-content: center !important;
     width: 100% !important;
     text-align: center !important;
-    margin: 0 !important;
+    margin: -10px auto 4px auto !important;
     padding: 0 !important;
     flex-shrink: 0 !important;
   }
@@ -4036,7 +4023,7 @@ a.m3-button:hover { text-decoration: none; }
     gap: clamp(8px, 2.5vw, 12px) !important;
     width: 100% !important;
     max-width: 360px !important;
-    margin: clamp(4px, 1vh, 8px) auto 0 auto !important;
+    margin: clamp(16px, 2.5vh, 26px) auto clamp(4px, 0.8vh, 8px) auto !important;
     padding: 0 8px !important;
     z-index: 3 !important;
     flex-shrink: 0 !important;
@@ -4114,7 +4101,8 @@ a.m3-button:hover { text-decoration: none; }
       font-size: 1.15rem !important;
     }
     .home-hero-mobile-view__actions {
-      margin-top: 4px !important;
+      margin-top: 8px !important;
+      margin-bottom: 2px !important;
     }
     .home-hero-mobile-view__actions .m3-button {
       min-height: 36px !important;
@@ -4207,20 +4195,42 @@ a.m3-button:hover { text-decoration: none; }
 /* Tablet portrait refinement for mobile sequence on Galaxy Tab / iPad */
 @media (min-width: 600px) and (max-width: 1080px) and (orientation: portrait) {
   .home-hero-mobile-view__content {
-    padding: clamp(12px, 2vh, 24px) 24px clamp(8px, 1.5vh, 16px) !important;
+    justify-content: center !important;
+    gap: clamp(18px, 2.8vh, 32px) !important;
+    padding: clamp(18px, 2.8vh, 32px) 24px !important;
+  }
+
+  .home-hero-mobile-view__identity {
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 4px !important;
   }
 
   .home-hero-mobile-view__parish {
-    font-size: 0.92rem !important;
-    letter-spacing: 0.28em !important;
+    font-size: 1.05rem !important;
+    letter-spacing: 0.32em !important;
   }
 
   .home-hero-mobile-view__festival {
-    font-size: clamp(3.2rem, 6.8vw, 4.4rem) !important;
+    font-size: clamp(3.6rem, 7.5vw, 4.8rem) !important;
+    letter-spacing: 0.08em !important;
   }
 
   .home-hero-mobile-view__acclamation {
-    font-size: 1.65rem !important;
+    font-size: 1.85rem !important;
+  }
+
+  .home-hero-mobile-view__divider-line {
+    width: clamp(36px, 9vw, 60px) !important;
+  }
+
+  /* Scaled Medallion to gracefully fill tablet portrait height */
+  .home-hero-mobile-view .medallion-size--mobile {
+    width: min(460px, min(60vw, 44vh)) !important;
+    height: min(460px, min(60vw, 44vh)) !important;
+    max-height: 44vh !important;
   }
 
   .home-hero-mobile-view .hero-artwork img {
@@ -4239,15 +4249,41 @@ a.m3-button:hover { text-decoration: none; }
   }
 
   .home-hero-mobile-view__actions {
-    max-width: 440px !important;
-    margin-top: 12px !important;
+    max-width: 480px !important;
+    width: 100% !important;
+    gap: 18px !important;
+    margin: 6px auto 0 auto !important;
   }
 
   .home-hero-mobile-view__actions .m3-button {
-    min-height: 44px !important;
-    height: 44px !important;
-    font-size: 0.95rem !important;
-    padding: 0 20px !important;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    min-height: 52px !important;
+    height: 52px !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    padding: 0 24px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+  }
+
+  .home-hero-mobile-view__actions span {
+    display: inline !important;
+  }
+
+  .home-hero-mobile-view__timer .countdown-bar {
+    padding: 16px 28px !important;
+  }
+
+  .home-hero-mobile-view__timer .countdown-unit__value {
+    font-size: clamp(2.2rem, 4.5vw, 2.7rem) !important;
+  }
+
+  .home-hero-mobile-view__timer .countdown-unit__label {
+    font-size: 0.8rem !important;
+    letter-spacing: 0.12em !important;
   }
 
   .home-hero-mobile-view__timer .countdown-bar {
@@ -4263,9 +4299,16 @@ a.m3-button:hover { text-decoration: none; }
   }
 
   .home-hero-mobile-copy {
-    padding: 60px 32px 80px !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 56px 32px 72px !important;
+  }
+
+  .home-hero-mobile-copy__inner {
     max-width: 720px !important;
     margin: 0 auto !important;
+    padding: 0 !important;
   }
 
   .home-hero-mobile-copy h1 {
