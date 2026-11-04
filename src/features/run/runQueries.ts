@@ -276,6 +276,19 @@ export function getCategoryBadgeStyle(categoryName: string): { bg: string; color
   };
 }
 
+/**
+ * Resolves the appropriate GCash deep-link URI based on user device platform.
+ * - Android: uses Android Chrome Intent URI targeting the official GCash app package
+ * - iOS / Others: uses gcash:// custom URI scheme
+ */
+export function getGCashDeepLink(userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : ''): string {
+  const isAndroid = /android/i.test(userAgent);
+  if (isAndroid) {
+    return 'intent://#Intent;package=com.globe.gcash.android;scheme=gcash;end';
+  }
+  return 'gcash://';
+}
+
 export interface AdminCashRegistrationInput extends RegistrationInput {
   email: string;
   temporary_password: string;

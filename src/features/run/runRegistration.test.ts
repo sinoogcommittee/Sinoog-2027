@@ -5,6 +5,7 @@ import {
   FALLBACK_RUN_EVENT,
   formatElapsed,
   getRunnerQrValue,
+  getGCashDeepLink,
 } from './runQueries';
 
 describe('runRegistration — Fee, Eligibility & Validation Logic', () => {
@@ -80,5 +81,16 @@ describe('runRegistration — Fee, Eligibility & Validation Logic', () => {
     expect(FALLBACK_RUN_EVENT.terms_version).toBe('2027-v2');
     expect(FALLBACK_RUN_EVENT.privacy_version).toBe('2027-v2');
     expect(FALLBACK_RUN_EVENT.gcash_number).toMatch(/^09\d{9}$/);
+  });
+
+  it('resolves correct GCash deep-link schemes for Android and iOS devices', () => {
+    const androidUA = 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36';
+    const iosUA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+    const desktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+    expect(getGCashDeepLink(androidUA)).toBe('intent://#Intent;package=com.globe.gcash.android;scheme=gcash;end');
+    expect(getGCashDeepLink(iosUA)).toBe('gcash://');
+    expect(getGCashDeepLink(desktopUA)).toBe('gcash://');
+    expect(getGCashDeepLink('')).toBe('gcash://');
   });
 });

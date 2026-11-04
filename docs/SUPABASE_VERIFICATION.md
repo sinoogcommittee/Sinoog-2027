@@ -48,6 +48,8 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | `023_category_timing_starts.sql` | Prepared | SQL Editor | Site administrator | Ready for production; staggered category gun starts (10K @ 4:00 AM, 5K @ 4:30 AM, 3K @ 5:00 AM) with reference-only schedule display, strict manual button click trigger, client-side fallback storage (`sinoog_category_gun_starts`), and live ticking elapsed clocks |
 | `024_kit_claim_audit_tracking.sql` | Prepared | SQL Editor | Site administrator | Ready for production; automated audit trigger recording every manual and QR race kit handover and cancellation into public.audit_logs with processing admin ID |
 | `025_update_3k_shirt_kit_description.sql` | Prepared | SQL Editor | Site administrator | Ready for production; updates 3K category kit description to 'Event Shirt' and normalizes any legacy 'Singlet (Size)' 3K registrations to plain size |
+| `026_record_run_finish_by_bib.sql` | Prepared | SQL Editor | Site administrator | Ready for production; permits recording run finishes directly by bib number with official duration computation |
+| `027_optional_gcash_reference.sql` | Prepared | SQL Editor | Site administrator | Ready for production; makes GCash reference number optional so runners can open GCash, transfer directly, and submit screenshot without typing hassle |
 
 ## Financial reporting enhancement — October 28, 2026
 

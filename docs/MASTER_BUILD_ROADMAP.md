@@ -363,7 +363,7 @@ Priority: **P0 before paid registration opens**
 
 - [~] Administrator-editable GCash number/account name are implemented; verified recipient/account name remains to be supplied.
 - [~] The form displays fee/currency and migration `007` snapshots the database category fee server-side; apply and test it.
-- [x] Allow runner to submit a payment reference and private proof file.
+- [x] Allow runner to submit a payment reference and private proof file; GCash deep-linking (`gcash://` and Android intent), auto-copying recipient number and fee, and optional reference number (screenshot-only verification) enabled in migration `027`.
 - [x] Allow online runners to select GCash or Cash; cash submissions identify the authorized administrator receiving payment and require proof.
 - [~] GCash JPG/PNG/WebP screenshots are canvas-reencoded to WebP before upload, with cleanup on metadata failure; server-side content inspection remains.
 - [~] Store evidence in the private `payment-evidence` bucket under a user/registration path; verify Storage policies and signed access with separate accounts.

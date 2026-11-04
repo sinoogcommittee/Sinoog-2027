@@ -1212,7 +1212,7 @@ export interface Database {
         Returns: Database['public']['Tables']['run_registrations']['Row'];
       };
       mark_gcash_payment_submitted: {
-        Args: { p_payment_id: string; p_payer_reference: string };
+        Args: { p_payment_id: string; p_payer_reference?: string | null };
         Returns: undefined;
       };
       mark_manual_payment_submitted: {

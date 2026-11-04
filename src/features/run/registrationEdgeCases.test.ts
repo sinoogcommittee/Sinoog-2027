@@ -211,4 +211,81 @@ describe('registrationEdgeCases — Kit Claims, Concurrency & Payment Guards', (
     };
     expect(isEligibleForKitClaim(rejectedRegistration)).toBe(false);
   });
+
+  it('validates payment submission rules: optional reference for GCash, required receiver for cash', () => {
+    function validatePaymentSubmission(input: {
+      method: 'GCash' | 'Cash';
+      payerReference?: string | null;
+      receivedBy?: string | null;
+      fileAttached: boolean;
+    }): { valid: boolean; error?: string } {
+      if (!input.fileAttached) {
+        return { valid: false, error: 'Payment evidence file is required.' };
+      }
+      if (input.method === 'Cash' && !input.receivedBy) {
+        return { valid: false, error: 'Administrator who received cash payment is required.' };
+      }
+      // GCash reference is optional; if provided, length check
+      if (input.method === 'GCash' && input.payerReference && input.payerReference.trim()) {
+        const trimmed = input.payerReference.trim();
+        if (trimmed.length < 4 || trimmed.length > 100) {
+          return { valid: false, error: 'GCash reference must be between 4 and 100 characters.' };
+        }
+      }
+      return { valid: true };
+    }
+
+    // GCash without reference number is VALID (upload proof only)
+    expect(
+      validatePaymentSubmission({
+        method: 'GCash',
+        payerReference: '',
+        fileAttached: true,
+      }).valid
+    ).toBe(true);
+
+    expect(
+      validatePaymentSubmission({
+        method: 'GCash',
+        payerReference: undefined,
+        fileAttached: true,
+      }).valid
+    ).toBe(true);
+
+    // GCash with valid reference is also VALID
+    expect(
+      validatePaymentSubmission({
+        method: 'GCash',
+        payerReference: '1002348921',
+        fileAttached: true,
+      }).valid
+    ).toBe(true);
+
+    // GCash missing file is INVALID
+    expect(
+      validatePaymentSubmission({
+        method: 'GCash',
+        payerReference: '',
+        fileAttached: false,
+      }).valid
+    ).toBe(false);
+
+    // Cash missing receiver is INVALID
+    expect(
+      validatePaymentSubmission({
+        method: 'Cash',
+        receivedBy: null,
+        fileAttached: true,
+      }).valid
+    ).toBe(false);
+
+    // Cash with receiver is VALID
+    expect(
+      validatePaymentSubmission({
+        method: 'Cash',
+        receivedBy: 'admin-001',
+        fileAttached: true,
+      }).valid
+    ).toBe(true);
+  });
 });
