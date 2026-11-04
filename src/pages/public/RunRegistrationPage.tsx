@@ -48,7 +48,6 @@ import {
   submitPaymentEvidence,
   getCashPaymentReceivers,
   getRunnerQrValue,
-  getGCashDeepLink,
   EMERGENCY_RELATIONSHIPS,
   type RunCategory,
   type RunEvent,
@@ -127,6 +126,9 @@ export function RunRegistrationPage() {
     (typeof user?.user_metadata?.full_name === 'string' ? user.user_metadata.full_name : '');
   const profileMobile = profile?.mobile || '';
   const profileAddress = profile?.locality || '';
+
+  const isMobile = typeof navigator !== 'undefined' && /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isAndroid = typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent);
 
   useEffect(() => {
     let mounted = true;
@@ -318,47 +320,6 @@ export function RunRegistrationPage() {
     }
   };
 
-  const handleOpenGCash = async (manualClick = true) => {
-    const gcashNum = runEvent?.gcash_number || '09260265423';
-    const amountCentavos =
-      userState.payment?.amount_centavos ??
-      userState.registration?.fee_centavos ??
-      selectedCategory?.fee_centavos ??
-      50000;
-    const formattedAmount = (amountCentavos / 100).toLocaleString('en-PH', {
-      style: 'currency',
-      currency: 'PHP',
-    });
-
-    try {
-      await navigator.clipboard.writeText(gcashNum);
-      setCopiedKey('gcash');
-      window.setTimeout(
-        () => setCopiedKey((current) => (current === 'gcash' ? null : current)),
-        2500
-      );
-    } catch {
-      // ignore clipboard error
-    }
-
-    if (manualClick) {
-      toast(
-        `GCash number (${gcashNum}) copied! Opening GCash... Pay ${formattedAmount} via Express Send.`,
-        'info'
-      );
-    }
-
-    const deepLink = getGCashDeepLink();
-    window.location.href = deepLink;
-  };
-
-  const handlePaymentMethodChange = (method: ManualPaymentMethod) => {
-    setPaymentMethod(method);
-    if (method === 'GCash') {
-      void handleOpenGCash(false);
-    }
-  };
-
   const handlePaymentProofSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!userState.payment) return;
@@ -413,6 +374,14 @@ export function RunRegistrationPage() {
     try {
       await navigator.clipboard.writeText(value);
       setCopiedKey(key);
+      toast(
+        key === 'gcash'
+          ? `GCash number ${value} copied!`
+          : key === 'amount'
+          ? `Amount ₱${value} copied!`
+          : 'Copied to clipboard!',
+        'info'
+      );
       window.setTimeout(
         () => setCopiedKey((current) => (current === key ? null : current)),
         2000
@@ -448,7 +417,7 @@ export function RunRegistrationPage() {
           description={`Your entry reference is ${reg.reference}. Track your verification and claim details below.`}
         />
 
-        <section className="section">
+        <section className="section" style={{ paddingBottom: '8rem' }}>
           <div className="container narrow">
             <div
               style={{
@@ -748,12 +717,12 @@ export function RunRegistrationPage() {
                       {paymentMethod === 'GCash' ? (
                         <div
                           style={{
-                            background: 'linear-gradient(135deg, #005CE6 0%, #0043A8 100%)',
-                            color: '#ffffff',
+                            background: 'var(--md-sys-color-surface-container-low, #fffbfa)',
+                            border: '1.5px solid var(--md-sys-color-outline-variant, #e0d0cc)',
                             borderRadius: '12px',
                             padding: '1.25rem',
-                            marginBottom: '1.25rem',
-                            boxShadow: '0 4px 14px rgba(0, 92, 230, 0.2)',
+                            marginBottom: '1.5rem',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
                           }}
                         >
                           <div
@@ -762,7 +731,7 @@ export function RunRegistrationPage() {
                               alignItems: 'center',
                               justifyContent: 'space-between',
                               flexWrap: 'wrap',
-                              gap: '0.75rem',
+                              gap: '0.5rem',
                               marginBottom: '1rem',
                             }}
                           >
@@ -771,180 +740,330 @@ export function RunRegistrationPage() {
                                 style={{
                                   display: 'inline-block',
                                   fontSize: '0.75rem',
-                                  textTransform: 'uppercase',
-                                  letterSpacing: '0.08em',
                                   fontWeight: 700,
-                                  background: 'rgba(255, 255, 255, 0.2)',
-                                  padding: '0.2rem 0.5rem',
-                                  borderRadius: '4px',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.06em',
+                                  color: '#005ce6',
+                                  background: 'rgba(0, 92, 230, 0.08)',
+                                  border: '1px solid rgba(0, 92, 230, 0.2)',
+                                  padding: '0.2rem 0.6rem',
+                                  borderRadius: '999px',
                                   marginBottom: '0.35rem',
                                 }}
                               >
-                                Direct GCash Transfer
+                                GCash Express Send
                               </span>
-                              <h4 style={{ margin: 0, fontSize: '1.15rem', color: '#ffffff', fontWeight: 700 }}>
+                              <h4
+                                style={{
+                                  margin: 0,
+                                  fontSize: '1.15rem',
+                                  color: 'var(--md-sys-color-on-surface, #1e1a19)',
+                                  fontWeight: 700,
+                                }}
+                              >
                                 Pay {feeFormatted} for {selectedCategory?.name || 'Sinoog Run 2027'}
                               </h4>
                             </div>
 
-                            <Button
-                              type="button"
-                              variant="filled"
-                              onClick={() => void handleOpenGCash(true)}
+                            <div
                               style={{
-                                backgroundColor: '#ffffff',
-                                color: '#005CE6',
-                                fontWeight: 700,
-                                fontSize: '0.92rem',
-                                padding: '0.65rem 1.1rem',
-                                borderRadius: '8px',
-                                border: 'none',
-                                boxShadow: '0 2px 6px rgba(0,0,0,0.18)',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.35rem',
+                                fontSize: '0.8rem',
+                                fontWeight: 600,
+                                color: '#15803d',
+                                background: '#f0fdf4',
+                                border: '1px solid #bbf7d0',
+                                padding: '0.3rem 0.6rem',
+                                borderRadius: '6px',
                               }}
                             >
-                              <ExternalLink size={16} style={{ marginRight: '0.35rem' }} />
-                              Open GCash App to Pay {feeFormatted}
-                            </Button>
+                              <CheckCircle2 size={14} color="#16a34a" />
+                              <span>No reference number typing needed</span>
+                            </div>
                           </div>
 
+                          {/* Direct Launch GCash Action */}
+                          <div style={{ marginBottom: '1.25rem' }}>
+                            <a
+                              href={
+                                isAndroid
+                                  ? 'intent://#Intent;scheme=gcash;package=com.globe.gcash.android;end;'
+                                  : 'gcash://'
+                              }
+                              onClick={(e) => {
+                                void copyText('gcash', runEvent?.gcash_number || '09260265423');
+                                if (!isMobile) {
+                                  e.preventDefault();
+                                  toast(
+                                    'GCash number copied! Open the GCash app on your mobile phone to complete payment.',
+                                    'info'
+                                  );
+                                }
+                              }}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.5rem',
+                                backgroundColor: '#005ce6',
+                                color: '#ffffff',
+                                fontWeight: 700,
+                                fontSize: '0.95rem',
+                                padding: '0.75rem 1.25rem',
+                                borderRadius: '8px',
+                                textDecoration: 'none',
+                                boxShadow: '0 2px 6px rgba(0, 92, 230, 0.25)',
+                                width: '100%',
+                                boxSizing: 'border-box',
+                                transition: 'background-color 0.15s ease',
+                              }}
+                            >
+                              <ExternalLink size={18} />
+                              <span>Open GCash App on Phone</span>
+                            </a>
+                            <div
+                              style={{
+                                textAlign: 'center',
+                                fontSize: '0.78rem',
+                                color: 'var(--md-sys-color-on-surface-variant, #524340)',
+                                marginTop: '0.35rem',
+                              }}
+                            >
+                              Tapping this copies the number automatically and launches your GCash app
+                            </div>
+                          </div>
+
+                          {/* 3 Responsive Payment Tiles */}
                           <div
                             style={{
                               display: 'grid',
-                              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                              gap: '0.75rem',
-                              background: 'rgba(0, 0, 0, 0.15)',
-                              padding: '0.85rem',
-                              borderRadius: '8px',
-                              fontSize: '0.88rem',
+                              gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                              gap: '0.85rem',
+                              marginBottom: '1rem',
                             }}
                           >
-                            <div>
-                              <div
-                                style={{
-                                  opacity: 0.85,
-                                  fontSize: '0.75rem',
-                                  textTransform: 'uppercase',
-                                  letterSpacing: '0.05em',
-                                }}
-                              >
-                                Designated GCash Number
-                              </div>
-                              <div
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '0.5rem',
-                                  marginTop: '0.2rem',
-                                }}
-                              >
-                                <strong style={{ fontSize: '1.05rem', letterSpacing: '0.04em' }}>
-                                  {runEvent?.gcash_number || '09260265423'}
-                                </strong>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    void copyText('gcash', runEvent?.gcash_number || '09260265423')
-                                  }
-                                  style={{
-                                    background: 'rgba(255, 255, 255, 0.25)',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    color: '#ffffff',
-                                    padding: '0.2rem 0.5rem',
-                                    fontSize: '0.75rem',
-                                    cursor: 'pointer',
-                                    fontWeight: 600,
-                                  }}
-                                >
-                                  {copiedKey === 'gcash' ? 'Copied!' : 'Copy Number'}
-                                </button>
-                              </div>
-                            </div>
-
-                            {runEvent?.gcash_account_name && (
+                            {/* GCash Number Tile */}
+                            <div
+                              style={{
+                                background: '#ffffff',
+                                border: '1px solid var(--md-sys-color-outline-variant, #e0d0cc)',
+                                borderRadius: '10px',
+                                padding: '0.85rem',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between',
+                                gap: '0.6rem',
+                              }}
+                            >
                               <div>
                                 <div
                                   style={{
-                                    opacity: 0.85,
-                                    fontSize: '0.75rem',
+                                    fontSize: '0.72rem',
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.05em',
+                                    color: 'var(--md-sys-color-on-surface-variant, #524340)',
+                                    fontWeight: 600,
                                   }}
                                 >
-                                  Account Name
+                                  Designated GCash Number
                                 </div>
                                 <div
                                   style={{
+                                    fontSize: '1.25rem',
+                                    fontWeight: 800,
+                                    fontFamily: 'monospace',
+                                    color: '#005ce6',
                                     marginTop: '0.2rem',
-                                    fontWeight: 600,
-                                    fontSize: '0.95rem',
+                                    letterSpacing: '0.04em',
                                   }}
                                 >
-                                  {runEvent.gcash_account_name}
+                                  {runEvent?.gcash_number || '09260265423'}
                                 </div>
                               </div>
-                            )}
 
-                            <div>
-                              <div
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  void copyText('gcash', runEvent?.gcash_number || '09260265423')
+                                }
                                 style={{
-                                  opacity: 0.85,
-                                  fontSize: '0.75rem',
-                                  textTransform: 'uppercase',
-                                  letterSpacing: '0.05em',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '0.4rem',
+                                  background: copiedKey === 'gcash' ? '#16a34a' : '#005ce6',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  padding: '0.5rem 0.85rem',
+                                  fontSize: '0.82rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  width: '100%',
                                 }}
                               >
-                                Exact Amount
+                                {copiedKey === 'gcash' ? <Check size={15} /> : <Copy size={15} />}
+                                {copiedKey === 'gcash' ? 'Copied Number!' : 'Copy GCash Number'}
+                              </button>
+                            </div>
+
+                            {/* Account Name Tile */}
+                            <div
+                              style={{
+                                background: '#ffffff',
+                                border: '1px solid var(--md-sys-color-outline-variant, #e0d0cc)',
+                                borderRadius: '10px',
+                                padding: '0.85rem',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                gap: '0.25rem',
+                              }}
+                            >
+                              <div
+                                style={{
+                                  fontSize: '0.72rem',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.05em',
+                                  color: 'var(--md-sys-color-on-surface-variant, #524340)',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                Recipient Account Name
                               </div>
                               <div
                                 style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '0.5rem',
-                                  marginTop: '0.2rem',
+                                  fontSize: '1.1rem',
+                                  fontWeight: 700,
+                                  color: 'var(--md-sys-color-on-surface, #1e1a19)',
                                 }}
                               >
-                                <strong style={{ fontSize: '1.05rem' }}>{feeFormatted}</strong>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const numericAmount = userState.payment
-                                      ? String(userState.payment.amount_centavos / 100)
-                                      : selectedCategory
-                                      ? String(selectedCategory.fee_centavos / 100)
-                                      : '0';
-                                    void copyText('amount', numericAmount);
-                                  }}
+                                {runEvent?.gcash_account_name || 'Anthony Riel C. Diango'}
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: '0.78rem',
+                                  color: 'var(--md-sys-color-on-surface-variant, #524340)',
+                                }}
+                              >
+                                Sto. Niño Parish Sinoog 2027 Committee
+                              </div>
+                            </div>
+
+                            {/* Amount Tile */}
+                            <div
+                              style={{
+                                background: '#ffffff',
+                                border: '1px solid var(--md-sys-color-outline-variant, #e0d0cc)',
+                                borderRadius: '10px',
+                                padding: '0.85rem',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between',
+                                gap: '0.6rem',
+                              }}
+                            >
+                              <div>
+                                <div
                                   style={{
-                                    background: 'rgba(255, 255, 255, 0.25)',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    color: '#ffffff',
-                                    padding: '0.2rem 0.5rem',
-                                    fontSize: '0.75rem',
-                                    cursor: 'pointer',
+                                    fontSize: '0.72rem',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em',
+                                    color: 'var(--md-sys-color-on-surface-variant, #524340)',
                                     fontWeight: 600,
                                   }}
                                 >
-                                  {copiedKey === 'amount' ? 'Copied!' : 'Copy Amount'}
-                                </button>
+                                  Amount to Pay
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: '1.25rem',
+                                    fontWeight: 800,
+                                    color: 'var(--md-sys-color-primary, #7b1c1c)',
+                                    marginTop: '0.2rem',
+                                  }}
+                                >
+                                  {feeFormatted}
+                                </div>
                               </div>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const numericAmount = userState.payment
+                                    ? String(userState.payment.amount_centavos / 100)
+                                    : selectedCategory
+                                    ? String(selectedCategory.fee_centavos / 100)
+                                    : '0';
+                                  void copyText('amount', numericAmount);
+                                }}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '0.4rem',
+                                  background:
+                                    copiedKey === 'amount'
+                                      ? '#16a34a'
+                                      : 'var(--md-sys-color-surface-container-highest, #ede0dc)',
+                                  color:
+                                    copiedKey === 'amount'
+                                      ? '#ffffff'
+                                      : 'var(--md-sys-color-on-surface, #1e1a19)',
+                                  border: '1px solid var(--md-sys-color-outline-variant, #e0d0cc)',
+                                  borderRadius: '6px',
+                                  padding: '0.5rem 0.85rem',
+                                  fontSize: '0.82rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  width: '100%',
+                                }}
+                              >
+                                {copiedKey === 'amount' ? <Check size={15} /> : <Copy size={15} />}
+                                {copiedKey === 'amount' ? 'Copied Amount!' : 'Copy Amount'}
+                              </button>
                             </div>
                           </div>
 
+                          {/* Simple Step-by-Step Instructions */}
                           <div
                             style={{
-                              marginTop: '0.75rem',
-                              fontSize: '0.82rem',
-                              opacity: 0.95,
-                              lineHeight: 1.45,
+                              background: 'var(--md-sys-color-surface-container, #f5eeeb)',
+                              borderRadius: '8px',
+                              padding: '0.85rem 1rem',
+                              fontSize: '0.86rem',
+                              color: 'var(--md-sys-color-on-surface-variant, #524340)',
+                              lineHeight: 1.5,
                             }}
                           >
-                            💡 <strong>Quick Steps:</strong> Tap <em>Open GCash App</em> (number is
-                            copied automatically) → choose <strong>Express Send</strong> in GCash →
-                            paste the number and send <strong>{feeFormatted}</strong> → take a
-                            screenshot of your receipt → upload it below.{' '}
-                            <strong>No need to type the reference number!</strong>
+                            <strong style={{ color: 'var(--md-sys-color-on-surface, #1e1a19)' }}>
+                              Easy payment steps:
+                            </strong>
+                            <ol
+                              style={{
+                                margin: '0.35rem 0 0',
+                                paddingLeft: '1.25rem',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.25rem',
+                              }}
+                            >
+                              <li>
+                                Tap <strong>Open GCash App on Phone</strong> (number is copied automatically) or copy it manually.
+                              </li>
+                              <li>
+                                Open your <strong>GCash App</strong> → tap <strong>Express Send</strong> → paste the
+                                number and send <strong>{feeFormatted}</strong>.
+                              </li>
+                              <li>
+                                Save or take a screenshot of your completed GCash receipt.
+                              </li>
+                              <li>
+                                Upload your screenshot below and tap <strong>Submit payment for verification</strong>.
+                              </li>
+                            </ol>
                           </div>
                         </div>
                       ) : (
@@ -990,29 +1109,27 @@ export function RunRegistrationPage() {
                         style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
                       >
                         <div
-                          className="responsive-two-column"
-                          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns:
+                              paymentMethod === 'Cash'
+                                ? 'repeat(auto-fit, minmax(240px, 1fr))'
+                                : '1fr',
+                            gap: '1rem',
+                          }}
                         >
                           <SelectField
                             label="Payment Method"
                             value={paymentMethod}
                             onChange={(e) =>
-                              handlePaymentMethodChange(e.target.value as ManualPaymentMethod)
+                              setPaymentMethod(e.target.value as ManualPaymentMethod)
                             }
                           >
                             <option value="GCash">GCash</option>
                             <option value="Cash">Cash</option>
                           </SelectField>
 
-                          {paymentMethod === 'GCash' ? (
-                            <TextField
-                              label="Reference / Transaction ID (Optional)"
-                              placeholder="Optional — verified via screenshot"
-                              value={payerReference}
-                              onChange={(e) => setPayerReference(e.target.value)}
-                              helperText="No need to type your reference number if uploading a clear screenshot."
-                            />
-                          ) : (
+                          {paymentMethod === 'Cash' && (
                             <SelectField
                               label="Cash received by"
                               required
@@ -1040,7 +1157,7 @@ export function RunRegistrationPage() {
                             }}
                           >
                             {paymentMethod === 'GCash'
-                              ? 'GCash Screenshot'
+                              ? 'Upload GCash Receipt Screenshot'
                               : 'Proof of Cash Payment'}{' '}
                             <span style={{ color: 'var(--md-sys-color-error)' }}>*</span>
                           </label>
@@ -1051,6 +1168,11 @@ export function RunRegistrationPage() {
                             onChange={handlePaymentFileChange}
                             style={{ width: '100%', padding: '0.5rem 0', fontSize: '0.88rem' }}
                           />
+                          {paymentMethod === 'GCash' && (
+                            <p style={{ margin: '0.35rem 0 0', fontSize: '0.8rem', color: '#666' }}>
+                              Upload the screenshot of your completed GCash transfer. The committee will verify the amount and recipient directly from the image.
+                            </p>
+                          )}
                         </div>
 
                         <Button
@@ -1084,7 +1206,7 @@ export function RunRegistrationPage() {
           title="Registration Opens Soon"
           description="Prepare for the opening community run on January 9, 2027 in Guinacot, Guindulman, Bohol."
         />
-        <section className="section">
+        <section className="section" style={{ paddingBottom: '8rem' }}>
           <div className="container narrow">
             <div className="notice" style={{ marginBottom: '2rem' }}>
               <CheckCircle2 size={24} />
@@ -1190,7 +1312,7 @@ export function RunRegistrationPage() {
         description="Fill out the official entry form to participate in Sinoog Run 2027."
       />
 
-      <section className="section">
+      <section className="section" style={{ paddingBottom: '8rem' }}>
         <div className="container narrow">
           {!user && !isDemoAdmin && (
             <div
