@@ -28,14 +28,30 @@ export function AccessDeniedPage({
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1.5rem', width: '100%' }}>
           {user ? (
-            <Button
-              variant="outlined"
-              onClick={() => void signOut()}
-              leadingIcon={<LogIn size={16} />}
-              style={{ justifyContent: 'center' }}
-            >
-              Sign in with different account
-            </Button>
+            <>
+              <Button
+                variant="outlined"
+                to="/account"
+                style={{ justifyContent: 'center' }}
+              >
+                Go to my runner account
+              </Button>
+              <Button
+                variant="outlined"
+                to="/join-staff"
+                style={{ justifyContent: 'center' }}
+              >
+                Check staff approval or submit invite code
+              </Button>
+              <Button
+                variant="text"
+                onClick={() => void signOut()}
+                leadingIcon={<LogIn size={16} />}
+                style={{ justifyContent: 'center' }}
+              >
+                Sign out / Switch account
+              </Button>
+            </>
           ) : (
             <Button
               variant="filled"

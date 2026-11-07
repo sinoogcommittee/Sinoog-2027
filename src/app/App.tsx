@@ -20,6 +20,7 @@ import { ResetPasswordPage } from '../pages/auth/ResetPasswordPage';
 import { AuthCallbackPage } from '../pages/auth/AuthCallbackPage';
 import { RunnerAuthPage } from '../pages/auth/RunnerAuthPage';
 import { AccountPage } from '../pages/auth/AccountPage';
+import { JoinStaffPage } from '../pages/auth/JoinStaffPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { ActivitiesManagerPage } from '../pages/admin/ActivitiesManagerPage';
 import { SettingsPage } from '../pages/admin/SettingsPage';
@@ -32,7 +33,6 @@ import { GalleryManagerPage } from '../pages/admin/GalleryManagerPage';
 import { DelegationsManagerPage } from '../pages/admin/DelegationsManagerPage';
 import { AuditLogsManagerPage } from '../pages/admin/AuditLogsManagerPage';
 import { NotFoundPage } from '../pages/public/NotFoundPage';
-import { RequireAdmin } from '../components/RequireAdmin';
 import { ScrollToTop } from '../components/ScrollToTop';
 import { DocumentTitleManager } from '../components/DocumentTitleManager';
 import { InstallAppPrompt } from '../components/InstallAppPrompt';
@@ -43,11 +43,21 @@ const RunTimingPage = lazy(() => import('../pages/admin/RunTimingPage').then((mo
 const KitClaimsManagerPage = lazy(() => import('../pages/admin/KitClaimsManagerPage').then((module) => ({ default: module.KitClaimsManagerPage })));
 
 function CommitteeWorkspaceIndex() {
-  const { isAdmin, isNewsInCharge, isDelegationHead } = useAuth();
+  const { isSuperAdmin, isAdmin, canAccess } = useAuth();
 
-  if (isAdmin) return <AdminDashboardPage />;
-  if (isNewsInCharge) return <Navigate to="/admin/posts" replace />;
-  if (isDelegationHead) return <Navigate to="/admin/delegations" replace />;
+  if (isSuperAdmin || isAdmin || canAccess('overview')) return <AdminDashboardPage />;
+  if (canAccess('registrations')) return <Navigate to="/admin/registrations" replace />;
+  if (canAccess('kit_claims')) return <Navigate to="/admin/kit-claims" replace />;
+  if (canAccess('run_timing')) return <Navigate to="/admin/run-timing" replace />;
+  if (canAccess('activities')) return <Navigate to="/admin/activities" replace />;
+  if (canAccess('posts')) return <Navigate to="/admin/posts" replace />;
+  if (canAccess('delegations')) return <Navigate to="/admin/delegations" replace />;
+  if (canAccess('finance')) return <Navigate to="/admin/finance" replace />;
+  if (canAccess('sponsors')) return <Navigate to="/admin/sponsors" replace />;
+  if (canAccess('gallery')) return <Navigate to="/admin/gallery" replace />;
+  if (canAccess('audit')) return <Navigate to="/admin/audit" replace />;
+  if (canAccess('settings')) return <Navigate to="/admin/settings" replace />;
+  if (canAccess('users')) return <Navigate to="/admin/users" replace />;
 
   return <Navigate to="/" replace />;
 }
@@ -86,6 +96,8 @@ export default function App() {
 
         {/* Committee staff only */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/join-staff" element={<JoinStaffPage />} />
+        <Route path="/admin/join" element={<Navigate to="/join-staff" replace />} />
 
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
@@ -97,24 +109,40 @@ export default function App() {
         <Route path="/admin" element={<PortalLayout />}>
           <Route index element={<CommitteeWorkspaceIndex />} />
 
-          <Route element={<RequireAdmin />}>
+          <Route element={<RequireRole permission="activities" />}>
             <Route path="activities" element={<ActivitiesManagerPage />} />
+          </Route>
+          <Route element={<RequireRole permission="settings" />}>
             <Route path="settings" element={<SettingsPage />} />
+          </Route>
+          <Route element={<RequireRole permission="registrations" />}>
             <Route path="registrations" element={<RegistrationsManagerPage />} />
+          </Route>
+          <Route element={<RequireRole permission="kit_claims" />}>
             <Route path="kit-claims" element={<Suspense fallback={<div className="admin-page">Loading kit claims…</div>}><KitClaimsManagerPage /></Suspense>} />
+          </Route>
+          <Route element={<RequireRole permission="run_timing" />}>
             <Route path="run-timing" element={<Suspense fallback={<div className="admin-page">Loading race timing…</div>}><RunTimingPage /></Suspense>} />
+          </Route>
+          <Route element={<RequireRole permission="users" />}>
             <Route path="users" element={<UsersManagerPage />} />
+          </Route>
+          <Route element={<RequireRole permission="finance" />}>
             <Route path="finance" element={<FinancePage />} />
+          </Route>
+          <Route element={<RequireRole permission="sponsors" />}>
             <Route path="sponsors" element={<SponsorsManagerPage />} />
+          </Route>
+          <Route element={<RequireRole permission="gallery" />}>
             <Route path="gallery" element={<GalleryManagerPage />} />
+          </Route>
+          <Route element={<RequireRole permission="audit" />}>
             <Route path="audit" element={<AuditLogsManagerPage />} />
           </Route>
-
-          <Route element={<RequireRole role="news_in_charge" />}>
+          <Route element={<RequireRole permission="posts" />}>
             <Route path="posts" element={<PostsManagerPage />} />
           </Route>
-
-          <Route element={<RequireRole role="delegation_head" />}>
+          <Route element={<RequireRole permission="delegations" />}>
             <Route path="delegations" element={<DelegationsManagerPage />} />
           </Route>
         </Route>

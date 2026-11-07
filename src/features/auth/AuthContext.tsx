@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useMemo, type ReactNode } from 'react
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 import type { AppRole, Profile } from '../../types';
-import { AuthContext } from './authState';
+import { AuthContext, type AdminPermission } from './authState';
 
 // The offline demo administrator only exists in local development builds.
 const readDemoFlag = () => import.meta.env.DEV && sessionStorage.getItem('sinoog-demo-admin') === '1';
@@ -168,21 +168,79 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const isSuspended = useMemo(() => Boolean(profile?.suspended_at), [profile]);
+  const isSuperAdmin = useMemo(
+    () => !isSuspended && roles.includes('super_admin'),
+    [isSuspended, roles]
+  );
   const isAdmin = useMemo(
-    () => !isSuspended && (isDemoAdmin || roles.includes('admin')),
-    [isSuspended, isDemoAdmin, roles]
+    () => !isSuspended && (isDemoAdmin || isSuperAdmin || roles.includes('admin')),
+    [isSuspended, isDemoAdmin, isSuperAdmin, roles]
   );
   const isNewsInCharge = useMemo(
     () => !isSuspended && (isAdmin || roles.includes('news_in_charge')),
     [isSuspended, isAdmin, roles]
   );
   const isDelegationHead = useMemo(
-    () => !isSuspended && (isAdmin || roles.includes('delegation_head')),
+    () => !isSuspended && (isAdmin || roles.includes('delegation_head') || roles.includes('delegations_manager')),
+    [isSuspended, isAdmin, roles]
+  );
+  const isStaff = useMemo(
+    () => !isSuspended && (isAdmin || roles.some((r) => r !== 'public_user')),
     [isSuspended, isAdmin, roles]
   );
   const isPublicUser = useMemo(
     () => !isSuspended && (roles.includes('public_user') || Boolean(user)),
     [isSuspended, roles, user]
+  );
+
+  const hasRole = useCallback(
+    (target: AppRole | AppRole[]) => {
+      if (isSuspended) return false;
+      if (isDemoAdmin || isSuperAdmin) return true;
+      const targets = Array.isArray(target) ? target : [target];
+      if (isAdmin && !targets.includes('super_admin')) return true;
+      return targets.some((t) => roles.includes(t));
+    },
+    [isSuspended, isDemoAdmin, isSuperAdmin, isAdmin, roles]
+  );
+
+  const canAccess = useCallback(
+    (permission: AdminPermission): boolean => {
+      if (isSuspended) return false;
+      if (isDemoAdmin || isSuperAdmin || isAdmin) return true;
+
+      switch (permission) {
+        case 'overview':
+          return isStaff;
+        case 'activities':
+          return roles.includes('activities_coordinator');
+        case 'posts':
+          return roles.includes('news_in_charge');
+        case 'registrations':
+          return roles.includes('registrations_manager');
+        case 'kit_claims':
+          return roles.includes('kit_claims_officer');
+        case 'run_timing':
+          return roles.includes('timing_official');
+        case 'delegations':
+          return roles.includes('delegations_manager') || roles.includes('delegation_head');
+        case 'users':
+          return roles.includes('users_manager');
+        case 'finance':
+          return roles.includes('finance_officer');
+        case 'sponsors':
+          return roles.includes('sponsors_manager');
+        case 'gallery':
+          return roles.includes('gallery_manager') || roles.includes('news_in_charge');
+        case 'audit':
+          return roles.includes('audit_viewer');
+        case 'settings':
+          return roles.includes('settings_manager');
+        default:
+          return false;
+      }
+    },
+    [isSuspended, isDemoAdmin, isSuperAdmin, isAdmin, isStaff, roles]
   );
 
   const value = useMemo(
@@ -192,12 +250,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       roles,
       session,
       loading,
+      isSuperAdmin,
       isAdmin,
+      isStaff,
       isNewsInCharge,
       isDelegationHead,
       isPublicUser,
       isSuspended,
       isDemoAdmin,
+      canAccess,
+      hasRole,
       error,
       refresh,
       signOut,
@@ -208,12 +270,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       roles,
       session,
       loading,
+      isSuperAdmin,
       isAdmin,
+      isStaff,
       isNewsInCharge,
       isDelegationHead,
       isPublicUser,
       isSuspended,
       isDemoAdmin,
+      canAccess,
+      hasRole,
       error,
       refresh,
       signOut,

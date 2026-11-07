@@ -20,40 +20,39 @@ import {
   AdminSignOutIcon,
 } from '../components/AdminNavIcons';
 
+import type { AdminPermission } from '../features/auth/authState';
+
 const items = [
-  ['Overview', '/admin', AdminOverviewIcon, 'admin'],
-  ['Activities & Schedule', '/admin/activities', AdminActivitiesIcon, 'admin'],
-  ['News posts', '/admin/posts', AdminNewsIcon, 'news'],
-  ['Registrations', '/admin/registrations', AdminRegistrationsIcon, 'admin'],
-  ['Kit claiming', '/admin/kit-claims', AdminKitClaimIcon, 'admin'],
-  ['Race timing', '/admin/run-timing', AdminTimingIcon, 'admin'],
-  ['Delegations', '/admin/delegations', AdminDelegationsIcon, 'delegation'],
-  ['Users & Staff', '/admin/users', AdminUsersIcon, 'admin'],
-  ['Financial records', '/admin/finance', AdminFinanceIcon, 'admin'],
-  ['Sponsors', '/admin/sponsors', AdminSponsorsIcon, 'admin'],
-  ['Gallery', '/admin/gallery', AdminGalleryIcon, 'admin'],
-  ['Audit history', '/admin/audit', AdminAuditIcon, 'admin'],
-  ['Website settings', '/admin/settings', AdminSettingsIcon, 'admin'],
+  ['Overview', '/admin', AdminOverviewIcon, 'overview'],
+  ['Activities & Schedule', '/admin/activities', AdminActivitiesIcon, 'activities'],
+  ['News posts', '/admin/posts', AdminNewsIcon, 'posts'],
+  ['Registrations', '/admin/registrations', AdminRegistrationsIcon, 'registrations'],
+  ['Kit claiming', '/admin/kit-claims', AdminKitClaimIcon, 'kit_claims'],
+  ['Race timing', '/admin/run-timing', AdminTimingIcon, 'run_timing'],
+  ['Delegations', '/admin/delegations', AdminDelegationsIcon, 'delegations'],
+  ['Users & Staff', '/admin/users', AdminUsersIcon, 'users'],
+  ['Financial records', '/admin/finance', AdminFinanceIcon, 'finance'],
+  ['Sponsors', '/admin/sponsors', AdminSponsorsIcon, 'sponsors'],
+  ['Gallery', '/admin/gallery', AdminGalleryIcon, 'gallery'],
+  ['Audit history', '/admin/audit', AdminAuditIcon, 'audit'],
+  ['Website settings', '/admin/settings', AdminSettingsIcon, 'settings'],
 ] as const;
 
 export function PortalLayout() {
   const navigate = useNavigate();
-  const { user, profile, isDemoAdmin, isAdmin, isNewsInCharge, isDelegationHead, signOut } = useAuth();
+  const { user, profile, isDemoAdmin, isSuperAdmin, isAdmin, roles, canAccess, signOut } = useAuth();
 
   const displayName = profile?.full_name || (user?.email ? user.email.split('@')[0] : isDemoAdmin ? 'Demo Administrator' : 'Administrator');
   const displayEmail = user?.email || (isDemoAdmin ? 'local-preview@sinoog2027.internal' : 'Administrator account');
-  const roleLabel = isAdmin
-    ? 'Admin'
-    : isNewsInCharge && isDelegationHead
-      ? 'News staff · Delegation head'
-      : isNewsInCharge
-        ? 'News staff'
-        : 'Delegation head';
-  const visibleItems = items.filter(([, , , access]) =>
-    isAdmin ||
-    (access === 'news' && isNewsInCharge) ||
-    (access === 'delegation' && isDelegationHead),
-  );
+  const staffRoleCount = roles.filter((r) => r !== 'public_user').length;
+  const roleLabel = isSuperAdmin
+    ? 'Super Admin'
+    : isAdmin
+      ? 'Admin'
+      : staffRoleCount > 0
+        ? `${staffRoleCount} assigned role${staffRoleCount > 1 ? 's' : ''}`
+        : 'Committee Staff';
+  const visibleItems = items.filter(([, , , permission]) => canAccess(permission as AdminPermission));
 
   async function handleSignOut() {
     await signOut();
@@ -88,6 +87,12 @@ export function PortalLayout() {
             ))}
           </nav>
           <div className="portal-sidebar-actions">
+            <Link className="portal-public-site" to="/account" title="View my runner account and digital pass">
+              <span className="portal-nav-icon">
+                <AdminRegistrationsIcon />
+              </span>
+              <span>My Runner Pass</span>
+            </Link>
             <Link className="portal-public-site" to="/" title="View public website">
               <span className="portal-nav-icon">
                 <AdminPublicSiteIcon />

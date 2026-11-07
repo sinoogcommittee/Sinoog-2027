@@ -1472,15 +1472,17 @@ a.m3-button:hover { text-decoration: none; }
   display: flex !important;
   align-items: stretch !important;
   width: 100% !important;
-  gap: 0 !important;
-  padding: 4px 0 2px 0 !important;
+  gap: 2px !important;
+  padding: 5px 8px 4px 8px !important;
   margin: 0 !important;
   list-style: none !important;
   overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-x !important;
   overscroll-behavior-x: contain !important;
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
-  scroll-snap-type: x mandatory !important;
+  scroll-snap-type: x proximity !important;
   scroll-behavior: smooth !important;
   box-sizing: border-box !important;
 }
@@ -1490,27 +1492,23 @@ a.m3-button:hover { text-decoration: none; }
 }
 
 .pub-floating-nav__item {
-  flex: 0 0 20% !important;
-  width: 20% !important;
-  min-width: 20% !important;
-  max-width: 20% !important;
+  flex: 0 0 68px !important;
+  width: 68px !important;
+  min-width: 68px !important;
+  max-width: 76px !important;
   box-sizing: border-box !important;
-  padding: 0 2px !important;
+  padding: 0 1px !important;
   list-style: none !important;
+  scroll-snap-align: center !important;
+  scroll-snap-stop: normal !important;
 }
 
-/* 1st item of each 5-item page (Home, Gallery) inset 8px from curved left cap */
-.pub-floating-nav__item:nth-child(5n + 1) {
-  padding-left: 8px !important;
-  padding-right: 2px !important;
-  scroll-snap-align: start !important;
-  scroll-snap-stop: always !important;
+.pub-floating-nav__item:first-child {
+  padding-left: 4px !important;
 }
 
-/* 5th item of each 5-item page (News, Account/Sign in/Workspace) inset 8px from curved right cap */
-.pub-floating-nav__item:nth-child(5n) {
-  padding-right: 8px !important;
-  padding-left: 2px !important;
+.pub-floating-nav__item:last-child {
+  padding-right: 4px !important;
 }
 
 .pub-floating-nav__link {
@@ -1600,38 +1598,34 @@ a.m3-button:hover { text-decoration: none; }
   color: #fedf9c !important;
 }
 
-/* 2-page indicator at bottom of pill */
-.pub-floating-nav__pagination {
+/* Sleek continuous scroll indicator track */
+.pub-floating-nav__track-wrap {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 6px !important;
   padding: 0 0 5px 0 !important;
+  pointer-events: none !important;
 }
 
-.pub-floating-nav__dot {
-  width: 16px !important;
-  height: 3.5px !important;
+.pub-floating-nav__track {
+  width: 44px !important;
+  height: 3px !important;
   border-radius: 9999px !important;
-  background: rgba(245, 223, 171, 0.3) !important;
-  border: none !important;
-  padding: 0 !important;
-  cursor: pointer !important;
-  transition:
-    width 0.22s cubic-bezier(0.2, 0.9, 0.3, 1),
-    background 0.22s ease,
-    box-shadow 0.22s ease !important;
+  background: rgba(245, 223, 171, 0.22) !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
-.pub-floating-nav__dot:focus-visible {
-  outline: 1.5px solid #fedf9c !important;
-  outline-offset: 1px !important;
-}
-
-.pub-floating-nav__dot.is-active {
-  width: 28px !important;
+.pub-floating-nav__track-thumb {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 18px !important;
+  border-radius: 9999px !important;
   background: #fedf9c !important;
   box-shadow: 0 0 6px rgba(254, 223, 156, 0.5) !important;
+  transition: transform 0.08s ease-out !important;
 }
 
 /* Extra clearance for mobile and tablet portrait page bottoms so floating nav does not obscure content */

@@ -309,64 +309,76 @@ export function FloatingNav() {
     [signedIn, isAdmin, isDemoAdmin],
   );
 
-  // Derive target page for active route
-  const activeRouteIndex = useMemo(() => {
-    return navItems.findIndex((item) => {
-      if (item.exact) return location.pathname === item.path;
-      if (item.path === '/run') {
-        return location.pathname === '/run' || location.pathname === '/run/routes';
-      }
-      return location.pathname === item.path || location.pathname.startsWith(item.path + '/');
-    });
-  }, [location.pathname, navItems]);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
-  const activeRoutePage = activeRouteIndex >= 5 ? 1 : 0;
-  const [swipedPage, setSwipedPage] = useState<number | null>(null);
-  const [lastPathname, setLastPathname] = useState(location.pathname);
-
-  // Reset swiped page when route changes so active item's page is displayed
-  if (location.pathname !== lastPathname) {
-    setLastPathname(location.pathname);
-    setSwipedPage(null);
-  }
-
-  const currentPage = swipedPage ?? activeRoutePage;
-
-  // Align scroll offset with current page smoothly
+  // Auto-center active route's nav item on mount or when route changes
   useEffect(() => {
     const list = listRef.current;
     if (!list) return;
 
     const rafId = requestAnimationFrame(() => {
-      if (list.clientWidth > 0) {
+      const activeEl = list.querySelector<HTMLElement>('[data-active="true"]')?.closest<HTMLLIElement>('li');
+      if (activeEl) {
+        const targetScroll = activeEl.offsetLeft - (list.clientWidth / 2) + (activeEl.clientWidth / 2);
         list.scrollTo({
-          left: currentPage * list.clientWidth,
+          left: Math.max(0, targetScroll),
           behavior: 'smooth',
         });
       }
     });
 
     return () => cancelAnimationFrame(rafId);
-  }, [currentPage]);
+  }, [location.pathname, navItems]);
 
-  // Track user swipe / horizontal scroll position between the two 5-item pages
+  // Track fluid horizontal scroll position for the sleek scroll track
   const handleScroll = () => {
     const list = listRef.current;
-    if (!list || list.clientWidth === 0) return;
-    const pageIndex = Math.round(list.scrollLeft / list.clientWidth);
-    if ((pageIndex === 0 || pageIndex === 1) && pageIndex !== currentPage) {
-      setSwipedPage(pageIndex);
+    if (!list) return;
+    const maxScroll = list.scrollWidth - list.clientWidth;
+    if (maxScroll > 0) {
+      setScrollProgress(Math.min(1, Math.max(0, list.scrollLeft / maxScroll)));
+    } else {
+      setScrollProgress(0);
     }
   };
 
-  const goToPage = (pageIndex: number) => {
+  // Mouse drag support for desktop preview / testing
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const startScrollLeftRef = useRef(0);
+  const hasDraggedRef = useRef(false);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
     const list = listRef.current;
     if (!list) return;
-    setSwipedPage(pageIndex);
-    list.scrollTo({
-      left: pageIndex * list.clientWidth,
-      behavior: 'smooth',
-    });
+    isDraggingRef.current = true;
+    startXRef.current = e.pageX - list.offsetLeft;
+    startScrollLeftRef.current = list.scrollLeft;
+    hasDraggedRef.current = false;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current) return;
+    const list = listRef.current;
+    if (!list) return;
+    const x = e.pageX - list.offsetLeft;
+    const walk = x - startXRef.current;
+    if (Math.abs(walk) > 5) {
+      hasDraggedRef.current = true;
+    }
+    list.scrollLeft = startScrollLeftRef.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    isDraggingRef.current = false;
+  };
+
+  const handleClickCapture = (e: React.MouseEvent) => {
+    if (hasDraggedRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      hasDraggedRef.current = false;
+    }
   };
 
   return (
@@ -379,6 +391,11 @@ export function FloatingNav() {
           ref={listRef}
           className="pub-floating-nav__list"
           onScroll={handleScroll}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUpOrLeave}
+          onMouseLeave={handleMouseUpOrLeave}
+          onClickCapture={handleClickCapture}
         >
           {navItems.map((item) => {
             const isActive = item.exact
@@ -408,24 +425,16 @@ export function FloatingNav() {
           })}
         </ul>
 
-        {/* 2-page pagination indicator for quick tap and visual feedback */}
-        <div className="pub-floating-nav__pagination" role="tablist" aria-label="Menu pages">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={currentPage === 0}
-            aria-label="Page 1: Home, Festival, Run, Schedule, News"
-            className={`pub-floating-nav__dot${currentPage === 0 ? ' is-active' : ''}`}
-            onClick={() => goToPage(0)}
-          />
-          <button
-            type="button"
-            role="tab"
-            aria-selected={currentPage === 1}
-            aria-label="Page 2: Gallery, Sponsors, About, Register, Account"
-            className={`pub-floating-nav__dot${currentPage === 1 ? ' is-active' : ''}`}
-            onClick={() => goToPage(1)}
-          />
+        {/* Sleek continuous scroll indicator track */}
+        <div className="pub-floating-nav__track-wrap" aria-hidden="true">
+          <div className="pub-floating-nav__track">
+            <div
+              className="pub-floating-nav__track-thumb"
+              style={{
+                transform: `translateX(${scrollProgress * 26}px)`,
+              }}
+            />
+          </div>
         </div>
       </div>
     </nav>

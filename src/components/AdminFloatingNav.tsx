@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/useAuth';
+import type { AdminPermission } from '../features/auth/authState';
 import {
   AdminOverviewIcon,
   AdminActivitiesIcon,
@@ -22,7 +23,8 @@ export interface AdminNavItemDef {
   label: string;
   path: string;
   renderIcon: () => ReactNode;
-  access: 'admin' | 'news' | 'delegation';
+  permission?: AdminPermission;
+  alwaysVisible?: boolean;
   exact?: boolean;
   isAction?: boolean;
   onAction?: () => void | Promise<void>;
@@ -31,7 +33,7 @@ export interface AdminNavItemDef {
 export function AdminFloatingNav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin, isNewsInCharge, isDelegationHead, signOut } = useAuth();
+  const { canAccess, signOut } = useAuth();
   const listRef = useRef<HTMLUListElement | null>(null);
 
   async function handleSignOut() {
@@ -46,32 +48,32 @@ export function AdminFloatingNav() {
         label: 'Overview',
         path: '/admin',
         renderIcon: () => <AdminOverviewIcon />,
-        access: 'admin',
+        permission: 'overview',
         exact: true,
       },
       {
         label: 'Activities',
         path: '/admin/activities',
         renderIcon: () => <AdminActivitiesIcon />,
-        access: 'admin',
+        permission: 'activities',
       },
       {
         label: 'News',
         path: '/admin/posts',
         renderIcon: () => <AdminNewsIcon />,
-        access: 'news',
+        permission: 'posts',
       },
       {
         label: 'Registrations',
         path: '/admin/registrations',
         renderIcon: () => <AdminRegistrationsIcon />,
-        access: 'admin',
+        permission: 'registrations',
       },
       {
         label: 'Timing',
         path: '/admin/run-timing',
         renderIcon: () => <AdminTimingIcon />,
-        access: 'admin',
+        permission: 'run_timing',
       },
 
       // Page 2: Management & Records (6 - 10)
@@ -79,37 +81,37 @@ export function AdminFloatingNav() {
         label: 'Delegations',
         path: '/admin/delegations',
         renderIcon: () => <AdminDelegationsIcon />,
-        access: 'delegation',
+        permission: 'delegations',
       },
       {
         label: 'Users',
         path: '/admin/users',
         renderIcon: () => <AdminUsersIcon />,
-        access: 'admin',
+        permission: 'users',
       },
       {
         label: 'Finance',
         path: '/admin/finance',
         renderIcon: () => <AdminFinanceIcon />,
-        access: 'admin',
+        permission: 'finance',
       },
       {
         label: 'Sponsors',
         path: '/admin/sponsors',
         renderIcon: () => <AdminSponsorsIcon />,
-        access: 'admin',
+        permission: 'sponsors',
       },
       {
         label: 'Gallery',
         path: '/admin/gallery',
         renderIcon: () => <AdminGalleryIcon />,
-        access: 'admin',
+        permission: 'gallery',
       },
       {
         label: 'Audit history',
         path: '/admin/audit',
         renderIcon: () => <AdminAuditIcon />,
-        access: 'admin',
+        permission: 'audit',
       },
 
       // Page 3: System, External & Session (11 - 13)
@@ -117,20 +119,20 @@ export function AdminFloatingNav() {
         label: 'Settings',
         path: '/admin/settings',
         renderIcon: () => <AdminSettingsIcon />,
-        access: 'admin',
+        permission: 'settings',
       },
       {
         label: 'Public site',
         path: '/',
         renderIcon: () => <AdminPublicSiteIcon />,
-        access: 'admin',
+        alwaysVisible: true,
         exact: true,
       },
       {
         label: 'Sign out',
         path: '#signout',
         renderIcon: () => <AdminSignOutIcon />,
-        access: 'admin',
+        alwaysVisible: true,
         isAction: true,
         onAction: () => void handleSignOut(),
       },
@@ -141,70 +143,80 @@ export function AdminFloatingNav() {
 
   const visibleItems = useMemo(() => {
     return allItems.filter(
-      (item) =>
-        isAdmin ||
-        (item.access === 'news' && isNewsInCharge) ||
-        (item.access === 'delegation' && isDelegationHead),
+      (item) => item.alwaysVisible || (item.permission && canAccess(item.permission)),
     );
-  }, [allItems, isAdmin, isNewsInCharge, isDelegationHead]);
+  }, [allItems, canAccess]);
 
-  // Derive target page for active route
-  const activeRouteIndex = useMemo(() => {
-    return visibleItems.findIndex((item) => {
-      if (item.isAction) return false;
-      if (item.exact) return location.pathname === item.path;
-      return location.pathname === item.path || location.pathname.startsWith(item.path + '/');
-    });
-  }, [location.pathname, visibleItems]);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
-  const totalPages = Math.ceil(visibleItems.length / 5);
-  const activeRoutePage = activeRouteIndex >= 0 ? Math.floor(activeRouteIndex / 5) : 0;
-  const [swipedPage, setSwipedPage] = useState<number | null>(null);
-  const [lastPathname, setLastPathname] = useState(location.pathname);
-
-  // Reset swiped page when route changes so active item's page is displayed
-  if (location.pathname !== lastPathname) {
-    setLastPathname(location.pathname);
-    setSwipedPage(null);
-  }
-
-  const currentPage = Math.min(swipedPage ?? activeRoutePage, Math.max(0, totalPages - 1));
-
-  // Align scroll offset with current page smoothly
+  // Auto-center active route's nav item on mount or when route changes
   useEffect(() => {
     const list = listRef.current;
     if (!list) return;
 
     const rafId = requestAnimationFrame(() => {
-      if (list.clientWidth > 0) {
+      const activeEl = list.querySelector<HTMLElement>('[data-active="true"]')?.closest<HTMLLIElement>('li');
+      if (activeEl) {
+        const targetScroll = activeEl.offsetLeft - (list.clientWidth / 2) + (activeEl.clientWidth / 2);
         list.scrollTo({
-          left: currentPage * list.clientWidth,
+          left: Math.max(0, targetScroll),
           behavior: 'smooth',
         });
       }
     });
 
     return () => cancelAnimationFrame(rafId);
-  }, [currentPage]);
+  }, [location.pathname, visibleItems]);
 
-  // Track user swipe / horizontal scroll position between the 5-item pages
+  // Track fluid horizontal scroll position for the sleek scroll track
   const handleScroll = () => {
     const list = listRef.current;
-    if (!list || list.clientWidth === 0) return;
-    const pageIndex = Math.round(list.scrollLeft / list.clientWidth);
-    if (pageIndex >= 0 && pageIndex < totalPages && pageIndex !== currentPage) {
-      setSwipedPage(pageIndex);
+    if (!list) return;
+    const maxScroll = list.scrollWidth - list.clientWidth;
+    if (maxScroll > 0) {
+      setScrollProgress(Math.min(1, Math.max(0, list.scrollLeft / maxScroll)));
+    } else {
+      setScrollProgress(0);
     }
   };
 
-  const goToPage = (pageIndex: number) => {
+  // Mouse drag support for desktop preview / testing
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const startScrollLeftRef = useRef(0);
+  const hasDraggedRef = useRef(false);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
     const list = listRef.current;
     if (!list) return;
-    setSwipedPage(pageIndex);
-    list.scrollTo({
-      left: pageIndex * list.clientWidth,
-      behavior: 'smooth',
-    });
+    isDraggingRef.current = true;
+    startXRef.current = e.pageX - list.offsetLeft;
+    startScrollLeftRef.current = list.scrollLeft;
+    hasDraggedRef.current = false;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current) return;
+    const list = listRef.current;
+    if (!list) return;
+    const x = e.pageX - list.offsetLeft;
+    const walk = x - startXRef.current;
+    if (Math.abs(walk) > 5) {
+      hasDraggedRef.current = true;
+    }
+    list.scrollLeft = startScrollLeftRef.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    isDraggingRef.current = false;
+  };
+
+  const handleClickCapture = (e: React.MouseEvent) => {
+    if (hasDraggedRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      hasDraggedRef.current = false;
+    }
   };
 
   return (
@@ -217,6 +229,11 @@ export function AdminFloatingNav() {
           ref={listRef}
           className="admin-floating-nav__list"
           onScroll={handleScroll}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUpOrLeave}
+          onMouseLeave={handleMouseUpOrLeave}
+          onClickCapture={handleClickCapture}
         >
           {visibleItems.map((item) => {
             const isActive = !item.isAction && (item.exact
@@ -262,22 +279,17 @@ export function AdminFloatingNav() {
           })}
         </ul>
 
-        {/* Dynamic pagination indicators when more than 1 page exists */}
-        {totalPages > 1 && (
-          <div className="admin-floating-nav__pagination" role="tablist" aria-label="Menu pages">
-            {Array.from({ length: totalPages }, (_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                role="tab"
-                aria-selected={currentPage === idx}
-                aria-label={`Page ${idx + 1}`}
-                className={`admin-floating-nav__dot${currentPage === idx ? ' is-active' : ''}`}
-                onClick={() => goToPage(idx)}
-              />
-            ))}
+        {/* Sleek continuous scroll indicator track */}
+        <div className="admin-floating-nav__track-wrap" aria-hidden="true">
+          <div className="admin-floating-nav__track">
+            <div
+              className="admin-floating-nav__track-thumb"
+              style={{
+                transform: `translateX(${scrollProgress * 26}px)`,
+              }}
+            />
           </div>
-        )}
+        </div>
       </div>
     </nav>
   );

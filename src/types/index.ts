@@ -20,6 +20,8 @@ import type {
   DbRunRegistration,
   DbKitClaim,
   DbAuditLog,
+  DbStaffInvite,
+  DbStaffRequest,
 } from './database';
 
 export type {
@@ -44,6 +46,8 @@ export type {
   DbRunRegistration,
   DbKitClaim,
   DbAuditLog,
+  DbStaffInvite,
+  DbStaffRequest,
 };
 
 export type Role = AppRole;

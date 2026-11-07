@@ -48,6 +48,17 @@ export function AuthCallbackPage() {
           await supabase.auth.getSession();
         if (sessionCheckError) throw sessionCheckError;
 
+        // Auto-claim pending committee invite code if user authenticated via Google onboarding flow
+        const pendingInvite = sessionStorage.getItem('sinoog_pending_staff_invite');
+        if (pendingInvite && sessionData.session?.user.id) {
+          sessionStorage.removeItem('sinoog_pending_staff_invite');
+          try {
+            await supabase.rpc('claim_staff_invite', { p_code: pendingInvite.trim() });
+          } catch (claimErr) {
+            console.warn('Staff invite claim note:', claimErr);
+          }
+        }
+
         await refresh();
         if (!active) return;
 

@@ -17,6 +17,7 @@ import { getAllActivitiesForAdmin } from '../../features/activities/activityQuer
 import { getAllPostsForAdmin } from '../../features/content/postQueries';
 import { getAllRegistrationsForAdmin } from '../../features/run/runQueries';
 import { useAuth } from '../../features/auth/useAuth';
+import type { AdminPermission } from '../../features/auth/authState';
 import {
   AdminActivitiesIcon,
   AdminNewsIcon,
@@ -33,7 +34,7 @@ import {
 } from '../../components/AdminNavIcons';
 
 export function AdminDashboardPage() {
-  const { isAdmin, isNewsInCharge, isDelegationHead } = useAuth();
+  const { canAccess } = useAuth();
   const [activitiesCount, setActivitiesCount] = useState<number>(0);
   const [postsCount, setPostsCount] = useState<number>(0);
   const [registrationsCount, setRegistrationsCount] = useState<number>(0);
@@ -71,7 +72,7 @@ export function AdminDashboardPage() {
       icon: AdminRegistrationsIcon,
       category: 'Run Operations',
       description: 'Review participant signups, verify GCash payments, and assign bib/QR codes.',
-      access: 'admin' as const,
+      permission: 'registrations' as AdminPermission,
     },
     {
       title: 'Kit Claiming',
@@ -79,7 +80,7 @@ export function AdminDashboardPage() {
       icon: AdminKitClaimIcon,
       category: 'Run Operations',
       description: 'Camera QR scanner, singlet check-in roster, and offline cache sync queue.',
-      access: 'admin' as const,
+      permission: 'kit_claims' as AdminPermission,
     },
     {
       title: 'Race Timing',
@@ -87,7 +88,7 @@ export function AdminDashboardPage() {
       icon: AdminTimingIcon,
       category: 'Run Operations',
       description: 'Staggered gun start clocks, finish line scanner, and live leaderboard.',
-      access: 'admin' as const,
+      permission: 'run_timing' as AdminPermission,
     },
     {
       title: 'Activities & Schedule',
@@ -95,7 +96,7 @@ export function AdminDashboardPage() {
       icon: AdminActivitiesIcon,
       category: 'Festival & Liturgy',
       description: 'Novena mass schedules, nightly cultural presentations, and event timeline.',
-      access: 'admin' as const,
+      permission: 'activities' as AdminPermission,
     },
     {
       title: 'News Posts',
@@ -103,7 +104,7 @@ export function AdminDashboardPage() {
       icon: AdminNewsIcon,
       category: 'Festival & Liturgy',
       description: 'Parish announcements, newsletter bulletins, and editorial publishing.',
-      access: 'news' as const,
+      permission: 'posts' as AdminPermission,
     },
     {
       title: 'Delegations',
@@ -111,7 +112,7 @@ export function AdminDashboardPage() {
       icon: AdminDelegationsIcon,
       category: 'Festival & Liturgy',
       description: 'Contingent workspace, musical audio track uploads, and dancer rosters.',
-      access: 'delegation' as const,
+      permission: 'delegations' as AdminPermission,
     },
     {
       title: 'Financial Records',
@@ -119,7 +120,7 @@ export function AdminDashboardPage() {
       icon: AdminFinanceIcon,
       category: 'Finance & Records',
       description: 'Cashbook ledger, registration & general funds, void logs, and CSV export.',
-      access: 'admin' as const,
+      permission: 'finance' as AdminPermission,
     },
     {
       title: 'Sponsors',
@@ -127,7 +128,7 @@ export function AdminDashboardPage() {
       icon: AdminSponsorsIcon,
       category: 'Media & Community',
       description: 'Corporate and benefactors directory, sponsorship tiers, and logos.',
-      access: 'admin' as const,
+      permission: 'sponsors' as AdminPermission,
     },
     {
       title: 'Media Gallery',
@@ -135,7 +136,7 @@ export function AdminDashboardPage() {
       icon: AdminGalleryIcon,
       category: 'Media & Community',
       description: 'Photo and video albums, YouTube video embeds, and festival highlights.',
-      access: 'admin' as const,
+      permission: 'gallery' as AdminPermission,
     },
     {
       title: 'Users & Staff',
@@ -143,7 +144,7 @@ export function AdminDashboardPage() {
       icon: AdminUsersIcon,
       category: 'Administration',
       description: 'Manage committee staff accounts, role assignments, and permissions.',
-      access: 'admin' as const,
+      permission: 'users' as AdminPermission,
     },
     {
       title: 'Audit History',
@@ -151,7 +152,7 @@ export function AdminDashboardPage() {
       icon: AdminAuditIcon,
       category: 'Administration',
       description: 'Immutable security event logs, detail inspector, and RFC-4180 CSV export.',
-      access: 'admin' as const,
+      permission: 'audit' as AdminPermission,
     },
     {
       title: 'Website Settings',
@@ -159,15 +160,11 @@ export function AdminDashboardPage() {
       icon: AdminSettingsIcon,
       category: 'Administration',
       description: 'Edition parameters, registration toggle, emergency banner, and bib printing.',
-      access: 'admin' as const,
+      permission: 'settings' as AdminPermission,
     },
   ];
 
-  const visibleShortcuts = allShortcuts.filter((item) =>
-    isAdmin ||
-    (item.access === 'news' && isNewsInCharge) ||
-    (item.access === 'delegation' && isDelegationHead),
-  );
+  const visibleShortcuts = allShortcuts.filter((item) => canAccess(item.permission));
 
   return (
     <div className="m3-admin-dashboard admin-page">

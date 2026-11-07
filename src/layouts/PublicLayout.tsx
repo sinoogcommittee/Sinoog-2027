@@ -31,7 +31,7 @@ const NAV_LINKS = [
 ] as const;
 
 export function PublicLayout() {
-  const { user, isDemoAdmin, isAdmin } = useAuth();
+  const { user, isDemoAdmin, isAdmin, isStaff } = useAuth();
   const signedIn = Boolean(user) || isDemoAdmin;
   const location = useLocation();
   const menuBtnRef = useRef<HTMLButtonElement>(null);
@@ -101,7 +101,7 @@ export function PublicLayout() {
                 <NavLink to="/account" className="pub-topbar__navlink">
                   My account
                 </NavLink>
-                {(isAdmin || isDemoAdmin) && (
+                {(isStaff || isAdmin || isDemoAdmin) && (
                   <NavLink to="/admin" className="pub-topbar__navlink">
                     Workspace
                   </NavLink>
@@ -181,7 +181,7 @@ export function PublicLayout() {
               >
                 My account
               </Link>
-              {(isAdmin || isDemoAdmin) && (
+              {(isStaff || isAdmin || isDemoAdmin) && (
                 <Link
                   to="/admin"
                   className="pub-drawer__link"

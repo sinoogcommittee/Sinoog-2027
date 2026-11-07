@@ -8,7 +8,23 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const staffRoles = ['admin', 'news_in_charge', 'delegation_head'] as const;
+const staffRoles = [
+  'super_admin',
+  'admin',
+  'activities_coordinator',
+  'news_in_charge',
+  'registrations_manager',
+  'kit_claims_officer',
+  'timing_official',
+  'delegations_manager',
+  'delegation_head',
+  'finance_officer',
+  'sponsors_manager',
+  'gallery_manager',
+  'audit_viewer',
+  'settings_manager',
+  'users_manager',
+] as const;
 type StaffRole = typeof staffRoles[number];
 
 function json(body: unknown, status = 200) {
@@ -50,9 +66,10 @@ Deno.serve(async (request) => {
   const serviceClient = createClient(supabaseUrl, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
-  const { data: callerRole } = await serviceClient.from('user_roles').select('role')
-    .eq('user_id', caller.id).eq('role', 'admin').maybeSingle();
-  if (!callerRole) return json({ error: 'Administrator access is required.' }, 403);
+  const { data: callerRoles } = await serviceClient.from('user_roles').select('role')
+    .eq('user_id', caller.id).in('role', ['admin', 'super_admin']);
+  if (!callerRoles || callerRoles.length === 0) return json({ error: 'Administrator access is required.' }, 403);
+  const callerIsSuper = callerRoles.some((r) => r.role === 'super_admin');
   const { data: callerProfile } = await serviceClient.from('profiles').select('suspended_at')
     .eq('id', caller.id).maybeSingle();
   if (callerProfile?.suspended_at) return json({ error: 'Your account is suspended.' }, 403);
@@ -80,6 +97,9 @@ Deno.serve(async (request) => {
     if (!fullName) return json({ error: 'Enter the staff member’s full name.' }, 400);
     if (password.length < 8) return json({ error: 'The temporary password must contain at least 8 characters.' }, 400);
     if (roles.length === 0) return json({ error: 'Assign at least one staff role.' }, 400);
+    if (!callerIsSuper && (roles.includes('super_admin') || roles.includes('admin'))) {
+      return json({ error: 'Only the Super Administrator can grant Administrator or Super Administrator roles.' }, 403);
+    }
 
     const { data: created, error: createError } = await serviceClient.auth.admin.createUser({
       email,
@@ -263,11 +283,15 @@ Deno.serve(async (request) => {
       return json({ error: 'You cannot suspend the administrator account currently signed in.' }, 400);
     }
 
+    if (!callerIsSuper && (roles.includes('super_admin') || roles.includes('admin'))) {
+      return json({ error: 'Only the Super Administrator can grant Administrator or Super Administrator roles.' }, 403);
+    }
+
     const { data: currentAdminRole } = await serviceClient.from('user_roles').select('role')
-      .eq('user_id', userId).eq('role', 'admin').maybeSingle();
-    if (currentAdminRole && !roles.includes('admin')) {
+      .eq('user_id', userId).in('role', ['admin', 'super_admin']).maybeSingle();
+    if (currentAdminRole && !roles.includes('admin') && !roles.includes('super_admin')) {
       const { count } = await serviceClient.from('user_roles').select('user_id', { count: 'exact', head: true })
-        .eq('role', 'admin');
+        .in('role', ['admin', 'super_admin']);
       if ((count ?? 0) <= 1) return json({ error: 'The last administrator role cannot be removed.' }, 409);
     }
 
@@ -322,10 +346,10 @@ Deno.serve(async (request) => {
     if (userId === caller.id) return json({ error: 'You cannot delete the administrator account currently signed in.' }, 400);
 
     const { data: targetAdminRole } = await serviceClient.from('user_roles').select('role')
-      .eq('user_id', userId).eq('role', 'admin').maybeSingle();
+      .eq('user_id', userId).in('role', ['admin', 'super_admin']).maybeSingle();
     if (targetAdminRole) {
       const { count } = await serviceClient.from('user_roles').select('user_id', { count: 'exact', head: true })
-        .eq('role', 'admin');
+        .in('role', ['admin', 'super_admin']);
       if ((count ?? 0) <= 1) return json({ error: 'The last administrator account cannot be deleted.' }, 409);
     }
 

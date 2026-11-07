@@ -2,11 +2,35 @@ import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './useAuth';
 import { AccessDeniedPage } from './AccessDeniedPage';
 import { LoadingState } from '../ui/FeedbackStates';
+import type { AdminPermission } from './authState';
+import type { AppRole } from '../../types';
 
-type RequiredRole = 'admin' | 'staff' | 'news_in_charge' | 'delegation_head' | 'public_user';
+type RequiredRole =
+  | 'admin'
+  | 'super_admin'
+  | 'staff'
+  | 'news_in_charge'
+  | 'delegation_head'
+  | 'public_user'
+  | AppRole;
 
-export function RequireRole({ role = 'admin' }: { role?: RequiredRole }) {
-  const { user, isDemoAdmin, isAdmin, isNewsInCharge, isDelegationHead, loading, isSuspended } = useAuth();
+interface RequireRoleProps {
+  role?: RequiredRole;
+  permission?: AdminPermission;
+}
+
+export function RequireRole({ role = 'admin', permission }: RequireRoleProps) {
+  const {
+    user,
+    isDemoAdmin,
+    isSuperAdmin,
+    isAdmin,
+    isStaff,
+    canAccess,
+    hasRole,
+    loading,
+    isSuspended,
+  } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -21,12 +45,20 @@ export function RequireRole({ role = 'admin' }: { role?: RequiredRole }) {
     return <AccessDeniedPage reason="Your account has been suspended by an administrator." />;
   }
 
-  const hasAccess =
-    isAdmin ||
-    (role === 'staff' && (isNewsInCharge || isDelegationHead)) ||
-    (role === 'news_in_charge' && isNewsInCharge) ||
-    (role === 'delegation_head' && isDelegationHead) ||
-    (role === 'public_user' && Boolean(user || isDemoAdmin));
+  let hasAccess = false;
+  if (permission) {
+    hasAccess = canAccess(permission);
+  } else if (role === 'staff') {
+    hasAccess = isStaff;
+  } else if (role === 'public_user') {
+    hasAccess = Boolean(user || isDemoAdmin);
+  } else if (role === 'super_admin') {
+    hasAccess = isSuperAdmin;
+  } else if (role === 'admin') {
+    hasAccess = isAdmin;
+  } else {
+    hasAccess = hasRole(role as AppRole);
+  }
 
   if (!user && !isDemoAdmin) {
     return <Navigate to="/login" state={{ from: location }} replace />;
@@ -36,7 +68,13 @@ export function RequireRole({ role = 'admin' }: { role?: RequiredRole }) {
     return (
       <AccessDeniedPage
         requiredRole={role}
-        reason={role === 'staff' ? 'A committee staff role is required to open this workspace.' : undefined}
+        reason={
+          permission
+            ? `You do not have the required "${permission}" committee permission. Contact a Super Administrator or Admin to assign this role to your account.`
+            : role === 'staff'
+              ? 'A committee staff role is required to open this workspace.'
+              : undefined
+        }
       />
     );
   }
@@ -46,4 +84,12 @@ export function RequireRole({ role = 'admin' }: { role?: RequiredRole }) {
 
 export function RequireAdmin() {
   return <RequireRole role="admin" />;
+}
+
+export function RequireSuperAdmin() {
+  return <RequireRole role="super_admin" />;
+}
+
+export function RequirePermission({ permission }: { permission: AdminPermission }) {
+  return <RequireRole permission={permission} />;
 }

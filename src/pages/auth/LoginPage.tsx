@@ -11,6 +11,7 @@ export function LoginPage() {
   const {
     user,
     isAdmin,
+    isStaff,
     isDemoAdmin,
     isNewsInCharge,
     isDelegationHead,
@@ -22,7 +23,7 @@ export function LoginPage() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const hasStaffAccess = isAdmin || isNewsInCharge || isDelegationHead || isDemoAdmin;
+  const hasStaffAccess = isStaff || isAdmin || isNewsInCharge || isDelegationHead || isDemoAdmin;
 
   if (!authLoading && user) {
     if (hasStaffAccess) return <Navigate to="/admin" replace />;
@@ -91,6 +92,16 @@ export function LoginPage() {
             {loading ? 'Signing in…' : 'Sign in to workspace'}
           </Button>
         </form>
+
+        <div style={{ marginTop: '20px', padding: '16px', background: 'var(--md-sys-color-surface-container-low)', borderRadius: '12px', border: '1px solid var(--md-sys-color-outline-variant)' }}>
+          <strong style={{ display: 'block', fontSize: '0.95rem', marginBottom: '4px' }}>Have an invite code?</strong>
+          <p style={{ margin: '0 0 10px 0', fontSize: '0.84rem', color: 'var(--md-sys-color-on-surface-variant)' }}>
+            Committee members invited by the Super Administrator can sign up automatically using their Google account.
+          </p>
+          <Link to="/join-staff" className="button button--outlined button--sm" style={{ display: 'inline-block' }}>
+            Join with Google & Invite Code
+          </Link>
+        </div>
 
         {import.meta.env.DEV && !isSupabaseConfigured && (
           <button

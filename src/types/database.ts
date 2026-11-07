@@ -6,7 +6,23 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type AppRole = 'public_user' | 'delegation_head' | 'news_in_charge' | 'admin';
+export type AppRole =
+  | 'public_user'
+  | 'delegation_head'
+  | 'news_in_charge'
+  | 'admin'
+  | 'super_admin'
+  | 'activities_coordinator'
+  | 'registrations_manager'
+  | 'kit_claims_officer'
+  | 'timing_official'
+  | 'delegations_manager'
+  | 'finance_officer'
+  | 'sponsors_manager'
+  | 'gallery_manager'
+  | 'audit_viewer'
+  | 'settings_manager'
+  | 'users_manager';
 export type ContentStatus = 'draft' | 'published' | 'archived';
 export type ReviewStatus = 'draft' | 'submitted' | 'under_review' | 'approved' | 'needs_changes' | 'rejected' | 'cancelled';
 export type PaymentStatus = 'unpaid' | 'submitted' | 'verified' | 'rejected' | 'refunded';
@@ -70,6 +86,7 @@ export interface Database {
         Row: {
           id: string;
           full_name: string | null;
+          email: string | null;
           mobile: string | null;
           locality: string | null;
           suspended_at: string | null;
@@ -79,6 +96,7 @@ export interface Database {
         Insert: {
           id: string;
           full_name?: string | null;
+          email?: string | null;
           mobile?: string | null;
           locality?: string | null;
           suspended_at?: string | null;
@@ -88,6 +106,7 @@ export interface Database {
         Update: {
           id?: string;
           full_name?: string | null;
+          email?: string | null;
           mobile?: string | null;
           locality?: string | null;
           suspended_at?: string | null;
@@ -114,6 +133,90 @@ export interface Database {
           role?: AppRole;
           assigned_by?: string | null;
           assigned_at?: string;
+        };
+        Relationships: [];
+      };
+      staff_invites: {
+        Row: {
+          id: string;
+          code: string;
+          created_by: string | null;
+          note: string | null;
+          max_uses: number;
+          uses_count: number;
+          expires_at: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          created_by?: string | null;
+          note?: string | null;
+          max_uses?: number;
+          uses_count?: number;
+          expires_at?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          code?: string;
+          created_by?: string | null;
+          note?: string | null;
+          max_uses?: number;
+          uses_count?: number;
+          expires_at?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      staff_requests: {
+        Row: {
+          id: string;
+          user_id: string;
+          invite_code: string;
+          invite_id: string | null;
+          status: 'pending' | 'approved' | 'rejected';
+          notes: string | null;
+          requested_at: string;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          assigned_roles: string[];
+          applicant_email: string | null;
+          applicant_name: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          invite_code: string;
+          invite_id?: string | null;
+          status?: 'pending' | 'approved' | 'rejected';
+          notes?: string | null;
+          requested_at?: string;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          assigned_roles?: string[];
+          applicant_email?: string | null;
+          applicant_name?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          invite_code?: string;
+          invite_id?: string | null;
+          status?: 'pending' | 'approved' | 'rejected';
+          notes?: string | null;
+          requested_at?: string;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          assigned_roles?: string[];
+          applicant_email?: string | null;
+          applicant_name?: string | null;
         };
         Relationships: [];
       };
@@ -1295,6 +1398,62 @@ export interface Database {
         };
         Returns: Database['public']['Tables']['run_registrations']['Row'];
       };
+      generate_staff_invite: {
+        Args: {
+          p_note?: string | null;
+          p_max_uses?: number | null;
+          p_expires_in_days?: number | null;
+          p_custom_code?: string | null;
+        };
+        Returns: Database['public']['Tables']['staff_invites']['Row'];
+      };
+      claim_staff_invite: {
+        Args: {
+          p_code: string;
+        };
+        Returns: {
+          status: string;
+          message: string;
+        };
+      };
+      approve_staff_request: {
+        Args: {
+          p_request_id: string;
+          p_roles: string[];
+        };
+        Returns: {
+          status: string;
+          user_id: string;
+          roles: string[];
+        };
+      };
+      reject_staff_request: {
+        Args: {
+          p_request_id: string;
+          p_reason?: string | null;
+        };
+        Returns: {
+          status: string;
+        };
+      };
+      revoke_staff_invite: {
+        Args: {
+          p_invite_id: string;
+        };
+        Returns: {
+          success: boolean;
+        };
+      };
+      delete_staff_invite: {
+        Args: {
+          p_invite_id: string;
+        };
+        Returns: void;
+      };
+      is_super_admin: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
     };
     Enums: {
       app_role: AppRole;
@@ -1325,4 +1484,6 @@ export type DbDelegationFile = Database['public']['Tables']['delegation_files'][
 export type DbRunRegistration = Database['public']['Tables']['run_registrations']['Row'];
 export type DbKitClaim = Database['public']['Tables']['kit_claims']['Row'];
 export type DbAuditLog = Database['public']['Tables']['audit_logs']['Row'];
+export type DbStaffInvite = Database['public']['Tables']['staff_invites']['Row'];
+export type DbStaffRequest = Database['public']['Tables']['staff_requests']['Row'];
 

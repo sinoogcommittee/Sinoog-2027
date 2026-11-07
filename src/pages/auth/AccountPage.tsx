@@ -19,7 +19,7 @@ import {
 import { StatusBadge } from '../../components/StatusBadge';
 
 export function AccountPage() {
-  const { user, profile, loading: authLoading, isAdmin, isDemoAdmin, refresh, signOut } = useAuth();
+  const { user, profile, loading: authLoading, isAdmin, isStaff, isDemoAdmin, refresh, signOut } = useAuth();
   const { toast } = useToast();
   const [fullName, setFullName] = useState('');
   const [mobile, setMobile] = useState('');
@@ -133,9 +133,13 @@ export function AccountPage() {
               <Button type="button" variant="secondary" to="/run/register">
                 Run registration
               </Button>
-              {isAdmin && (
+              {(isAdmin || isStaff || isDemoAdmin) ? (
                 <Button type="button" variant="ghost" to="/admin">
                   Committee workspace
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" to="/join-staff">
+                  Enter staff invite code
                 </Button>
               )}
             </div>

@@ -1,7 +1,22 @@
 import { supabase } from '../../lib/supabase';
 import type { AppRole, Profile } from '../../types';
 
-export type StaffRole = 'admin' | 'news_in_charge' | 'delegation_head';
+export type StaffRole =
+  | 'super_admin'
+  | 'admin'
+  | 'activities_coordinator'
+  | 'news_in_charge'
+  | 'registrations_manager'
+  | 'kit_claims_officer'
+  | 'timing_official'
+  | 'delegations_manager'
+  | 'delegation_head'
+  | 'finance_officer'
+  | 'sponsors_manager'
+  | 'gallery_manager'
+  | 'audit_viewer'
+  | 'settings_manager'
+  | 'users_manager';
 
 export interface ManagedUser {
   id: string;
@@ -43,7 +58,23 @@ export interface ManagedUserDeletionPreview {
   preserved_content_count: number;
 }
 
-const STAFF_ROLES: StaffRole[] = ['admin', 'news_in_charge', 'delegation_head'];
+export const STAFF_ROLES: StaffRole[] = [
+  'super_admin',
+  'admin',
+  'activities_coordinator',
+  'news_in_charge',
+  'registrations_manager',
+  'kit_claims_officer',
+  'timing_official',
+  'delegations_manager',
+  'delegation_head',
+  'finance_officer',
+  'sponsors_manager',
+  'gallery_manager',
+  'audit_viewer',
+  'settings_manager',
+  'users_manager',
+];
 
 function isStaffRole(role: AppRole): role is StaffRole {
   return STAFF_ROLES.includes(role as StaffRole);
@@ -71,6 +102,7 @@ export async function listUsersForAdmin(): Promise<ManagedUser[]> {
 
   return (profiles as Profile[]).map((p) => ({
     id: p.id,
+    email: p.email ?? null,
     full_name: p.full_name,
     mobile: p.mobile,
     locality: p.locality,
@@ -130,11 +162,11 @@ export async function setUserStaffRoles(
   const toRemove = currentStaff.filter((r) => !unique.includes(r));
 
   // Never remove the last admin in the system
-  if (toRemove.includes('admin')) {
+  if (toRemove.includes('admin') || toRemove.includes('super_admin')) {
     const { data: admins, error: adminErr } = await supabase
       .from('user_roles')
       .select('user_id')
-      .eq('role', 'admin');
+      .in('role', ['admin', 'super_admin']);
 
     if (adminErr) throw new Error(adminErr.message);
     const otherAdmins = (admins ?? []).filter((a) => a.user_id !== userId);

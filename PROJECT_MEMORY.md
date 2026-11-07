@@ -95,6 +95,13 @@ e:\Programs\Sinoog 2027\
 | `019` | `019_gallery_collection_order.sql` | Added `sort_order` to albums and `reorder_gallery_album` RPC |
 | `020` | `020_financial_reporting_dimensions.sql` | Cashbook allocation scopes (`overall`, `festival`, `run`, `general`), counterparties, recorder enforcement |
 | `021` | `021_delegation_workspace_and_public_policy.sql` | Added `theme` & `description` to `delegation_entries`; public RLS for approved contingents; storage deletion policies |
+| `022` | `022_category_bib_sequence.sql` | Category bib sequence assignments (3K: 3001-3999, 5K: 5001-5999, 10K: 10001-10999) |
+| `023` | `023_category_timing_starts.sql` | Staggered category gun starts and live ticking elapsed clocks |
+| `024` | `024_kit_claim_audit_tracking.sql` | Automated audit trigger for race kit handovers |
+| `025` | `025_update_3k_shirt_kit_description.sql` | 3K event shirt description update and legacy size normalization |
+| `026` | `026_record_run_finish_by_bib.sql` | Direct finish recording by bib number |
+| `027` | `027_optional_gcash_reference.sql` | Optional GCash reference number on payment submission |
+| `028` | `028_super_admin_and_staff_invites.sql` | Super admin creator role, modular page permissions, staff invite codes, Google onboarding queue & approval RPCs |
 
 ---
 
@@ -184,6 +191,13 @@ e:\Programs\Sinoog 2027\
    * Mobile View 1 vertical sequence: Identity details (`Sto. Niño Parish` / `SINOOG 2027` / `Viva Pit Señor!`) above -> Artwork emblem in center -> Countdown timer flush at bottom above the floating bar.
    * Header branding: Committee logo `.pub-topbar .logo-mark--committee` is enlarged to `48px` (mobile) / `52px` (desktop) to visually balance with the circular parish seal.
    * Mobile ambient bamboos are temporarily commented out / hidden (`display: none !important`).
+
+### Mobile Bottom Navbars (Division ExeCon Architecture)
+* **Fluid Single-Item Swipe**: `AdminFloatingNav` (`/admin`) and `FloatingNav` (public site) use `scroll-snap-type: x proximity;` with individual items sized at `flex: 0 0 68px; min-width: 68px; max-width: 76px; scroll-snap-align: center; scroll-snap-stop: normal;`.
+* **No Rigid 5-Page Jumping**: Users can swipe one icon at a time smoothly left and right without jumping 5 icons at once.
+* **Auto-Centering**: When navigating to any page, the active route's icon smoothly auto-centers into view via `offsetLeft - (clientWidth / 2) + (itemWidth / 2)`.
+* **Continuous Scroll Track**: Replaced discrete 5-page dots with a sleek 44px gold indicator track (`#fedf9c`) whose thumb glides continuously with scroll position.
+* **Desktop Preview Drag**: Supports mouse drag-to-scroll on desktop browsers and mobile device emulators.
 
 ---
 

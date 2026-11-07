@@ -50,6 +50,7 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | `025_update_3k_shirt_kit_description.sql` | Prepared | SQL Editor | Site administrator | Ready for production; updates 3K category kit description to 'Event Shirt' and normalizes any legacy 'Singlet (Size)' 3K registrations to plain size |
 | `026_record_run_finish_by_bib.sql` | Prepared | SQL Editor | Site administrator | Ready for production; permits recording run finishes directly by bib number with official duration computation |
 | `027_optional_gcash_reference.sql` | Prepared | SQL Editor | Site administrator | Ready for production; makes GCash reference number optional so runners can open GCash, transfer directly, and submit screenshot without typing hassle |
+| `028_super_admin_and_staff_invites.sql` | 2026-11-07 | SQL Editor / MCP | Site administrator | PASS — applied; super_admin role, 11 modular page access roles, staff invite codes, self-service Google onboarding queue, and administrator approval RPCs |
 
 ## Financial reporting enhancement — October 28, 2026
 
@@ -181,6 +182,15 @@ The consolidated check passed all database structure, enum, trusted-function, St
 | Database impact | APPLIED | `supabase/migrations/026_record_run_finish_by_bib.sql` applied in production. Adds `record_run_finish_by_identifier(text)` accepting either a runner bib number (e.g. `10001`, `#10001`) or a QR token. |
 | Client-side Fallback | VERIFIED | `recordRunnerFinish` in `src/features/run/runQueries.ts` automatically queries approved registrations by `bib_number` and passes `qr_token` to `record_run_finish(p_qr_token)`. |
 | Real-time Match UI | VERIFIED | Typing a bib number into `/admin/run-timing` dynamically shows a live runner badge (`✓ Found: #10001 Name (Category)` or `⚠️ Already finished`), with fast single-tap / Enter key submission. |
+
+## Migration 028: Super Administrator, Staff Invites & Google Sign-Up Tracking — November 7, 2026
+
+| Area | Result | Notes |
+| --- | --- | --- |
+| Database impact | APPLIED | `supabase/migrations/028_super_admin_and_staff_invites.sql` applied in production (`ohmdfkegcbllaczhpwwu`). Schema includes `staff_invites`, `staff_requests`, `profiles.email`, `staff_requests.applicant_email`, `staff_requests.applicant_name`. |
+| RLS Policies | VERIFIED | Permissive policies active for `staff_invites` and `staff_requests`. Admins and Super Admins can query all records; invitees can submit claims. |
+| Google Sign-up Tracking | VERIFIED | `claim_staff_invite` stores Google account email (`auth.users.email` / JWT claim) and applicant name. |
+| Real-Time UI Tracking | VERIFIED | `/admin/users` Invite Codes tab tracks: was it used, how many used (`uses_count`), how many left (`remainingUses`), progress bar, and list of each Google account signed up with one-click approval. |
 
 ## Type regeneration
 
