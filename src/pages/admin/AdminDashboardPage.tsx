@@ -99,14 +99,6 @@ export function AdminDashboardPage() {
       permission: 'activities' as AdminPermission,
     },
     {
-      title: 'News Posts',
-      path: '/admin/posts',
-      icon: AdminNewsIcon,
-      category: 'Festival & Liturgy',
-      description: 'Parish announcements, newsletter bulletins, and editorial publishing.',
-      permission: 'posts' as AdminPermission,
-    },
-    {
       title: 'Delegations',
       path: '/admin/delegations',
       icon: AdminDelegationsIcon,
@@ -115,18 +107,18 @@ export function AdminDashboardPage() {
       permission: 'delegations' as AdminPermission,
     },
     {
-      title: 'Financial Records',
-      path: '/admin/finance',
-      icon: AdminFinanceIcon,
-      category: 'Finance & Records',
-      description: 'Cashbook ledger, registration & general funds, void logs, and CSV export.',
-      permission: 'finance' as AdminPermission,
+      title: 'News Posts',
+      path: '/admin/posts',
+      icon: AdminNewsIcon,
+      category: 'Communications & Media',
+      description: 'Parish announcements, newsletter bulletins, and editorial publishing.',
+      permission: 'posts' as AdminPermission,
     },
     {
       title: 'Sponsors',
       path: '/admin/sponsors',
       icon: AdminSponsorsIcon,
-      category: 'Media & Community',
+      category: 'Communications & Media',
       description: 'Corporate and benefactors directory, sponsorship tiers, and logos.',
       permission: 'sponsors' as AdminPermission,
     },
@@ -134,7 +126,7 @@ export function AdminDashboardPage() {
       title: 'Media Gallery',
       path: '/admin/gallery',
       icon: AdminGalleryIcon,
-      category: 'Media & Community',
+      category: 'Communications & Media',
       description: 'Photo and video albums, YouTube video embeds, and festival highlights.',
       permission: 'gallery' as AdminPermission,
     },
@@ -142,15 +134,23 @@ export function AdminDashboardPage() {
       title: 'Users & Staff',
       path: '/admin/users',
       icon: AdminUsersIcon,
-      category: 'Administration',
-      description: 'Manage committee staff accounts, role assignments, and permissions.',
+      category: 'Governance & System',
+      description: 'Manage committee staff accounts, Google invite codes, and permissions.',
       permission: 'users' as AdminPermission,
+    },
+    {
+      title: 'Financial Records',
+      path: '/admin/finance',
+      icon: AdminFinanceIcon,
+      category: 'Governance & System',
+      description: 'Cashbook ledger, registration & general funds, void logs, and CSV export.',
+      permission: 'finance' as AdminPermission,
     },
     {
       title: 'Audit History',
       path: '/admin/audit',
       icon: AdminAuditIcon,
-      category: 'Administration',
+      category: 'Governance & System',
       description: 'Immutable security event logs, detail inspector, and RFC-4180 CSV export.',
       permission: 'audit' as AdminPermission,
     },
@@ -158,13 +158,41 @@ export function AdminDashboardPage() {
       title: 'Website Settings',
       path: '/admin/settings',
       icon: AdminSettingsIcon,
-      category: 'Administration',
+      category: 'Governance & System',
       description: 'Edition parameters, registration toggle, emergency banner, and bib printing.',
       permission: 'settings' as AdminPermission,
     },
   ];
 
-  const visibleShortcuts = allShortcuts.filter((item) => canAccess(item.permission));
+  const categories = [
+    {
+      name: 'Run Operations',
+      description: 'Race registrations, singlet kit claims, and live staggered gun-start timing.',
+      items: allShortcuts.filter((s) => s.category === 'Run Operations'),
+    },
+    {
+      name: 'Festival & Liturgy',
+      description: 'Novena mass schedules, nightly cultural presentations, and dance contingent workspaces.',
+      items: allShortcuts.filter((s) => s.category === 'Festival & Liturgy'),
+    },
+    {
+      name: 'Communications & Media',
+      description: 'Parish news updates, corporate sponsors ranking, and photo/video albums.',
+      items: allShortcuts.filter((s) => s.category === 'Communications & Media'),
+    },
+    {
+      name: 'Governance & System',
+      description: 'Committee staff invites, financial cashbook ledger, audit history, and website settings.',
+      items: allShortcuts.filter((s) => s.category === 'Governance & System'),
+    },
+  ];
+
+  const visibleCategories = categories
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => canAccess(item.permission)),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <div className="m3-admin-dashboard admin-page">
@@ -227,30 +255,39 @@ export function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="admin-shortcuts-grid">
-          {visibleShortcuts.map((item) => {
-            const IconComponent = item.icon;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className="admin-shortcut-card"
-                title={`Open ${item.title}`}
-              >
-                <div className="admin-shortcut-icon-wrap">
-                  <IconComponent />
-                </div>
-                <div className="admin-shortcut-body">
-                  <div className="admin-shortcut-title-row">
-                    <strong>{item.title}</strong>
-                    <ArrowRight size={16} className="admin-shortcut-arrow" aria-hidden="true" />
-                  </div>
-                  <small className="admin-shortcut-category">{item.category}</small>
-                  <p>{item.description}</p>
-                </div>
-              </Link>
-            );
-          })}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {visibleCategories.map((group) => (
+            <div key={group.name} className="admin-shortcuts-group">
+              <div className="admin-shortcuts-group-header">
+                <h3 className="admin-shortcuts-group-title">{group.name}</h3>
+                <p className="admin-shortcuts-group-desc">{group.description}</p>
+              </div>
+              <div className="admin-shortcuts-grid">
+                {group.items.map((item) => {
+                  const IconComponent = item.icon;
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className="admin-shortcut-card"
+                      title={`Open ${item.title}`}
+                    >
+                      <div className="admin-shortcut-icon-wrap">
+                        <IconComponent />
+                      </div>
+                      <div className="admin-shortcut-body">
+                        <div className="admin-shortcut-title-row">
+                          <strong>{item.title}</strong>
+                          <ArrowRight size={16} className="admin-shortcut-arrow" aria-hidden="true" />
+                        </div>
+                        <p>{item.description}</p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     </div>

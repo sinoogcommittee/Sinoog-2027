@@ -192,12 +192,26 @@ e:\Programs\Sinoog 2027\
    * Header branding: Committee logo `.pub-topbar .logo-mark--committee` is enlarged to `48px` (mobile) / `52px` (desktop) to visually balance with the circular parish seal.
    * Mobile ambient bamboos are temporarily commented out / hidden (`display: none !important`).
 
+### Admin Navigation & Functional Categories
+* **Logical Functional Sequence**:
+  1. **Core Operations**: Overview (`/admin`).
+  2. **Run Operations**: Registrations (`/admin/registrations`) -> Kit Claiming (`/admin/kit-claims`) -> Race Timing (`/admin/run-timing`).
+  3. **Festival & Liturgy**: Activities & Schedule (`/admin/activities`) -> Contingent Delegations (`/admin/delegations`).
+  4. **Communications & Media**: News Posts (`/admin/posts`) -> Sponsors (`/admin/sponsors`) -> Media Gallery (`/admin/gallery`).
+  5. **Governance & System**: Users & Staff (`/admin/users`) -> Financial Records (`/admin/finance`) -> Audit History (`/admin/audit`) -> Website Settings (`/admin/settings`).
+* **Sidebar Categorization**: `PortalLayout` groups items under category headers (`.portal-nav-category-header`) filtered by user role permissions.
+* **Dashboard Shortcuts Grouping**: `AdminDashboardPage` displays shortcuts grouped by category with clean section headers.
+* **Settings Categorization**: `/admin/settings` features segmented category tabs (`All Settings`, `Parish & Dates`, `Run & Registration`, `System & Banner`) and grouped cards.
+
 ### Mobile Bottom Navbars (Division ExeCon Architecture)
 * **Fluid Single-Item Swipe**: `AdminFloatingNav` (`/admin`) and `FloatingNav` (public site) use `scroll-snap-type: x proximity;` with individual items sized at `flex: 0 0 68px; min-width: 68px; max-width: 76px; scroll-snap-align: center; scroll-snap-stop: normal;`.
 * **No Rigid 5-Page Jumping**: Users can swipe one icon at a time smoothly left and right without jumping 5 icons at once.
 * **Auto-Centering**: When navigating to any page, the active route's icon smoothly auto-centers into view via `offsetLeft - (clientWidth / 2) + (itemWidth / 2)`.
 * **Continuous Scroll Track**: Replaced discrete 5-page dots with a sleek 44px gold indicator track (`#fedf9c`) whose thumb glides continuously with scroll position.
 * **Desktop Preview Drag**: Supports mouse drag-to-scroll on desktop browsers and mobile device emulators.
+
+### Invite Code Cards & Mobile Action Buttons
+* **Mobile Icon-Only Secondary Actions**: On viewports `<= 640px`, secondary action buttons inside `.invite-card__actions-secondary` ("Copy Code", "Deactivate", "Delete") hide text labels (`.m3-button__label { display: none !important; }`) and render as spacious 40px touch tiles with centered 18px icons, equal `flex: 1 1 0` distribution, and accessible `title` / `aria-label` attributes to completely eliminate text wrapping and overlapping.
 
 ---
 

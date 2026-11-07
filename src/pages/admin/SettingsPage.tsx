@@ -69,6 +69,7 @@ export function SettingsPage() {
   const [bibPrintModalOpen, setBibPrintModalOpen] = useState(false);
   const [registrations, setRegistrations] = useState<DbRunRegistration[]>([]);
   const [categories, setCategories] = useState<RunCategory[]>([]);
+  const [settingsCategory, setSettingsCategory] = useState<'all' | 'parish' | 'run' | 'system'>('all');
   const logoFileInputRef = useRef<HTMLInputElement | null>(null);
   const logoInputId = useId();
 
@@ -325,330 +326,406 @@ export function SettingsPage() {
           </Button>
         </div>
 
+        {/* Category Navigation Tabs */}
+        <div className="users-segmented-nav" style={{ maxWidth: '960px', marginBottom: '24px' }} role="tablist" aria-label="Settings categories">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={settingsCategory === 'all'}
+            className={`users-segmented-tab${settingsCategory === 'all' ? ' is-active' : ''}`}
+            onClick={() => setSettingsCategory('all')}
+          >
+            All Settings
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={settingsCategory === 'parish'}
+            className={`users-segmented-tab${settingsCategory === 'parish' ? ' is-active' : ''}`}
+            onClick={() => setSettingsCategory('parish')}
+          >
+            Parish & Dates
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={settingsCategory === 'run'}
+            className={`users-segmented-tab${settingsCategory === 'run' ? ' is-active' : ''}`}
+            onClick={() => setSettingsCategory('run')}
+          >
+            Run & Registration
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={settingsCategory === 'system'}
+            className={`users-segmented-tab${settingsCategory === 'system' ? ' is-active' : ''}`}
+            onClick={() => setSettingsCategory('system')}
+          >
+            System & Banner
+          </button>
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'var(--md-space-6)', maxWidth: '960px' }}>
-          {/* Section 1: Edition & Parish Identity */}
-          <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
-            <div style={{ marginBottom: 'var(--md-space-4)' }}>
-              <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
-                <Calendar size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
-                Edition & Parish Identity
-              </h2>
-              <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
-                Official event title, parish name, and geographical location.
-              </p>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 'var(--md-space-3)' }}>
-              <TextField
-                label="Edition Name"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <TextField
-                label="Parish Name"
-                required
-                value={parishName}
-                onChange={(e) => setParishName(e.target.value)}
-              />
-              <TextField
-                label="Official Location"
-                required
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
-              <TextField
-                label="Official Timezone"
-                disabled
-                value={timezone}
-                helperText="All event schedules are authoritatively stored in Asia/Manila."
-              />
-            </div>
-          </Card>
-
-          {/* Section 2: Sinoog Run operational settings */}
-          <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
-            <div style={{ marginBottom: 'var(--md-space-4)' }}>
-              <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
-                <CreditCard size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
-                Sinoog Run Registration & GCash
-              </h2>
-              <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
-                Editable payment destination, registration deadline, and race start time.
-              </p>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--md-space-3)' }}>
-              <TextField
-                label="GCash Number"
-                type="tel"
-                inputMode="numeric"
-                value={gcashNumber}
-                onChange={(e) => setGcashNumber(e.target.value.replace(/[^0-9+]/g, ''))}
-                placeholder="09260265423"
-              />
-              <TextField
-                label="GCash Account Name"
-                value={gcashAccountName}
-                onChange={(e) => setGcashAccountName(e.target.value)}
-                placeholder="Add when confirmed"
-              />
-              <TextField
-                label="Registration Opens"
-                type="datetime-local"
-                value={registrationOpensAt}
-                onChange={(e) => setRegistrationOpensAt(e.target.value)}
-              />
-              <TextField
-                label="Registration Deadline"
-                type="datetime-local"
-                value={registrationClosesAt}
-                onChange={(e) => setRegistrationClosesAt(e.target.value)}
-                helperText="Leave blank while the deadline is still to be announced."
-              />
-              <TextField
-                label="Race Start Date & Time"
-                type="datetime-local"
-                value={raceStartsAt}
-                onChange={(e) => setRaceStartsAt(e.target.value)}
-                helperText="Leave blank until official start time is confirmed."
-              />
-            </div>
-          </Card>
-
-          {/* Section 2B: Race Bibs & Official Logo */}
-          <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
-            <div style={{ marginBottom: 'var(--md-space-4)' }}>
-              <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
-                <Printer size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
-                Race Bibs &amp; Official Logo
-              </h2>
-              <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
-                Upload the official Sinoog Run bib logo and print approved runner bibs in 8×13″ landscape (2 bibs per sheet).
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--md-space-4)', flexWrap: 'wrap', background: 'var(--md-sys-color-surface-container-low)', padding: 'var(--md-space-4)', borderRadius: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-4)' }}>
-                <div style={{ width: '90px', height: '65px', background: '#ffffff', border: '1px solid var(--md-sys-color-outline-variant)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }}>
-                  <img src={bibLogoUrl} alt="Bib Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                </div>
-                <div>
-                  <strong style={{ display: 'block', fontSize: '0.95rem' }}>Upper Left Bib Logo</strong>
-                  <span style={{ fontSize: '0.80rem', color: 'var(--md-sys-color-on-surface-variant)' }}>
-                    Upload finalized event logo here anytime — automatically converts on all race bibs.
-                  </span>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', flexWrap: 'wrap' }}>
-                <input
-                  id={logoInputId}
-                  ref={logoFileInputRef}
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                  style={{ display: 'none' }}
-                  onChange={handleUploadBibLogo}
-                />
-                <Button
-                  type="button"
-                  variant="outlined"
-                  size="small"
-                  leadingIcon={<Upload size={16} />}
-                  disabled={uploadingBibLogo}
-                  onClick={() => logoFileInputRef.current?.click()}
-                >
-                  {uploadingBibLogo ? 'Uploading logo…' : 'Upload final logo'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="filled"
-                  size="small"
-                  leadingIcon={<Printer size={16} />}
-                  onClick={() => setBibPrintModalOpen(true)}
-                >
-                  Print approved bibs (8×13″)
-                </Button>
-              </div>
-            </div>
-          </Card>
-
-          {/* Section 3: Key Event Dates */}
-          <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
-            <div style={{ marginBottom: 'var(--md-space-4)' }}>
-              <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
-                <Calendar size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
-                Key Celebration Dates
-              </h2>
-              <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
-                Governs countdowns and key event labels across the website.
-              </p>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--md-space-3)' }}>
-              <TextField
-                label="Sinoog Run Date"
-                type="date"
-                value={runDate}
-                onChange={(e) => setRunDate(e.target.value)}
-              />
-              <TextField
-                label="Novena Start Date"
-                type="date"
-                value={novenaStartDate}
-                onChange={(e) => setNovenaStartDate(e.target.value)}
-              />
-              <TextField
-                label="Fiesta & Festival Day"
-                type="date"
-                value={fiestaDate}
-                onChange={(e) => setFiestaDate(e.target.value)}
-              />
-            </div>
-          </Card>
-
-          {/* Section 4: Feature Switches */}
-          <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
-            <div style={{ marginBottom: 'var(--md-space-4)' }}>
-              <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
-                <Shield size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
-                Feature Availability Switches
-              </h2>
-              <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
-                Enable or pause public portals and workflows.
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-3)' }}>
-              <div>
-                <Checkbox
-                  checked={registrationOpen}
-                  onChange={(e) => setRegistrationOpen(e.target.checked)}
-                  label="Sinoog Run Registration Open"
-                />
-                <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)', marginLeft: '32px' }}>
-                  When enabled, eligible participants can submit registration forms and upload payment evidence.
-                </small>
-              </div>
-
-              <div>
-                <Checkbox
-                  checked={delegationsEnabled}
-                  onChange={(e) => setDelegationsEnabled(e.target.checked)}
-                  label="Delegation Submission Portal Open"
-                />
-                <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)', marginLeft: '32px' }}>
-                  Allows authorized delegation heads to submit participant rosters and musical pieces.
-                </small>
-              </div>
-
-              <div>
-                <Checkbox
-                  checked={sponsorsEnabled}
-                  onChange={(e) => setSponsorsEnabled(e.target.checked)}
-                  label="Display Sponsors Page & Footers"
-                />
-                <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)', marginLeft: '32px' }}>
-                  Show verified corporate and community benefactors.
-                </small>
-              </div>
-
-              <div>
-                <Checkbox
-                  checked={galleryEnabled}
-                  onChange={(e) => setGalleryEnabled(e.target.checked)}
-                  label="Display Public Media Gallery"
-                />
-                <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)', marginLeft: '32px' }}>
-                  Enable photo albums and video recordings of previous and current celebrations.
-                </small>
-              </div>
-            </div>
-          </Card>
-
-          {/* Section 5: Urgent Public Announcement Banner */}
-          <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
-            <div style={{ marginBottom: 'var(--md-space-4)' }}>
-              <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
-                <Bell size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
-                Public Announcement Banner
-              </h2>
-              <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
-                Broadcast high-visibility notifications or emergency advisories across all public pages.
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-4)' }}>
-              <Checkbox
-                checked={bannerEnabled}
-                onChange={(e) => setBannerEnabled(e.target.checked)}
-                label="Enable announcement banner on website"
-              />
-
-              {bannerEnabled && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--md-space-3)' }}>
-                  <TextField
-                    label="Banner Text / Advisory"
-                    placeholder="e.g. Weather Advisory: Holy Mass venue transferred to parish hall due to rain."
-                    value={bannerText}
-                    onChange={(e) => setBannerText(e.target.value)}
-                  />
-                  <SelectField
-                    label="Severity Tone"
-                    value={bannerSeverity}
-                    onChange={(e) => setBannerSeverity(e.target.value as 'info' | 'warning' | 'alert')}
-                  >
-                    <option value="info">Information (Blue)</option>
-                    <option value="warning">Notice / Caution (Gold)</option>
-                    <option value="alert">Urgent / Advisory (Wine Red)</option>
-                  </SelectField>
+          {/* CATEGORY 1: PARISH IDENTITY & DATES */}
+          {(settingsCategory === 'all' || settingsCategory === 'parish') && (
+            <>
+              {settingsCategory === 'all' && (
+                <div className="admin-shortcuts-group-header" style={{ marginTop: '4px' }}>
+                  <h3 className="admin-shortcuts-group-title">Parish Identity, Dates & Contacts</h3>
+                  <p className="admin-shortcuts-group-desc">Official titles, liturgical calendar dates, and contact channels.</p>
                 </div>
               )}
-            </div>
-          </Card>
 
-          {/* Section 6: Official Committee Contact & Socials */}
-          <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
-            <div style={{ marginBottom: 'var(--md-space-4)' }}>
-              <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
-                <Mail size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
-                Official Contacts & Channels
-              </h2>
-              <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
-                Publicized in the footer and About page for participant inquiries.
-              </p>
-            </div>
+              {/* Section 1: Edition & Parish Identity */}
+              <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
+                <div style={{ marginBottom: 'var(--md-space-4)' }}>
+                  <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
+                    <Calendar size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
+                    Edition & Parish Identity
+                  </h2>
+                  <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+                    Official event title, parish name, and geographical location.
+                  </p>
+                </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--md-space-3)' }}>
-              <TextField
-                label="Support Email"
-                type="email"
-                placeholder="e.g. sto.nino.guinacot@gmail.com"
-                value={contactEmail}
-                onChange={(e) => setContactEmail(e.target.value)}
-              />
-              <TextField
-                label="Mobile / Telephone"
-                type="tel"
-                placeholder="e.g. +63 912 345 6789"
-                value={contactPhone}
-                onChange={(e) => setContactPhone(e.target.value)}
-              />
-              <TextField
-                label="Office Hours"
-                placeholder="e.g. Monday - Saturday, 8:00 AM - 5:00 PM"
-                value={officeHours}
-                onChange={(e) => setOfficeHours(e.target.value)}
-              />
-              <TextField
-                label="Facebook Page URL"
-                type="url"
-                placeholder="e.g. https://facebook.com/stoninoguinacot"
-                value={socialFb}
-                onChange={(e) => setSocialFb(e.target.value)}
-              />
-            </div>
-          </Card>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 'var(--md-space-3)' }}>
+                  <TextField
+                    label="Edition Name"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                  <TextField
+                    label="Parish Name"
+                    required
+                    value={parishName}
+                    onChange={(e) => setParishName(e.target.value)}
+                  />
+                  <TextField
+                    label="Official Location"
+                    required
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                  />
+                  <TextField
+                    label="Official Timezone"
+                    disabled
+                    value={timezone}
+                    helperText="All event schedules are authoritatively stored in Asia/Manila."
+                  />
+                </div>
+              </Card>
+
+              {/* Section 2: Key Event Dates */}
+              <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
+                <div style={{ marginBottom: 'var(--md-space-4)' }}>
+                  <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
+                    <Calendar size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
+                    Key Celebration Dates
+                  </h2>
+                  <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+                    Governs countdowns and key event labels across the website.
+                  </p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--md-space-3)' }}>
+                  <TextField
+                    label="Sinoog Run Date"
+                    type="date"
+                    value={runDate}
+                    onChange={(e) => setRunDate(e.target.value)}
+                  />
+                  <TextField
+                    label="Novena Start Date"
+                    type="date"
+                    value={novenaStartDate}
+                    onChange={(e) => setNovenaStartDate(e.target.value)}
+                  />
+                  <TextField
+                    label="Fiesta & Festival Day"
+                    type="date"
+                    value={fiestaDate}
+                    onChange={(e) => setFiestaDate(e.target.value)}
+                  />
+                </div>
+              </Card>
+
+              {/* Section 3: Official Committee Contact & Socials */}
+              <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
+                <div style={{ marginBottom: 'var(--md-space-4)' }}>
+                  <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
+                    <Mail size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
+                    Official Contacts & Channels
+                  </h2>
+                  <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+                    Publicized in the footer and About page for participant inquiries.
+                  </p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--md-space-3)' }}>
+                  <TextField
+                    label="Support Email"
+                    type="email"
+                    placeholder="e.g. sto.nino.guinacot@gmail.com"
+                    value={contactEmail}
+                    onChange={(e) => setContactEmail(e.target.value)}
+                  />
+                  <TextField
+                    label="Mobile / Telephone"
+                    type="tel"
+                    placeholder="e.g. +63 912 345 6789"
+                    value={contactPhone}
+                    onChange={(e) => setContactPhone(e.target.value)}
+                  />
+                  <TextField
+                    label="Office Hours"
+                    placeholder="e.g. Monday - Saturday, 8:00 AM - 5:00 PM"
+                    value={officeHours}
+                    onChange={(e) => setOfficeHours(e.target.value)}
+                  />
+                  <TextField
+                    label="Facebook Page URL"
+                    type="url"
+                    placeholder="e.g. https://facebook.com/stoninoguinacot"
+                    value={socialFb}
+                    onChange={(e) => setSocialFb(e.target.value)}
+                  />
+                </div>
+              </Card>
+            </>
+          )}
+
+          {/* CATEGORY 2: RUN OPERATIONS & REGISTRATION */}
+          {(settingsCategory === 'all' || settingsCategory === 'run') && (
+            <>
+              {settingsCategory === 'all' && (
+                <div className="admin-shortcuts-group-header" style={{ marginTop: '8px' }}>
+                  <h3 className="admin-shortcuts-group-title">Sinoog Run & Registration Operations</h3>
+                  <p className="admin-shortcuts-group-desc">Payment destination, registration deadlines, and race bib printing.</p>
+                </div>
+              )}
+
+              {/* Section 4: Sinoog Run operational settings */}
+              <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
+                <div style={{ marginBottom: 'var(--md-space-4)' }}>
+                  <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
+                    <CreditCard size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
+                    Sinoog Run Registration & GCash
+                  </h2>
+                  <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+                    Editable payment destination, registration deadline, and race start time.
+                  </p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--md-space-3)' }}>
+                  <TextField
+                    label="GCash Number"
+                    type="tel"
+                    inputMode="numeric"
+                    value={gcashNumber}
+                    onChange={(e) => setGcashNumber(e.target.value.replace(/[^0-9+]/g, ''))}
+                    placeholder="09260265423"
+                  />
+                  <TextField
+                    label="GCash Account Name"
+                    value={gcashAccountName}
+                    onChange={(e) => setGcashAccountName(e.target.value)}
+                    placeholder="Add when confirmed"
+                  />
+                  <TextField
+                    label="Registration Opens"
+                    type="datetime-local"
+                    value={registrationOpensAt}
+                    onChange={(e) => setRegistrationOpensAt(e.target.value)}
+                  />
+                  <TextField
+                    label="Registration Deadline"
+                    type="datetime-local"
+                    value={registrationClosesAt}
+                    onChange={(e) => setRegistrationClosesAt(e.target.value)}
+                    helperText="Leave blank while the deadline is still to be announced."
+                  />
+                  <TextField
+                    label="Race Start Date & Time"
+                    type="datetime-local"
+                    value={raceStartsAt}
+                    onChange={(e) => setRaceStartsAt(e.target.value)}
+                    helperText="Leave blank until official start time is confirmed."
+                  />
+                </div>
+              </Card>
+
+              {/* Section 5: Race Bibs & Official Logo */}
+              <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
+                <div style={{ marginBottom: 'var(--md-space-4)' }}>
+                  <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
+                    <Printer size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
+                    Race Bibs &amp; Official Logo
+                  </h2>
+                  <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+                    Upload the official Sinoog Run bib logo and print approved runner bibs in 8×13″ landscape (2 bibs per sheet).
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--md-space-4)', flexWrap: 'wrap', background: 'var(--md-sys-color-surface-container-low)', padding: 'var(--md-space-4)', borderRadius: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-4)' }}>
+                    <div style={{ width: '90px', height: '65px', background: '#ffffff', border: '1px solid var(--md-sys-color-outline-variant)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }}>
+                      <img src={bibLogoUrl} alt="Bib Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                    </div>
+                    <div>
+                      <strong style={{ display: 'block', fontSize: '0.95rem' }}>Upper Left Bib Logo</strong>
+                      <span style={{ fontSize: '0.80rem', color: 'var(--md-sys-color-on-surface-variant)' }}>
+                        Upload finalized event logo here anytime — automatically converts on all race bibs.
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', flexWrap: 'wrap' }}>
+                    <input
+                      id={logoInputId}
+                      ref={logoFileInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                      style={{ display: 'none' }}
+                      onChange={handleUploadBibLogo}
+                    />
+                    <Button
+                      type="button"
+                      variant="outlined"
+                      size="small"
+                      leadingIcon={<Upload size={16} />}
+                      disabled={uploadingBibLogo}
+                      onClick={() => logoFileInputRef.current?.click()}
+                    >
+                      {uploadingBibLogo ? 'Uploading logo…' : 'Upload final logo'}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="filled"
+                      size="small"
+                      leadingIcon={<Printer size={16} />}
+                      onClick={() => setBibPrintModalOpen(true)}
+                    >
+                      Print approved bibs (8×13″)
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            </>
+          )}
+
+          {/* CATEGORY 3: SYSTEM AVAILABILITY & ANNOUNCEMENTS */}
+          {(settingsCategory === 'all' || settingsCategory === 'system') && (
+            <>
+              {settingsCategory === 'all' && (
+                <div className="admin-shortcuts-group-header" style={{ marginTop: '8px' }}>
+                  <h3 className="admin-shortcuts-group-title">System Switches & Public Advisories</h3>
+                  <p className="admin-shortcuts-group-desc">Feature availability switches and urgent public announcement banner.</p>
+                </div>
+              )}
+
+              {/* Section 6: Feature Switches */}
+              <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
+                <div style={{ marginBottom: 'var(--md-space-4)' }}>
+                  <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
+                    <Shield size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
+                    Feature Availability Switches
+                  </h2>
+                  <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+                    Enable or pause public portals and workflows.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-3)' }}>
+                  <div>
+                    <Checkbox
+                      checked={registrationOpen}
+                      onChange={(e) => setRegistrationOpen(e.target.checked)}
+                      label="Sinoog Run Registration Open"
+                    />
+                    <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)', marginLeft: '32px' }}>
+                      When enabled, eligible participants can submit registration forms and upload payment evidence.
+                    </small>
+                  </div>
+
+                  <div>
+                    <Checkbox
+                      checked={delegationsEnabled}
+                      onChange={(e) => setDelegationsEnabled(e.target.checked)}
+                      label="Delegation Submission Portal Open"
+                    />
+                    <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)', marginLeft: '32px' }}>
+                      Allows authorized delegation heads to submit participant rosters and musical pieces.
+                    </small>
+                  </div>
+
+                  <div>
+                    <Checkbox
+                      checked={sponsorsEnabled}
+                      onChange={(e) => setSponsorsEnabled(e.target.checked)}
+                      label="Display Sponsors Page & Footers"
+                    />
+                    <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)', marginLeft: '32px' }}>
+                      Show verified corporate and community benefactors.
+                    </small>
+                  </div>
+
+                  <div>
+                    <Checkbox
+                      checked={galleryEnabled}
+                      onChange={(e) => setGalleryEnabled(e.target.checked)}
+                      label="Display Public Media Gallery"
+                    />
+                    <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)', marginLeft: '32px' }}>
+                      Enable photo albums and video recordings of previous and current celebrations.
+                    </small>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Section 7: Urgent Public Announcement Banner */}
+              <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
+                <div style={{ marginBottom: 'var(--md-space-4)' }}>
+                  <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
+                    <Bell size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
+                    Public Announcement Banner
+                  </h2>
+                  <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+                    Broadcast high-visibility notifications or emergency advisories across all public pages.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-4)' }}>
+                  <Checkbox
+                    checked={bannerEnabled}
+                    onChange={(e) => setBannerEnabled(e.target.checked)}
+                    label="Enable announcement banner on website"
+                  />
+
+                  {bannerEnabled && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--md-space-3)' }}>
+                      <TextField
+                        label="Banner Text / Advisory"
+                        placeholder="e.g. Weather Advisory: Holy Mass venue transferred to parish hall due to rain."
+                        value={bannerText}
+                        onChange={(e) => setBannerText(e.target.value)}
+                      />
+                      <SelectField
+                        label="Severity Tone"
+                        value={bannerSeverity}
+                        onChange={(e) => setBannerSeverity(e.target.value as 'info' | 'warning' | 'alert')}
+                      >
+                        <option value="info">Information (Blue)</option>
+                        <option value="warning">Notice / Caution (Gold)</option>
+                        <option value="alert">Urgent / Advisory (Wine Red)</option>
+                      </SelectField>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </>
+          )}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--md-space-2)', marginBottom: 'var(--md-space-6)' }}>
             <Button variant="filled" type="submit" loading={saving} leadingIcon={<Save size={18} />}>

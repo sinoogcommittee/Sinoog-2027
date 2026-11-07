@@ -14,6 +14,8 @@ import {
   Ban,
   Mail,
   Users,
+  UserCheck,
+  Tag,
 } from 'lucide-react';
 import {
   createManagedStaffAccount,
@@ -509,67 +511,84 @@ export function UsersManagerPage() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <div className="users-header-actions">
           {isSuperAdmin && (
             <Button
               variant="outlined"
-              leadingIcon={<KeyRound size={17} />}
+              size="small"
+              leadingIcon={<KeyRound size={16} />}
               onClick={() => {
                 setLastGeneratedInvite(null);
                 setInviteNote('');
                 setInviteCustomCode('');
                 setInviteModalOpen(true);
               }}
+              title="Generate committee invite code"
             >
-              Generate invite code
+              <span className="btn-label-desktop">Generate invite code</span>
+              <span className="btn-label-mobile">Generate code</span>
             </Button>
           )}
-          <Button variant="filled" leadingIcon={<UserPlus size={17} />} onClick={openCreateStaff}>
-            Create staff account
+          <Button
+            variant="filled"
+            size="small"
+            leadingIcon={<UserPlus size={16} />}
+            onClick={openCreateStaff}
+            title="Create staff account"
+          >
+            <span className="btn-label-desktop">Create staff account</span>
+            <span className="btn-label-mobile">Create account</span>
           </Button>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--md-sys-color-outline-variant)', marginBottom: '16px' }}>
+      {/* Navigation Tabs (Material 3 Segmented Bar) */}
+      <div className="users-segmented-nav" role="tablist" aria-label="Users section navigation">
         <button
           type="button"
-          className={`button ${activeTab === 'users' ? 'button--filled' : 'button--ghost'}`}
+          role="tab"
+          aria-selected={activeTab === 'users'}
+          className={`users-segmented-tab${activeTab === 'users' ? ' is-active' : ''}`}
           onClick={() => setActiveTab('users')}
-          style={{ borderRadius: '8px 8px 0 0' }}
         >
-          Staff & Registered Users ({users.length})
+          <Users size={16} className="users-tab-icon" />
+          <span className="users-tab-label">
+            <span className="tab-text-full">Staff & Users</span>
+            <span className="tab-text-short">Users</span>
+          </span>
+          <span className="users-tab-count">{users.length}</span>
         </button>
+
         <button
           type="button"
-          className={`button ${activeTab === 'requests' ? 'button--filled' : 'button--ghost'}`}
+          role="tab"
+          aria-selected={activeTab === 'requests'}
+          className={`users-segmented-tab${activeTab === 'requests' ? ' is-active' : ''}`}
           onClick={() => setActiveTab('requests')}
-          style={{ borderRadius: '8px 8px 0 0', position: 'relative' }}
         >
-          Pending Approvals
+          <UserCheck size={16} className="users-tab-icon" />
+          <span className="users-tab-label">
+            <span className="tab-text-full">Pending Approvals</span>
+            <span className="tab-text-short">Approvals</span>
+          </span>
           {pendingCount > 0 && (
-            <span
-              style={{
-                marginLeft: '8px',
-                padding: '2px 7px',
-                borderRadius: '12px',
-                background: activeTab === 'requests' ? '#fff' : 'var(--md-sys-color-primary)',
-                color: activeTab === 'requests' ? 'var(--md-sys-color-primary)' : '#fff',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-              }}
-            >
-              {pendingCount}
-            </span>
+            <span className="users-tab-badge">{pendingCount}</span>
           )}
         </button>
+
         <button
           type="button"
-          className={`button ${activeTab === 'invites' ? 'button--filled' : 'button--ghost'}`}
+          role="tab"
+          aria-selected={activeTab === 'invites'}
+          className={`users-segmented-tab${activeTab === 'invites' ? ' is-active' : ''}`}
           onClick={() => setActiveTab('invites')}
-          style={{ borderRadius: '8px 8px 0 0' }}
         >
-          Invite Codes ({invites.length})
+          <KeyRound size={16} className="users-tab-icon" />
+          <span className="users-tab-label">
+            <span className="tab-text-full">Invite Codes</span>
+            <span className="tab-text-short">Invites</span>
+          </span>
+          <span className="users-tab-count">{invites.length}</span>
         </button>
       </div>
 
@@ -635,28 +654,35 @@ export function UsersManagerPage() {
                 return (
                   <div key={u.id} className="admin-table__row users-table__grid users-table__row">
                     <div className="users-table__identity">
-                      <strong>{u.full_name || 'Unnamed account'}</strong>
+                      <div className="users-table__name-wrap">
+                        <strong>{u.full_name || 'Unnamed account'}</strong>
+                        <span className="users-table__status-mobile">
+                          <StatusBadge tone={u.suspended_at ? 'danger' : 'success'}>
+                            {u.suspended_at ? 'Suspended' : 'Active'}
+                          </StatusBadge>
+                        </span>
+                      </div>
                       {u.email && (
-                        <div style={{ fontSize: '0.8rem', color: 'var(--md-sys-color-primary)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
-                          <Mail size={12} />
+                        <div className="users-table__email-row">
+                          <Mail size={13} aria-hidden="true" />
                           <span>{u.email}</span>
                         </div>
                       )}
-                      <small style={{ display: 'block', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.75rem' }}>
-                        {u.id.slice(0, 8)}…
+                      <small className="users-table__id-small">
+                        ID: {u.id.slice(0, 8)}…
                       </small>
                     </div>
                     <div className="users-table__contact">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Phone size={14} aria-hidden="true" />
                         <span>{u.mobile || '—'}</span>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <MapPin size={14} aria-hidden="true" />
                         <small>{u.locality || '—'}</small>
                       </div>
                     </div>
-                    <div className="users-table__roles" style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                    <div className="users-table__roles">
                       {staffRoles.length === 0 ? (
                         <StatusBadge tone="warning">Runner</StatusBadge>
                       ) : (
@@ -667,12 +693,12 @@ export function UsersManagerPage() {
                         ))
                       )}
                     </div>
-                    <div className="users-table__status">
+                    <div className="users-table__status users-table__status-desktop">
                       <StatusBadge tone={u.suspended_at ? 'danger' : 'success'}>
                         {u.suspended_at ? 'Suspended' : 'Active'}
                       </StatusBadge>
                     </div>
-                    <div className="users-table__actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
+                    <div className="users-table__actions">
                       <button
                         type="button"
                         className="button button--ghost button--sm users-table__icon-button"
@@ -721,8 +747,8 @@ export function UsersManagerPage() {
               message="When committee members use their invite code to register via Google, their requests will appear here for review."
             />
           ) : (
-            <div className="admin-table">
-              <div className="admin-table__head" style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr 1fr 1fr 2fr', gap: '12px', alignItems: 'center' }}>
+            <div className="admin-table requests-table">
+              <div className="admin-table__head requests-table__head requests-table__grid">
                 <span>Applicant</span>
                 <span>Contact / Address</span>
                 <span>Invite Code</span>
@@ -734,11 +760,17 @@ export function UsersManagerPage() {
               {requests.map((req) => (
                 <div
                   key={req.id}
-                  className="admin-table__row"
-                  style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr 1fr 1fr 2fr', gap: '12px', alignItems: 'center' }}
+                  className="admin-table__row requests-table__row requests-table__grid"
                 >
                   <div>
-                    <strong>{req.applicantName}</strong>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <strong>{req.applicantName}</strong>
+                      <span className="mobile-only">
+                        <StatusBadge tone={req.status === 'approved' ? 'success' : req.status === 'rejected' ? 'danger' : 'warning'}>
+                          {req.status === 'approved' ? 'Approved' : req.status === 'rejected' ? 'Rejected' : 'Pending'}
+                        </StatusBadge>
+                      </span>
+                    </div>
                     {req.applicantEmail && (
                       <div style={{ fontSize: '0.8rem', color: 'var(--md-sys-color-primary)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
                         <Mail size={12} />
@@ -761,18 +793,18 @@ export function UsersManagerPage() {
                   <div style={{ fontSize: '0.85rem' }}>
                     {new Date(req.requested_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </div>
-                  <div>
+                  <div className="desktop-only">
                     <StatusBadge tone={req.status === 'approved' ? 'success' : req.status === 'rejected' ? 'danger' : 'warning'}>
                       {req.status === 'approved' ? 'Approved' : req.status === 'rejected' ? 'Rejected' : 'Pending'}
                     </StatusBadge>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px', flexWrap: 'wrap' }}>
                     {req.status === 'pending' ? (
                       <>
-                        <Button variant="filled" onClick={() => openApproveModal(req)}>
+                        <Button variant="filled" size="small" onClick={() => openApproveModal(req)}>
                           Approve & Assign Roles
                         </Button>
-                        <Button variant="outlined" onClick={() => void handleRejectRequest(req)}>
+                        <Button variant="outlined" size="small" onClick={() => void handleRejectRequest(req)}>
                           Reject
                         </Button>
                       </>
@@ -840,117 +872,93 @@ export function UsersManagerPage() {
                 const pendingClaimantsCount = inv.claimants.filter((c) => c.status === 'pending').length;
 
                 return (
-                  <Card
-                    key={inv.id}
-                    variant="outlined"
-                    style={{
-                      padding: '20px',
-                      borderRadius: '16px',
-                      borderColor: active ? 'var(--md-sys-color-outline-variant)' : 'var(--md-sys-color-outline)',
-                      background: active ? 'var(--md-sys-color-surface)' : 'var(--md-sys-color-surface-container-low)',
-                    }}
-                  >
+                  <div key={inv.id} className={`invite-card${active ? ' is-active' : ' is-inactive'}`}>
                     {/* Top Header Row */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                          <code
-                            style={{
-                              fontSize: '1.25rem',
-                              fontWeight: 800,
-                              letterSpacing: '1px',
-                              padding: '4px 10px',
-                              background: 'var(--md-sys-color-surface-container-high)',
-                              border: '1px solid var(--md-sys-color-outline-variant)',
-                              borderRadius: '8px',
-                              color: 'var(--md-sys-color-primary)',
-                            }}
-                          >
-                            {inv.code}
-                          </code>
-                          <StatusBadge tone={!inv.is_active ? 'danger' : isExpired ? 'danger' : isExhausted ? 'neutral' : 'success'}>
-                            {!inv.is_active ? 'Revoked' : isExpired ? 'Expired' : isExhausted ? 'Fully Claimed' : 'Active — Ready to Claim'}
+                    <div className="invite-card__header">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <code className="invite-card__code-badge">
+                          {inv.code}
+                        </code>
+                        <StatusBadge tone={!inv.is_active ? 'danger' : isExpired ? 'danger' : isExhausted ? 'neutral' : 'success'}>
+                          {!inv.is_active ? 'Revoked' : isExpired ? 'Expired' : isExhausted ? 'Fully Claimed' : 'Active — Ready to Claim'}
+                        </StatusBadge>
+                        {pendingClaimantsCount > 0 && (
+                          <StatusBadge tone="warning">
+                            {pendingClaimantsCount} Pending
                           </StatusBadge>
-                          {pendingClaimantsCount > 0 && (
-                            <StatusBadge tone="warning">
-                              {pendingClaimantsCount} Pending Approval
-                            </StatusBadge>
-                          )}
-                        </div>
-                        <div style={{ marginTop: '8px', fontSize: '0.92rem' }}>
-                          <strong>Assignment / Purpose:</strong>{' '}
-                          <span style={{ color: inv.note ? 'inherit' : 'var(--md-sys-color-on-surface-variant)' }}>
-                            {inv.note || 'General Committee Invitation'}
-                          </span>
-                        </div>
+                        )}
                       </div>
 
-                      {/* Action buttons */}
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <div className="invite-card__purpose">
+                        <Tag size={14} style={{ color: 'var(--md-sys-color-primary)', flexShrink: 0 }} />
+                        <span><strong>Assignment:</strong> {inv.note || 'General Committee Invitation'}</span>
+                      </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="invite-card__actions">
+                      <Button
+                        variant="filled"
+                        size="small"
+                        leadingIcon={<Copy size={15} />}
+                        onClick={() => void copyText(joinUrl, 'Direct invite link copied!')}
+                        title="Copy direct onboarding link"
+                        style={{ width: '100%', justifyContent: 'center' }}
+                      >
+                        Copy Onboarding Link
+                      </Button>
+                      <div className="invite-card__actions-secondary">
                         <Button
                           variant="outlined"
                           size="small"
-                          leadingIcon={<Copy size={15} />}
-                          onClick={() => void copyText(joinUrl, 'Direct invite link copied!')}
-                          title="Copy direct onboarding link"
-                        >
-                          Copy Onboarding Link
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="small"
-                          leadingIcon={<Copy size={15} />}
+                          leadingIcon={<Copy size={16} />}
                           onClick={() => void copyText(inv.code, 'Invite code copied!')}
-                          title="Copy code only"
+                          title="Copy invite code"
+                          aria-label="Copy invite code"
+                          className="invite-action-btn invite-action-btn--copy"
                         >
-                          Copy Code
+                          <span className="invite-btn-label">Copy Code</span>
                         </Button>
                         {isSuperAdmin && inv.is_active && (
                           <Button
-                            variant="ghost"
+                            variant="outlined"
                             size="small"
-                            leadingIcon={<Ban size={15} />}
+                            leadingIcon={<Ban size={16} />}
                             onClick={() => void handleRevokeInvite(inv.id)}
-                            style={{ color: 'var(--md-sys-color-error)' }}
+                            style={{ color: 'var(--md-sys-color-error)', borderColor: 'rgba(186, 26, 26, 0.35)' }}
                             title="Deactivate this invite code so no more staff can claim it"
+                            aria-label="Deactivate invite code"
+                            className="invite-action-btn invite-action-btn--deactivate"
                           >
-                            Deactivate
+                            <span className="invite-btn-label">Deactivate</span>
                           </Button>
                         )}
                         {isSuperAdmin && (
                           <Button
-                            variant="ghost"
+                            variant="outlined"
                             size="small"
-                            leadingIcon={<Trash2 size={15} />}
+                            leadingIcon={<Trash2 size={16} />}
                             onClick={() => void handleDeleteInvite(inv)}
-                            style={{ color: 'var(--md-sys-color-error)' }}
+                            style={{ color: 'var(--md-sys-color-error)', borderColor: 'rgba(186, 26, 26, 0.35)' }}
                             title="Permanently delete invite code so it is not seen on this page"
+                            aria-label="Delete invite code"
+                            className="invite-action-btn invite-action-btn--delete"
                           >
-                            Delete
+                            <span className="invite-btn-label">Delete</span>
                           </Button>
                         )}
                       </div>
                     </div>
 
-                    {/* Real-Time Tracking Grid */}
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-                        gap: '12px',
-                        padding: '12px 16px',
-                        background: 'var(--md-sys-color-surface-container)',
-                        borderRadius: '12px',
-                        marginBottom: '16px',
-                      }}
-                    >
-                      <div>
-                        <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--md-sys-color-on-surface-variant)' }}>
+                    {/* Real-Time Tracking Grid (2x2 on mobile, 4-col on desktop) */}
+                    <div className="invite-card__metrics">
+                      <div className="invite-card__metric-tile">
+                        <span className="invite-card__metric-label">
                           Usage Tracking
                         </span>
-                        <div style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: '2px' }}>
+                        <div className="invite-card__metric-value">
                           {inv.uses_count === 0 ? (
-                            <span style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>0 used (Not claimed)</span>
+                            <span style={{ color: 'var(--md-sys-color-on-surface-variant)', fontWeight: 500 }}>0 used</span>
                           ) : (
                             <span style={{ color: 'var(--md-sys-color-primary)' }}>
                               {inv.uses_count} {inv.uses_count === 1 ? 'staff joined' : 'staff joined'}
@@ -959,28 +967,28 @@ export function UsersManagerPage() {
                         </div>
                       </div>
 
-                      <div>
-                        <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--md-sys-color-on-surface-variant)' }}>
+                      <div className="invite-card__metric-tile">
+                        <span className="invite-card__metric-label">
                           Slots Remaining
                         </span>
-                        <div style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: '2px' }}>
+                        <div className="invite-card__metric-value">
                           {inv.remainingUses === 'unlimited' ? (
-                            <span>Unlimited slots</span>
+                            <span>Unlimited</span>
                           ) : inv.remainingUses === 0 ? (
                             <span style={{ color: 'var(--md-sys-color-error)' }}>0 left (Full)</span>
                           ) : (
                             <span style={{ color: '#2e7d32' }}>
-                              {inv.remainingUses} left <span style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--md-sys-color-on-surface-variant)' }}>(of {inv.max_uses})</span>
+                              {inv.remainingUses} left <small style={{ fontSize: '0.76rem', color: 'var(--md-sys-color-on-surface-variant)', fontWeight: 500 }}>(of {inv.max_uses})</small>
                             </span>
                           )}
                         </div>
                       </div>
 
-                      <div>
-                        <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--md-sys-color-on-surface-variant)' }}>
-                          Expiration Date
+                      <div className="invite-card__metric-tile">
+                        <span className="invite-card__metric-label">
+                          Expires
                         </span>
-                        <div style={{ fontSize: '0.92rem', fontWeight: 600, marginTop: '4px' }}>
+                        <div className="invite-card__metric-value" style={{ fontSize: '0.86rem' }}>
                           {inv.expires_at ? (
                             new Date(inv.expires_at).toLocaleDateString('en-PH', {
                               month: 'short',
@@ -988,16 +996,16 @@ export function UsersManagerPage() {
                               year: 'numeric',
                             })
                           ) : (
-                            'Never expires'
+                            'Never'
                           )}
                         </div>
                       </div>
 
-                      <div>
-                        <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--md-sys-color-on-surface-variant)' }}>
-                          Created Date
+                      <div className="invite-card__metric-tile">
+                        <span className="invite-card__metric-label">
+                          Created
                         </span>
-                        <div style={{ fontSize: '0.92rem', fontWeight: 600, marginTop: '4px' }}>
+                        <div className="invite-card__metric-value" style={{ fontSize: '0.86rem' }}>
                           {new Date(inv.created_at).toLocaleDateString('en-PH', {
                             month: 'short',
                             day: 'numeric',
@@ -1127,7 +1135,7 @@ export function UsersManagerPage() {
                         </div>
                       )}
                     </div>
-                  </Card>
+                  </div>
                 );
               })}
             </div>

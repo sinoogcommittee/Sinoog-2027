@@ -7,6 +7,7 @@ import {
   AdminActivitiesIcon,
   AdminNewsIcon,
   AdminRegistrationsIcon,
+  AdminKitClaimIcon,
   AdminTimingIcon,
   AdminDelegationsIcon,
   AdminUsersIcon,
@@ -43,7 +44,7 @@ export function AdminFloatingNav() {
 
   const allItems: AdminNavItemDef[] = useMemo(
     () => [
-      // Page 1: Core Operations (1 - 5)
+      // 1. Core Operations
       {
         label: 'Overview',
         path: '/admin',
@@ -51,23 +52,19 @@ export function AdminFloatingNav() {
         permission: 'overview',
         exact: true,
       },
-      {
-        label: 'Activities',
-        path: '/admin/activities',
-        renderIcon: () => <AdminActivitiesIcon />,
-        permission: 'activities',
-      },
-      {
-        label: 'News',
-        path: '/admin/posts',
-        renderIcon: () => <AdminNewsIcon />,
-        permission: 'posts',
-      },
+
+      // 2. Run Operations (Chronological race tools)
       {
         label: 'Registrations',
         path: '/admin/registrations',
         renderIcon: () => <AdminRegistrationsIcon />,
         permission: 'registrations',
+      },
+      {
+        label: 'Kit Claims',
+        path: '/admin/kit-claims',
+        renderIcon: () => <AdminKitClaimIcon />,
+        permission: 'kit_claims',
       },
       {
         label: 'Timing',
@@ -76,24 +73,26 @@ export function AdminFloatingNav() {
         permission: 'run_timing',
       },
 
-      // Page 2: Management & Records (6 - 10)
+      // 3. Festival & Liturgy (Parish events & contingents)
+      {
+        label: 'Activities',
+        path: '/admin/activities',
+        renderIcon: () => <AdminActivitiesIcon />,
+        permission: 'activities',
+      },
       {
         label: 'Delegations',
         path: '/admin/delegations',
         renderIcon: () => <AdminDelegationsIcon />,
         permission: 'delegations',
       },
+
+      // 4. Communications & Media (Public content)
       {
-        label: 'Users',
-        path: '/admin/users',
-        renderIcon: () => <AdminUsersIcon />,
-        permission: 'users',
-      },
-      {
-        label: 'Finance',
-        path: '/admin/finance',
-        renderIcon: () => <AdminFinanceIcon />,
-        permission: 'finance',
+        label: 'News',
+        path: '/admin/posts',
+        renderIcon: () => <AdminNewsIcon />,
+        permission: 'posts',
       },
       {
         label: 'Sponsors',
@@ -107,20 +106,34 @@ export function AdminFloatingNav() {
         renderIcon: () => <AdminGalleryIcon />,
         permission: 'gallery',
       },
+
+      // 5. Governance & System (Administration, ledger & audit)
       {
-        label: 'Audit history',
+        label: 'Users',
+        path: '/admin/users',
+        renderIcon: () => <AdminUsersIcon />,
+        permission: 'users',
+      },
+      {
+        label: 'Finance',
+        path: '/admin/finance',
+        renderIcon: () => <AdminFinanceIcon />,
+        permission: 'finance',
+      },
+      {
+        label: 'Audit',
         path: '/admin/audit',
         renderIcon: () => <AdminAuditIcon />,
         permission: 'audit',
       },
-
-      // Page 3: System, External & Session (11 - 13)
       {
         label: 'Settings',
         path: '/admin/settings',
         renderIcon: () => <AdminSettingsIcon />,
         permission: 'settings',
       },
+
+      // 6. External & Session Actions
       {
         label: 'Public site',
         path: '/',

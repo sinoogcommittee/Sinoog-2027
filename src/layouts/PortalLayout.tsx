@@ -1,3 +1,4 @@
+import { useMemo, type ReactNode } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { LogoMark } from '../components/LogoMark';
 import { useAuth } from '../features/auth/useAuth';
@@ -22,20 +23,58 @@ import {
 
 import type { AdminPermission } from '../features/auth/authState';
 
-const items = [
-  ['Overview', '/admin', AdminOverviewIcon, 'overview'],
-  ['Activities & Schedule', '/admin/activities', AdminActivitiesIcon, 'activities'],
-  ['News posts', '/admin/posts', AdminNewsIcon, 'posts'],
-  ['Registrations', '/admin/registrations', AdminRegistrationsIcon, 'registrations'],
-  ['Kit claiming', '/admin/kit-claims', AdminKitClaimIcon, 'kit_claims'],
-  ['Race timing', '/admin/run-timing', AdminTimingIcon, 'run_timing'],
-  ['Delegations', '/admin/delegations', AdminDelegationsIcon, 'delegations'],
-  ['Users & Staff', '/admin/users', AdminUsersIcon, 'users'],
-  ['Financial records', '/admin/finance', AdminFinanceIcon, 'finance'],
-  ['Sponsors', '/admin/sponsors', AdminSponsorsIcon, 'sponsors'],
-  ['Gallery', '/admin/gallery', AdminGalleryIcon, 'gallery'],
-  ['Audit history', '/admin/audit', AdminAuditIcon, 'audit'],
-  ['Website settings', '/admin/settings', AdminSettingsIcon, 'settings'],
+export interface PortalNavItem {
+  label: string;
+  path: string;
+  Icon: () => ReactNode;
+  permission: AdminPermission;
+  exact?: boolean;
+}
+
+export interface PortalNavSection {
+  category: string;
+  items: readonly PortalNavItem[];
+}
+
+const NAV_SECTIONS: readonly PortalNavSection[] = [
+  {
+    category: 'Core Operations',
+    items: [
+      { label: 'Overview', path: '/admin', Icon: AdminOverviewIcon, permission: 'overview', exact: true },
+    ],
+  },
+  {
+    category: 'Run Operations',
+    items: [
+      { label: 'Registrations', path: '/admin/registrations', Icon: AdminRegistrationsIcon, permission: 'registrations' },
+      { label: 'Kit Claiming', path: '/admin/kit-claims', Icon: AdminKitClaimIcon, permission: 'kit_claims' },
+      { label: 'Race Timing', path: '/admin/run-timing', Icon: AdminTimingIcon, permission: 'run_timing' },
+    ],
+  },
+  {
+    category: 'Festival & Liturgy',
+    items: [
+      { label: 'Activities & Schedule', path: '/admin/activities', Icon: AdminActivitiesIcon, permission: 'activities' },
+      { label: 'Delegations', path: '/admin/delegations', Icon: AdminDelegationsIcon, permission: 'delegations' },
+    ],
+  },
+  {
+    category: 'Communications & Media',
+    items: [
+      { label: 'News Posts', path: '/admin/posts', Icon: AdminNewsIcon, permission: 'posts' },
+      { label: 'Sponsors', path: '/admin/sponsors', Icon: AdminSponsorsIcon, permission: 'sponsors' },
+      { label: 'Media Gallery', path: '/admin/gallery', Icon: AdminGalleryIcon, permission: 'gallery' },
+    ],
+  },
+  {
+    category: 'Governance & System',
+    items: [
+      { label: 'Users & Staff', path: '/admin/users', Icon: AdminUsersIcon, permission: 'users' },
+      { label: 'Financial Records', path: '/admin/finance', Icon: AdminFinanceIcon, permission: 'finance' },
+      { label: 'Audit History', path: '/admin/audit', Icon: AdminAuditIcon, permission: 'audit' },
+      { label: 'Website Settings', path: '/admin/settings', Icon: AdminSettingsIcon, permission: 'settings' },
+    ],
+  },
 ] as const;
 
 export function PortalLayout() {
@@ -52,7 +91,13 @@ export function PortalLayout() {
       : staffRoleCount > 0
         ? `${staffRoleCount} assigned role${staffRoleCount > 1 ? 's' : ''}`
         : 'Committee Staff';
-  const visibleItems = items.filter(([, , , permission]) => canAccess(permission as AdminPermission));
+
+  const visibleSections = useMemo(() => {
+    return NAV_SECTIONS.map((section) => ({
+      ...section,
+      items: section.items.filter((item) => canAccess(item.permission)),
+    })).filter((section) => section.items.length > 0);
+  }, [canAccess]);
 
   async function handleSignOut() {
     await signOut();
@@ -71,19 +116,28 @@ export function PortalLayout() {
         </Link>
         <div className="portal-nav-scroll">
           <nav aria-label="Committee workspace navigation">
-            {visibleItems.map(([label, path, Icon]) => (
-              <NavLink
-                className="portal-nav-item"
-                key={path}
-                to={path}
-                end={path === '/admin'}
-                title={label}
-              >
-                <span className="portal-nav-icon">
-                  <Icon />
-                </span>
-                <span>{label}</span>
-              </NavLink>
+            {visibleSections.map((section) => (
+              <div key={section.category} className="portal-nav-section">
+                <div className="portal-nav-category-header">
+                  <span>{section.category}</span>
+                </div>
+                <div className="portal-nav-section-items">
+                  {section.items.map((item) => (
+                    <NavLink
+                      className="portal-nav-item"
+                      key={item.path}
+                      to={item.path}
+                      end={item.exact}
+                      title={item.label}
+                    >
+                      <span className="portal-nav-icon">
+                        <item.Icon />
+                      </span>
+                      <span>{item.label}</span>
+                    </NavLink>
+                  ))}
+                </div>
+              </div>
             ))}
           </nav>
           <div className="portal-sidebar-actions">
