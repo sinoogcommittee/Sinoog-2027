@@ -5007,3 +5007,266 @@ a.m3-button:hover { text-decoration: none; }
   border-radius: 10px;
   font-weight: 600;
 }
+
+/* Official Race Kits Showcase above Category Cards */
+.run-kits-showcase {
+  margin: 1.25rem 0 2rem;
+}
+
+.run-kits-showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.run-kit-showcase-card {
+  background: var(--md-sys-color-surface, #ffffff);
+  border: 1px solid var(--md-sys-color-outline-variant, #e7ded7);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(65, 10, 18, 0.04);
+  display: flex;
+  flex-direction: column;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.run-kit-showcase-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(65, 10, 18, 0.08);
+}
+
+.run-kit-showcase-card__header {
+  padding: 12px 14px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant, #f0e7e1);
+  background: var(--md-sys-color-surface-container-low, #fbf7f4);
+}
+
+.run-kit-showcase-card__title {
+  margin: 0;
+  font-family: Fraunces, serif;
+  font-size: 1.05rem;
+  color: var(--md-sys-color-on-surface, #231917);
+  font-weight: 700;
+}
+
+.run-kit-showcase-card__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #fdfaf7;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.run-kit-showcase-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 220ms ease;
+}
+
+.run-kit-showcase-card__media:hover .run-kit-showcase-card__img {
+  transform: scale(1.02);
+}
+
+.run-kit-showcase-card__thumbnails {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px 10px;
+  background: var(--md-sys-color-surface, #ffffff);
+  border-top: 1px solid var(--md-sys-color-outline-variant, #f0e7e1);
+}
+
+.run-kit-showcase-card__thumb-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--md-sys-color-outline-variant, #e0d0c5);
+  background: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 140ms ease;
+}
+
+.run-kit-showcase-card__thumb-btn.active {
+  border: 2px solid var(--wine, #741f29);
+  box-shadow: 0 0 0 1px #d4a754;
+}
+
+.run-kit-showcase-card__thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Mobile Race Kits Carousel with Blurred Peeks */
+.run-kits-showcase-desktop {
+  display: block;
+}
+
+.run-kits-showcase-mobile {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .run-kits-showcase-desktop {
+    display: none;
+  }
+
+  .run-kits-showcase-mobile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .run-mobile-kit-pills {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    width: 100%;
+    overflow-x: auto;
+    padding: 2px 4px;
+  }
+
+  .run-mobile-kit-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    background: var(--md-sys-color-surface-container-low, #fbf7f4);
+    border: 1px solid var(--md-sys-color-outline-variant, #e7ded7);
+    color: var(--md-sys-color-on-surface-variant, #6b5a52);
+    cursor: pointer;
+    transition: all 180ms ease;
+    min-height: 40px;
+  }
+
+  .run-mobile-kit-pill.active {
+    background: var(--wine, #741f29);
+    color: #ffffff;
+    border-color: var(--wine, #741f29);
+    box-shadow: 0 4px 12px rgba(116, 31, 41, 0.28);
+  }
+
+  .run-mobile-kit-stage {
+    position: relative;
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+    touch-action: pan-y;
+  }
+
+  .run-mobile-kit-peek {
+    position: relative;
+    width: 88%;
+    height: 48px;
+    overflow: hidden;
+    border: 1px solid var(--md-sys-color-outline-variant, #e7ded7);
+    background: #f0e7e1;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(65, 10, 18, 0.06);
+    transition: transform 180ms ease, opacity 180ms ease;
+    z-index: 1;
+  }
+
+  .run-mobile-kit-peek--top {
+    border-radius: 14px 14px 0 0;
+    margin-bottom: -10px;
+    transform: scale(0.93);
+    opacity: 0.75;
+  }
+
+  .run-mobile-kit-peek--bottom {
+    border-radius: 0 0 14px 14px;
+    margin-top: -10px;
+    transform: scale(0.93);
+    opacity: 0.75;
+  }
+
+  .run-mobile-kit-peek:active {
+    transform: scale(0.96);
+    opacity: 0.95;
+  }
+
+  .run-mobile-kit-peek__backdrop {
+    position: absolute;
+    inset: -10px;
+    overflow: hidden;
+    filter: blur(8px) brightness(0.8);
+    transform: scale(1.15);
+  }
+
+  .run-mobile-kit-peek__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .run-mobile-kit-peek__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ece3db;
+    color: #8a7468;
+  }
+
+  .run-mobile-kit-peek__badge {
+    position: relative;
+    z-index: 2;
+    background: rgba(35, 25, 23, 0.78);
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 12px;
+    letter-spacing: 0.3px;
+    backdrop-filter: blur(4px);
+  }
+
+  .run-mobile-kit-card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    background: var(--md-sys-color-surface, #ffffff);
+    border: 1px solid var(--md-sys-color-outline-variant, #e7ded7);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 26px rgba(65, 10, 18, 0.1);
+  }
+
+  .run-mobile-kit-swipe-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+    color: var(--md-sys-color-on-surface-variant, #8a7468);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+}

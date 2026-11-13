@@ -81,6 +81,39 @@ export function RunPage({ section }: { section?: 'routes' }) {
     });
   }, []);
 
+  const [mobileCategoryIdx, setMobileCategoryIdx] = useState<number>(0);
+  const carouselTouchStartX = useRef<number | null>(null);
+  const carouselTouchStartY = useRef<number | null>(null);
+
+  const handleCarouselTouchStart = useCallback((e: React.TouchEvent) => {
+    carouselTouchStartX.current = e.touches[0].clientX;
+    carouselTouchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleCarouselTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (carouselTouchStartX.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - carouselTouchStartX.current;
+    const deltaY = carouselTouchStartY.current !== null
+      ? e.changedTouches[0].clientY - carouselTouchStartY.current
+      : 0;
+    carouselTouchStartX.current = null;
+    carouselTouchStartY.current = null;
+
+    if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX < 0) {
+        setMobileCategoryIdx((prev) => (prev + 1) % (categories.length || 1));
+      } else {
+        setMobileCategoryIdx((prev) => (prev - 1 + (categories.length || 1)) % (categories.length || 1));
+      }
+    } else if (Math.abs(deltaY) > 50 && Math.abs(deltaY) > Math.abs(deltaX)) {
+      if (deltaY < 0) {
+        setMobileCategoryIdx((prev) => (prev + 1) % (categories.length || 1));
+      } else {
+        setMobileCategoryIdx((prev) => (prev - 1 + (categories.length || 1)) % (categories.length || 1));
+      }
+    }
+  }, [categories.length]);
+
   useEffect(() => {
     if (!kitLightbox) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -305,6 +338,340 @@ export function RunPage({ section }: { section?: 'routes' }) {
                   );
                 })}
               </div>
+
+              {/* Official Race Kits Showcase - Visual Preview */}
+              {(() => {
+                const safeMobileIdx = categories.length > 0 ? (mobileCategoryIdx % categories.length) : 0;
+                const currentMobileCat = categories[safeMobileIdx];
+                const prevMobileCat = categories.length > 1 ? categories[(safeMobileIdx - 1 + categories.length) % categories.length] : null;
+                const nextMobileCat = categories.length > 1 ? categories[(safeMobileIdx + 1) % categories.length] : null;
+
+                const getCategoryKitImages = (catId: string): string[] => {
+                  const kitData = storedRaceKits[catId];
+                  return Array.isArray(kitData?.images) && kitData.images.length > 0
+                    ? kitData.images
+                    : kitData?.image_url
+                      ? [kitData.image_url]
+                      : [];
+                };
+
+                const currentMobileImages = currentMobileCat ? getCategoryKitImages(currentMobileCat.id) : [];
+                const activeMobilePhotoIdx = currentMobileCat ? (cardPhotoIndices[currentMobileCat.id] || 0) : 0;
+                const currentMobilePhoto = currentMobileImages[activeMobilePhotoIdx] || currentMobileImages[0] || '';
+
+                const prevMobileImages = prevMobileCat ? getCategoryKitImages(prevMobileCat.id) : [];
+                const prevMobilePhoto = prevMobileImages[0] || '';
+
+                const nextMobileImages = nextMobileCat ? getCategoryKitImages(nextMobileCat.id) : [];
+                const nextMobilePhoto = nextMobileImages[0] || '';
+
+                return (
+                  <div className="run-kits-showcase">
+                    {/* Desktop View: Full 3-card grid */}
+                    <div className="run-kits-showcase-desktop">
+                      <div className="run-kits-showcase-grid">
+                        {categories.map((c) => {
+                          const kitData = storedRaceKits[c.id];
+                          const kitImages: string[] = Array.isArray(kitData?.images) && kitData.images.length > 0
+                            ? kitData.images
+                            : kitData?.image_url
+                              ? [kitData.image_url]
+                              : [];
+                          const activePhotoIdx = cardPhotoIndices[c.id] || 0;
+                          const currentPhoto = kitImages[activePhotoIdx] || kitImages[0];
+
+                          return (
+                            <div key={`showcase-${c.id}`} className="run-kit-showcase-card">
+                              <div className="run-kit-showcase-card__header">
+                                <span className="activity-type activity-type--run">{formatKm(c.distance_meters)}</span>
+                                <h3 className="run-kit-showcase-card__title">{c.name}</h3>
+                              </div>
+
+                              <div
+                                className="run-kit-showcase-card__media"
+                                onClick={() => {
+                                  if (kitImages.length > 0) {
+                                    setKitLightbox({
+                                      title: `${c.name} Official Race Kit`,
+                                      distanceKm: formatKm(c.distance_meters),
+                                      images: kitImages,
+                                      currentIndex: activePhotoIdx,
+                                    });
+                                  }
+                                }}
+                                title={kitImages.length > 0 ? 'Click to full screen preview (swipeable left/right)' : undefined}
+                              >
+                                {kitImages.length > 0 ? (
+                                  <>
+                                    <img
+                                      src={currentPhoto}
+                                      alt={`Official Race Kit for ${c.name} - Photo ${activePhotoIdx + 1}`}
+                                      className="run-kit-showcase-card__img"
+                                    />
+
+                                    {kitImages.length > 1 && (
+                                      <div className="run-kit-card-photo-controls">
+                                        <button
+                                          type="button"
+                                          className="run-kit-card-arrow-btn"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setCardPhotoIndices((prev) => ({
+                                              ...prev,
+                                              [c.id]: (activePhotoIdx - 1 + kitImages.length) % kitImages.length,
+                                            }));
+                                          }}
+                                          aria-label="Previous photo"
+                                        >
+                                          <ChevronLeft size={16} />
+                                        </button>
+
+                                        <span className="run-kit-card-badge">
+                                          {activePhotoIdx + 1} / {kitImages.length}
+                                        </span>
+
+                                        <button
+                                          type="button"
+                                          className="run-kit-card-arrow-btn"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setCardPhotoIndices((prev) => ({
+                                              ...prev,
+                                              [c.id]: (activePhotoIdx + 1) % kitImages.length,
+                                            }));
+                                          }}
+                                          aria-label="Next photo"
+                                        >
+                                          <ChevronRight size={16} />
+                                        </button>
+                                      </div>
+                                    )}
+
+                                    <span className="run-kit-modal-card__zoom-hint">
+                                      <Eye size={13} /> Full screen preview
+                                    </span>
+                                  </>
+                                ) : (
+                                  <div className="run-kit-modal-card__placeholder">
+                                    <PackageOpen size={36} style={{ opacity: 0.6, marginBottom: '6px' }} />
+                                    <strong style={{ fontSize: '0.85rem' }}>Official Kit Photo Pending</strong>
+                                    <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Design preview will be released by the committee.</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {kitImages.length > 1 && (
+                                <div className="run-kit-showcase-card__thumbnails">
+                                  {kitImages.map((img: string, idx: number) => (
+                                    <button
+                                      key={`showcase-thumb-${img}-${idx}`}
+                                      type="button"
+                                      className={`run-kit-showcase-card__thumb-btn ${idx === activePhotoIdx ? 'active' : ''}`}
+                                      onClick={() =>
+                                        setCardPhotoIndices((prev) => ({
+                                          ...prev,
+                                          [c.id]: idx,
+                                        }))
+                                      }
+                                      aria-label={`Show photo ${idx + 1}`}
+                                    >
+                                      <img src={img} alt="" />
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Mobile View: 1-display Carousel with Blurred Peeks */}
+                    {currentMobileCat && (
+                      <div className="run-kits-showcase-mobile">
+                        {/* Category selection pills */}
+                        <div className="run-mobile-kit-pills" role="tablist" aria-label="Select race kit category">
+                          {categories.map((cat, idx) => (
+                            <button
+                              key={`m-pill-${cat.id}`}
+                              type="button"
+                              role="tab"
+                              aria-selected={idx === safeMobileIdx}
+                              className={`run-mobile-kit-pill ${idx === safeMobileIdx ? 'active' : ''}`}
+                              onClick={() => setMobileCategoryIdx(idx)}
+                            >
+                              <span className="run-mobile-kit-pill__dist">{formatKm(cat.distance_meters)}</span>
+                              <span>{cat.name.split(' ')[0]}</span>
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Interactive Stage with Top/Bottom blurred peeks */}
+                        <div
+                          className="run-mobile-kit-stage"
+                          onTouchStart={handleCarouselTouchStart}
+                          onTouchEnd={handleCarouselTouchEnd}
+                        >
+                          {/* TOP PEEK: Previous Category blurred */}
+                          {prevMobileCat && (
+                            <button
+                              type="button"
+                              className="run-mobile-kit-peek run-mobile-kit-peek--top"
+                              onClick={() => setMobileCategoryIdx((prev) => (prev - 1 + categories.length) % categories.length)}
+                              aria-label={`View ${prevMobileCat.name} race kit`}
+                            >
+                              <div className="run-mobile-kit-peek__backdrop">
+                                {prevMobilePhoto ? (
+                                  <img src={prevMobilePhoto} alt="" className="run-mobile-kit-peek__img" />
+                                ) : (
+                                  <div className="run-mobile-kit-peek__placeholder">
+                                    <PackageOpen size={16} />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="run-mobile-kit-peek__badge">
+                                <span>▲ {formatKm(prevMobileCat.distance_meters)} · {prevMobileCat.name}</span>
+                              </div>
+                            </button>
+                          )}
+
+                          {/* CENTER CARD: Current Category (active, sharp) */}
+                          <div className="run-mobile-kit-card">
+                            <div className="run-kit-showcase-card__header">
+                              <span className="activity-type activity-type--run">{formatKm(currentMobileCat.distance_meters)}</span>
+                              <h3 className="run-kit-showcase-card__title">{currentMobileCat.name}</h3>
+                            </div>
+
+                            <div
+                              className="run-kit-showcase-card__media"
+                              onClick={() => {
+                                if (currentMobileImages.length > 0) {
+                                  setKitLightbox({
+                                    title: `${currentMobileCat.name} Official Race Kit`,
+                                    distanceKm: formatKm(currentMobileCat.distance_meters),
+                                    images: currentMobileImages,
+                                    currentIndex: activeMobilePhotoIdx,
+                                  });
+                                }
+                              }}
+                              title={currentMobileImages.length > 0 ? 'Click to full screen preview (swipeable left/right)' : undefined}
+                            >
+                              {currentMobileImages.length > 0 ? (
+                                <>
+                                  <img
+                                    src={currentMobilePhoto}
+                                    alt={`Official Race Kit for ${currentMobileCat.name} - Photo ${activeMobilePhotoIdx + 1}`}
+                                    className="run-kit-showcase-card__img"
+                                  />
+
+                                  {currentMobileImages.length > 1 && (
+                                    <div className="run-kit-card-photo-controls">
+                                      <button
+                                        type="button"
+                                        className="run-kit-card-arrow-btn"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setCardPhotoIndices((prev) => ({
+                                            ...prev,
+                                            [currentMobileCat.id]: (activeMobilePhotoIdx - 1 + currentMobileImages.length) % currentMobileImages.length,
+                                          }));
+                                        }}
+                                        aria-label="Previous photo"
+                                      >
+                                        <ChevronLeft size={16} />
+                                      </button>
+
+                                      <span className="run-kit-card-badge">
+                                        {activeMobilePhotoIdx + 1} / {currentMobileImages.length}
+                                      </span>
+
+                                      <button
+                                        type="button"
+                                        className="run-kit-card-arrow-btn"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setCardPhotoIndices((prev) => ({
+                                            ...prev,
+                                            [currentMobileCat.id]: (activeMobilePhotoIdx + 1) % currentMobileImages.length,
+                                          }));
+                                        }}
+                                        aria-label="Next photo"
+                                      >
+                                        <ChevronRight size={16} />
+                                      </button>
+                                    </div>
+                                  )}
+
+                                  <span className="run-kit-modal-card__zoom-hint">
+                                    <Eye size={13} /> Full screen preview
+                                  </span>
+                                </>
+                              ) : (
+                                <div className="run-kit-modal-card__placeholder">
+                                  <PackageOpen size={36} style={{ opacity: 0.6, marginBottom: '6px' }} />
+                                  <strong style={{ fontSize: '0.85rem' }}>Official Kit Photo Pending</strong>
+                                  <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Design preview will be released by the committee.</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {currentMobileImages.length > 1 && (
+                              <div className="run-kit-showcase-card__thumbnails">
+                                {currentMobileImages.map((img: string, idx: number) => (
+                                  <button
+                                    key={`m-showcase-thumb-${img}-${idx}`}
+                                    type="button"
+                                    className={`run-kit-showcase-card__thumb-btn ${idx === activeMobilePhotoIdx ? 'active' : ''}`}
+                                    onClick={() =>
+                                      setCardPhotoIndices((prev) => ({
+                                        ...prev,
+                                        [currentMobileCat.id]: idx,
+                                      }))
+                                    }
+                                    aria-label={`Show photo ${idx + 1}`}
+                                  >
+                                    <img src={img} alt="" />
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* BOTTOM PEEK: Next Category blurred */}
+                          {nextMobileCat && (
+                            <button
+                              type="button"
+                              className="run-mobile-kit-peek run-mobile-kit-peek--bottom"
+                              onClick={() => setMobileCategoryIdx((prev) => (prev + 1) % categories.length)}
+                              aria-label={`View ${nextMobileCat.name} race kit`}
+                            >
+                              <div className="run-mobile-kit-peek__backdrop">
+                                {nextMobilePhoto ? (
+                                  <img src={nextMobilePhoto} alt="" className="run-mobile-kit-peek__img" />
+                                ) : (
+                                  <div className="run-mobile-kit-peek__placeholder">
+                                    <PackageOpen size={16} />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="run-mobile-kit-peek__badge">
+                                <span>▼ {formatKm(nextMobileCat.distance_meters)} · {nextMobileCat.name}</span>
+                              </div>
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Swipe navigation hint */}
+                        <div className="run-mobile-kit-swipe-hint">
+                          <ChevronLeft size={14} />
+                          <span>Swipe left / right to view categories</span>
+                          <ChevronRight size={14} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               <div className="feature-cards run-highlights">
                 <Card as="article" variant="outlined" className="run-highlight-card">
