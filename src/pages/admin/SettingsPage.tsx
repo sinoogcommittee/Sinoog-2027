@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef, useId, type FormEvent } from 'react';
-import { Save, Calendar, Shield, Bell, Mail, CreditCard, Printer, Upload } from 'lucide-react';
+import { Save, Calendar, Shield, Bell, Mail, CreditCard, Printer, Upload, PackageOpen, Trash2 } from 'lucide-react';
 import {
   getCurrentEdition,
   getSiteSettings,
@@ -8,7 +8,7 @@ import {
 } from '../../features/editions/editionQueries';
 import { LoadingState } from '../../features/ui/FeedbackStates';
 import { useToast } from '../../features/ui/useToast';
-import type { Edition, DbRunRegistration } from '../../types/database';
+import type { Edition, DbRunRegistration, Json } from '../../types/database';
 import { getRunEventAndCategories, updateRunEventSettings, getAllRegistrationsForAdmin, type RunCategory } from '../../features/run/runQueries';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/m3/Card';
@@ -73,6 +73,15 @@ export function SettingsPage() {
   const logoFileInputRef = useRef<HTMLInputElement | null>(null);
   const logoInputId = useId();
 
+  // Site settings - Official Race Kits per Category
+  interface CategoryRaceKitState {
+    image_url: string;
+    description: string;
+  }
+  const [raceKits, setRaceKits] = useState<Record<string, CategoryRaceKitState>>({});
+  const [uploadingKitCategoryId, setUploadingKitCategoryId] = useState<string | null>(null);
+  const kitFileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
   const fetchSettings = useCallback(async () => {
     try {
       const ed = await getCurrentEdition();
@@ -121,6 +130,34 @@ export function SettingsPage() {
         setBibLogoUrl(settings.race_bib.logo_url);
         localStorage.setItem('sinoog_bib_logo_url', settings.race_bib.logo_url);
       }
+
+      // Initialize race kits from settings or localStorage fallback
+      let initialKits: Record<string, CategoryRaceKitState> = {};
+      if (settings.race_kits?.kits) {
+        initialKits = { ...(settings.race_kits.kits as Record<string, CategoryRaceKitState>) };
+      } else {
+        try {
+          const cached = localStorage.getItem('sinoog_race_kits');
+          if (cached) {
+            initialKits = JSON.parse(cached);
+          }
+        } catch {
+          // ignore cache error
+        }
+      }
+
+      // Populate any category that does not yet have an entry in initialKits
+      cats.forEach((c) => {
+        if (!initialKits[c.id]) {
+          initialKits[c.id] = {
+            image_url: '',
+            description: c.kit_description || '',
+          };
+        } else if (!initialKits[c.id].description && c.kit_description) {
+          initialKits[c.id].description = c.kit_description;
+        }
+      });
+      setRaceKits(initialKits);
     } catch (err: unknown) {
       console.error('Failed to load settings:', err);
       toast('Failed to load settings from Supabase.', 'error');
@@ -130,64 +167,8 @@ export function SettingsPage() {
   }, [toast]);
 
   useEffect(() => {
-    let mounted = true;
-    void (async () => {
-      try {
-        const ed = await getCurrentEdition();
-        if (!mounted) return;
-        setEdition(ed);
-
-        setName(ed.name);
-        setParishName(ed.parish_name);
-        setLocation(ed.location);
-        setTimezone(ed.timezone || 'Asia/Manila');
-        setRunDate(ed.run_date || '');
-        setNovenaStartDate(ed.novena_start_date || '');
-        setFiestaDate(ed.fiesta_date || '');
-        setRegistrationOpen(ed.registration_open);
-
-        const { event } = await getRunEventAndCategories(ed.id);
-        if (!mounted) return;
-        setRunEventId(event.id);
-        setRegistrationOpensAt(toManilaInput(event.registration_opens_at));
-        setRegistrationClosesAt(toManilaInput(event.registration_closes_at));
-        setRaceStartsAt(toManilaInput(event.race_starts_at));
-        setGcashNumber(event.gcash_number || '09260265423');
-        setGcashAccountName(event.gcash_account_name || '');
-
-        const settings = await getSiteSettings(ed.id);
-        if (!mounted) return;
-        if (settings.announcement_banner) {
-          setBannerEnabled(Boolean(settings.announcement_banner.enabled));
-          setBannerText(settings.announcement_banner.text || '');
-          setBannerSeverity(settings.announcement_banner.severity || 'info');
-        }
-        if (settings.feature_switches) {
-          setDelegationsEnabled(Boolean(settings.feature_switches.delegations_enabled));
-          setSponsorsEnabled(settings.feature_switches.sponsors_enabled ?? true);
-          setGalleryEnabled(settings.feature_switches.gallery_enabled ?? true);
-        }
-        if (settings.contact_info) {
-          setContactEmail(settings.contact_info.email || '');
-          setContactPhone(settings.contact_info.phone || '');
-          setOfficeHours(settings.contact_info.office_hours || '');
-          setSocialFb(settings.contact_info.social_fb || '');
-        }
-      } catch (err: unknown) {
-        if (!mounted) return;
-        console.error('Failed to load settings:', err);
-        toast('Failed to load settings from Supabase.', 'error');
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
-  }, [toast]);
+    void fetchSettings();
+  }, [fetchSettings]);
 
   const handleSaveAll = async (e: FormEvent) => {
     e.preventDefault();
@@ -239,6 +220,34 @@ export function SettingsPage() {
       await saveSiteSetting(edition.id, 'race_bib', {
         logo_url: bibLogoUrl,
       });
+
+      // 6. Save official race kits settings
+      await saveSiteSetting(edition.id, 'race_kits', {
+        kits: raceKits,
+        updated_at: new Date().toISOString(),
+      } as unknown as Json);
+      try {
+        localStorage.setItem('sinoog_race_kits', JSON.stringify(raceKits));
+      } catch {
+        // ignore
+      }
+
+      // 7. Synchronize updated kit descriptions to run_categories in database
+      if (supabase && categories.length > 0) {
+        for (const cat of categories) {
+          const updatedDesc = raceKits[cat.id]?.description;
+          if (updatedDesc !== undefined && updatedDesc !== cat.kit_description) {
+            try {
+              await supabase
+                .from('run_categories')
+                .update({ kit_description: updatedDesc.trim() || null })
+                .eq('id', cat.id);
+            } catch (catErr) {
+              console.warn(`Could not update category description for ${cat.id}:`, catErr);
+            }
+          }
+        }
+      }
 
       if (runEventId) {
         await updateRunEventSettings(runEventId, {
@@ -302,6 +311,107 @@ export function SettingsPage() {
     } finally {
       setUploadingBibLogo(false);
     }
+  };
+
+  const handleUploadKitPhoto = async (categoryId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !edition) return;
+
+    try {
+      setUploadingKitCategoryId(categoryId);
+      const fileExt = file.name.split('.').pop() || 'png';
+      const fileName = `race-kits/kit_${categoryId}_${Date.now()}.${fileExt}`;
+
+      let uploadedUrl: string | null = null;
+      if (supabase) {
+        const { error: uploadErr } = await supabase.storage
+          .from('public-media')
+          .upload(fileName, file, { upsert: true });
+
+        if (!uploadErr) {
+          const {
+            data: { publicUrl },
+          } = supabase.storage.from('public-media').getPublicUrl(fileName);
+          uploadedUrl = publicUrl;
+        } else {
+          console.warn('Supabase storage upload failed, falling back to local FileReader:', uploadErr);
+        }
+      }
+
+      if (!uploadedUrl) {
+        uploadedUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (event) => resolve((event.target?.result as string) || '');
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (uploadedUrl) {
+        const cat = categories.find((c) => c.id === categoryId);
+        const currentDesc = raceKits[categoryId]?.description ?? (cat?.kit_description || '');
+        const updatedKits: Record<string, CategoryRaceKitState> = {
+          ...raceKits,
+          [categoryId]: {
+            image_url: uploadedUrl,
+            description: currentDesc,
+          },
+        };
+        setRaceKits(updatedKits);
+        try {
+          localStorage.setItem('sinoog_race_kits', JSON.stringify(updatedKits));
+        } catch {
+          // ignore
+        }
+        await saveSiteSetting(edition.id, 'race_kits', {
+          kits: updatedKits,
+          updated_at: new Date().toISOString(),
+        } as unknown as Json);
+        toast(`Race kit photo uploaded for ${cat?.name || 'category'}!`, 'success');
+      }
+    } catch (err) {
+      console.error('Race kit photo upload failed:', err);
+      toast('Failed to upload race kit photo.', 'error');
+    } finally {
+      setUploadingKitCategoryId(null);
+      if (e.target) {
+        e.target.value = '';
+      }
+    }
+  };
+
+  const handleRemoveKitPhoto = async (categoryId: string) => {
+    const cat = categories.find((c) => c.id === categoryId);
+    const currentDesc = raceKits[categoryId]?.description ?? (cat?.kit_description || '');
+    const updatedKits: Record<string, CategoryRaceKitState> = {
+      ...raceKits,
+      [categoryId]: {
+        image_url: '',
+        description: currentDesc,
+      },
+    };
+    setRaceKits(updatedKits);
+    try {
+      localStorage.setItem('sinoog_race_kits', JSON.stringify(updatedKits));
+    } catch {
+      // ignore
+    }
+    if (edition) {
+      await saveSiteSetting(edition.id, 'race_kits', {
+        kits: updatedKits,
+        updated_at: new Date().toISOString(),
+      } as unknown as Json);
+    }
+    toast(`Race kit photo removed for ${cat?.name || 'category'}.`, 'info');
+  };
+
+  const handleKitDescriptionChange = (categoryId: string, desc: string) => {
+    setRaceKits((prev) => ({
+      ...prev,
+      [categoryId]: {
+        image_url: prev[categoryId]?.image_url || '',
+        description: desc,
+      },
+    }));
   };
 
   if (loading) {
@@ -556,15 +666,15 @@ export function SettingsPage() {
                 </div>
               </Card>
 
-              {/* Section 5: Race Bibs & Official Logo */}
+              {/* Section 5: Race Bibs, Official Logo & Race Kits */}
               <Card variant="outlined" style={{ padding: 'var(--md-space-6)' }}>
                 <div style={{ marginBottom: 'var(--md-space-4)' }}>
                   <h2 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.25rem' }}>
                     <Printer size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
-                    Race Bibs &amp; Official Logo
+                    Race Bibs, Official Logo &amp; Official Race Kits
                   </h2>
                   <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
-                    Upload the official Sinoog Run bib logo and print approved runner bibs in 8×13″ landscape (2 bibs per sheet).
+                    Upload the official Sinoog Run bib logo, manage race kit photos and descriptions per category, and print approved runner bibs.
                   </p>
                 </div>
 
@@ -609,6 +719,205 @@ export function SettingsPage() {
                     >
                       Print approved bibs (8×13″)
                     </Button>
+                  </div>
+                </div>
+
+                {/* Section 5b: Official Race Kits per Category */}
+                <div style={{ marginTop: 'var(--md-space-6)', paddingTop: 'var(--md-space-6)', borderTop: '1px solid var(--md-sys-color-outline-variant)' }}>
+                  <div style={{ marginBottom: 'var(--md-space-4)' }}>
+                    <h3 style={{ display: 'flex', alignItems: 'center', gap: 'var(--md-space-2)', margin: 0, fontSize: '1.1rem' }}>
+                      <PackageOpen size={20} style={{ color: 'var(--md-sys-color-primary)' }} />
+                      Official Race Kits per Category
+                    </h3>
+                    <p style={{ margin: '4px 0 0 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.85rem' }}>
+                      Upload pictures of the official race kits (singlets, shirts, medals, inclusions) and configure the kit descriptions for each category. These appear dynamically in the Official Race Kit viewer on the public Run page.
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--md-space-4)' }}>
+                    {categories.length === 0 ? (
+                      <p style={{ fontStyle: 'italic', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+                        No categories loaded yet.
+                      </p>
+                    ) : (
+                      categories.map((c) => {
+                        const kitData = raceKits[c.id];
+                        const imageUrl = kitData?.image_url || '';
+                        const description = kitData?.description ?? (c.kit_description || '');
+                        const isUploading = uploadingKitCategoryId === c.id;
+
+                        return (
+                          <div
+                            key={c.id}
+                            style={{
+                              background: 'var(--md-sys-color-surface-container-low)',
+                              border: '1px solid var(--md-sys-color-outline-variant)',
+                              borderRadius: '10px',
+                              padding: 'var(--md-space-4)',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: 'var(--md-space-3)',
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span
+                                  style={{
+                                    background: 'var(--wine, #741f29)',
+                                    color: '#ffffff',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 700,
+                                    padding: '2px 8px',
+                                    borderRadius: '12px',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.04em',
+                                  }}
+                                >
+                                  {c.distance_meters / 1000}K
+                                </span>
+                                <strong style={{ fontSize: '1rem', color: 'var(--md-sys-color-on-surface)' }}>{c.name}</strong>
+                              </div>
+                              <span style={{ fontSize: '0.85rem', color: 'var(--md-sys-color-on-surface-variant)' }}>
+                                Fee: <strong>{(c.fee_centavos / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</strong>
+                              </span>
+                            </div>
+
+                            <div
+                              style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                                gap: 'var(--md-space-4)',
+                                alignItems: 'start',
+                              }}
+                            >
+                              {/* Photo upload and preview */}
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  gap: '8px',
+                                }}
+                              >
+                                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--md-sys-color-on-surface)' }}>
+                                  Kit Picture (Singlet, Shirt, Medal &amp; Inclusions)
+                                </span>
+                                <div
+                                  style={{
+                                    width: '100%',
+                                    height: '160px',
+                                    background: '#ffffff',
+                                    border: '1px dashed var(--md-sys-color-outline-variant)',
+                                    borderRadius: '8px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    overflow: 'hidden',
+                                    position: 'relative',
+                                  }}
+                                >
+                                  {imageUrl ? (
+                                    <img
+                                      src={imageUrl}
+                                      alt={`Official race kit for ${c.name}`}
+                                      style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'contain',
+                                        background: '#f8fafc',
+                                      }}
+                                    />
+                                  ) : (
+                                    <div
+                                      style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        padding: '12px',
+                                        textAlign: 'center',
+                                        color: 'var(--md-sys-color-on-surface-variant)',
+                                      }}
+                                    >
+                                      <PackageOpen size={32} style={{ opacity: 0.5, marginBottom: '6px' }} />
+                                      <span style={{ fontSize: '0.8rem' }}>No race kit picture uploaded yet</span>
+                                      <span style={{ fontSize: '0.72rem', opacity: 0.8 }}>JPG, PNG, or WebP</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                  <input
+                                    type="file"
+                                    accept="image/png,image/jpeg,image/webp"
+                                    style={{ display: 'none' }}
+                                    ref={(el) => {
+                                      kitFileInputRefs.current[c.id] = el;
+                                    }}
+                                    onChange={(e) => void handleUploadKitPhoto(c.id, e)}
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="outlined"
+                                    size="small"
+                                    leadingIcon={<Upload size={14} />}
+                                    disabled={isUploading}
+                                    onClick={() => kitFileInputRefs.current[c.id]?.click()}
+                                  >
+                                    {isUploading ? 'Uploading…' : imageUrl ? 'Change picture' : 'Upload picture'}
+                                  </Button>
+                                  {imageUrl && (
+                                    <Button
+                                      type="button"
+                                      variant="text"
+                                      size="small"
+                                      leadingIcon={<Trash2 size={14} />}
+                                      disabled={isUploading}
+                                      onClick={() => void handleRemoveKitPhoto(c.id)}
+                                      style={{ color: 'var(--md-sys-color-error, #ba1a1a)' }}
+                                    >
+                                      Remove
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Kit description & inclusions */}
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label
+                                  htmlFor={`kit-desc-${c.id}`}
+                                  style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--md-sys-color-on-surface)' }}
+                                >
+                                  Kit Inclusions &amp; Description
+                                </label>
+                                <textarea
+                                  id={`kit-desc-${c.id}`}
+                                  rows={5}
+                                  value={description}
+                                  onChange={(e) => handleKitDescriptionChange(c.id, e.target.value)}
+                                  placeholder="e.g., Official Sinoog 2027 Singlet / Full Sub, Race Bib, Finisher Medal, Hydration Support"
+                                  style={{
+                                    width: '100%',
+                                    padding: '10px 12px',
+                                    fontSize: '0.875rem',
+                                    lineHeight: 1.5,
+                                    borderRadius: '6px',
+                                    border: '1px solid var(--md-sys-color-outline-variant)',
+                                    background: 'var(--md-sys-color-surface)',
+                                    color: 'var(--md-sys-color-on-surface)',
+                                    resize: 'vertical',
+                                    fontFamily: 'inherit',
+                                    boxSizing: 'border-box',
+                                  }}
+                                />
+                                <span style={{ fontSize: '0.75rem', color: 'var(--md-sys-color-on-surface-variant)' }}>
+                                  Describes what is inside the kit for {c.name}. Updated live on public Run page when saved.
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               </Card>

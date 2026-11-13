@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Sinoog 2027 — public-page overrides for the Material 3 Button
  * Loaded AFTER global.css (see src/main.tsx) so it wins specificity ties.
  * Scope: only buttons rendered by src/components/Button.tsx (class "m3-button").
@@ -4666,4 +4666,185 @@ a.m3-button:hover { text-decoration: none; }
   border-radius: var(--md-sys-shape-corner-medium, 12px) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 2px 8px -2px rgba(76, 18, 27, 0.08) !important;
   padding: var(--md-space-5) !important;
+}
+
+
+/* ---------- Official Race Kits Modal & Cards (/run) ---------- */
+.m3-run-kits-dialog {
+  width: min(760px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+}
+
+.m3-run-lightbox-dialog {
+  width: min(880px, calc(100vw - 32px));
+}
+
+.run-kit-tab-btn {
+  background: var(--md-sys-color-surface-container-low);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface-variant);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.run-kit-tab-btn:hover {
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  border-color: #d4a754;
+}
+
+.run-kit-tab-btn.active {
+  background: var(--wine, #741f29);
+  color: #ffffff;
+  border-color: var(--wine, #741f29);
+}
+
+.run-kit-modal-card {
+  background: var(--md-sys-color-surface-container-low);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 12px;
+  padding: var(--md-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--md-space-3);
+  transition: border-color 150ms ease;
+}
+
+.run-kit-modal-card:hover {
+  border-color: #d4a754;
+}
+
+.run-kit-modal-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.run-kit-modal-card__body {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: var(--md-space-4);
+  align-items: stretch;
+}
+
+@media (max-width: 640px) {
+  .run-kit-modal-card__body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.run-kit-modal-card__photo-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.run-kit-modal-card__img-wrap {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  background: #ffffff;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.run-kit-modal-card__img-wrap:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border-color: #d4a754;
+}
+
+.run-kit-modal-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #f8fafc;
+}
+
+.run-kit-modal-card__zoom-hint {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.run-kit-modal-card__placeholder {
+  width: 100%;
+  min-height: 150px;
+  background: #ffffff;
+  border: 1px dashed var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.run-kit-modal-card__details-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.run-kit-modal-card__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.run-kit-modal-card__list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--md-sys-color-on-surface);
+  line-height: 1.4;
+}
+
+.run-category-card__kit-preview-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--wine, #741f29);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  transition: opacity 120ms ease;
+}
+
+.run-category-card__kit-preview-btn:hover {
+  text-decoration: underline;
+  opacity: 0.85;
 }

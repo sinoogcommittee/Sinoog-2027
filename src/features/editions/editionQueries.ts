@@ -40,6 +40,15 @@ export interface SiteSettingsMap {
   race_bib?: {
     logo_url?: string;
   };
+  race_kits?: {
+    kits?: Record<string, {
+      category_id: string;
+      image_url?: string;
+      description?: string;
+      title?: string;
+    }>;
+    updated_at?: string;
+  };
 }
 
 export async function getCurrentEdition(): Promise<Edition> {
@@ -85,6 +94,8 @@ export async function getSiteSettings(editionId: string): Promise<SiteSettingsMa
         settings.feature_switches = item.value as unknown as SiteSettingsMap['feature_switches'];
       } else if (item.key === 'race_bib') {
         settings.race_bib = item.value as unknown as SiteSettingsMap['race_bib'];
+      } else if (item.key === 'race_kits') {
+        settings.race_kits = item.value as unknown as SiteSettingsMap['race_kits'];
       }
     }
     return settings;

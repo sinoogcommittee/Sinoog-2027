@@ -4,6 +4,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
+  Eye,
   LogIn,
   PackageOpen,
   Route,
@@ -20,7 +21,7 @@ import {
   type RunCategory,
   type RunEvent,
 } from '../../features/run/runQueries';
-import { getCurrentEdition } from '../../features/editions/editionQueries';
+import { getCurrentEdition, getSiteSettings, type SiteSettingsMap } from '../../features/editions/editionQueries';
 import { useAuth } from '../../features/auth/useAuth';
 import type { DbRunRegistration } from '../../types';
 
@@ -46,6 +47,10 @@ export function RunPage({ section }: { section?: 'routes' }) {
   const [registrationOpen, setRegistrationOpen] = useState(false);
   const [registration, setRegistration] = useState<DbRunRegistration | null>(null);
   const [sizeChartOpen, setSizeChartOpen] = useState(false);
+  const [raceKitsModalOpen, setRaceKitsModalOpen] = useState(false);
+  const [selectedKitCategory, setSelectedKitCategory] = useState<string>('all');
+  const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string } | null>(null);
+  const [siteSettings, setSiteSettings] = useState<SiteSettingsMap | null>(null);
   const activeUserId = user?.id || (isDemoAdmin ? 'demo-user-123' : null);
 
   useEffect(() => {
@@ -54,7 +59,10 @@ export function RunPage({ section }: { section?: 'routes' }) {
       try {
         const ed = await getCurrentEdition();
         if (!mounted) return;
-        const { event, categories: cats } = await getRunEventAndCategories(ed.id);
+        const [{ event, categories: cats }, settings] = await Promise.all([
+          getRunEventAndCategories(ed.id),
+          getSiteSettings(ed.id).catch(() => ({})),
+        ]);
         if (!mounted) return;
         const now = Date.now();
         setRegistrationOpen(
@@ -64,6 +72,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
         );
         setRunEvent(event);
         setCategories(cats);
+        setSiteSettings(settings);
         if (activeUserId) {
           const state = await getUserRegistration(event.id, activeUserId);
           if (mounted) setRegistration(state.registration);
@@ -77,6 +86,15 @@ export function RunPage({ section }: { section?: 'routes' }) {
       mounted = false;
     };
   }, [activeUserId]);
+
+  const storedRaceKits = siteSettings?.race_kits?.kits || (() => {
+    try {
+      const cached = localStorage.getItem('sinoog_race_kits');
+      return cached ? JSON.parse(cached) : {};
+    } catch {
+      return {};
+    }
+  })();
 
   const hasActiveRegistration = Boolean(registration && !['rejected', 'cancelled'].includes(registration.status));
   const isApproved = registration?.status === 'approved';
@@ -163,20 +181,35 @@ export function RunPage({ section }: { section?: 'routes' }) {
                   const isRegisteredCategory =
                     hasActiveRegistration && registration?.category_id === c.id;
                   const canRegisterHere = registrationOpen && !hasActiveRegistration;
+                  const kitData = storedRaceKits[c.id];
+                  const kitImage = kitData?.image_url;
+                  const kitDescription = kitData?.description || c.kit_description;
 
                   return (
                     <Card key={c.id} as="article" variant="outlined" className="run-category-card">
                       <span className="activity-type activity-type--run">{formatKm(c.distance_meters)}</span>
                       <h3>{c.name}</h3>
                       <p className="run-category-card__price">{formatFee(c.fee_centavos)}</p>
-                      {c.kit_description ? (
-                        <p className="run-category-card__kit-text">{c.kit_description}</p>
+                      {kitDescription ? (
+                        <p className="run-category-card__kit-text">{kitDescription}</p>
                       ) : (
                         <ul className="run-category-card__kit">
                           <li>Event singlet / race kit</li>
                           <li>Bib number</li>
                           <li>Finisher recognition as announced</li>
                         </ul>
+                      )}
+                      {kitImage && (
+                        <button
+                          type="button"
+                          className="run-category-card__kit-preview-btn"
+                          onClick={() => {
+                            setSelectedKitCategory(c.id);
+                            setRaceKitsModalOpen(true);
+                          }}
+                        >
+                          <Eye size={13} /> View official kit photo
+                        </button>
                       )}
                       {c.min_age != null || c.max_age != null ? (
                         <p className="run-category-card__age">
@@ -223,6 +256,18 @@ export function RunPage({ section }: { section?: 'routes' }) {
               </div>
 
               <div className="run-utility-row">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="small"
+                  leadingIcon={<PackageOpen size={18} />}
+                  onClick={() => {
+                    setSelectedKitCategory('all');
+                    setRaceKitsModalOpen(true);
+                  }}
+                >
+                  Show all official race kits
+                </Button>
                 <Button type="button" variant="text" size="small" leadingIcon={<Ruler size={18} />} onClick={() => setSizeChartOpen(true)}>
                   View size chart
                 </Button>
@@ -250,7 +295,28 @@ export function RunPage({ section }: { section?: 'routes' }) {
                   </div>
                   <h3>Official Race Kit</h3>
                   <p>Event singlet, bib, and finisher items as announced for each category.</p>
-                  <strong className="run-highlight-card__footer">Exclusive Edition</strong>
+                  <strong className="run-highlight-card__footer">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedKitCategory('all');
+                        setRaceKitsModalOpen(true);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        font: 'inherit',
+                        color: 'inherit',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      Show all official race kits →
+                    </button>
+                  </strong>
                 </Card>
                 <Card as="article" variant="outlined" className="run-highlight-card">
                   <div className="run-highlight-card__icon-badge">
@@ -329,6 +395,186 @@ export function RunPage({ section }: { section?: 'routes' }) {
           If a supplier chart is uploaded by the committee, it will replace this reference table.
         </p>
       </Dialog>
+
+      {/* Official Race Kits Showcase Dialog */}
+      <Dialog
+        open={raceKitsModalOpen}
+        title="Official Sinoog Run Race Kits"
+        onClose={() => setRaceKitsModalOpen(false)}
+        className="m3-run-kits-dialog"
+        actions={
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', flexWrap: 'wrap', gap: '8px' }}>
+            <Button
+              type="button"
+              variant="text"
+              size="small"
+              leadingIcon={<Ruler size={16} />}
+              onClick={() => {
+                setRaceKitsModalOpen(false);
+                setSizeChartOpen(true);
+              }}
+            >
+              View singlet size guide
+            </Button>
+            <Button type="button" variant="text" size="small" onClick={() => setRaceKitsModalOpen(false)}>
+              Close
+            </Button>
+          </div>
+        }
+      >
+        <p style={{ margin: '0 0 16px 0', color: 'var(--md-sys-color-on-surface-variant)', fontSize: '0.875rem' }}>
+          Official commemorative apparel, race bibs, and finisher inclusions for each Sinoog Run distance. Click any kit photo to enlarge.
+        </p>
+
+        {/* Category filter tabs */}
+        <div className="run-kit-modal-tabs" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
+          <button
+            type="button"
+            className={`run-kit-tab-btn ${selectedKitCategory === 'all' ? 'active' : ''}`}
+            onClick={() => setSelectedKitCategory('all')}
+          >
+            All categories ({categories.length})
+          </button>
+          {categories.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              className={`run-kit-tab-btn ${selectedKitCategory === c.id ? 'active' : ''}`}
+              onClick={() => setSelectedKitCategory(c.id)}
+            >
+              {formatKm(c.distance_meters)}
+            </button>
+          ))}
+        </div>
+
+        {/* Category kit cards list */}
+        <div className="run-kit-modal-grid" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {categories
+            .filter((c) => selectedKitCategory === 'all' || selectedKitCategory === c.id)
+            .map((c) => {
+              const kitInfo = storedRaceKits[c.id];
+              const kitImage = kitInfo?.image_url;
+              const kitDescription = kitInfo?.description || c.kit_description;
+              const isRegisteredCategory = hasActiveRegistration && registration?.category_id === c.id;
+              const canRegisterHere = registrationOpen && !hasActiveRegistration;
+
+              return (
+                <div key={c.id} className="run-kit-modal-card">
+                  <div className="run-kit-modal-card__header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span className="activity-type activity-type--run">{formatKm(c.distance_meters)}</span>
+                      <h3 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--md-sys-color-on-surface)' }}>{c.name}</h3>
+                    </div>
+                    <strong style={{ fontSize: '1.1rem', color: 'var(--wine, #741f29)' }}>{formatFee(c.fee_centavos)}</strong>
+                  </div>
+
+                  <div className="run-kit-modal-card__body">
+                    {/* Photo column */}
+                    <div className="run-kit-modal-card__photo-col">
+                      {kitImage ? (
+                        <div
+                          className="run-kit-modal-card__img-wrap"
+                          onClick={() => setLightboxImage({ url: kitImage, title: `${c.name} Official Race Kit` })}
+                          title="Click to view full image"
+                        >
+                          <img src={kitImage} alt={`Official Race Kit for ${c.name}`} className="run-kit-modal-card__img" />
+                          <span className="run-kit-modal-card__zoom-hint">
+                            <Eye size={13} /> Click to enlarge
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="run-kit-modal-card__placeholder">
+                          <PackageOpen size={36} style={{ opacity: 0.6, marginBottom: '6px' }} />
+                          <strong style={{ fontSize: '0.85rem' }}>Official Kit Photo Pending</strong>
+                          <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Design preview will be released by the committee.</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Inclusions column */}
+                    <div className="run-kit-modal-card__details-col">
+                      <h4 style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: 'var(--md-sys-color-on-surface)' }}>
+                        Kit Inclusions &amp; Rewards:
+                      </h4>
+                      {kitDescription ? (
+                        <ul className="run-kit-modal-card__list">
+                          {kitDescription
+                            .split(/[,•\n]+/)
+                            .map((s) => s.trim())
+                            .filter(Boolean)
+                            .map((item, idx) => (
+                              <li key={idx}>
+                                <CheckCircle2 size={15} style={{ color: '#2e7d32', flexShrink: 0, marginTop: '2px' }} />
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                        </ul>
+                      ) : (
+                        <ul className="run-kit-modal-card__list">
+                          <li>
+                            <CheckCircle2 size={15} style={{ color: '#2e7d32', flexShrink: 0 }} />
+                            <span>Event Singlet / Event Shirt</span>
+                          </li>
+                          <li>
+                            <CheckCircle2 size={15} style={{ color: '#2e7d32', flexShrink: 0 }} />
+                            <span>Official Race Bib</span>
+                          </li>
+                          <li>
+                            <CheckCircle2 size={15} style={{ color: '#2e7d32', flexShrink: 0 }} />
+                            <span>Finisher Medal / Recognition</span>
+                          </li>
+                        </ul>
+                      )}
+
+                      <div style={{ marginTop: 'auto', paddingTop: '12px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        {isRegisteredCategory ? (
+                          <span style={{ fontSize: '0.85rem', color: '#2e7d32', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <CheckCircle2 size={15} /> Registered in this category
+                          </span>
+                        ) : canRegisterHere ? (
+                          <Button
+                            to={signedIn ? '/run/register' : '/signin?next=/run/register'}
+                            size="small"
+                            variant="filled"
+                            leadingIcon={<ArrowRight size={14} />}
+                            onClick={() => setRaceKitsModalOpen(false)}
+                          >
+                            Register for {formatKm(c.distance_meters)}
+                          </Button>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      </Dialog>
+
+      {/* Lightbox / Zoom Dialog */}
+      {lightboxImage && (
+        <Dialog
+          open={Boolean(lightboxImage)}
+          title={lightboxImage.title}
+          onClose={() => setLightboxImage(null)}
+          className="m3-run-lightbox-dialog"
+          actions={<Button type="button" variant="text" size="small" onClick={() => setLightboxImage(null)}>Close</Button>}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px', overflow: 'hidden' }}>
+            <img
+              src={lightboxImage.url}
+              alt={lightboxImage.title}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '70vh',
+                objectFit: 'contain',
+                borderRadius: '8px',
+                border: '1px solid var(--md-sys-color-outline-variant)',
+              }}
+            />
+          </div>
+        </Dialog>
+      )}
     </>
   );
 }
