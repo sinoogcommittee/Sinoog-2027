@@ -132,10 +132,12 @@ export function RunPage({ section }: { section?: 'routes' }) {
     };
   }, [activeUserId]);
 
-  const storedRaceKits = siteSettings?.race_kits?.kits || (() => {
+  type StoredRaceKits = NonNullable<NonNullable<SiteSettingsMap['race_kits']>['kits']>;
+
+  const storedRaceKits: StoredRaceKits = siteSettings?.race_kits?.kits || (() => {
     try {
       const cached = localStorage.getItem('sinoog_race_kits');
-      return cached ? JSON.parse(cached) : {};
+      return cached ? (JSON.parse(cached) as StoredRaceKits) : {};
     } catch {
       return {};
     }
@@ -227,12 +229,12 @@ export function RunPage({ section }: { section?: 'routes' }) {
                     hasActiveRegistration && registration?.category_id === c.id;
                   const canRegisterHere = registrationOpen && !hasActiveRegistration;
                   const kitData = storedRaceKits[c.id];
-                  const kitImages = Array.isArray(kitData?.images) && kitData.images.length > 0
+                  const kitImages: string[] = Array.isArray(kitData?.images) && kitData.images.length > 0
                     ? kitData.images
                     : kitData?.image_url
                       ? [kitData.image_url]
                       : [];
-                  const kitDescription = kitData?.description || c.kit_description;
+                  const kitDescription: string = kitData?.description || c.kit_description || '';
 
                   return (
                     <Card key={c.id} as="article" variant="outlined" className="run-category-card">
@@ -481,14 +483,14 @@ export function RunPage({ section }: { section?: 'routes' }) {
             .filter((c) => selectedKitCategory === 'all' || selectedKitCategory === c.id)
             .map((c) => {
               const kitInfo = storedRaceKits[c.id];
-              const kitImages = Array.isArray(kitInfo?.images) && kitInfo.images.length > 0
+              const kitImages: string[] = Array.isArray(kitInfo?.images) && kitInfo.images.length > 0
                 ? kitInfo.images
                 : kitInfo?.image_url
                   ? [kitInfo.image_url]
                   : [];
               const activePhotoIdx = cardPhotoIndices[c.id] || 0;
               const currentPhoto = kitImages[activePhotoIdx] || kitImages[0];
-              const kitDescription = kitInfo?.description || c.kit_description;
+              const kitDescription: string = kitInfo?.description || c.kit_description || '';
               const isRegisteredCategory = hasActiveRegistration && registration?.category_id === c.id;
               const canRegisterHere = registrationOpen && !hasActiveRegistration;
 
@@ -572,7 +574,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
                           {/* Thumbnail row for card preview */}
                           {kitImages.length > 1 && (
                             <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', padding: '2px' }}>
-                              {kitImages.map((img, idx) => (
+                              {kitImages.map((img: string, idx: number) => (
                                 <button
                                   key={`${img}-${idx}`}
                                   type="button"
@@ -619,9 +621,9 @@ export function RunPage({ section }: { section?: 'routes' }) {
                         <ul className="run-kit-modal-card__list">
                           {kitDescription
                             .split(/[,•\n]+/)
-                            .map((s) => s.trim())
+                            .map((s: string) => s.trim())
                             .filter(Boolean)
-                            .map((item, idx) => (
+                            .map((item: string, idx: number) => (
                               <li key={idx}>
                                 <CheckCircle2 size={15} style={{ color: '#2e7d32', flexShrink: 0, marginTop: '2px' }} />
                                 <span>{item}</span>
@@ -745,7 +747,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
           {/* Dots / Thumbnail navigation strip */}
           {kitLightbox.images.length > 1 && (
             <div className="run-lightbox-thumbnails">
-              {kitLightbox.images.map((thumbUrl, tIdx) => (
+              {kitLightbox.images.map((thumbUrl: string, tIdx: number) => (
                 <button
                   key={`${thumbUrl}-${tIdx}`}
                   type="button"
