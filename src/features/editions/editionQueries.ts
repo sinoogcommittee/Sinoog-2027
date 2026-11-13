@@ -44,6 +44,7 @@ export interface SiteSettingsMap {
     kits?: Record<string, {
       category_id: string;
       image_url?: string;
+      images?: string[];
       description?: string;
       title?: string;
     }>;

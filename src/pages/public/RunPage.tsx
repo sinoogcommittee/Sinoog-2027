@@ -1,8 +1,10 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Clock,
   Eye,
   LogIn,
@@ -49,9 +51,52 @@ export function RunPage({ section }: { section?: 'routes' }) {
   const [sizeChartOpen, setSizeChartOpen] = useState(false);
   const [raceKitsModalOpen, setRaceKitsModalOpen] = useState(false);
   const [selectedKitCategory, setSelectedKitCategory] = useState<string>('all');
-  const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string } | null>(null);
+  interface KitLightboxState {
+    title: string;
+    distanceKm: string;
+    images: string[];
+    currentIndex: number;
+  }
+  const [kitLightbox, setKitLightbox] = useState<KitLightboxState | null>(null);
+  const [cardPhotoIndices, setCardPhotoIndices] = useState<Record<string, number>>({});
   const [siteSettings, setSiteSettings] = useState<SiteSettingsMap | null>(null);
   const activeUserId = user?.id || (isDemoAdmin ? 'demo-user-123' : null);
+
+  const touchStartX = useRef<number | null>(null);
+  const touchDeltaX = useRef<number>(0);
+
+  const handlePrevLightboxPhoto = useCallback(() => {
+    setKitLightbox((prev) => {
+      if (!prev || prev.images.length <= 1) return prev;
+      const nextIdx = (prev.currentIndex - 1 + prev.images.length) % prev.images.length;
+      return { ...prev, currentIndex: nextIdx };
+    });
+  }, []);
+
+  const handleNextLightboxPhoto = useCallback(() => {
+    setKitLightbox((prev) => {
+      if (!prev || prev.images.length <= 1) return prev;
+      const nextIdx = (prev.currentIndex + 1) % prev.images.length;
+      return { ...prev, currentIndex: nextIdx };
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!kitLightbox) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrevLightboxPhoto();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleNextLightboxPhoto();
+      } else if (e.key === 'Escape') {
+        setKitLightbox(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [kitLightbox, handlePrevLightboxPhoto, handleNextLightboxPhoto]);
 
   useEffect(() => {
     let mounted = true;
@@ -182,7 +227,11 @@ export function RunPage({ section }: { section?: 'routes' }) {
                     hasActiveRegistration && registration?.category_id === c.id;
                   const canRegisterHere = registrationOpen && !hasActiveRegistration;
                   const kitData = storedRaceKits[c.id];
-                  const kitImage = kitData?.image_url;
+                  const kitImages = Array.isArray(kitData?.images) && kitData.images.length > 0
+                    ? kitData.images
+                    : kitData?.image_url
+                      ? [kitData.image_url]
+                      : [];
                   const kitDescription = kitData?.description || c.kit_description;
 
                   return (
@@ -199,7 +248,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
                           <li>Finisher recognition as announced</li>
                         </ul>
                       )}
-                      {kitImage && (
+                      {kitImages.length > 0 && (
                         <button
                           type="button"
                           className="run-category-card__kit-preview-btn"
@@ -208,7 +257,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
                             setRaceKitsModalOpen(true);
                           }}
                         >
-                          <Eye size={13} /> View official kit photo
+                          <Eye size={13} /> View official kit photo{kitImages.length > 1 ? `s (${kitImages.length})` : ''}
                         </button>
                       )}
                       {c.min_age != null || c.max_age != null ? (
@@ -253,27 +302,6 @@ export function RunPage({ section }: { section?: 'routes' }) {
                     </Card>
                   );
                 })}
-              </div>
-
-              <div className="run-utility-row">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="small"
-                  leadingIcon={<PackageOpen size={18} />}
-                  onClick={() => {
-                    setSelectedKitCategory('all');
-                    setRaceKitsModalOpen(true);
-                  }}
-                >
-                  Show all official race kits
-                </Button>
-                <Button type="button" variant="text" size="small" leadingIcon={<Ruler size={18} />} onClick={() => setSizeChartOpen(true)}>
-                  View size chart
-                </Button>
-                <Button to="/run/routes" variant="text" size="small" leadingIcon={<Route size={18} />}>
-                  Route map & checkpoints
-                </Button>
               </div>
 
               <div className="feature-cards run-highlights">
@@ -453,7 +481,13 @@ export function RunPage({ section }: { section?: 'routes' }) {
             .filter((c) => selectedKitCategory === 'all' || selectedKitCategory === c.id)
             .map((c) => {
               const kitInfo = storedRaceKits[c.id];
-              const kitImage = kitInfo?.image_url;
+              const kitImages = Array.isArray(kitInfo?.images) && kitInfo.images.length > 0
+                ? kitInfo.images
+                : kitInfo?.image_url
+                  ? [kitInfo.image_url]
+                  : [];
+              const activePhotoIdx = cardPhotoIndices[c.id] || 0;
+              const currentPhoto = kitImages[activePhotoIdx] || kitImages[0];
               const kitDescription = kitInfo?.description || c.kit_description;
               const isRegisteredCategory = hasActiveRegistration && registration?.category_id === c.id;
               const canRegisterHere = registrationOpen && !hasActiveRegistration;
@@ -469,18 +503,103 @@ export function RunPage({ section }: { section?: 'routes' }) {
                   </div>
 
                   <div className="run-kit-modal-card__body">
-                    {/* Photo column */}
+                    {/* Photo column with sweep / carousel support */}
                     <div className="run-kit-modal-card__photo-col">
-                      {kitImage ? (
-                        <div
-                          className="run-kit-modal-card__img-wrap"
-                          onClick={() => setLightboxImage({ url: kitImage, title: `${c.name} Official Race Kit` })}
-                          title="Click to view full image"
-                        >
-                          <img src={kitImage} alt={`Official Race Kit for ${c.name}`} className="run-kit-modal-card__img" />
-                          <span className="run-kit-modal-card__zoom-hint">
-                            <Eye size={13} /> Click to enlarge
-                          </span>
+                      {kitImages.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <div
+                            className="run-kit-modal-card__img-wrap"
+                            onClick={() =>
+                              setKitLightbox({
+                                title: `${c.name} Official Race Kit`,
+                                distanceKm: formatKm(c.distance_meters),
+                                images: kitImages,
+                                currentIndex: activePhotoIdx,
+                              })
+                            }
+                            title="Click to full screen preview (swipeable left/right)"
+                          >
+                            <img
+                              src={currentPhoto}
+                              alt={`Official Race Kit for ${c.name} - Photo ${activePhotoIdx + 1}`}
+                              className="run-kit-modal-card__img"
+                            />
+
+                            {/* Top controls: counter and sweep buttons */}
+                            {kitImages.length > 1 && (
+                              <div className="run-kit-card-photo-controls">
+                                <button
+                                  type="button"
+                                  className="run-kit-card-arrow-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setCardPhotoIndices((prev) => ({
+                                      ...prev,
+                                      [c.id]: (activePhotoIdx - 1 + kitImages.length) % kitImages.length,
+                                    }));
+                                  }}
+                                  aria-label="Previous photo"
+                                >
+                                  <ChevronLeft size={16} />
+                                </button>
+
+                                <span className="run-kit-card-badge">
+                                  {activePhotoIdx + 1} / {kitImages.length}
+                                </span>
+
+                                <button
+                                  type="button"
+                                  className="run-kit-card-arrow-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setCardPhotoIndices((prev) => ({
+                                      ...prev,
+                                      [c.id]: (activePhotoIdx + 1) % kitImages.length,
+                                    }));
+                                  }}
+                                  aria-label="Next photo"
+                                >
+                                  <ChevronRight size={16} />
+                                </button>
+                              </div>
+                            )}
+
+                            <span className="run-kit-modal-card__zoom-hint">
+                              <Eye size={13} /> Full screen preview
+                            </span>
+                          </div>
+
+                          {/* Thumbnail row for card preview */}
+                          {kitImages.length > 1 && (
+                            <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', padding: '2px' }}>
+                              {kitImages.map((img, idx) => (
+                                <button
+                                  key={`${img}-${idx}`}
+                                  type="button"
+                                  onClick={() =>
+                                    setCardPhotoIndices((prev) => ({
+                                      ...prev,
+                                      [c.id]: idx,
+                                    }))
+                                  }
+                                  style={{
+                                    width: '38px',
+                                    height: '38px',
+                                    borderRadius: '4px',
+                                    overflow: 'hidden',
+                                    border: idx === activePhotoIdx ? '2px solid var(--wine, #741f29)' : '1px solid var(--md-sys-color-outline-variant)',
+                                    padding: 0,
+                                    background: '#ffffff',
+                                    cursor: 'pointer',
+                                    flexShrink: 0,
+                                  }}
+                                  aria-label={`Show photo ${idx + 1}`}
+                                >
+                                  <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="run-kit-modal-card__placeholder">
@@ -551,28 +670,94 @@ export function RunPage({ section }: { section?: 'routes' }) {
         </div>
       </Dialog>
 
-      {/* Lightbox / Zoom Dialog */}
-      {lightboxImage && (
+      {/* Sweepable Full-Screen Lightbox Preview */}
+      {kitLightbox && (
         <Dialog
-          open={Boolean(lightboxImage)}
-          title={lightboxImage.title}
-          onClose={() => setLightboxImage(null)}
+          open={Boolean(kitLightbox)}
+          title={`${kitLightbox.distanceKm} · ${kitLightbox.title} (${kitLightbox.currentIndex + 1} of ${kitLightbox.images.length})`}
+          onClose={() => setKitLightbox(null)}
           className="m3-run-lightbox-dialog"
-          actions={<Button type="button" variant="text" size="small" onClick={() => setLightboxImage(null)}>Close</Button>}
+          actions={
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', flexWrap: 'wrap', gap: '8px' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--md-sys-color-on-surface-variant)' }}>
+                {kitLightbox.images.length > 1 ? 'Sweep/swipe left or right to browse photos' : 'Official Sinoog Run photo'}
+              </span>
+              <Button type="button" variant="text" size="small" onClick={() => setKitLightbox(null)}>Close</Button>
+            </div>
+          }
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px', overflow: 'hidden' }}>
-            <img
-              src={lightboxImage.url}
-              alt={lightboxImage.title}
-              style={{
-                maxWidth: '100%',
-                maxHeight: '70vh',
-                objectFit: 'contain',
-                borderRadius: '8px',
-                border: '1px solid var(--md-sys-color-outline-variant)',
-              }}
-            />
+          <div
+            className="run-lightbox-container"
+            onTouchStart={(e) => {
+              touchStartX.current = e.touches[0].clientX;
+              touchDeltaX.current = 0;
+            }}
+            onTouchMove={(e) => {
+              if (touchStartX.current != null) {
+                touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+              }
+            }}
+            onTouchEnd={() => {
+              if (touchDeltaX.current > 45) {
+                handleNextLightboxPhoto();
+              } else if (touchDeltaX.current < -45) {
+                handlePrevLightboxPhoto();
+              }
+              touchStartX.current = null;
+              touchDeltaX.current = 0;
+            }}
+          >
+            {/* Previous Arrow Button */}
+            {kitLightbox.images.length > 1 && (
+              <button
+                type="button"
+                className="run-lightbox-arrow run-lightbox-arrow--left"
+                onClick={handlePrevLightboxPhoto}
+                aria-label="Previous photo"
+              >
+                <ChevronLeft size={30} />
+              </button>
+            )}
+
+            {/* Main Sweepable Image View */}
+            <div className="run-lightbox-img-stage">
+              <img
+                key={kitLightbox.images[kitLightbox.currentIndex]}
+                src={kitLightbox.images[kitLightbox.currentIndex]}
+                alt={`${kitLightbox.title} - Photo ${kitLightbox.currentIndex + 1}`}
+                className="run-lightbox-active-img"
+              />
+            </div>
+
+            {/* Next Arrow Button */}
+            {kitLightbox.images.length > 1 && (
+              <button
+                type="button"
+                className="run-lightbox-arrow run-lightbox-arrow--right"
+                onClick={handleNextLightboxPhoto}
+                aria-label="Next photo"
+              >
+                <ChevronRight size={30} />
+              </button>
+            )}
           </div>
+
+          {/* Dots / Thumbnail navigation strip */}
+          {kitLightbox.images.length > 1 && (
+            <div className="run-lightbox-thumbnails">
+              {kitLightbox.images.map((thumbUrl, tIdx) => (
+                <button
+                  key={`${thumbUrl}-${tIdx}`}
+                  type="button"
+                  className={`run-lightbox-thumb-btn ${tIdx === kitLightbox.currentIndex ? 'active' : ''}`}
+                  onClick={() => setKitLightbox((prev) => prev ? { ...prev, currentIndex: tIdx } : null)}
+                  aria-label={`Go to photo ${tIdx + 1}`}
+                >
+                  <img src={thumbUrl} alt="" />
+                </button>
+              ))}
+            </div>
+          )}
         </Dialog>
       )}
     </>

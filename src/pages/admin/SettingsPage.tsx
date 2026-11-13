@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef, useId, type FormEvent } from 'react';
-import { Save, Calendar, Shield, Bell, Mail, CreditCard, Printer, Upload, PackageOpen, Trash2 } from 'lucide-react';
+import { Save, Calendar, Shield, Bell, Mail, CreditCard, Printer, Upload, PackageOpen, Trash2, Plus, Star } from 'lucide-react';
 import {
   getCurrentEdition,
   getSiteSettings,
@@ -76,6 +76,7 @@ export function SettingsPage() {
   // Site settings - Official Race Kits per Category
   interface CategoryRaceKitState {
     image_url: string;
+    images: string[];
     description: string;
   }
   const [raceKits, setRaceKits] = useState<Record<string, CategoryRaceKitState>>({});
@@ -131,30 +132,55 @@ export function SettingsPage() {
         localStorage.setItem('sinoog_bib_logo_url', settings.race_bib.logo_url);
       }
 
+      // Official Committee Kit Inclusions defaults
+      const COMMITTEE_KIT_DESCRIPTIONS: Record<string, string> = {
+        '3000': 'Official Sinoog 2027 Event Shirt, Race Bib, Finisher Medal, Post-race Refreshment',
+        '5000': 'Official Sinoog 2027 Event Sublimation Shirt or Singlet, Race Bib, Finisher Medal, Post-race Refreshment',
+        '10000': 'Official Sinoog 2027 Event Sublimation Shirt or Singlet, Race Bib, Finisher Medal, Finisher Shirt, Post-race Refreshment',
+      };
+
       // Initialize race kits from settings or localStorage fallback
-      let initialKits: Record<string, CategoryRaceKitState> = {};
-      if (settings.race_kits?.kits) {
-        initialKits = { ...(settings.race_kits.kits as Record<string, CategoryRaceKitState>) };
-      } else {
+      const initialKits: Record<string, CategoryRaceKitState> = {};
+      const sourceKits = settings.race_kits?.kits || (() => {
         try {
           const cached = localStorage.getItem('sinoog_race_kits');
-          if (cached) {
-            initialKits = JSON.parse(cached);
-          }
+          return cached ? JSON.parse(cached) : {};
         } catch {
-          // ignore cache error
+          return {};
+        }
+      })();
+
+      if (sourceKits && typeof sourceKits === 'object') {
+        for (const [k, v] of Object.entries(sourceKits as Record<string, Record<string, unknown>>)) {
+          const rawImages = Array.isArray(v.images)
+            ? (v.images as string[]).filter(Boolean)
+            : v.image_url
+              ? [v.image_url as string]
+              : [];
+          initialKits[k] = {
+            image_url: rawImages[0] || (v.image_url as string) || '',
+            images: rawImages,
+            description: (v.description as string) || '',
+          };
         }
       }
 
       // Populate any category that does not yet have an entry in initialKits
       cats.forEach((c) => {
+        const committeeDesc = COMMITTEE_KIT_DESCRIPTIONS[c.distance_meters.toString()] || c.kit_description || '';
         if (!initialKits[c.id]) {
           initialKits[c.id] = {
             image_url: '',
-            description: c.kit_description || '',
+            images: [],
+            description: committeeDesc,
           };
-        } else if (!initialKits[c.id].description && c.kit_description) {
-          initialKits[c.id].description = c.kit_description;
+        } else {
+          if (!Array.isArray(initialKits[c.id].images)) {
+            initialKits[c.id].images = initialKits[c.id].image_url ? [initialKits[c.id].image_url] : [];
+          }
+          if (!initialKits[c.id].description) {
+            initialKits[c.id].description = committeeDesc;
+          }
         }
       });
       setRaceKits(initialKits);
@@ -313,47 +339,68 @@ export function SettingsPage() {
     }
   };
 
-  const handleUploadKitPhoto = async (categoryId: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !edition) return;
+  const handleUploadKitPhotos = async (categoryId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0 || !edition) return;
 
     try {
       setUploadingKitCategoryId(categoryId);
-      const fileExt = file.name.split('.').pop() || 'png';
-      const fileName = `race-kits/kit_${categoryId}_${Date.now()}.${fileExt}`;
+      const cat = categories.find((c) => c.id === categoryId);
+      const uploadedUrls: string[] = [];
 
-      let uploadedUrl: string | null = null;
-      if (supabase) {
-        const { error: uploadErr } = await supabase.storage
-          .from('public-media')
-          .upload(fileName, file, { upsert: true });
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileExt = file.name.split('.').pop() || 'png';
+        const fileName = `race-kits/kit_${categoryId}_${Date.now()}_${i}.${fileExt}`;
 
-        if (!uploadErr) {
-          const {
-            data: { publicUrl },
-          } = supabase.storage.from('public-media').getPublicUrl(fileName);
-          uploadedUrl = publicUrl;
-        } else {
-          console.warn('Supabase storage upload failed, falling back to local FileReader:', uploadErr);
+        let uploadedUrl: string | null = null;
+        if (supabase) {
+          const { error: uploadErr } = await supabase.storage
+            .from('public-media')
+            .upload(fileName, file, { upsert: true });
+
+          if (!uploadErr) {
+            const {
+              data: { publicUrl },
+            } = supabase.storage.from('public-media').getPublicUrl(fileName);
+            uploadedUrl = publicUrl;
+          } else {
+            console.warn('Supabase storage upload failed, falling back to local FileReader:', uploadErr);
+          }
+        }
+
+        if (!uploadedUrl) {
+          uploadedUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (event) => resolve((event.target?.result as string) || '');
+            reader.readAsDataURL(file);
+          });
+        }
+
+        if (uploadedUrl) {
+          uploadedUrls.push(uploadedUrl);
         }
       }
 
-      if (!uploadedUrl) {
-        uploadedUrl = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = (event) => resolve((event.target?.result as string) || '');
-          reader.readAsDataURL(file);
-        });
-      }
+      if (uploadedUrls.length > 0) {
+        const currentData = raceKits[categoryId] || {
+          images: [],
+          image_url: '',
+          description: cat?.kit_description || '',
+        };
+        const existingImages = Array.isArray(currentData.images)
+          ? currentData.images
+          : currentData.image_url
+            ? [currentData.image_url]
+            : [];
+        const combinedImages = [...existingImages, ...uploadedUrls];
 
-      if (uploadedUrl) {
-        const cat = categories.find((c) => c.id === categoryId);
-        const currentDesc = raceKits[categoryId]?.description ?? (cat?.kit_description || '');
         const updatedKits: Record<string, CategoryRaceKitState> = {
           ...raceKits,
           [categoryId]: {
-            image_url: uploadedUrl,
-            description: currentDesc,
+            ...currentData,
+            images: combinedImages,
+            image_url: combinedImages[0] || '',
           },
         };
         setRaceKits(updatedKits);
@@ -366,11 +413,11 @@ export function SettingsPage() {
           kits: updatedKits,
           updated_at: new Date().toISOString(),
         } as unknown as Json);
-        toast(`Race kit photo uploaded for ${cat?.name || 'category'}!`, 'success');
+        toast(`Uploaded ${uploadedUrls.length} photo${uploadedUrls.length > 1 ? 's' : ''} for ${cat?.name || 'category'}!`, 'success');
       }
     } catch (err) {
       console.error('Race kit photo upload failed:', err);
-      toast('Failed to upload race kit photo.', 'error');
+      toast('Failed to upload race kit photo(s).', 'error');
     } finally {
       setUploadingKitCategoryId(null);
       if (e.target) {
@@ -379,14 +426,26 @@ export function SettingsPage() {
     }
   };
 
-  const handleRemoveKitPhoto = async (categoryId: string) => {
+  const handleRemoveKitPhotoIndex = async (categoryId: string, indexToRemove: number) => {
     const cat = categories.find((c) => c.id === categoryId);
-    const currentDesc = raceKits[categoryId]?.description ?? (cat?.kit_description || '');
+    const currentData = raceKits[categoryId] || {
+      images: [],
+      image_url: '',
+      description: cat?.kit_description || '',
+    };
+    const currentImages = Array.isArray(currentData.images)
+      ? currentData.images
+      : currentData.image_url
+        ? [currentData.image_url]
+        : [];
+    const updatedImages = currentImages.filter((_, idx) => idx !== indexToRemove);
+
     const updatedKits: Record<string, CategoryRaceKitState> = {
       ...raceKits,
       [categoryId]: {
-        image_url: '',
-        description: currentDesc,
+        ...currentData,
+        images: updatedImages,
+        image_url: updatedImages[0] || '',
       },
     };
     setRaceKits(updatedKits);
@@ -401,7 +460,46 @@ export function SettingsPage() {
         updated_at: new Date().toISOString(),
       } as unknown as Json);
     }
-    toast(`Race kit photo removed for ${cat?.name || 'category'}.`, 'info');
+    toast(`Photo removed from ${cat?.name || 'category'}.`, 'info');
+  };
+
+  const handleSetPrimaryKitPhoto = async (categoryId: string, indexToMakePrimary: number) => {
+    const cat = categories.find((c) => c.id === categoryId);
+    const currentData = raceKits[categoryId] || {
+      images: [],
+      image_url: '',
+      description: cat?.kit_description || '',
+    };
+    const currentImages = Array.isArray(currentData.images)
+      ? [...currentData.images]
+      : currentData.image_url
+        ? [currentData.image_url]
+        : [];
+    if (indexToMakePrimary <= 0 || indexToMakePrimary >= currentImages.length) return;
+    const [selected] = currentImages.splice(indexToMakePrimary, 1);
+    currentImages.unshift(selected);
+
+    const updatedKits: Record<string, CategoryRaceKitState> = {
+      ...raceKits,
+      [categoryId]: {
+        ...currentData,
+        images: currentImages,
+        image_url: currentImages[0] || '',
+      },
+    };
+    setRaceKits(updatedKits);
+    try {
+      localStorage.setItem('sinoog_race_kits', JSON.stringify(updatedKits));
+    } catch {
+      // ignore
+    }
+    if (edition) {
+      await saveSiteSetting(edition.id, 'race_kits', {
+        kits: updatedKits,
+        updated_at: new Date().toISOString(),
+      } as unknown as Json);
+    }
+    toast(`Set primary photo for ${cat?.name || 'category'}.`, 'success');
   };
 
   const handleKitDescriptionChange = (categoryId: string, desc: string) => {
@@ -409,6 +507,7 @@ export function SettingsPage() {
       ...prev,
       [categoryId]: {
         image_url: prev[categoryId]?.image_url || '',
+        images: prev[categoryId]?.images || (prev[categoryId]?.image_url ? [prev[categoryId].image_url] : []),
         description: desc,
       },
     }));
@@ -742,7 +841,11 @@ export function SettingsPage() {
                     ) : (
                       categories.map((c) => {
                         const kitData = raceKits[c.id];
-                        const imageUrl = kitData?.image_url || '';
+                        const images = Array.isArray(kitData?.images) && kitData.images.length > 0
+                          ? kitData.images
+                          : kitData?.image_url
+                            ? [kitData.image_url]
+                            : [];
                         const description = kitData?.description ?? (c.kit_description || '');
                         const isUploading = uploadingKitCategoryId === c.id;
 
@@ -790,7 +893,7 @@ export function SettingsPage() {
                                 alignItems: 'start',
                               }}
                             >
-                              {/* Photo upload and preview */}
+                              {/* Photo upload and preview (1 or more photos) */}
                               <div
                                 style={{
                                   display: 'flex',
@@ -798,86 +901,164 @@ export function SettingsPage() {
                                   gap: '8px',
                                 }}
                               >
-                                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--md-sys-color-on-surface)' }}>
-                                  Kit Picture (Singlet, Shirt, Medal &amp; Inclusions)
-                                </span>
-                                <div
-                                  style={{
-                                    width: '100%',
-                                    height: '160px',
-                                    background: '#ffffff',
-                                    border: '1px dashed var(--md-sys-color-outline-variant)',
-                                    borderRadius: '8px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    overflow: 'hidden',
-                                    position: 'relative',
-                                  }}
-                                >
-                                  {imageUrl ? (
-                                    <img
-                                      src={imageUrl}
-                                      alt={`Official race kit for ${c.name}`}
-                                      style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        objectFit: 'contain',
-                                        background: '#f8fafc',
-                                      }}
-                                    />
-                                  ) : (
-                                    <div
-                                      style={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        padding: '12px',
-                                        textAlign: 'center',
-                                        color: 'var(--md-sys-color-on-surface-variant)',
-                                      }}
-                                    >
-                                      <PackageOpen size={32} style={{ opacity: 0.5, marginBottom: '6px' }} />
-                                      <span style={{ fontSize: '0.8rem' }}>No race kit picture uploaded yet</span>
-                                      <span style={{ fontSize: '0.72rem', opacity: 0.8 }}>JPG, PNG, or WebP</span>
-                                    </div>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px' }}>
+                                  <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--md-sys-color-on-surface)' }}>
+                                    Kit Photos {images.length > 0 ? `(${images.length})` : ''}
+                                  </span>
+                                  {images.length > 0 && (
+                                    <span style={{ fontSize: '0.72rem', color: 'var(--md-sys-color-on-surface-variant)' }}>
+                                      First photo is primary cover photo
+                                    </span>
                                   )}
                                 </div>
+
+                                {images.length === 0 ? (
+                                  <div
+                                    style={{
+                                      width: '100%',
+                                      height: '160px',
+                                      background: '#ffffff',
+                                      border: '1px dashed var(--md-sys-color-outline-variant)',
+                                      borderRadius: '8px',
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      padding: '12px',
+                                      textAlign: 'center',
+                                      color: 'var(--md-sys-color-on-surface-variant)',
+                                    }}
+                                  >
+                                    <PackageOpen size={32} style={{ opacity: 0.5, marginBottom: '6px' }} />
+                                    <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>No race kit photos uploaded yet</span>
+                                    <span style={{ fontSize: '0.72rem', opacity: 0.8 }}>Upload 1 or more photos (JPG, PNG, or WebP)</span>
+                                  </div>
+                                ) : (
+                                  <div
+                                    style={{
+                                      display: 'grid',
+                                      gridTemplateColumns: 'repeat(auto-fill, minmax(105px, 1fr))',
+                                      gap: '8px',
+                                      background: '#ffffff',
+                                      padding: '8px',
+                                      borderRadius: '8px',
+                                      border: '1px solid var(--md-sys-color-outline-variant)',
+                                      maxHeight: '260px',
+                                      overflowY: 'auto',
+                                    }}
+                                  >
+                                    {images.map((imgUrl, imgIdx) => (
+                                      <div
+                                        key={`${imgUrl}-${imgIdx}`}
+                                        style={{
+                                          position: 'relative',
+                                          height: '95px',
+                                          borderRadius: '6px',
+                                          overflow: 'hidden',
+                                          border: imgIdx === 0 ? '2px solid var(--wine, #741f29)' : '1px solid var(--md-sys-color-outline-variant)',
+                                          background: '#f8fafc',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                        }}
+                                      >
+                                        <img
+                                          src={imgUrl}
+                                          alt={`Photo ${imgIdx + 1}`}
+                                          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                        />
+                                        <span
+                                          style={{
+                                            position: 'absolute',
+                                            top: '4px',
+                                            left: '4px',
+                                            background: imgIdx === 0 ? 'var(--wine, #741f29)' : 'rgba(0,0,0,0.65)',
+                                            color: '#ffffff',
+                                            fontSize: '0.65rem',
+                                            padding: '1px 5px',
+                                            borderRadius: '10px',
+                                            fontWeight: 700,
+                                          }}
+                                        >
+                                          {imgIdx === 0 ? 'Cover' : `#${imgIdx + 1}`}
+                                        </span>
+
+                                        <div
+                                          style={{
+                                            position: 'absolute',
+                                            bottom: '4px',
+                                            right: '4px',
+                                            display: 'flex',
+                                            gap: '2px',
+                                          }}
+                                        >
+                                          {imgIdx !== 0 && (
+                                            <button
+                                              type="button"
+                                              title="Set as cover photo"
+                                              onClick={() => void handleSetPrimaryKitPhoto(c.id, imgIdx)}
+                                              style={{
+                                                background: 'rgba(255,255,255,0.92)',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '4px',
+                                                padding: '3px',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                              }}
+                                            >
+                                              <Star size={12} style={{ color: '#d4a754' }} />
+                                            </button>
+                                          )}
+                                          <button
+                                            type="button"
+                                            title="Remove photo"
+                                            onClick={() => void handleRemoveKitPhotoIndex(c.id, imgIdx)}
+                                            style={{
+                                              background: 'rgba(255,255,255,0.92)',
+                                              border: '1px solid #ba1a1a',
+                                              borderRadius: '4px',
+                                              padding: '3px',
+                                              cursor: 'pointer',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                            }}
+                                          >
+                                            <Trash2 size={12} style={{ color: '#ba1a1a' }} />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
 
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                   <input
                                     type="file"
+                                    multiple
                                     accept="image/png,image/jpeg,image/webp"
                                     style={{ display: 'none' }}
                                     ref={(el) => {
                                       kitFileInputRefs.current[c.id] = el;
                                     }}
-                                    onChange={(e) => void handleUploadKitPhoto(c.id, e)}
+                                    onChange={(e) => void handleUploadKitPhotos(c.id, e)}
                                   />
                                   <Button
                                     type="button"
                                     variant="outlined"
                                     size="small"
-                                    leadingIcon={<Upload size={14} />}
+                                    leadingIcon={images.length > 0 ? <Plus size={14} /> : <Upload size={14} />}
                                     disabled={isUploading}
                                     onClick={() => kitFileInputRefs.current[c.id]?.click()}
                                   >
-                                    {isUploading ? 'Uploading…' : imageUrl ? 'Change picture' : 'Upload picture'}
+                                    {isUploading
+                                      ? 'Uploading photo(s)…'
+                                      : images.length > 0
+                                        ? 'Add more photo(s)'
+                                        : 'Upload kit photo(s)'}
                                   </Button>
-                                  {imageUrl && (
-                                    <Button
-                                      type="button"
-                                      variant="text"
-                                      size="small"
-                                      leadingIcon={<Trash2 size={14} />}
-                                      disabled={isUploading}
-                                      onClick={() => void handleRemoveKitPhoto(c.id)}
-                                      style={{ color: 'var(--md-sys-color-error, #ba1a1a)' }}
-                                    >
-                                      Remove
-                                    </Button>
-                                  )}
                                 </div>
                               </div>
 
