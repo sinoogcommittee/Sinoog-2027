@@ -656,12 +656,12 @@ export function RunPage({ section }: { section?: 'routes' }) {
                               <div
                                 key={visible.length === 2 ? `${cat.id}-${position}` : cat.id}
                                 style={{
-                                  top: `${50 + position * 16}%`,
-                                  transform: `translateY(-50%) scale(${isCurrent ? 1 : 0.84})`,
-                                  opacity: isCurrent ? 1 : 0.45,
+                                  top: `${50 + position * 25}%`,
+                                  transform: `translateY(-50%) scale(${isCurrent ? 1 : 0.86})`,
+                                  opacity: isCurrent ? 1 : 0.48,
                                   zIndex: isCurrent ? 10 : 1,
-                                  filter: !isCurrent ? 'blur(2px)' : 'none',
-                                  transition: 'all 280ms cubic-bezier(0.22, 1, 0.36, 1)',
+                                  filter: !isCurrent ? 'blur(1.5px)' : 'none',
+                                  transition: 'all 300ms cubic-bezier(0.22, 1, 0.36, 1)',
                                 }}
                                 className={`run-mobile-stack-card ${isCurrent ? 'is-current' : 'is-peek'}`}
                                 onClick={!isCurrent ? () => stepMobileCategory(position) : undefined}
@@ -755,30 +755,6 @@ export function RunPage({ section }: { section?: 'routes' }) {
                           })}
                         </div>
 
-                        {/* Navigation controls below stack (Division ExeCon style) */}
-                        <div className="run-mobile-kit-nav-controls">
-                          <button
-                            type="button"
-                            aria-label="Previous category"
-                            disabled={visible.length < 2}
-                            onClick={() => stepMobileCategory(-1)}
-                            className="run-mobile-kit-nav-btn"
-                          >
-                            <ChevronLeft size={20} />
-                          </button>
-                          <p className="run-mobile-kit-nav-counter">
-                            {index + 1} / {visible.length}
-                          </p>
-                          <button
-                            type="button"
-                            aria-label="Next category"
-                            disabled={visible.length < 2}
-                            onClick={() => stepMobileCategory(1)}
-                            className="run-mobile-kit-nav-btn"
-                          >
-                            <ChevronRight size={20} />
-                          </button>
-                        </div>
 
                         <div className="run-mobile-kit-swipe-hint">
                           <ChevronLeft size={14} />
@@ -1208,9 +1184,6 @@ export function RunPage({ section }: { section?: 'routes' }) {
                   <span className="run-photo-fullscreen-title">
                     {formatKm(currentCat.distance_meters)} · {currentCat.name}
                   </span>
-                  <span className="run-photo-fullscreen-counter">
-                    {kitLightbox.categoryIndex + 1} / {categories.length}
-                  </span>
                 </div>
               </div>
 
@@ -1274,29 +1247,13 @@ export function RunPage({ section }: { section?: 'routes' }) {
               </div>
             </div>
 
-            {/* Photo Canvas with Touch Zoom & Pan & Category Navigation */}
+            {/* Photo Canvas with Touch Zoom & Pan & Category Navigation (Swipe / Keyboard) */}
             <div
               className="run-photo-fullscreen-canvas"
               onTouchStart={handleViewerTouchStart}
               onTouchMove={handleViewerTouchMove}
               onTouchEnd={handleViewerTouchEnd}
             >
-              {/* Prev Category Arrow (when scale === 1) */}
-              {categories.length > 1 && zoomScale === 1 && (
-                <button
-                  type="button"
-                  className="run-fullscreen-nav-arrow run-fullscreen-nav-arrow--left"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    stepLightboxCategory(-1);
-                  }}
-                  aria-label="Previous category"
-                  title="Previous category"
-                >
-                  <ChevronLeft size={32} />
-                </button>
-              )}
-
               {/* The Main Image */}
               <div
                 className="run-photo-fullscreen-img-wrap"
@@ -1322,22 +1279,6 @@ export function RunPage({ section }: { section?: 'routes' }) {
                   </div>
                 )}
               </div>
-
-              {/* Next Category Arrow (when scale === 1) */}
-              {categories.length > 1 && zoomScale === 1 && (
-                <button
-                  type="button"
-                  className="run-fullscreen-nav-arrow run-fullscreen-nav-arrow--right"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    stepLightboxCategory(1);
-                  }}
-                  aria-label="Next category"
-                  title="Next category"
-                >
-                  <ChevronRight size={32} />
-                </button>
-              )}
             </div>
 
             {/* Bottom Footer: Thumbnails within current category (if multiple) or swipe tip */}
@@ -1363,7 +1304,7 @@ export function RunPage({ section }: { section?: 'routes' }) {
                   </div>
                 ) : (
                   <span className="run-photo-fullscreen-hint">
-                    Swipe left / right or use arrows to view other categories • Pinch or double-tap to zoom
+                    Swipe left / right to view categories • Pinch or double-tap to zoom
                   </span>
                 )}
               </div>
